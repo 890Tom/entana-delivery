@@ -1,0 +1,10 @@
+#!/bin/sh
+# Blocks direct pushes to main. Use a branch and a pull request.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "Direct push to main is blocked. Create a branch and open a pull request." >&2
+    echo "(Emergency override: git push --no-verify)" >&2
+    exit 1
+  fi
+done
+exit 0
