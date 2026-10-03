@@ -6,4 +6,18 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "chore"
-# Add the "npm" (pnpm) and "docker" ecosystems when the monorepo and infra/ exist.
+
+  - package-ecosystem: "npm" # also covers pnpm workspaces
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+    ignore:
+      # typescript-eslint does not support TypeScript 7 yet (see docs/adr/0003).
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+# Add the "docker" ecosystem when infra/ exists.

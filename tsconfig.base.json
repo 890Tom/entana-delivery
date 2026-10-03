@@ -1,0 +1,28 @@
+{
+  // Shared TypeScript settings. Every package extends this file.
+  // TypeScript 6 changed several defaults, so the important options are explicit.
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+
+    // Strictness
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Keeps imports explicit and compatible with fast transpilers (Vite, esbuild, SWC)
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+
+    "skipLibCheck": true,
+    "noEmit": true,
+
+    // No global @types package is loaded by accident; packages opt in (for example "node")
+    "types": []
+  }
+}
