@@ -1,0 +1,7 @@
+# Direct pushes to main are refused: use a branch and a pull request.
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "Direct push to main is blocked. Create a branch and open a pull request." >&2
+    exit 1
+  fi
+done

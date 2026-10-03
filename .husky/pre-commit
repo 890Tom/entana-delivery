@@ -1,0 +1,14 @@
+# Direct commits to main are refused: work on a branch and open a pull request.
+if [ "$(git branch --show-current)" = "main" ]; then
+  echo "Committing on main is blocked. Create a branch (feat/..., fix/..., chore/...)." >&2
+  exit 1
+fi
+
+pnpm exec lint-staged
+
+# The secrets scan must never be skipped silently.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "gitleaks is not installed. Install it (for example: brew install gitleaks) before committing." >&2
+  exit 1
+fi
+gitleaks git --staged --redact --verbose
