@@ -1,0 +1,34 @@
+# Dependencies and builds
+node_modules/
+.pnpm-store/
+dist/
+build/
+.turbo/
+coverage/
+
+# Environment and secrets (keep the example only)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Tests and tooling output
+test-results/
+playwright-report/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Runtime data
+postgres-data/
+uploads/
+storage/
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json

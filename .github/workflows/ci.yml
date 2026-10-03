@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  repo-hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required files
+        run: |
+          for f in LICENSE README.md CONTRIBUTING.md SECURITY.md CODE_OF_CONDUCT.md .gitleaks.toml; do
+            test -f "$f" || { echo "Missing $f"; exit 1; }
+          done
+
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Added with the monorepo setup (step 1 of the starter plan):
+  # lint, typecheck, unit tests, integration tests (PostgreSQL), build.

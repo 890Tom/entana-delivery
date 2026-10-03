@@ -1,0 +1,12 @@
+title = "entana-delivery gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Placeholders in example files and documentation"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''^examples/demo/''',
+  '''^docs/''',
+]
