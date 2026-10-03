@@ -6,7 +6,7 @@ The project is pre-1.0: only the latest commit on `main` and the latest tagged r
 
 ## Reporting a vulnerability
 
-Please **do not open a public issue**. Report privately through GitHub: *Security* tab, then *Report a vulnerability* (private vulnerability reporting). If that is unavailable, contact the maintainer through the email address on the GitHub profile.
+Please **do not open a public issue**. Report privately through GitHub: _Security_ tab, then _Report a vulnerability_ (private vulnerability reporting). If that is unavailable, contact the maintainer through the email address on the GitHub profile.
 
 Please include what you found, the steps to reproduce it, the affected version or commit, and the impact you expect.
 
