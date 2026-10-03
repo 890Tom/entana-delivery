@@ -1,0 +1,4 @@
+# Every folder listed here is a package of the monorepo.
+packages:
+  - "apps/*"
+  - "packages/*"
