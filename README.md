@@ -25,7 +25,7 @@ NestJS · Prisma · PostgreSQL · React + Vite (PWA) · MapLibre GL with OpenFre
 
 ## Getting started
 
-*Coming with the first vertical slice.* The goal is a first test order in under 10 minutes:
+_Coming with the first vertical slice._ The goal is a first test order in under 10 minutes:
 
 ```bash
 git clone https://github.com/890Tom/entana-delivery.git
@@ -52,11 +52,11 @@ infra/       Docker Compose, reverse proxy, backups
 
 ## Roadmap
 
-| Milestone | Scope |
-|---|---|
-| 1a | Orders end to end: customer PWA, admin login, orders, catalogue |
-| 1b | Delivery axes with automatic fees, resellers map |
-| 2 | Driver app, dispatch by axis (not a priority yet) |
+| Milestone | Scope                                                           |
+| --------- | --------------------------------------------------------------- |
+| 1a        | Orders end to end: customer PWA, admin login, orders, catalogue |
+| 1b        | Delivery axes with automatic fees, resellers map                |
+| 2         | Driver app, dispatch by axis (not a priority yet)               |
 
 ## Contributing
 

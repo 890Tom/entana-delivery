@@ -25,7 +25,7 @@ Thank you for your interest. This project is in early development: please open a
 
 ## Code style
 
-TypeScript in strict mode, no `any`, small functions with explicit names, comments that explain *why*. Formatting and linting are enforced by tooling (added with the monorepo setup).
+TypeScript in strict mode, no `any`, small functions with explicit names, comments that explain _why_. Formatting and linting are enforced by tooling (added with the monorepo setup).
 
 ## Reporting security issues
 
