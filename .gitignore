@@ -32,3 +32,8 @@ storage/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# AI assistant files (kept local)
+.claude/
+CLAUDE.md
+AGENTS.md
