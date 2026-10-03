@@ -1,0 +1,9 @@
+// Models are added in the next step (see docs/data-model.md).
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
