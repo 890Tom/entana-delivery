@@ -4,3 +4,4 @@ dist
 build
 coverage
 .turbo
+docs/data-model.md

@@ -5,7 +5,7 @@
 
 **An open-source ordering and delivery app for small local businesses.** Customers order from their phone, the shop confirms and delivers, and everyone can follow the order, without a marketplace and without an account.
 
-> **Status: early development.** The first vertical slice (a customer orders, the admin confirms with a delivery date, the customer sees the confirmation) is in progress. See the [roadmap](#roadmap).
+> **Status: early development.** The tooling is in place (TypeScript, ESLint, Prettier, Vitest, Turborepo, Git hooks, CI) along with the first shared package. The applications (database, API, customer PWA, admin dashboard) are added step by step, toward a first vertical slice: a customer orders, the admin confirms with a delivery date, the customer sees the confirmation. See the [roadmap](#roadmap).
 
 ## Why this project
 
@@ -25,29 +25,56 @@ NestJS · Prisma · PostgreSQL · React + Vite (PWA) · MapLibre GL with OpenFre
 
 ## Getting started
 
-_Coming with the first vertical slice._ The goal is a first test order in under 10 minutes:
+There is nothing to run yet: the applications are not in the repository. What you can do today is set up the development environment and run the checks.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) 24 (see `.nvmrc`)
+- [pnpm](https://pnpm.io/) (the version is pinned in `package.json`)
+- [Docker](https://www.docker.com/) (for the PostgreSQL database, from the database step on)
+- [gitleaks](https://github.com/gitleaks/gitleaks) (the pre-commit hook scans staged changes and needs it installed locally)
+
+### Install
 
 ```bash
 git clone https://github.com/890Tom/entana-delivery.git
 cd entana-delivery
-cp .env.example .env
-docker compose up
+pnpm install
 ```
 
-## Repository layout (planned)
+Git hooks are installed automatically by `pnpm install` (through Husky). See [CONTRIBUTING.md](CONTRIBUTING.md) for what they check.
+
+### Commands
+
+| Command              | What it does                              |
+| -------------------- | ----------------------------------------- |
+| `pnpm typecheck`     | Type-check all packages                   |
+| `pnpm lint`          | Lint with ESLint                          |
+| `pnpm format`        | Format the repository with Prettier       |
+| `pnpm format:check`  | Check formatting without changing files   |
+| `pnpm test`          | Run the unit tests (Vitest)               |
+| `pnpm test:coverage` | Run the unit tests with a coverage report |
+
+The goal for the first vertical slice is a first test order in under 10 minutes with `docker compose up`. That setup is not available yet.
+
+## Repository layout
 
 ```
-apps/        api (NestJS), client (PWA), admin (dashboard)
-packages/    contracts (Zod, quote, status transitions), ui, config
-prisma/      schema and migrations
-examples/    demo instance configuration and fake seed data
-docs/        architecture, decision records (adr/), guides
-infra/       Docker Compose, reverse proxy, backups
+packages/
+  contracts/   shared Zod schemas and pure domain rules (first tests in place)
+docs/
+  adr/         architecture decision records
+  data-model.md  database schema reference
+.github/       CI workflows, issue and pull request templates
+.husky/        Git hooks
 ```
+
+Planned, not yet created: `apps/` (API, customer PWA, admin dashboard), `prisma/` (schema and migrations), `examples/` (demo configuration and fake seed data), `infra/` (Docker Compose, reverse proxy, backups).
 
 ## Documentation
 
 - Architecture decision records: [`docs/adr`](docs/adr)
+- Database schema: [`docs/data-model.md`](docs/data-model.md)
 - Product specification (French): to be published in `docs/`
 
 ## Roadmap
