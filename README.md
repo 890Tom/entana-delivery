@@ -54,6 +54,21 @@ Git hooks are installed automatically by `pnpm install` (through Husky). See [CO
 | `pnpm format:check`  | Check formatting without changing files   |
 | `pnpm test`          | Run the unit tests (Vitest)               |
 | `pnpm test:coverage` | Run the unit tests with a coverage report |
+| `pnpm db:up`         | Start PostgreSQL (Docker Compose)         |
+| `pnpm db:down`       | Stop PostgreSQL (data is kept)            |
+| `pnpm db:validate`   | Validate the Prisma schema                |
+
+### Start the database
+
+```bash
+cp .env.example .env   # then set the same password in POSTGRES_PASSWORD and DATABASE_URL
+pnpm db:up             # starts PostgreSQL 18 and waits until it is healthy
+pnpm db:validate       # checks the Prisma schema
+```
+
+`DATABASE_URL` repeats the user, password, database and port of the `POSTGRES_*` variables, so change them together. A password with special characters must be URL-encoded in `DATABASE_URL` (a password of letters and digits avoids the problem).
+
+PostgreSQL listens on `127.0.0.1:5433` only, not on the network (set `POSTGRES_PORT` to change the port). Data is stored in the `postgres_data` Docker volume and survives `pnpm db:down`. To erase it, run `docker compose down -v`.
 
 The goal for the first vertical slice is a first test order in under 10 minutes with `docker compose up`. That setup is not available yet.
 
@@ -62,6 +77,7 @@ The goal for the first vertical slice is a first test order in under 10 minutes 
 ```
 packages/
   contracts/   shared Zod schemas and pure domain rules (first tests in place)
+  database/    Prisma schema, migrations, client and seed (schema only for now)
 docs/
   adr/         architecture decision records
   data-model.md  database schema reference
@@ -69,7 +85,7 @@ docs/
 .husky/        Git hooks
 ```
 
-Planned, not yet created: `apps/` (API, customer PWA, admin dashboard), `prisma/` (schema and migrations), `examples/` (demo configuration and fake seed data), `infra/` (Docker Compose, reverse proxy, backups).
+Planned, not yet created: `apps/` (API, customer PWA, admin dashboard), `examples/` (demo configuration and fake seed data), `infra/` (reverse proxy, backups).
 
 ## Documentation
 

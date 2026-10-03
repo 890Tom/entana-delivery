@@ -5,8 +5,16 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "db:generate": {
+      "inputs": ["prisma/schema.prisma", "prisma.config.ts"],
+      "outputs": ["src/generated/**"]
+    },
+    "db:validate": {
+      "inputs": ["prisma/schema.prisma", "prisma.config.ts"],
+      "env": ["DATABASE_URL"]
+    },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["^typecheck", "db:generate"]
     },
     "test": {
       "outputs": ["coverage/**"]

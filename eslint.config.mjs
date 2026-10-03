@@ -7,7 +7,14 @@ import tseslint from "typescript-eslint";
 export default defineConfig(
   // Files that are never linted.
   {
-    ignores: ["**/dist/**", "**/build/**", "**/coverage/**", "**/.turbo/**", "**/node_modules/**"],
+    ignores: [
+      "**/dist/**",
+      "**/build/**",
+      "**/coverage/**",
+      "**/.turbo/**",
+      "**/generated/**",
+      "**/node_modules/**",
+    ],
   },
 
   // Base rules for JavaScript, then strict and stylistic rules that use type information.

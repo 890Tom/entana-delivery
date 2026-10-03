@@ -37,3 +37,6 @@ storage/
 .claude/
 CLAUDE.md
 AGENTS.md
+
+# Generated Prisma client
+packages/database/src/generated/
