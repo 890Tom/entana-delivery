@@ -77,12 +77,17 @@ export async function hashPassword(password: string): Promise<string> {
   return `$argon2id$v=19$${parameters}$${encodeBase64WithoutPadding(salt)}$${encodeBase64WithoutPadding(hash)}`;
 }
 
-// Returns false (never throws) for a wrong password and for a stored value that is not a
-// valid Argon2id hash, so a login handler treats both the same way.
-export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+interface StoredHash {
+  readonly argon2: { memory: number; passes: number; parallelism: number };
+  readonly salt: Buffer;
+  readonly expected: Buffer;
+}
+
+// Reads a PHC string and applies the limits on what it declares. Null when it is not one we
+// would have written.
+function parseStoredHash(storedHash: string): StoredHash | null {
   const match = PHC_PATTERN.exec(storedHash);
-  if (match === null || password === "") return false;
-  const [, memory, passes, parallelism, salt, hash] = match;
+  const [, memory, passes, parallelism, salt, hash] = match ?? [];
   if (
     memory === undefined ||
     passes === undefined ||
@@ -90,30 +95,34 @@ export async function verifyPassword(password: string, storedHash: string): Prom
     salt === undefined ||
     hash === undefined
   ) {
-    return false;
+    return null;
   }
-  const expected = Buffer.from(hash, "base64");
-  const saltBytes = Buffer.from(salt, "base64");
-  const stored = {
+  const argon2Parameters = {
     memory: Number(memory),
     passes: Number(passes),
     parallelism: Number(parallelism),
   };
-  if (
-    !isWithinStoredLimits(stored) ||
-    saltBytes.length < STORED_LIMITS.minSaltBytes ||
-    expected.length < STORED_LIMITS.minTagBytes
-  ) {
-    return false;
-  }
+  const saltBytes = Buffer.from(salt, "base64");
+  const expected = Buffer.from(hash, "base64");
+  const isTooWeak =
+    saltBytes.length < STORED_LIMITS.minSaltBytes || expected.length < STORED_LIMITS.minTagBytes;
+  if (!isWithinStoredLimits(argon2Parameters) || isTooWeak) return null;
+  return { argon2: argon2Parameters, salt: saltBytes, expected };
+}
+
+// Returns false (never throws) for a wrong password and for a stored value that is not a
+// valid Argon2id hash, so a login handler treats both the same way.
+export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+  const stored = parseStoredHash(storedHash);
+  if (stored === null || password === "") return false;
   try {
     const actual = await deriveKey({
       message: password,
-      nonce: saltBytes,
-      ...stored,
-      tagLength: expected.length,
+      nonce: stored.salt,
+      ...stored.argon2,
+      tagLength: stored.expected.length,
     });
-    return actual.length === expected.length && timingSafeEqual(actual, expected);
+    return actual.length === stored.expected.length && timingSafeEqual(actual, stored.expected);
   } catch {
     // Parameters outside what Argon2 accepts (for example a salt that is too short).
     return false;

@@ -67,8 +67,15 @@ jobs:
         run: pnpm lint
       - name: Typecheck
         run: pnpm typecheck
-      - name: Test
-        run: pnpm test
+      # Dependency direction and circular imports (dependency-cruiser.config.mjs).
+      - name: Check architecture
+        run: pnpm lint:architecture
+      # Unused files, exports and dependencies (knip.jsonc).
+      - name: Check for dead code
+        run: pnpm knip
+      # Runs the unit tests and fails below the coverage floors of each package.
+      - name: Test with coverage
+        run: pnpm test:coverage
       - name: Build
         run: pnpm build
 

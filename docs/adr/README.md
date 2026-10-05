@@ -10,5 +10,6 @@
 | [0006](0006-prisma-7-and-postgresql-18.md)                    | Prisma 7 and PostgreSQL 18                                                                      | accepted |
 | [0007](0007-check-constraints-in-a-hand-written-migration.md) | CHECK constraints in a hand-written migration, plain composite index instead of a partial index | accepted |
 | [0008](0008-argon2id-password-hashing-with-node-crypto.md)    | Argon2id password hashing with Node's built-in crypto                                           | accepted |
+| [0009](0009-enforce-engineering-standards-with-tooling.md)    | Enforce the engineering standards with tooling                                                  | accepted |
 
 Planned records: PostGIS left out (setup in ADR 0006), delivery axes made of places, idempotent orders and offline mode, simplified order statuses, VPS hosting with OpenFreeMap tiles, hashed tracking token. Use [`0000-template.md`](0000-template.md).

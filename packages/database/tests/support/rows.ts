@@ -32,14 +32,14 @@ function uniqueText(prefix: string): string {
   return `${prefix}-${randomUUID()}`;
 }
 
-export function randomPhone(): string {
+function randomPhone(): string {
   return `+2613${String(randomInt(100_000_000)).padStart(8, "0")}`;
 }
 
 // Same alphabet as the real codes: no ambiguous characters (0, O, 1, I). See docs/data-model.md.
 const PUBLIC_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-export function randomPublicCode(): string {
+function randomPublicCode(): string {
   return Array.from(
     { length: 6 },
     () => PUBLIC_CODE_ALPHABET[Math.floor(Math.random() * PUBLIC_CODE_ALPHABET.length)],

@@ -2,7 +2,7 @@ import type { Client } from "pg";
 
 // Every table of the data model (docs/data-model.md). _prisma_migrations is not one of them:
 // a reset keeps the migration history.
-export const SEEDED_TABLES = [
+const SEEDED_TABLES = [
   "customer",
   "customer_order",
   "order_item",
@@ -23,7 +23,7 @@ function isUndefinedTable(error: unknown): boolean {
   return error instanceof Error && "code" in error && error.code === UNDEFINED_TABLE;
 }
 
-export async function tablesWithRows(db: Client): Promise<string[]> {
+async function tablesWithRows(db: Client): Promise<string[]> {
   const filled: string[] = [];
   try {
     for (const table of SEEDED_TABLES) {
