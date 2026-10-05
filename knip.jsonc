@@ -1,0 +1,12 @@
+// Reports unused files, exports and dependencies (`pnpm knip`, CI job `quality`).
+// Workspaces, scripts, Vitest and test files are detected automatically.
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "workspaces": {
+    "packages/database": {
+      // Used by src/generated (written by `prisma generate`, not committed). Remove this line
+      // once src/index.ts exports the Prisma client.
+      "ignoreDependencies": ["@prisma/client"],
+    },
+  },
+}

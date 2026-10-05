@@ -26,7 +26,7 @@ Thank you for your interest. This project is in early development: please open a
 
 ## Code style
 
-TypeScript in strict mode, no `any`, small functions with explicit names, comments that explain _why_. Formatting and linting are enforced by tooling. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm format:check` and `pnpm test`.
+TypeScript in strict mode, no `any`, small functions with explicit names, comments that explain _why_. Formatting and linting are enforced by tooling. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm lint:architecture`, `pnpm knip` and `pnpm test:coverage`.
 
 ## Reporting security issues
 
