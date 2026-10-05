@@ -5,5 +5,12 @@
     // The seed runs with Node's own TypeScript support, which needs the .ts extension in imports.
     "allowImportingTsExtensions": true
   },
-  "include": ["src", "seed", "prisma.config.ts", "vitest.config.ts", "vitest.integration.config.ts"]
+  "include": [
+    "src",
+    "seed",
+    "tests",
+    "prisma.config.ts",
+    "vitest.config.ts",
+    "vitest.integration.config.ts"
+  ]
 }

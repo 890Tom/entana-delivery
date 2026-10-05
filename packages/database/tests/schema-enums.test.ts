@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import * as generated from "./generated/enums.js";
+import * as generated from "../src/generated/enums.js";
 
 const dataModel = readFileSync(new URL("../../../docs/data-model.md", import.meta.url), "utf8");
 

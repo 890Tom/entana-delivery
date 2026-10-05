@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { expectViolation, SQLSTATE, useRollbackTransaction } from "./test-support/database.js";
-import { insertOrderItem, insertProduct } from "./test-support/rows.js";
+import { expectViolation, SQLSTATE, useRollbackTransaction } from "../support/database.js";
+import { insertOrderItem, insertProduct } from "../support/rows.js";
 
 describe("referential integrity", () => {
   const db = useRollbackTransaction();

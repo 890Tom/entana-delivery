@@ -30,7 +30,7 @@ How they stay out of your way:
 
 If a run is killed (for example with `kill -9`), its `test_<hex>` schema stays in your development database. List leftovers with `\dn test_*` in `psql` and remove them with `DROP SCHEMA test_<hex> CASCADE`. They are harmless, and in CI the container is thrown away.
 
-A test checks that every CHECK constraint of the schema has a test case. When you add a constraint in a migration, add its case in `src/check-constraints.integration.test.ts`, or that test fails.
+A test checks that every CHECK constraint of the schema has a test case. When you add a constraint in a migration, add its case in `tests/integration/check-constraints.integration.test.ts`, or that test fails.
 
 ## Seed data
 
