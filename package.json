@@ -16,6 +16,8 @@
     "format:check": "prettier . --check",
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
+    "db:seed": "pnpm --filter @entana/database db:seed",
+    "db:reset-and-seed": "pnpm --filter @entana/database db:reset-and-seed",
     "db:generate": "turbo run db:generate",
     "db:validate": "turbo run db:validate",
     "prepare": "husky"
