@@ -8,22 +8,22 @@
 // an interactive terminal, never in CI or a container whose output is kept, and not through
 // Turborepo, which caches the output of the tasks it runs.
 import { Client } from "pg";
-import { todayInAntananarivo } from "./antananarivo-date.ts";
-import { seedCatalogue } from "./catalogue.ts";
-import { seedCustomersAndOrders } from "./customers-and-orders.ts";
-import { assertDatabaseIsEmpty, truncateAllTables } from "./database.ts";
+import { todayInAntananarivo } from "./lib/antananarivo-date.ts";
+import { seedCatalogue } from "./data/catalogue.ts";
+import { seedCustomersAndOrders } from "./data/customers-and-orders.ts";
+import { assertDatabaseIsEmpty, truncateAllTables } from "./safety/database.ts";
 import {
   destructiveSeedRefusals,
   optInFlagsDefinedByEnvFile,
   seedRefusals,
-} from "./destructive-guard.ts";
-import { describeDatabaseTarget, loadRootEnvFile } from "./environment.ts";
-import { seedPlacesAndAxes } from "./places-and-axes.ts";
-import { seedResellers } from "./resellers.ts";
-import { seedSettings } from "./settings.ts";
-import type { SeedContext } from "./sql.ts";
-import { seedStaff } from "./staff.ts";
-import type { SeededStaff } from "./staff.ts";
+} from "./safety/destructive-guard.ts";
+import { describeDatabaseTarget, loadRootEnvFile } from "./safety/environment.ts";
+import { seedPlacesAndAxes } from "./data/places-and-axes.ts";
+import { seedResellers } from "./data/resellers.ts";
+import { seedSettings } from "./data/settings.ts";
+import type { SeedContext } from "./lib/sql.ts";
+import { seedStaff } from "./data/staff.ts";
+import type { SeededStaff } from "./data/staff.ts";
 
 const DEFAULT_ADMIN_USERNAME = "admin";
 

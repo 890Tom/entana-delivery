@@ -1,6 +1,6 @@
 import type { Client } from "pg";
 import { describe, expect, inject, it } from "vitest";
-import { expectViolation, SQLSTATE, useRollbackTransaction } from "./test-support/database.js";
+import { expectViolation, SQLSTATE, useRollbackTransaction } from "../support/database.js";
 import {
   insertCustomer,
   insertOrder,
@@ -11,7 +11,7 @@ import {
   insertReseller,
   insertShopSetting,
   insertStaffUser,
-} from "./test-support/rows.js";
+} from "../support/rows.js";
 
 interface Scenario {
   name: string;

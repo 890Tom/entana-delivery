@@ -21,7 +21,7 @@
 ## Consequences
 
 - The database rejects invalid data whatever the writer (API, seed, manual SQL).
-- The constraints exist only in SQL. Prisma will not warn if someone drops one, so automated database tests against a real PostgreSQL cover them (`packages/database/src/check-constraints.integration.test.ts`, run by `pnpm test:integration`). A test fails when a constraint of the schema has no test case, or when a tested constraint is missing from the schema.
+- The constraints exist only in SQL. Prisma will not warn if someone drops one, so automated database tests against a real PostgreSQL cover them (`packages/database/tests/integration/check-constraints.integration.test.ts`, run by `pnpm test:integration`). A test fails when a constraint of the schema has no test case, or when a tested constraint is missing from the schema.
 - The plain index also stores finished orders (`DELIVERED`, `REJECTED`, `CANCELLED`, `FAILED`), so it is larger than the partial index would be. For a single small business this is negligible, and the index leads with `status`, so queries on active statuses still use it.
 - No preview feature in the schema, and nothing to migrate when Prisma changes it.
 

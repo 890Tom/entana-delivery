@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
-import { addDays, localHourOnDay } from "./antananarivo-date.ts";
+import { addDays, localHourOnDay } from "../lib/antananarivo-date.ts";
 import type { SeededProduct } from "./catalogue.ts";
 import { DEMO_CENTRE, DEMO_OUT_OF_AXIS_FEE_AR, demoPhone } from "./config.ts";
-import { computeOrderTotal } from "./order-total.ts";
+import { computeOrderTotal } from "../lib/order-total.ts";
 import type { SeededGeography } from "./places-and-axes.ts";
-import type { SeedContext } from "./sql.ts";
-import { insertRow, insertRowAndReturnId, minutesBefore, pick } from "./sql.ts";
+import type { SeedContext } from "../lib/sql.ts";
+import { insertRow, insertRowAndReturnId, minutesBefore, pick } from "../lib/sql.ts";
 
 type Status =
   "NEW" | "CONFIRMED" | "OUT_FOR_DELIVERY" | "DELIVERED" | "REJECTED" | "CANCELLED" | "FAILED";

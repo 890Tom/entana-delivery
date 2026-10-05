@@ -1,6 +1,6 @@
 import { DEMO_CENTRE } from "./config.ts";
-import type { SeedContext } from "./sql.ts";
-import { daysBefore, insertRow } from "./sql.ts";
+import type { SeedContext } from "../lib/sql.ts";
+import { daysBefore, insertRow } from "../lib/sql.ts";
 
 interface DemoReseller {
   readonly name: string;

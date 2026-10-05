@@ -2,7 +2,7 @@
 // A missing file is fine, and variables already set in the shell win over the file.
 export function loadRootEnvFile(): void {
   try {
-    process.loadEnvFile(new URL("../../../.env", import.meta.url));
+    process.loadEnvFile(new URL("../../../../.env", import.meta.url));
   } catch (error) {
     if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) {
       throw error;

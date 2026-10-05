@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
-import { hashPassword } from "../src/password-hash.ts";
+import { hashPassword } from "../../src/password-hash.ts";
 import { demoPhone } from "./config.ts";
-import type { SeedContext } from "./sql.ts";
-import { insertRowAndReturnId } from "./sql.ts";
+import type { SeedContext } from "../lib/sql.ts";
+import { insertRowAndReturnId } from "../lib/sql.ts";
 
 export interface SeededStaff {
   readonly adminId: string;
