@@ -50,6 +50,9 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Check formatting
         run: pnpm format:check
+      # The generated Prisma client is not committed, and lint needs its types.
+      - name: Generate Prisma client
+        run: pnpm db:generate
       - name: Lint
         run: pnpm lint
       - name: Typecheck

@@ -15,6 +15,7 @@
     "format:check": "prettier . --check",
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
+    "db:generate": "turbo run db:generate",
     "db:validate": "turbo run db:validate",
     "prepare": "husky"
   },
