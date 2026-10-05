@@ -91,6 +91,7 @@ Planned, not yet created: `apps/` (API, customer PWA, admin dashboard), `example
 
 - Architecture decision records: [`docs/adr`](docs/adr)
 - Database schema: [`docs/data-model.md`](docs/data-model.md)
+- API container image (build, run, Compose, health check): [`apps/api/README.md`](apps/api/README.md#container)
 - Product specification (French): to be published in `docs/`
 
 ## Roadmap
