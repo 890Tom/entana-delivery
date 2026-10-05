@@ -120,6 +120,15 @@ export default defineConfig(
     rules: { "no-restricted-syntax": "off" },
   },
 
+  // NestJS modules are classes with no member: the `@Module()` decorator is all they have.
+  // Only a decorated class is allowed to be empty, and only in the API.
+  {
+    files: ["apps/api/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-extraneous-class": ["error", { allowWithDecorator: true }],
+    },
+  },
+
   // A test file groups many cases in one `describe` callback, so only that limit is lifted.
   {
     files: ["**/*.test.ts", "**/tests/**/*.ts"],

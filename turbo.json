@@ -13,12 +13,25 @@
       "inputs": ["prisma/schema.prisma", "prisma.config.ts"],
       "env": ["DATABASE_URL"]
     },
+    // Typecheck needs no build: packages expose their TypeScript source to the compiler through
+    // the "types" condition of their package.json, so a stale dist can never be read here.
     "typecheck": {
       "dependsOn": ["^typecheck", "db:generate"]
     },
+    // The tests run Node-style resolution (the "default" condition), which reads the compiled
+    // output of the packages: they are rebuilt first.
     "test": {
-      "dependsOn": ["db:generate"],
+      "dependsOn": ["^build", "db:generate"],
       "outputs": ["coverage/**"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"]
+    },
+    // The API in watch mode: never cached, never finishes.
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
     },
     // Never cached: a cache hit would report success without querying the database.
     // No dependency on db:generate: these tests use `pg` directly, not the generated client.
@@ -27,7 +40,7 @@
       "env": ["DATABASE_URL"]
     },
     "test:coverage": {
-      "dependsOn": ["db:generate"],
+      "dependsOn": ["^build", "db:generate"],
       "outputs": ["coverage/**"]
     }
   }

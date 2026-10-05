@@ -1,0 +1,13 @@
+{
+  // What `pnpm build` compiles: the application only, never the tests.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // The base disables emit because other packages are only type-checked.
+    "noEmit": false,
+    "outDir": "dist",
+    // Keeps dist/main.js at the root of dist (no src/ level).
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}

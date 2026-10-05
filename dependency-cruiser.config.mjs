@@ -3,8 +3,9 @@
 //
 //   packages/contracts (pure)  ->  used by packages/database, apps/api and the front ends
 //   apps never import each other; only apps/api and packages/database know the database.
+//   shipped code never imports test code.
 
-const TEST_FILES = "\\.test\\.(ts|tsx)$|^packages/[^/]+/tests/";
+const TEST_FILES = "\\.test\\.(ts|tsx)$|^(apps|packages)/[^/]+/tests/";
 const NPM_TYPES = [
   "npm",
   "npm-dev",
@@ -50,6 +51,14 @@ export default {
       to: { dependencyTypes: NPM_TYPES, pathNot: "node_modules/zod/|^zod$" },
     },
     {
+      name: "production-code-does-not-import-tests",
+      comment:
+        "Test support code (for example the test-only routes of the API) must never be reachable from the shipped code.",
+      severity: "error",
+      from: { path: "^(apps|packages)/[^/]+/src/", pathNot: TEST_FILES },
+      to: { path: TEST_FILES },
+    },
+    {
       name: "packages-no-app-imports",
       comment: "Dependencies point towards the packages, never towards an application.",
       severity: "error",
@@ -80,7 +89,9 @@ export default {
     tsConfig: { fileName: "tsconfig.base.json" },
     enhancedResolveOptions: {
       exportsFields: ["exports"],
-      conditionNames: ["import", "require", "node", "default"],
+      // "types" first: a package that publishes compiled JavaScript (contracts) is analysed
+      // through its TypeScript source, so that the check does not depend on a build.
+      conditionNames: ["types", "import", "require", "node", "default"],
     },
     moduleSystems: ["es6", "cjs"],
     reporterOptions: { text: { highlightFocused: true } },
