@@ -20,5 +20,25 @@ services:
       timeout: 3s
       retries: 10
 
+  # The API image. Behind the "app" profile: a plain `docker compose up` starts only the database.
+  # Start it with `docker compose --profile app up -d --build api`.
+  api:
+    profiles: ["app"]
+    image: entana-api:local
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      # Literal values on purpose: a HOST or PORT exported in the shell or set in .env must not
+      # override what the container needs (HOST=127.0.0.1 would make it unreachable).
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      # Empty means no cross-origin browser is allowed.
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+    ports:
+      - "${API_PORT:-3000}:3000"
+
 volumes:
   postgres_data:
