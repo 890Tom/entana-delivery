@@ -1,4 +1,10 @@
-// Models are added in the next step (see docs/data-model.md).
+// Source of truth for the rules: docs/data-model.md.
+//
+// Not expressed here, written in a custom SQL migration (step 2.3):
+// CHECK constraints and the partial index on customer_order.
+//
+// Identifiers use the native uuidv7() of PostgreSQL 18 (dbgenerated), so that any writer
+// (API, seed, manual SQL) gets an id, not only Prisma Client.
 datasource db {
   provider = "postgresql"
 }
@@ -6,4 +12,290 @@ datasource db {
 generator client {
   provider = "prisma-client"
   output   = "../src/generated"
+}
+
+enum TrustLevel {
+  NEW
+  KNOWN
+  BLOCKED
+
+  @@map("trust_level")
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  REJECTED
+  CANCELLED
+  FAILED
+
+  @@map("order_status")
+}
+
+enum FeeReason {
+  IN_AXIS
+  OUT_OF_AXIS
+  ADJUSTED
+
+  @@map("fee_reason")
+}
+
+enum OrderEventType {
+  STATUS_CHANGED
+  LINES_EDITED
+  FEE_ADJUSTED
+  DATE_CHANGED
+
+  @@map("order_event_type")
+}
+
+enum ActorType {
+  STAFF
+  CUSTOMER
+  SYSTEM
+
+  @@map("actor_type")
+}
+
+enum StaffRole {
+  ADMIN
+  DRIVER
+
+  @@map("staff_role")
+}
+
+// ---------------------------------------------------------------- Orders
+
+// Created automatically on the first order. No account and no name: the name is on the order.
+model Customer {
+  id         String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  phoneE164  String     @unique @map("phone_e164")
+  trustLevel TrustLevel @default(NEW) @map("trust_level")
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  orders CustomerOrder[]
+
+  @@map("customer")
+}
+
+model CustomerOrder {
+  id              String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  // SHA-256 of the tracking token. The token itself is never stored.
+  publicTokenHash String      @unique @map("public_token_hash")
+  // 6 characters, without ambiguous characters (0, O, 1, I).
+  publicCode      String      @unique @map("public_code")
+  customerId      String      @map("customer_id") @db.Uuid
+  // Null when no place matches.
+  placeId         String?     @map("place_id") @db.Uuid
+  // Null outside an axis.
+  axisId          String?     @map("axis_id") @db.Uuid
+  // Frozen at creation.
+  deliveryFee     Int         @map("delivery_fee")
+  feeReason       FeeReason   @map("fee_reason")
+  // A day, interpreted in Indian/Antananarivo. Null until the order is confirmed.
+  deliveryDate    DateTime?   @map("delivery_date") @db.Date
+  status          OrderStatus
+  // Reason of a refusal, a cancellation or a failed delivery.
+  statusReason    String?     @map("status_reason")
+  // Name typed for this order.
+  contactName     String      @map("contact_name")
+  customerNote    String?     @map("customer_note")
+  // Used from the driver phase.
+  driverId        String?     @map("driver_id") @db.Uuid
+  // Used from the driver phase.
+  tourPosition    Int?        @map("tour_position")
+  // Position chosen by the customer.
+  lat             Float       @db.DoublePrecision
+  lng             Float       @db.DoublePrecision
+  landmarkText    String      @map("landmark_text")
+  // Items total + delivery fee, recomputed by the server on every write.
+  totalAr         Int         @map("total_ar")
+  // The same key never creates a second order.
+  idempotencyKey  String      @unique @map("idempotency_key")
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  customer Customer      @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  place    Place?        @relation(fields: [placeId], references: [id], onDelete: Restrict)
+  axis     DeliveryAxis? @relation(fields: [axisId], references: [id], onDelete: Restrict)
+  driver   StaffUser?    @relation(fields: [driverId], references: [id], onDelete: Restrict)
+  items    OrderItem[]
+  events   OrderEvent[]
+
+  @@index([customerId])
+  @@map("customer_order")
+}
+
+model OrderItem {
+  id          String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  orderId     String @map("order_id") @db.Uuid
+  productId   String @map("product_id") @db.Uuid
+  // Name frozen at order time.
+  productName String @map("product_name")
+  qty         Int
+  // Frozen at order time.
+  unitPrice   Int    @map("unit_price")
+
+  order   CustomerOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  product Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@map("order_item")
+}
+
+// Written in the same transaction as the change it records.
+model OrderEvent {
+  id            String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  orderId       String         @map("order_id") @db.Uuid
+  type          OrderEventType
+  // Set for STATUS_CHANGED.
+  fromStatus    OrderStatus?   @map("from_status")
+  toStatus      OrderStatus?   @map("to_status")
+  actorType     ActorType      @map("actor_type")
+  // No foreign key on purpose: a staff account or a customer, depending on actorType.
+  actorId       String?        @map("actor_id") @db.Uuid
+  // Old and new values, reason.
+  payload       Json           @db.JsonB
+  // Idempotency of actions sent offline by the driver app.
+  clientEventId String?        @unique @map("client_event_id") @db.Uuid
+  clientTs      DateTime?      @map("client_ts") @db.Timestamptz(3)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order CustomerOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@index([orderId, createdAt])
+  @@map("order_event")
+}
+
+// ------------------------------------------------------------- Catalogue
+
+model Product {
+  id                    String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  // Reconciliation key with an external stock system.
+  sku                   String   @unique
+  name                  String
+  description           String?
+  priceAr               Int      @map("price_ar")
+  // Visible in the catalogue.
+  active                Boolean
+  // Set manually, never reset automatically.
+  available             Boolean
+  availabilityChangedAt DateTime @map("availability_changed_at") @db.Timestamptz(3)
+  // Display order.
+  position              Int
+  imageKey              String?  @map("image_key")
+  // Required to make a product visible.
+  imageAlt              String?  @map("image_alt")
+
+  orderItems OrderItem[]
+
+  @@map("product")
+}
+
+// -------------------------------------------------------------- Delivery
+
+model Place {
+  id      String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name    String
+  // Centre of the place.
+  lat     Float   @db.DoublePrecision
+  lng     Float   @db.DoublePrecision
+  radiusM Int     @default(500) @map("radius_m")
+  active  Boolean
+
+  axes   AxisPlace[]
+  orders CustomerOrder[]
+
+  @@map("place")
+}
+
+model DeliveryAxis {
+  id       String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name     String  @unique
+  // Priority: when a place belongs to several axes, the lowest position wins.
+  position Int
+  active   Boolean
+
+  places AxisPlace[]
+  orders CustomerOrder[]
+
+  @@map("delivery_axis")
+}
+
+// A place can belong to several axes.
+model AxisPlace {
+  axisId   String @map("axis_id") @db.Uuid
+  placeId  String @map("place_id") @db.Uuid
+  // Rank of the place along the axis.
+  position Int
+
+  axis  DeliveryAxis @relation(fields: [axisId], references: [id], onDelete: Restrict)
+  place Place        @relation(fields: [placeId], references: [id], onDelete: Restrict)
+
+  @@id([axisId, placeId])
+  @@map("axis_place")
+}
+
+// ------------------------------------- Administration, resellers, settings
+
+model StaffUser {
+  id               String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name             String
+  // Used to log in.
+  username         String    @unique
+  phone            String?
+  role             StaffRole
+  passwordHash     String    @map("password_hash")
+  failedLoginCount Int       @default(0) @map("failed_login_count")
+  // Set after 5 failed logins (15 minutes).
+  lockedUntil      DateTime? @map("locked_until") @db.Timestamptz(3)
+  active           Boolean
+
+  deliveries CustomerOrder[]
+  auditLogs  AuditLog[]
+
+  @@map("staff_user")
+}
+
+// Only actions outside orders. Everything about an order goes to order_event.
+model AuditLog {
+  id       String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  actorId  String   @map("actor_id") @db.Uuid
+  action   String
+  entity   String
+  entityId String   @map("entity_id") @db.Uuid
+  diff     Json     @db.JsonB
+  at       DateTime @default(now()) @db.Timestamptz(3)
+
+  actor StaffUser @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@map("audit_log")
+}
+
+model Reseller {
+  id           String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name         String
+  area         String
+  landmarkText String    @map("landmark_text")
+  lat          Float     @db.DoublePrecision
+  lng          Float     @db.DoublePrecision
+  // Visible on the public map. Requires consentAt (CHECK in step 2.3).
+  active       Boolean
+  // Publication consent.
+  consentAt    DateTime? @map("consent_at") @db.Timestamptz(3)
+  // Last verification.
+  verifiedAt   DateTime? @map("verified_at") @db.Timestamptz(3)
+
+  @@map("reseller")
+}
+
+// A single row: id is always 1 (CHECK in step 2.3), so there is no default.
+model ShopSetting {
+  id               Int      @id
+  outOfAxisFeeAr   Int      @map("out_of_axis_fee_ar")
+  outOfAxisMessage String   @map("out_of_axis_message")
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("shop_setting")
 }

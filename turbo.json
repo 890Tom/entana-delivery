@@ -17,9 +17,11 @@
       "dependsOn": ["^typecheck", "db:generate"]
     },
     "test": {
+      "dependsOn": ["db:generate"],
       "outputs": ["coverage/**"]
     },
     "test:coverage": {
+      "dependsOn": ["db:generate"],
       "outputs": ["coverage/**"]
     }
   }
