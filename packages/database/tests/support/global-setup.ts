@@ -61,7 +61,7 @@ async function createSchemaWithMigrations(databaseUrl: string, schema: string): 
 }
 
 // One throwaway schema with a random name per run: the development data is never touched.
-export default async function setup(project: TestProject): Promise<() => Promise<void>> {
+export async function setup(project: TestProject): Promise<() => Promise<void>> {
   const databaseUrl = requireDatabaseUrl();
   const schema = `test_${randomBytes(6).toString("hex")}`;
   try {

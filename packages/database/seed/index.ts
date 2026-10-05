@@ -27,8 +27,19 @@ import type { SeededStaff } from "./data/staff.ts";
 
 const DEFAULT_ADMIN_USERNAME = "admin";
 
+interface SeedConfiguration {
+  readonly isReset: boolean;
+  readonly databaseUrl: string;
+  readonly target: string;
+  readonly adminUsername: string;
+}
+
+function printLine(message: string): void {
+  process.stdout.write(`${message}\n`);
+}
+
 function fail(message: string): never {
-  console.error(message);
+  process.stderr.write(`${message}\n`);
   process.exit(1);
 }
 
@@ -46,77 +57,95 @@ function refuse(title: string, reasons: readonly string[], advice: string): neve
   return fail(`${title}\n${reasons.map((reason) => `- ${reason}`).join("\n")}\n${advice}`);
 }
 
-async function main(): Promise<void> {
-  const reset = process.argv.includes("--reset");
+function describeError(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function refuseIfEnvFileDefinesFlags(shellEnvironment: NodeJS.ProcessEnv): void {
+  const flagsFromEnvFile = optInFlagsDefinedByEnvFile(shellEnvironment, process.env);
+  if (flagsFromEnvFile.length === 0) return;
+  refuse(
+    "Refusing to run: the .env file defines an opt-in flag.",
+    flagsFromEnvFile.map((flag) => `${flag} is set in .env.`),
+    "Remove it from .env and pass it on the command line, for one run only.",
+  );
+}
+
+function refuseIfNotAllowed(isReset: boolean): void {
+  const refusals = isReset ? destructiveSeedRefusals(process.env) : seedRefusals(process.env);
+  if (refusals.length === 0) return;
+  refuse(
+    isReset ? "Refusing to reset the database:" : "Refusing to seed the database:",
+    refusals,
+    isReset
+      ? "db:reset-and-seed erases every table. Run it only on a local throwaway database, with ALLOW_DESTRUCTIVE_SEED=true."
+      : "The seed is meant for a local development database.",
+  );
+}
+
+function readConfiguration(): SeedConfiguration {
+  const isReset = process.argv.includes("--reset");
   const shellEnvironment = { ...process.env };
   loadRootEnvFile();
-
-  const flagsFromEnvFile = optInFlagsDefinedByEnvFile(shellEnvironment, process.env);
-  if (flagsFromEnvFile.length > 0) {
-    refuse(
-      "Refusing to run: the .env file defines an opt-in flag.",
-      flagsFromEnvFile.map((flag) => `${flag} is set in .env.`),
-      "Remove it from .env and pass it on the command line, for one run only.",
-    );
-  }
+  refuseIfEnvFileDefinesFlags(shellEnvironment);
 
   const databaseUrl = process.env.DATABASE_URL;
   if (databaseUrl === undefined || databaseUrl === "") {
-    fail("DATABASE_URL is not set. Copy .env.example to .env and run `pnpm db:up`.");
+    return fail("DATABASE_URL is not set. Copy .env.example to .env and run `pnpm db:up`.");
   }
-
-  const refusals = reset ? destructiveSeedRefusals(process.env) : seedRefusals(process.env);
-  if (refusals.length > 0) {
-    refuse(
-      reset ? "Refusing to reset the database:" : "Refusing to seed the database:",
-      refusals,
-      reset
-        ? "db:reset-and-seed erases every table. Run it only on a local throwaway database, with ALLOW_DESTRUCTIVE_SEED=true."
-        : "The seed is meant for a local development database.",
-    );
-  }
-  // Computed once, before anything can fail: it never throws and never shows the password.
-  const target = describeDatabaseTarget(databaseUrl);
+  refuseIfNotAllowed(isReset);
 
   const configuredUsername = process.env.INITIAL_ADMIN_USERNAME?.trim();
   const adminUsername =
     configuredUsername === undefined || configuredUsername === ""
       ? DEFAULT_ADMIN_USERNAME
       : configuredUsername;
-  const now = new Date();
-  let client: Client;
+  // Computed before anything can fail: it never throws and never shows the password.
+  return { isReset, databaseUrl, target: describeDatabaseTarget(databaseUrl), adminUsername };
+}
+
+async function connect({ databaseUrl, target }: SeedConfiguration): Promise<Client> {
   try {
     // Building the client parses the URL, which can throw as well.
-    client = new Client({ connectionString: databaseUrl });
+    const client = new Client({ connectionString: databaseUrl });
     await client.connect();
+    return client;
   } catch (error) {
-    fail(
-      `Cannot connect to ${target}: ` + (error instanceof Error ? error.message : String(error)),
-    );
+    return fail(`Cannot connect to ${target}: ${describeError(error)}`);
   }
-  try {
-    // One transaction: a failure leaves the database as it was.
-    await client.query("BEGIN");
-    if (reset) {
-      await truncateAllTables(client);
-    } else {
-      await assertDatabaseIsEmpty(client);
-    }
-    const staff = await seedEverything(
-      { db: client, now, today: todayInAntananarivo(now) },
-      adminUsername,
-    );
-    await client.query("COMMIT");
+}
 
-    // The password comes first: nothing after the commit may keep it from being shown.
-    console.log(`  Admin username: ${staff.adminUsername}`);
-    console.log(`  Admin password: ${staff.adminPassword}`);
-    console.log("");
-    console.log("This password is shown only once and is not stored anywhere. Note it now.");
-    console.log(`Demo data created in ${target}.`);
+// One transaction: a failure leaves the database as it was.
+async function seedInTransaction(client: Client, configuration: SeedConfiguration): Promise<void> {
+  const now = new Date();
+  await client.query("BEGIN");
+  if (configuration.isReset) {
+    await truncateAllTables(client);
+  } else {
+    await assertDatabaseIsEmpty(client);
+  }
+  const staff = await seedEverything(
+    { db: client, now, today: todayInAntananarivo(now) },
+    configuration.adminUsername,
+  );
+  await client.query("COMMIT");
+
+  // The password comes first: nothing after the commit may keep it from being shown.
+  printLine(`  Admin username: ${staff.adminUsername}`);
+  printLine(`  Admin password: ${staff.adminPassword}`);
+  printLine("");
+  printLine("This password is shown only once and is not stored anywhere. Note it now.");
+  printLine(`Demo data created in ${configuration.target}.`);
+}
+
+async function main(): Promise<void> {
+  const configuration = readConfiguration();
+  const client = await connect(configuration);
+  try {
+    await seedInTransaction(client, configuration);
   } catch (error) {
     await client.query("ROLLBACK").catch(() => undefined);
-    fail(error instanceof Error ? error.message : String(error));
+    fail(describeError(error));
   } finally {
     await client.end();
   }
