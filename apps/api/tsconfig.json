@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Node runs the compiled ESM output as is: NodeNext checks that imports are valid for Node
+    // (.js extensions, package "exports"). The base uses ESNext/Bundler, made for Vite.
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    // Nest decorators are the legacy (TypeScript "experimental") kind, not the TC39 ones.
+    "experimentalDecorators": true,
+    // Nest's dependency injection reads the constructor parameter types at runtime.
+    "emitDecoratorMetadata": true,
+    // Only Node's types are loaded (the base loads none).
+    "types": ["node"]
+  },
+  "include": ["src", "tests", "vitest.config.ts"]
+}

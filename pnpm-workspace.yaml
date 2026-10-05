@@ -5,3 +5,7 @@ packages:
 allowBuilds:
   "@prisma/engines": true
   prisma: true
+  # Telemetry install script of a transitive dependency (swagger-ui): not needed, not allowed.
+  "@scarf/scarf": false
+  # The native binary comes from a platform package, so the install script is not needed.
+  "@swc/core": false

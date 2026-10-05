@@ -3,6 +3,12 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
   "workspaces": {
+    "apps/api": {
+      // Started by `node dist/main.js` (the compiled output), so it is not found through a script.
+      "entry": ["src/main.ts"],
+      // pino loads it by name (the `target` of the development transport), with no import.
+      "ignoreDependencies": ["pino-pretty"],
+    },
     "packages/database": {
       // Used by src/generated (written by `prisma generate`, not committed). Remove this line
       // once src/index.ts exports the Prisma client.

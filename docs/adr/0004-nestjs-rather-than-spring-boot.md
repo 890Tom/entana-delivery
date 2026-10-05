@@ -20,3 +20,5 @@ Build the API with NestJS, in TypeScript. Validation schemas (Zod) and pure doma
 ## Alternatives considered
 
 - **Spring Boot:** mature, strongly typed, with excellent tooling. It was not chosen because it adds a second language and would duplicate the contracts and the domain rules between the API and the front ends.
+
+See also [0010](0010-nestjs-12-esm-express-vitest-with-swc.md) (how NestJS 12 is set up) and [0011](0011-validation-with-standard-schema-and-shared-zod-contracts.md) (validation).

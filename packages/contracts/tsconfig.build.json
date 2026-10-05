@@ -1,0 +1,13 @@
+{
+  // Emits the JavaScript that Node loads at runtime (the API). The compiler, ESLint,
+  // dependency-cruiser and knip read src through the "types" condition of package.json, so they
+  // never need dist. Node and Vite read dist ("default"): see ADR 0010.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}
