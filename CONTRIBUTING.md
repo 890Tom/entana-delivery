@@ -19,7 +19,7 @@ Thank you for your interest. This project is in early development: please open a
 
 ## Local setup
 
-1. Install Node 24 (see `.nvmrc`), pnpm, Docker and [gitleaks](https://github.com/gitleaks/gitleaks).
+1. Install Node 24.7 or later (see `.nvmrc`), pnpm, Docker and [gitleaks](https://github.com/gitleaks/gitleaks).
 2. Run `pnpm install`. The Git hooks are managed by [Husky](https://typicode.github.io/husky/) and install themselves through the `prepare` script, so there is nothing else to enable.
 3. The hooks block commits on `main`, run Prettier and ESLint on staged files, scan staged changes with gitleaks (which must be installed locally), check commit messages with commitlint, and block pushes to `main`.
 4. Check the secret hook works: stage a file containing a random fake token (a string starting with `ghp_` followed by 36 random letters and digits, which you type yourself and never commit) and confirm the commit is blocked. Do not use the well-known AWS documentation example key: gitleaks ignores it.
