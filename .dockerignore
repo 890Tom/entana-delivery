@@ -1,0 +1,43 @@
+# Keep the build context minimal and free of local or secret files.
+# Docker matches patterns from the context root only, so each one starts
+# with **/ to apply at every depth.
+
+# Version control
+**/.git
+
+# Local AI assistant files (never in an image)
+**/.claude
+**/CLAUDE.md
+**/AGENTS.md
+
+# Environment and secrets: the last matching rule wins, so the
+# exception for the example file must come after the broad pattern
+**/.env*
+!**/.env.example
+**/*.pem
+**/*.key
+
+# Dependencies and build outputs
+**/node_modules
+**/.pnpm-store
+**/dist
+**/build
+**/.turbo
+**/coverage
+
+# Test and tooling output
+**/test-results
+**/playwright-report
+
+# Logs
+**/*.log
+
+# Runtime data
+**/postgres-data
+**/uploads
+**/storage
+
+# Editors and OS
+**/.DS_Store
+**/.idea
+**/.vscode
