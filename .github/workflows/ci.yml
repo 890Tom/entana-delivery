@@ -121,6 +121,77 @@ jobs:
       - name: Integration tests (PostgreSQL)
         run: pnpm test:integration
 
+  # Builds the production image and tests it from outside, through the published port: the
+  # image's own health check runs inside the container and cannot see a wrong HOST.
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build the API image
+        run: docker build -f apps/api/Dockerfile -t entana-api:ci .
+      - name: Start the API container
+        run: |
+          docker run -d --name entana-api-ci -p 3000:3000 \
+            -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3000 \
+            entana-api:ci
+      - name: Wait until the API answers from the host
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS -o /dev/null http://localhost:3000/api/v1/health; then
+              echo "The API answered on attempt ${attempt}."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::The API never answered on http://localhost:3000/api/v1/health (30 tries, 2 seconds apart)."
+          exit 1
+      - name: Check the HTTP status
+        run: |
+          status=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/v1/health)
+          test "${status}" = "200" || { echo "::error::Expected HTTP 200, got ${status}."; exit 1; }
+      - name: Check the Cache-Control header
+        run: |
+          value=$(curl -s -D - -o /dev/null http://localhost:3000/api/v1/health | tr -d '\r' | awk -F': ' 'tolower($1) == "cache-control" { print $2 }')
+          test "${value}" = "no-store" || { echo "::error::Expected Cache-Control: no-store, got '${value}'."; exit 1; }
+      - name: Check the response body
+        run: |
+          body=$(curl -s http://localhost:3000/api/v1/health)
+          echo "${body}"
+          echo "${body}" | grep -q '"status":"ok"' || { echo '::error::The body does not contain "status":"ok".'; exit 1; }
+      - name: Check that the process does not run as root
+        run: |
+          uid=$(docker exec entana-api-ci id -u)
+          test "${uid}" != "0" || { echo "::error::The container runs as root."; exit 1; }
+          echo "The container runs as uid ${uid}."
+      - name: Wait until Docker reports the container healthy
+        run: |
+          for attempt in $(seq 1 30); do
+            health=$(docker inspect --format '{{.State.Health.Status}}' entana-api-ci)
+            if [ "${health}" = "healthy" ]; then
+              echo "The container is healthy."
+              exit 0
+            fi
+            echo "Health status: ${health}"
+            sleep 2
+          done
+          echo "::error::The container was not healthy after 60 seconds."
+          exit 1
+      - name: Check the graceful shutdown
+        run: |
+          SECONDS=0
+          docker stop -t 10 entana-api-ci
+          code=$(docker inspect --format '{{.State.ExitCode}}' entana-api-ci)
+          echo "Exit code ${code} after ${SECONDS} seconds."
+          test "${code}" = "0" || { echo "::error::Expected exit code 0, got ${code}."; exit 1; }
+          test "${SECONDS}" -lt 10 || { echo "::error::The shutdown took ${SECONDS} seconds."; exit 1; }
+      - name: Print the container logs
+        if: failure()
+        run: docker logs entana-api-ci
+      - name: Remove the container
+        if: always()
+        run: docker rm -f entana-api-ci
+
   pr-title:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
