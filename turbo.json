@@ -20,6 +20,12 @@
       "dependsOn": ["db:generate"],
       "outputs": ["coverage/**"]
     },
+    // Never cached: a cache hit would report success without querying the database.
+    // No dependency on db:generate: these tests use `pg` directly, not the generated client.
+    "test:integration": {
+      "cache": false,
+      "env": ["DATABASE_URL"]
+    },
     "test:coverage": {
       "dependsOn": ["db:generate"],
       "outputs": ["coverage/**"]

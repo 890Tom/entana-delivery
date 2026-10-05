@@ -62,6 +62,48 @@ jobs:
       - name: Build
         run: pnpm build
 
+  integration:
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: "0"
+      # No password: the service container only listens inside this job, and trust auth keeps
+      # any credential out of the workflow file.
+      DATABASE_URL: postgresql://entana_ci@localhost:5432/entana_ci
+    services:
+      postgres:
+        # Same major version as docker-compose.yml.
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: entana_ci
+          POSTGRES_DB: entana_ci
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U entana_ci -d entana_ci"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate Prisma client
+        run: pnpm db:generate
+      # Catches a change to schema.prisma without its migration. The hand-written CHECK
+      # constraints do not show up as a difference (Prisma does not introspect them).
+      - name: Apply migrations
+        run: pnpm --filter @entana/database exec prisma migrate deploy
+      - name: Check that schema.prisma and the migrations are in sync
+        run: pnpm --filter @entana/database exec prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code
+      - name: Integration tests (PostgreSQL)
+        run: pnpm test:integration
+
   pr-title:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -79,5 +121,3 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Validate PR title (Conventional Commits)
         run: printf '%s\n' "$PR_TITLE" | pnpm exec commitlint
-
-  # Still to come: integration tests (PostgreSQL).
