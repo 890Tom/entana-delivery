@@ -1,7 +1,7 @@
 // Source of truth for the rules: docs/data-model.md.
 //
-// Not expressed here, written in a custom SQL migration (step 2.3):
-// CHECK constraints and the partial index on customer_order.
+// Not expressed here: the CHECK constraints, which Prisma cannot represent. They live in the
+// hand-written migration add_check_constraints (see ADR 0007).
 //
 // Identifiers use the native uuidv7() of PostgreSQL 18 (dbgenerated), so that any writer
 // (API, seed, manual SQL) gets an id, not only Prisma Client.
@@ -124,6 +124,8 @@ model CustomerOrder {
   events   OrderEvent[]
 
   @@index([customerId])
+  // Plain index, not a partial one: the partialIndexes preview is not used (ADR 0007).
+  @@index([status, deliveryDate, axisId], map: "customer_order_status_delivery_date_axis_id_idx")
   @@map("customer_order")
 }
 
@@ -280,7 +282,7 @@ model Reseller {
   landmarkText String    @map("landmark_text")
   lat          Float     @db.DoublePrecision
   lng          Float     @db.DoublePrecision
-  // Visible on the public map. Requires consentAt (CHECK in step 2.3).
+  // Visible on the public map. Requires consentAt (CHECK constraint).
   active       Boolean
   // Publication consent.
   consentAt    DateTime? @map("consent_at") @db.Timestamptz(3)
@@ -290,7 +292,7 @@ model Reseller {
   @@map("reseller")
 }
 
-// A single row: id is always 1 (CHECK in step 2.3), so there is no default.
+// A single row: id is always 1 (CHECK constraint), so there is no default.
 model ShopSetting {
   id               Int      @id
   outOfAxisFeeAr   Int      @map("out_of_axis_fee_ar")
