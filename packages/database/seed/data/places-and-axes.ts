@@ -1,6 +1,6 @@
 import { DEMO_CENTRE } from "./config.ts";
-import type { SeedContext } from "./sql.ts";
-import { insertRow, insertRowAndReturnId, pick } from "./sql.ts";
+import type { SeedContext } from "../lib/sql.ts";
+import { insertRow, insertRowAndReturnId, pick } from "../lib/sql.ts";
 
 export interface SeededPlace {
   readonly id: string;

@@ -1,6 +1,6 @@
 import { DEMO_OUT_OF_AXIS_FEE_AR } from "./config.ts";
-import type { SeedContext } from "./sql.ts";
-import { insertRow } from "./sql.ts";
+import type { SeedContext } from "../lib/sql.ts";
+import { insertRow } from "../lib/sql.ts";
 
 export async function seedSettings({ db, now }: SeedContext): Promise<void> {
   await insertRow(db, "shop_setting", {

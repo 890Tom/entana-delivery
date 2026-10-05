@@ -1,5 +1,5 @@
-import type { SeedContext } from "./sql.ts";
-import { daysBefore, insertRowAndReturnId } from "./sql.ts";
+import type { SeedContext } from "../lib/sql.ts";
+import { daysBefore, insertRowAndReturnId } from "../lib/sql.ts";
 
 export interface SeededProduct {
   readonly id: string;
