@@ -29,7 +29,7 @@ There is nothing to run yet: the applications are not in the repository. What yo
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 24 (see `.nvmrc`)
+- [Node.js](https://nodejs.org/) 24.7 or later (see `.nvmrc`)
 - [pnpm](https://pnpm.io/) (the version is pinned in `package.json`)
 - [Docker](https://www.docker.com/) (for the PostgreSQL database, from the database step on)
 - [gitleaks](https://github.com/gitleaks/gitleaks) (the pre-commit hook scans staged changes and needs it installed locally)

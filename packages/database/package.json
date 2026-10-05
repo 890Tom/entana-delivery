@@ -4,22 +4,25 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./password-hash": "./src/password-hash.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "db:generate": "prisma generate",
-    "db:validate": "prisma validate"
+    "db:validate": "prisma validate",
+    "db:seed": "node seed/index.ts",
+    "db:reset-and-seed": "node seed/index.ts --reset"
   },
   "dependencies": {
-    "@prisma/client": "7.10.0"
+    "@prisma/client": "7.10.0",
+    "pg": "8.23.1"
   },
   "devDependencies": {
     "@types/node": "24.19.1",
     "@types/pg": "8.23.1",
-    "pg": "8.23.1",
     "prisma": "7.10.0",
     "vitest": "^5.0.3"
   }

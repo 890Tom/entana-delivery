@@ -179,4 +179,6 @@ Constraint `ck_shop_setting_single_row_and_fee`: `CHECK (id = 1 AND out_of_axis_
 
 ## Seed data (fake)
 
-Products (four flavours), three delivery axes made of fictional places, a few fake resellers, fake customers with obviously fake phone numbers, and one admin account whose random password is printed once by the seed script. No real business, person or number.
+Created by `pnpm db:seed` (see `packages/database/README.md`): the settings row, six products (one out of stock, one hidden), ten fictional places, three delivery axes (one place is shared by two of them), five customers with fake phone numbers (the `+44 7700 900xxx` range reserved for drama), eight orders with their items and events: 2 new, 2 confirmed, 1 out for delivery, 1 delivered, 1 rejected, 1 cancelled, six resellers, an admin account and an inactive driver account. The admin password is random and printed once by the script. No real business, person or number.
+
+An order creation is recorded as a `STATUS_CHANGED` event with `from_status` null, `to_status` `NEW` and `actor_type` `CUSTOMER`, because `ck_order_event_to_status_when_status_changed` requires a target status on that type.
