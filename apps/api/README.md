@@ -51,6 +51,49 @@ The API never logs the client address.
 After editing `packages/contracts`, run `pnpm --filter @entana/contracts build` (or restart
 `pnpm dev` from the root): the API loads the compiled output of `contracts`, not its source.
 
+## Container
+
+The production image is built by `apps/api/Dockerfile`. The build context is the repository root.
+Local files that are not versioned are kept out of the context by the strict `.dockerignore`.
+
+```sh
+docker build -f apps/api/Dockerfile -t entana-api .
+```
+
+Run it with literal values:
+
+```sh
+docker run -d --name entana-api -p 3000:3000 \
+  -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3000 \
+  entana-api
+```
+
+`HOST` must be `0.0.0.0` inside a container. With `127.0.0.1` the API is unreachable through the
+published port, even though Docker reports the container healthy: the health check runs inside the
+container and cannot see the problem. The values are literal on purpose, so that a `HOST` or
+`PORT` exported in your shell cannot change them.
+
+With Compose, the `api` service is behind the `app` profile, so a plain `docker compose up`
+starts only the database:
+
+```sh
+docker compose --profile app up -d --build api
+```
+
+Compose reads the whole file, so the `.env` file must set `POSTGRES_USER`, `POSTGRES_PASSWORD`
+and `POSTGRES_DB` even to start only the API (copy `.env.example`). It sets `NODE_ENV`, `HOST` and
+`PORT` itself and reads three optional variables from the shell or `.env`: `API_PORT` (port
+published on the host, default `3000`), `LOG_LEVEL` (default `info`) and `CORS_ORIGINS` (default
+empty: no cross-origin browser is allowed).
+
+**Health check.** Every 30 seconds (3 seconds timeout, 10 seconds start period, 3 retries) Node
+requests `http://127.0.0.1:$PORT/api/v1/health` and fails if the answer is not successful or takes
+more than 2 seconds. The image has no `curl`, so Node performs the request.
+
+**Variables set by the image:** `NODE_ENV=production`, `HOST=0.0.0.0` and `PORT=3000`. Every
+other variable of the table above keeps its default. The process runs as the `node` user and
+starts with `node dist/main.js`.
+
 ## Logs
 
 One JSON object per line on stdout (pino). Each request gets an id, returned in the
