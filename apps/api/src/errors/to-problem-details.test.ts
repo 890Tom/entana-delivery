@@ -9,6 +9,7 @@ import { problemDetailsSchema } from "@entana/contracts";
 import { describe, expect, it } from "vitest";
 import { toProblemDetails } from "./to-problem-details.js";
 import { RequestValidationError } from "./request-validation-error.js";
+import { ServiceNotReadyError } from "./service-not-ready-error.js";
 
 describe("toProblemDetails", () => {
   it("describes a Nest HTTP exception with its status", () => {
@@ -40,6 +41,19 @@ describe("toProblemDetails", () => {
     for (const error of [new BadRequestException(), new Error("x"), "a string", undefined]) {
       expect(problemDetailsSchema.safeParse(toProblemDetails(error, "/x")).success).toBe(true);
     }
+  });
+
+  describe("service not ready", () => {
+    it("is a 503 with a fixed text that names no component", () => {
+      const problem = toProblemDetails(new ServiceNotReadyError(), "/api/v1/health/ready");
+      expect(problem).toEqual({
+        type: "about:blank",
+        title: "Service Unavailable",
+        status: 503,
+        detail: "The service is not ready.",
+        instance: "/api/v1/health/ready",
+      });
+    });
   });
 
   describe("validation errors", () => {

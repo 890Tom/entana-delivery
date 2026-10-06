@@ -12,6 +12,7 @@ pnpm build && pnpm --filter @entana/api start
 ```
 
 - `GET /api/v1/health` — liveness (`status`, `service`, `version`, `uptimeSeconds`), never cached.
+- `GET /api/v1/health/ready` — readiness: `200 {"status":"ready"}` when the database answers within 2 seconds, otherwise a `503` problem details body that names no component. Never cached.
 - `GET /api/docs` — Swagger UI, and `/api/docs-json` the OpenAPI document. Off in production
   unless `SWAGGER_ENABLED=true`.
 
