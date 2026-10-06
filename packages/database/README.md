@@ -40,7 +40,7 @@ They check the hand-written CHECK constraints (ADR 0007), the unique keys and th
 1. Start PostgreSQL: `pnpm db:up`.
 2. Run `pnpm test:integration` from the root, or `pnpm --filter @entana/database test:integration`. `DATABASE_URL` is read from the environment, or from the root `.env`.
 
-Run this suite only against a local or disposable database: unlike the API suite, it does not refuse non-local hosts.
+The suite refuses to run, before any connection, unless `DATABASE_URL` has a single host that is `localhost`, an IPv4 address in 127.0.0.0/8 or `[::1]` (a `host` or `hostaddr` query parameter is refused too). `ENTANA_ALLOW_REMOTE_TEST_DB=1` (exactly `1`) lifts that check and prints a warning: use it only for a database that is meant for tests.
 
 How they stay out of your way:
 
