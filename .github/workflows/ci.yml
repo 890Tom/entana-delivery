@@ -141,6 +141,32 @@ jobs:
       - uses: actions/checkout@v7
       - name: Build the API image
         run: docker build -f apps/api/Dockerfile -t entana-api:ci .
+      # Informational for now: findings never fail the build. To be made blocking on fixable
+      # critical findings once the baseline is known. SARIF upload to GitHub code scanning
+      # is to be added when the repository is public (it needs a paid plan while private).
+      # fail-build only covers the severity cutoff: if the scanner itself cannot run
+      # (database download, image not found) the step still fails, and the next step fails
+      # on a missing or empty report.
+      - name: Scan the image for known vulnerabilities
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          image: entana-api:ci
+          fail-build: false
+          severity-cutoff: high
+          # Hide vulnerabilities without a fix: the goal is to see what we can actually act on.
+          only-fixed: true
+          output-format: table
+          output-file: grype-report.txt
+      - name: Show the vulnerability report
+        run: |
+          test -s grype-report.txt || { echo "::error::The scan produced no report."; exit 1; }
+          cat grype-report.txt
+          {
+            echo '## Image vulnerabilities (fixable, HIGH and above)'
+            echo '```'
+            cat grype-report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Refuses to start without DATABASE_URL
         run: |
           status=0
