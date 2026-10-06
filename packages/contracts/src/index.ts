@@ -9,3 +9,5 @@ export {
   problemDetailsSchema,
 } from "./problem-details.js";
 export type { FieldError, ProblemDetails } from "./problem-details.js";
+export { readinessResponseSchema } from "./readiness.js";
+export type { ReadinessResponse } from "./readiness.js";

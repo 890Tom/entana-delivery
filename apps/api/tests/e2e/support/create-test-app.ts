@@ -8,6 +8,7 @@ import {
   configureApplication,
 } from "../../../src/configure-application.js";
 import { createApplication } from "../../../src/create-application.js";
+import { READINESS_TIMEOUT_MS } from "../../../src/health/readiness-timeout.js";
 import { ProbeModule } from "./probe.module.js";
 
 /** The application exactly as `main.ts` builds it, initialised but not listening. */
@@ -28,6 +29,26 @@ export async function startAppWithProbe(
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule.register(config, logDestination), ProbeModule],
   }).compile();
+  const app = moduleRef.createNestApplication<NestExpressApplication>({
+    ...NEST_APPLICATION_OPTIONS,
+  });
+  configureApplication(app, config);
+  await app.init();
+  return app;
+}
+
+/** The real application with a shorter readiness timeout, so that a test does not wait 2 seconds. */
+export async function startAppWithReadinessTimeout(
+  config: AppConfig,
+  timeoutMs: number,
+  logDestination?: DestinationStream,
+): Promise<NestExpressApplication> {
+  const moduleRef = await Test.createTestingModule({
+    imports: [AppModule.register(config, logDestination)],
+  })
+    .overrideProvider(READINESS_TIMEOUT_MS)
+    .useValue(timeoutMs)
+    .compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>({
     ...NEST_APPLICATION_OPTIONS,
   });

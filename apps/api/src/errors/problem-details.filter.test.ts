@@ -2,6 +2,7 @@ import { NotFoundException } from "@nestjs/common";
 import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host.js";
 import { describe, expect, it, vi } from "vitest";
 import { ProblemDetailsFilter } from "./problem-details.filter.js";
+import { ServiceNotReadyError } from "./service-not-ready-error.js";
 
 interface FakeResponse {
   statusCode: number | undefined;
@@ -87,6 +88,13 @@ describe("ProblemDetailsFilter", () => {
     const logError = vi.fn();
     const host = new ExecutionContextHost([{ originalUrl: "/x?token=abc" }, buildResponse()]);
     new ProblemDetailsFilter({ error: logError }).catch(new NotFoundException(), host);
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it("does not log the service not being ready: the readiness check logged it already", () => {
+    const logError = vi.fn();
+    const host = new ExecutionContextHost([{ originalUrl: "/x" }, buildResponse()]);
+    new ProblemDetailsFilter({ error: logError }).catch(new ServiceNotReadyError(), host);
     expect(logError).not.toHaveBeenCalled();
   });
 });

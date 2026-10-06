@@ -1,5 +1,6 @@
 import { PROBLEM_DETAILS_CONTENT_TYPE } from "@entana/contracts";
 import type { Request, Response } from "express";
+import { ServiceNotReadyError } from "./service-not-ready-error.js";
 import { toProblemDetails } from "./to-problem-details.js";
 
 export interface ErrorLogger {
@@ -28,7 +29,9 @@ export function sendProblem(
   const [path = ""] = request.originalUrl.split("?");
   const problem = toProblemDetails(error, path);
 
-  if (problem.status >= 500) {
+  // The readiness check logs its own failure (a fixed message and a reason): a second line with
+  // the stack frames would only repeat it.
+  if (problem.status >= 500 && !(error instanceof ServiceNotReadyError)) {
     // The client only gets the generic answer; the logs get what is needed to find the cause.
     logger.error(describeForLog(error));
   }

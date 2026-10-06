@@ -3,8 +3,10 @@ import { HttpException } from "@nestjs/common";
 import { GENERIC_PROBLEM_TYPE, VALIDATION_PROBLEM_TYPE } from "@entana/contracts";
 import type { ProblemDetails } from "@entana/contracts";
 import { RequestValidationError } from "./request-validation-error.js";
+import { ServiceNotReadyError } from "./service-not-ready-error.js";
 
 const INTERNAL_ERROR_DETAIL = "An unexpected error occurred.";
+const NOT_READY_DETAIL = "The service is not ready.";
 
 // Messages of the HTTP layer (the body parser) can repeat parts of the request, so they are
 // replaced by fixed texts.
@@ -44,6 +46,9 @@ export function toProblemDetails(error: unknown, instance: string): ProblemDetai
       type: VALIDATION_PROBLEM_TYPE,
       errors: [...error.fieldErrors],
     };
+  }
+  if (error instanceof ServiceNotReadyError) {
+    return problem(503, NOT_READY_DETAIL, instance);
   }
   if (error instanceof HttpException) {
     const status = error.getStatus();
