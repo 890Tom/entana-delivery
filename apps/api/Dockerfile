@@ -47,6 +47,14 @@ WORKDIR /app
 COPY --from=build --chown=root:root /prod/api/package.json ./package.json
 COPY --from=build --chown=root:root /prod/api/dist ./dist
 COPY --from=build --chown=root:root /prod/api/node_modules ./node_modules
+# The API starts with node and never runs npm, npx, corepack or Yarn. These tools of the base image
+# are removed because the dependencies bundled inside them are flagged by the vulnerability scan.
+# This hides the files in the final view but does not shrink the image: the base layers keep them.
+RUN rm -rf \
+        /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+        /usr/local/bin/yarn /usr/local/bin/yarnpkg \
+        /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+        /opt/yarn-v1.22.22
 USER node
 EXPOSE 3000
 # Node itself performs the check: the image has no curl.
