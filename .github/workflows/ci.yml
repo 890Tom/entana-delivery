@@ -130,10 +130,19 @@ jobs:
       - uses: actions/checkout@v7
       - name: Build the API image
         run: docker build -f apps/api/Dockerfile -t entana-api:ci .
+      - name: Refuses to start without DATABASE_URL
+        run: |
+          status=0
+          output=$(timeout 30 docker run --rm entana-api:ci 2>&1) || status=$?
+          test "${status}" != "0" || { echo "::error::The container started without DATABASE_URL."; exit 1; }
+          echo "${output}" | grep -q "DATABASE_URL" || { echo "::error::The output does not name DATABASE_URL (exit code ${status})."; exit 1; }
+          echo "The container refused to start without DATABASE_URL (exit code ${status})."
       - name: Start the API container
+        # Fake value: the client does not connect until the first query.
         run: |
           docker run -d --name entana-api-ci -p 3000:3000 \
             -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3000 \
+            -e DATABASE_URL=postgresql://test:test@localhost:5432/test \
             entana-api:ci
       - name: Wait until the API answers from the host
         run: |
