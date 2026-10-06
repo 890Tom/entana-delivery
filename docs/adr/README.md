@@ -14,5 +14,6 @@
 | [0010](0010-nestjs-12-esm-express-vitest-with-swc.md)                    | NestJS 12 as an ESM application on Express, tested with Vitest and SWC                          | accepted |
 | [0011](0011-validation-with-standard-schema-and-shared-zod-contracts.md) | Request validation through Standard Schema, with Zod schemas shared in contracts                | accepted |
 | [0012](0012-container-image-for-the-api.md)                              | Container image for the API                                                                     | accepted |
+| [0013](0013-database-access-and-health-endpoints.md)                     | Database access and health endpoints                                                            | accepted |
 
 Planned records: PostGIS left out (setup in ADR 0006), delivery axes made of places, idempotent orders and offline mode, simplified order statuses, VPS hosting with OpenFreeMap tiles, hashed tracking token. Use [`0000-template.md`](0000-template.md).
