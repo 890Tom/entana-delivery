@@ -1,7 +1,8 @@
 # @entana/api
 
-NestJS 12 (ESM, Express) API. For now: a liveness endpoint and the production basics
-(configuration, logging, errors, security headers, API documentation). No database yet.
+NestJS 12 (ESM, Express) API. For now: liveness and readiness endpoints, access to PostgreSQL
+through `@entana/database`, and the production basics (configuration, logging, errors, security
+headers, API documentation). There is no business endpoint yet.
 
 ## Run it
 
@@ -11,8 +12,8 @@ pnpm --filter @entana/api dev      # watch mode, from the repository root
 pnpm build && pnpm --filter @entana/api start
 ```
 
-- `GET /api/v1/health` — liveness (`status`, `service`, `version`, `uptimeSeconds`), never cached.
-- `GET /api/v1/health/ready` — readiness: `200 {"status":"ready"}` when the database answers within 2 seconds, otherwise a `503` problem details body that names no component. Never cached.
+See [Health endpoints](#health-endpoints) for the two probes.
+
 - `GET /api/docs` — Swagger UI, and `/api/docs-json` the OpenAPI document. Off in production
   unless `SWAGGER_ENABLED=true`.
 
@@ -32,7 +33,7 @@ process prints the names of the invalid variables (never their values) and exits
 | `TRUST_PROXY`     | `false`                      | Number of reverse proxies in front of the API. See below.                 |
 | `BODY_LIMIT_KB`   | `100`                        | Largest JSON request body, in kilobytes.                                  |
 | `SWAGGER_ENABLED` | `development` or `test` only | Serves `/api/docs`.                                                       |
-| `DATABASE_URL`    | required                     | PostgreSQL URL. No whitespace; percent-encode the password. See below.    |
+| `DATABASE_URL`    | required                     | PostgreSQL URL. No whitespace or control character. See below.            |
 
 **`NODE_ENV`** defaults to `production`, so that a deployment that forgets it exposes nothing it
 should not (no API documentation, strict security headers, JSON logs). `.env.example` sets
@@ -51,11 +52,13 @@ a higher number than the real one, and never `true`: a client could then send it
 The API never logs the client address.
 
 **`DATABASE_URL`** is required: without it the API exits with code 1 and a message that names the
-variable (never its value). The value is used as it is, with no trimming, so it must not contain a
-space or a line break (a trailing newline from an env file is refused). Percent-encode special
-characters in the password (`@` becomes `%40`, `/` becomes `%2F`). The database client connects on
-the first query, so the API starts without a running database. A URL that the client refuses
-(for example a `mysql://` one) stops the start too, with a message that never quotes the URL.
+variable (never its value). It must start with `postgres://` or `postgresql://`, and contain no
+whitespace or control character anywhere (a trailing newline from an env file is refused): the
+value is used as it is, with no trimming. Percent-encode special characters in the password (`@`
+becomes `%40`, `/` becomes `%2F`, `:` becomes `%3A`). The value holds the password, so it is never
+logged and never quoted in an error message. The database client connects on the first query, so
+the API starts without a running database. A URL that the client refuses (for example a `mysql://`
+one) stops the start too, with a message that never quotes the URL.
 
 After editing `packages/contracts`, run `pnpm --filter @entana/contracts build` (or restart
 `pnpm dev` from the root): the API loads the compiled output of `contracts`, not its source.
@@ -90,6 +93,11 @@ starts only the database:
 docker compose --profile app up -d --build api
 ```
 
+The `api` service waits for the database health check to pass before it starts. Its
+`DATABASE_URL` is built by Compose from the `POSTGRES_*` variables, with the host `postgres`, and
+Compose cannot percent-encode: the database password must use only letters, digits and `-`, `.`,
+`_`, `~` for this service.
+
 Compose reads the whole file, so the `.env` file must set `POSTGRES_USER`, `POSTGRES_PASSWORD`
 and `POSTGRES_DB` even to start only the API (copy `.env.example`). It sets `NODE_ENV`, `HOST` and
 `PORT` itself and reads three optional variables from the shell or `.env`: `API_PORT` (port
@@ -121,6 +129,39 @@ Every error is `application/problem+json` (RFC 9457) with `type`, `title`, `stat
 `{ pointer, detail }` (JSON Pointer to the invalid field). An unexpected error is a generic 500:
 its message and stack are written to the logs only.
 
+## Health endpoints
+
+Both answer with `Cache-Control: no-store`.
+
+- `GET /api/v1/health` is the liveness probe (`status`, `service`, `version`, `uptimeSeconds`). It
+  never calls the database, so it stays green while the database is down.
+- `GET /api/v1/health/ready` is the readiness probe. It runs one trivial query (`SELECT 1`) and
+  waits at most 2000 ms for the answer. On success: `200` with `{"status":"ready"}`. Otherwise a
+  fixed `503` `application/problem+json` body (`detail`: "The service is not ready.") that names
+  no component and does not say that a database is involved. At most one check query is in flight
+  at a time: calls that arrive while it is pending share its result. A failure is logged once,
+  with a reason that is only `timeout`, `connection` or `query`.
+
+## Database errors
+
+A database failure that reaches the error filter is answered with a fixed status and a fixed
+sentence, whatever the cause:
+
+| Kind of failure                               | Status | `detail`                                                     |
+| --------------------------------------------- | ------ | ------------------------------------------------------------ |
+| Database unreachable, or connection timed out | 503    | The service is temporarily unavailable.                      |
+| Unique or foreign key violation               | 409    | The request conflicts with the current state of the service. |
+| Record not found                              | 404    | The requested resource was not found.                        |
+| CHECK or NOT NULL violation, any other error  | 500    | An unexpected error occurred.                                |
+
+Responses and logs never contain a table, a column, a constraint, SQL or a value: the log line of a
+classified failure holds the kind of failure and nothing else. The kinds come from
+`classifyDatabaseError` of `@entana/database`; the mapping is in
+`src/errors/database-failure/database-failure-mapping.ts`.
+
+By convention, `apps/api` never imports `pg` or Prisma: it uses `@entana/database` only, and does
+not list either as a dependency. No architecture rule enforces this yet.
+
 ## Dependency injection
 
 Nest injects by reading the constructor parameter types at runtime (`emitDecoratorMetadata`). A
@@ -132,10 +173,21 @@ The end-to-end tests boot the real module, so they catch it. Interfaces and toke
 
 ## Tests
 
-`pnpm --filter @entana/api test` runs the unit tests and the end-to-end tests (Supertest, no
-database). `test:e2e` runs the end-to-end tests alone, and `test:coverage` adds the 90% coverage
-floors. The end-to-end tests also use test-only routes (`tests/e2e/support/probe.module.ts`) to
+| Command                                      | What it runs                                                    |
+| -------------------------------------------- | --------------------------------------------------------------- |
+| `pnpm --filter @entana/api test`             | Unit and end-to-end tests (Supertest). No database needed.      |
+| `pnpm --filter @entana/api test:e2e`         | The end-to-end tests alone.                                     |
+| `pnpm --filter @entana/api test:coverage`    | Same as `test`, plus the coverage floors.                       |
+| `pnpm --filter @entana/api test:integration` | The tests that use a real PostgreSQL. Needs a running database. |
+
+The end-to-end tests also use test-only routes (`tests/e2e/support/probe.module.ts`) to
 exercise validation and errors; the real application has none, and a test checks it.
 
-Tests need the compiled `@entana/contracts` (Turborepo builds it first when you run `pnpm test`
-from the root).
+`test:integration` needs a running database: start it with `pnpm db:up`. `DATABASE_URL` is read
+from the environment or from the root `.env`. The suite creates a temporary schema, applies the
+migrations in it and drops it at the end, and it refuses to run, before any schema change, when the
+host of `DATABASE_URL` is not `localhost`, `127.0.0.1` or `[::1]`. Setting
+`ENTANA_ALLOW_REMOTE_TEST_DB=1` lifts that check, only for a database meant for tests.
+
+Tests need the compiled `@entana/contracts` and `@entana/database` (Turborepo builds them first
+when you run the commands from the root).
