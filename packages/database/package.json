@@ -16,8 +16,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
-    "db:seed": "node seed/index.ts",
-    "db:reset-and-seed": "node seed/index.ts --reset",
+    "db:seed": "node seed/preflight/run-preflight.ts && node seed/index.ts",
+    "db:reset-and-seed": "node seed/preflight/run-preflight.ts && node seed/index.ts --reset",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {

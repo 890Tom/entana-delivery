@@ -60,7 +60,7 @@ The seed fills a migrated, empty database with obviously fake demo data: setting
 2. Run `pnpm db:seed`.
 3. **Note the admin password at the end of the output.** It is random, shown once, never written to a file, and only its Argon2id hash is stored (ADR 0008). The username is `INITIAL_ADMIN_USERNAME` (default `admin`).
 
-The seed runs in one transaction: if anything fails, nothing is written. Run it directly with `pnpm`, not through Turborepo, which caches task output.
+Build the packages first (`pnpm build`), otherwise the seed stops with a hint. The seed runs in one transaction: if anything fails, nothing is written. Run it directly with `pnpm`, not through Turborepo, which caches task output.
 
 `pnpm db:seed` refuses to run:
 
