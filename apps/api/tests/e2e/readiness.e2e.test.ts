@@ -42,12 +42,16 @@ const NOT_READY_PROBLEM = {
 // A server that accepts connections and never answers: the database is "there" but hangs.
 interface SilentServer {
   readonly port: number;
+  /** How many connections the server has accepted so far. */
+  connectionCount(): number;
   close(): Promise<void>;
 }
 
 async function startSilentServer(): Promise<SilentServer> {
   const sockets = new Set<Socket>();
+  let accepted = 0;
   const server: Server = createServer((socket) => {
+    accepted += 1;
     sockets.add(socket);
     socket.on("error", () => undefined);
   });
@@ -59,6 +63,7 @@ async function startSilentServer(): Promise<SilentServer> {
   const { port } = address;
   return {
     port,
+    connectionCount: () => accepted,
     close: async () => {
       for (const socket of sockets) {
         socket.destroy();
@@ -176,6 +181,35 @@ describe("GET /api/v1/health/ready with a database that does not answer", () => 
     expectNothingAboutTheDatabase(response, silentServer.port);
     expectOnlyTheWarningAndTheAccessLog();
     expect(readinessWarnings()).toMatchObject([{ reason: "timeout" }]);
+  });
+
+  it("opens at most one connection for ten parallel requests to a server that never answers", async () => {
+    silentServer = await startSilentServer();
+    const started = await startAgainst(silentServer.port);
+
+    const responses = await Promise.all(
+      Array.from({ length: 10 }, () => request(started.getHttpServer()).get(READY_PATH)),
+    );
+
+    for (const response of responses) {
+      expect(response.status).toBe(503);
+      expect(response.headers["content-type"]).toMatch(/^application\/problem\+json/);
+      expect(problemDetailsSchema.parse(response.body)).toEqual(NOT_READY_PROBLEM);
+    }
+    expect(silentServer.connectionCount()).toBe(1);
+  });
+
+  it("opens no second connection for a request sent after the first timeout", async () => {
+    silentServer = await startSilentServer();
+    const started = await startAgainst(silentServer.port);
+    await request(started.getHttpServer()).get(READY_PATH);
+    expect(silentServer.connectionCount()).toBe(1);
+
+    // The first connection is still open, and so is the query waiting on it.
+    const response = await request(started.getHttpServer()).get(READY_PATH);
+
+    expect(response.status).toBe(503);
+    expect(silentServer.connectionCount()).toBe(1);
   });
 
   it("keeps GET /api/v1/health at 200 when nothing listens on the port", async () => {
