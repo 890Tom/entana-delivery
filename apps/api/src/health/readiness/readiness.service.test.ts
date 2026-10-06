@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ServiceNotReadyError } from "../errors/service-not-ready-error.js";
+import { ServiceNotReadyError } from "../../errors/service-not-ready-error.js";
 import { ReadinessService } from "./readiness.service.js";
 import type { ReadinessDatabase, ReadinessLogger } from "./readiness.service.js";
 

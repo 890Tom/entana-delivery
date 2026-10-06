@@ -8,7 +8,7 @@ import {
   configureApplication,
 } from "../../../src/configure-application.js";
 import { createApplication } from "../../../src/create-application.js";
-import { READINESS_TIMEOUT_MS } from "../../../src/health/readiness-timeout.js";
+import { READINESS_TIMEOUT_MS } from "../../../src/health/readiness/readiness-timeout.js";
 import { ProbeModule } from "./probe.module.js";
 
 /** The application exactly as `main.ts` builds it, initialised but not listening. */
