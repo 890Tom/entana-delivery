@@ -47,6 +47,13 @@ const trustProxySchema = z
     return z.NEVER;
   });
 
+// No whitespace or control character anywhere: a trailing newline from an env file is the likely
+// case. The value is neither trimmed nor parsed, because createPrismaClient validates the URL.
+// The message must not echo the value, which holds the password.
+const databaseUrlSchema = z
+  .string()
+  .regex(/^[^\s\p{Cc}]+$/u, "Must not contain whitespace or control characters.");
+
 const configSchema = z
   .object({
     // Production when unset: a deployment that forgets the variable must not expose the API
@@ -61,6 +68,7 @@ const configSchema = z
     TRUST_PROXY: trustProxySchema,
     BODY_LIMIT_KB: z.coerce.number().int().min(1).max(10240).default(100),
     SWAGGER_ENABLED: z.stringbool().optional(),
+    DATABASE_URL: databaseUrlSchema,
   })
   .transform((env) => ({
     nodeEnv: env.NODE_ENV,
@@ -72,6 +80,7 @@ const configSchema = z
     bodyLimitKb: env.BODY_LIMIT_KB,
     // The API documentation is off in production unless it is asked for.
     isSwaggerEnabled: env.SWAGGER_ENABLED ?? env.NODE_ENV !== "production",
+    databaseUrl: env.DATABASE_URL,
   }));
 
 export type AppConfig = Readonly<z.output<typeof configSchema>>;

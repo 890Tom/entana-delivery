@@ -10,9 +10,11 @@ import { toRequestValidationError } from "./errors/request-validation-error.js";
 
 /**
  * Options of the Nest application. The default body parser is off: `configureApplication` installs
- * a JSON parser with the configured size limit instead.
+ * a JSON parser with the configured size limit instead. `abortOnError` is off so that a failure at
+ * startup rejects (main.ts prints its message and exits with code 1) instead of aborting the
+ * process with a core dump.
  */
-export const NEST_APPLICATION_OPTIONS = { bodyParser: false } as const;
+export const NEST_APPLICATION_OPTIONS = { bodyParser: false, abortOnError: false } as const;
 
 const API_PREFIX = "api";
 const CORS_PREFLIGHT_MAX_AGE_SECONDS = 600;

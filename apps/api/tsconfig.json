@@ -10,7 +10,10 @@
     // Nest's dependency injection reads the constructor parameter types at runtime.
     "emitDecoratorMetadata": true,
     // Only Node's types are loaded (the base loads none).
-    "types": ["node"]
+    "types": ["node"],
+    // @entana/database exposes its TypeScript source to the compiler (see "types" in its
+    // package.json), and that source imports its own files with the .ts extension.
+    "rewriteRelativeImportExtensions": true
   },
   "include": ["src", "tests", "vitest.config.ts"]
 }

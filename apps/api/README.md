@@ -31,6 +31,7 @@ process prints the names of the invalid variables (never their values) and exits
 | `TRUST_PROXY`     | `false`                      | Number of reverse proxies in front of the API. See below.                 |
 | `BODY_LIMIT_KB`   | `100`                        | Largest JSON request body, in kilobytes.                                  |
 | `SWAGGER_ENABLED` | `development` or `test` only | Serves `/api/docs`.                                                       |
+| `DATABASE_URL`    | required                     | PostgreSQL URL. No whitespace; percent-encode the password. See below.    |
 
 **`NODE_ENV`** defaults to `production`, so that a deployment that forgets it exposes nothing it
 should not (no API documentation, strict security headers, JSON logs). `.env.example` sets
@@ -47,6 +48,13 @@ internet and the API. Behind one proxy, set `1`: Express then takes the client a
 a higher number than the real one, and never `true`: a client could then send its own
 `X-Forwarded-For` and choose the address that the application (and later rate limiting) sees.
 The API never logs the client address.
+
+**`DATABASE_URL`** is required: without it the API exits with code 1 and a message that names the
+variable (never its value). The value is used as it is, with no trimming, so it must not contain a
+space or a line break (a trailing newline from an env file is refused). Percent-encode special
+characters in the password (`@` becomes `%40`, `/` becomes `%2F`). The database client connects on
+the first query, so the API starts without a running database. A URL that the client refuses
+(for example a `mysql://` one) stops the start too, with a message that never quotes the URL.
 
 After editing `packages/contracts`, run `pnpm --filter @entana/contracts build` (or restart
 `pnpm dev` from the root): the API loads the compiled output of `contracts`, not its source.
@@ -65,6 +73,7 @@ Run it with literal values:
 ```sh
 docker run -d --name entana-api -p 3000:3000 \
   -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3000 \
+  -e DATABASE_URL=postgresql://user:password@host:5432/database \
   entana-api
 ```
 

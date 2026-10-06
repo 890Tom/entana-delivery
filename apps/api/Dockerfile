@@ -22,13 +22,21 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 
 COPY tsconfig.base.json ./
 COPY packages/contracts packages/contracts
+COPY packages/database packages/database
 COPY apps/api apps/api
-# "..." builds the packages the API depends on (contracts) before the API itself.
+# The database package compiles the generated Prisma client, so generation comes first. It needs
+# no database connection (prisma.config.ts falls back to a placeholder URL).
+RUN pnpm --filter @entana/database db:generate
+# "..." builds the packages the API depends on (contracts, database) before the API itself.
 RUN pnpm --filter "@entana/api..." build
 
-# Self-contained folder: compiled API, production dependencies, and the built contracts package.
+# Self-contained folder: compiled API, production dependencies, and the built workspace packages.
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm --filter @entana/api --prod --store-dir /pnpm/store deploy /prod/api
+# The deploy copies whole workspace packages. The database package keeps only what Node loads
+# (package.json and dist, which holds the generated client): no sources, seed, tests or migrations.
+RUN find /prod/api/node_modules/@entana/database/ -mindepth 1 -maxdepth 1 \
+        ! -name package.json ! -name dist -exec rm -r {} +
 
 FROM node:24.21.0-trixie-slim AS runtime
 ENV NODE_ENV=production \

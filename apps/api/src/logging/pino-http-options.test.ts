@@ -11,6 +11,8 @@ import {
   resolveRequestId,
 } from "./pino-http-options.js";
 
+const fakeDatabaseUrl = "postgresql://test:test@localhost:5432/test";
+
 function capture(): { stream: Writable; lines: () => string[] } {
   const chunks: string[] = [];
   const stream = new Writable({
@@ -88,20 +90,48 @@ describe("redaction", () => {
 
 describe("buildPinoHttpOptions", () => {
   it("uses the configured level", () => {
-    expect(buildPinoHttpOptions(parseConfig({ LOG_LEVEL: "warn" })).level).toBe("warn");
+    expect(
+      buildPinoHttpOptions(
+        parseConfig({
+          DATABASE_URL: fakeDatabaseUrl,
+          LOG_LEVEL: "warn",
+        }),
+      ).level,
+    ).toBe("warn");
   });
 
   it("writes readable logs only in development", () => {
-    expect(buildPinoHttpOptions(parseConfig({ NODE_ENV: "development" })).transport).toMatchObject({
+    expect(
+      buildPinoHttpOptions(
+        parseConfig({
+          DATABASE_URL: fakeDatabaseUrl,
+          NODE_ENV: "development",
+        }),
+      ).transport,
+    ).toMatchObject({
       target: "pino-pretty",
     });
-    expect(buildPinoHttpOptions(parseConfig({ NODE_ENV: "production" })).transport).toBeUndefined();
-    expect(buildPinoHttpOptions(parseConfig({ NODE_ENV: "test" })).transport).toBeUndefined();
+    expect(
+      buildPinoHttpOptions(
+        parseConfig({
+          DATABASE_URL: fakeDatabaseUrl,
+          NODE_ENV: "production",
+        }),
+      ).transport,
+    ).toBeUndefined();
+    expect(
+      buildPinoHttpOptions(
+        parseConfig({
+          DATABASE_URL: fakeDatabaseUrl,
+          NODE_ENV: "test",
+        }),
+      ).transport,
+    ).toBeUndefined();
   });
 });
 
 describe("what an access log line contains", () => {
-  const options = buildPinoHttpOptions(parseConfig({}));
+  const options = buildPinoHttpOptions(parseConfig({ DATABASE_URL: fakeDatabaseUrl }));
 
   function buildRoute(request: Record<string, unknown>, isFinished: boolean): unknown {
     const incoming = Object.assign(new IncomingMessage(new Socket()), request);
