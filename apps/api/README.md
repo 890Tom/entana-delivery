@@ -31,6 +31,7 @@ process prints the names of the invalid variables (never their values) and exits
 | `TRUST_PROXY`     | `false`                      | Number of reverse proxies in front of the API. See below.                 |
 | `BODY_LIMIT_KB`   | `100`                        | Largest JSON request body, in kilobytes.                                  |
 | `SWAGGER_ENABLED` | `development` or `test` only | Serves `/api/docs`.                                                       |
+| `DATABASE_URL`    | unset                        | PostgreSQL URL, not used yet. No whitespace; percent-encode the password. |
 
 **`NODE_ENV`** defaults to `production`, so that a deployment that forgets it exposes nothing it
 should not (no API documentation, strict security headers, JSON logs). `.env.example` sets

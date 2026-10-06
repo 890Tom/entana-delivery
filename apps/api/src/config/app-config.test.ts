@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { InvalidConfigurationError, parseConfig } from "./app-config.js";
+import type { AppConfig } from "./app-config.js";
 
-function expectInvalid(env: Record<string, string>): InvalidConfigurationError {
+const validDatabaseUrl = "postgresql://test:test@localhost:5432/test";
+
+// DATABASE_URL is required: every test that is not about it starts from a valid one.
+function parse(env: Record<string, string>): AppConfig {
+  return parseConfig({ DATABASE_URL: validDatabaseUrl, ...env });
+}
+
+function expectInvalidEnv(env: Record<string, string>): InvalidConfigurationError {
   let caught: unknown;
   try {
     parseConfig(env);
@@ -14,9 +22,13 @@ function expectInvalid(env: Record<string, string>): InvalidConfigurationError {
   return caught;
 }
 
+function expectInvalid(env: Record<string, string>): InvalidConfigurationError {
+  return expectInvalidEnv({ DATABASE_URL: validDatabaseUrl, ...env });
+}
+
 describe("parseConfig", () => {
   it("applies safe defaults when nothing is set", () => {
-    expect(parseConfig({})).toEqual({
+    expect(parse({})).toEqual({
       // Production, so that a deployment that forgets NODE_ENV exposes nothing it should not.
       nodeEnv: "production",
       // 0.0.0.0 so that the API is reachable from outside a container.
@@ -27,11 +39,12 @@ describe("parseConfig", () => {
       trustProxy: false,
       bodyLimitKb: 100,
       isSwaggerEnabled: false,
+      databaseUrl: validDatabaseUrl,
     });
   });
 
   it("reads every variable", () => {
-    const config = parseConfig({
+    const config = parse({
       NODE_ENV: "production",
       HOST: "127.0.0.1",
       PORT: "8080",
@@ -40,6 +53,7 @@ describe("parseConfig", () => {
       TRUST_PROXY: "1",
       BODY_LIMIT_KB: "20",
       SWAGGER_ENABLED: "true",
+      DATABASE_URL: "postgresql://entana:s3cret-pass-word@localhost:5433/entana",
     });
     expect(config).toEqual({
       nodeEnv: "production",
@@ -50,58 +64,91 @@ describe("parseConfig", () => {
       trustProxy: 1,
       bodyLimitKb: 20,
       isSwaggerEnabled: true,
+      databaseUrl: "postgresql://entana:s3cret-pass-word@localhost:5433/entana",
     });
   });
 
   it("accepts the limits of the valid ranges", () => {
-    expect(parseConfig({ PORT: "1", BODY_LIMIT_KB: "1" })).toMatchObject({
+    expect(parse({ PORT: "1", BODY_LIMIT_KB: "1" })).toMatchObject({
       port: 1,
       bodyLimitKb: 1,
     });
-    expect(parseConfig({ PORT: "65535", BODY_LIMIT_KB: "10240" })).toMatchObject({
+    expect(parse({ PORT: "65535", BODY_LIMIT_KB: "10240" })).toMatchObject({
       port: 65535,
       bodyLimitKb: 10240,
     });
   });
 
   it("treats an empty variable as not set", () => {
-    expect(parseConfig({ PORT: "", CORS_ORIGINS: "", LOG_LEVEL: "" }).port).toBe(3000);
+    expect(parse({ PORT: "", CORS_ORIGINS: "", LOG_LEVEL: "" }).port).toBe(3000);
   });
 
   it("ignores variables it does not know", () => {
-    expect(parseConfig({ DATABASE_URL: "postgresql://x", PATH: "/bin" })).toEqual(parseConfig({}));
+    expect(parse({ FOO: "bar", PATH: "/bin" })).toEqual(parse({}));
+  });
+
+  describe("database URL", () => {
+    const password = "s3cret-pass-word";
+
+    it("is returned unchanged", () => {
+      const url = `postgresql://entana:${password}@localhost:5433/entana?schema=public`;
+      expect(parseConfig({ DATABASE_URL: url }).databaseUrl).toBe(url);
+    });
+
+    it.each([
+      ["absent", {}],
+      ["empty", { DATABASE_URL: "" }],
+    ])("is required: refuses it when %s", (_label, env) => {
+      const error = expectInvalidEnv(env);
+      expect(error.issues).toHaveLength(1);
+      expect(error.issues[0]).toMatch(/^DATABASE_URL: /);
+    });
+
+    it.each([
+      ["a space", `postgresql://entana:${password} x@localhost/entana`],
+      ["a trailing newline", `postgresql://entana:${password}@localhost/entana\n`],
+      ["a trailing carriage return", `postgresql://entana:${password}@localhost/entana\r`],
+      ["a tab", `postgresql://entana:${password}@localhost/\tentana`],
+      ["a null character", `postgresql://entana:${password}@localhost/entana\u0000`],
+    ])("refuses %s, names the variable and never repeats the value", (_label, url) => {
+      const error = expectInvalidEnv({ DATABASE_URL: url });
+      expect(error.issues).toHaveLength(1);
+      expect(error.issues[0]).toMatch(/^DATABASE_URL: /);
+      expect(error.message).not.toContain(password);
+      expect(JSON.stringify(error.issues)).not.toContain(password);
+    });
   });
 
   describe("Swagger", () => {
     it("is off by default in production", () => {
-      expect(parseConfig({ NODE_ENV: "production" }).isSwaggerEnabled).toBe(false);
+      expect(parse({ NODE_ENV: "production" }).isSwaggerEnabled).toBe(false);
     });
 
     it("is off by default when NODE_ENV is not set", () => {
-      expect(parseConfig({}).isSwaggerEnabled).toBe(false);
+      expect(parse({}).isSwaggerEnabled).toBe(false);
     });
 
     it.each(["development", "test"])("is on by default when NODE_ENV is %s", (nodeEnv) => {
-      expect(parseConfig({ NODE_ENV: nodeEnv }).isSwaggerEnabled).toBe(true);
+      expect(parse({ NODE_ENV: nodeEnv }).isSwaggerEnabled).toBe(true);
     });
 
     it("can be switched on in production and off in development", () => {
-      expect(
-        parseConfig({ NODE_ENV: "production", SWAGGER_ENABLED: "true" }).isSwaggerEnabled,
-      ).toBe(true);
-      expect(
-        parseConfig({ NODE_ENV: "development", SWAGGER_ENABLED: "false" }).isSwaggerEnabled,
-      ).toBe(false);
+      expect(parse({ NODE_ENV: "production", SWAGGER_ENABLED: "true" }).isSwaggerEnabled).toBe(
+        true,
+      );
+      expect(parse({ NODE_ENV: "development", SWAGGER_ENABLED: "false" }).isSwaggerEnabled).toBe(
+        false,
+      );
     });
   });
 
   describe("trust proxy", () => {
     it("is off by default", () => {
-      expect(parseConfig({}).trustProxy).toBe(false);
+      expect(parse({}).trustProxy).toBe(false);
     });
 
     it("accepts the explicit word false", () => {
-      expect(parseConfig({ TRUST_PROXY: "false" }).trustProxy).toBe(false);
+      expect(parse({ TRUST_PROXY: "false" }).trustProxy).toBe(false);
     });
 
     it.each(["true", "0", "-1", "1.5", "loopback", "10.0.0.1"])(
@@ -125,7 +172,7 @@ describe("parseConfig", () => {
     });
 
     it("ignores a trailing comma and spaces", () => {
-      const config = parseConfig({ CORS_ORIGINS: " https://a.example.mg ,https://b.example.mg, " });
+      const config = parse({ CORS_ORIGINS: " https://a.example.mg ,https://b.example.mg, " });
       expect(config.corsOrigins).toEqual(["https://a.example.mg", "https://b.example.mg"]);
     });
 
