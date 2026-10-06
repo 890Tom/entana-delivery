@@ -1,6 +1,24 @@
 # @entana/database
 
-Prisma schema, migrations and (later) the Prisma client for PostgreSQL 18. The data model is described in [`docs/data-model.md`](../../docs/data-model.md).
+Prisma schema, migrations, seed data and the Prisma client factory for PostgreSQL 18. The data model is described in [`docs/data-model.md`](../../docs/data-model.md).
+
+## What the package exports
+
+Everything comes from `@entana/database` (`src/index.ts`):
+
+- `createPrismaClient(options)` builds a Prisma client on a `pg` pool. It opens no connection: the pool connects on the first query. Options:
+  - `connectionString` (required): a `postgres://` or `postgresql://` URL with no space or control character. It is validated and used as it is, with no trimming.
+  - `maxConnections`: positive integer, default `10`, at most `50`.
+  - `connectionTimeoutMs`: positive integer, default `5000`.
+- `InvalidDatabaseOptionsError`, thrown for an invalid option. Its message names the option and never quotes a value, and it carries no `cause`, because the connection string holds the password.
+- `classifyDatabaseError(error)` returns the kind of a database failure, one of `DATABASE_ERROR_KINDS`: `unique_violation`, `foreign_key_violation`, `check_violation`, `not_null_violation`, `record_not_found`, `connection`, `timeout`, `unknown`. It never returns, copies or logs the original message. The `DatabaseErrorKind` type is exported too.
+- Types: `PrismaClient`, `DatabaseClientOptions`, the model types (`AuditLog`, `AxisPlace`, `Customer`, `CustomerOrder`, `DeliveryAxis`, `OrderEvent`, `OrderItem`, `Place`, `Product`, `Reseller`, `ShopSetting`, `StaffUser`) and the enums of the schema.
+
+## Build and use
+
+The generated Prisma client (`src/generated`) is not committed. `pnpm db:generate` creates it, and Turborepo runs it before `build`, `typecheck`, `test` and `test:integration`, and `pnpm lint` runs it before ESLint.
+
+At runtime the package is consumed from its built `dist/` (the `default` condition of its `exports`), so build it (`pnpm build` from the root) after changing `src`. TypeScript reads the source (the `types` condition), so type checking needs no build.
 
 ## Commands
 
@@ -17,10 +35,12 @@ Run them from the repository root, or with `pnpm --filter @entana/database <comm
 
 ## Integration tests
 
-They check the hand-written CHECK constraints (ADR 0007), the unique keys and the foreign keys, with real SQL.
+They check the hand-written CHECK constraints (ADR 0007), the unique keys and the foreign keys, with real SQL, and the client factory and the error classification against a real server.
 
 1. Start PostgreSQL: `pnpm db:up`.
-2. Run `pnpm test:integration`. `DATABASE_URL` is read from the environment, or from the root `.env`.
+2. Run `pnpm test:integration` from the root, or `pnpm --filter @entana/database test:integration`. `DATABASE_URL` is read from the environment, or from the root `.env`.
+
+Run this suite only against a local or disposable database: unlike the API suite, it does not refuse non-local hosts.
 
 How they stay out of your way:
 
