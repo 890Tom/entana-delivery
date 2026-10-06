@@ -6,9 +6,12 @@ import type { AppConfig } from "../config/app-config.js";
 import { DatabaseModule } from "../database/database.module.js";
 import { HealthController } from "./health.controller.js";
 import { HealthService } from "./health.service.js";
-import { ReadinessController } from "./readiness.controller.js";
-import { ReadinessService } from "./readiness.service.js";
-import { DEFAULT_READINESS_TIMEOUT_MS, READINESS_TIMEOUT_MS } from "./readiness-timeout.js";
+import { ReadinessController } from "./readiness/readiness.controller.js";
+import { ReadinessService } from "./readiness/readiness.service.js";
+import {
+  DEFAULT_READINESS_TIMEOUT_MS,
+  READINESS_TIMEOUT_MS,
+} from "./readiness/readiness-timeout.js";
 
 @Module({})
 export class HealthModule {
