@@ -68,7 +68,7 @@ const configSchema = z
     TRUST_PROXY: trustProxySchema,
     BODY_LIMIT_KB: z.coerce.number().int().min(1).max(10240).default(100),
     SWAGGER_ENABLED: z.stringbool().optional(),
-    DATABASE_URL: databaseUrlSchema.optional(),
+    DATABASE_URL: databaseUrlSchema,
   })
   .transform((env) => ({
     nodeEnv: env.NODE_ENV,
