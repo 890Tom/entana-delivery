@@ -53,3 +53,5 @@ Known limitations:
 - **The API building its own client with `pg`.** Not chosen: [ADR 0005](0005-dedicated-database-package.md) gives database code one owner, and the API does not depend on `pg` or Prisma today. The architecture rule does not forbid it, so only that convention prevents it.
 - **Emitting declaration files instead of pointing `types` at `src`.** Not chosen: with the `types` condition on the source, TypeScript, ESLint, dependency-cruiser and knip never read a build output and cannot read a stale one ([ADR 0010](0010-nestjs-12-esm-express-vitest-with-swc.md), which does the same for `contracts`).
 - **Readiness folded into liveness** (one endpoint, or a liveness endpoint that depends on the database). Not chosen, for the reason given under the health endpoints: a database outage would then make an orchestrator restart a healthy process.
+
+Follow-up done: the rule `only-database-package-uses-database-libraries` in `dependency-cruiser.config.mjs` (and `no-restricted-imports` in ESLint) now forbids `pg` and Prisma outside `packages/database`.

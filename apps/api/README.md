@@ -159,8 +159,10 @@ classified failure holds the kind of failure and nothing else. The kinds come fr
 `classifyDatabaseError` of `@entana/database`; the mapping is in
 `src/errors/database-failure/database-failure-mapping.ts`.
 
-By convention, `apps/api` never imports `pg` or Prisma: it uses `@entana/database` only, and does
-not list either as a dependency. No architecture rule enforces this yet.
+`apps/api` never imports `pg` or Prisma: it uses `@entana/database` only. This is enforced, not a
+convention: the rule `only-database-package-uses-database-libraries` (`pnpm lint:architecture`, with
+`no-restricted-imports` in ESLint for instant feedback) fails on any import of `pg`, `prisma` or
+`@prisma/*` outside `packages/database`, in source and in tests.
 
 ## Dependency injection
 

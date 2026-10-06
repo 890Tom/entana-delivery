@@ -3,7 +3,8 @@
 //
 //   packages/contracts (pure)  ->  used by packages/database, apps/api and the front ends
 //   packages/password-hash (pure leaf)  ->  used by packages/database (seed) and apps
-//   apps never import each other; only apps/api and packages/database know the database.
+//   apps never import each other; only apps/api (through @entana/database) and
+//   packages/database know the database; only packages/database uses pg or Prisma.
 //   shipped code never imports test code.
 
 const TEST_FILES = "\\.test\\.(ts|tsx)$|^(apps|packages)/[^/]+/tests/";
@@ -16,6 +17,9 @@ const NPM_TYPES = [
   "npm-unknown",
   "unknown",
 ];
+
+const DATABASE_LIBRARIES =
+  "(^|/)node_modules/(pg|prisma|@prisma/[^/]+)/|^(pg|prisma|@prisma/[^/]+)(/|$)";
 
 /** @type {import('dependency-cruiser').IConfiguration} */
 export default {
@@ -84,11 +88,23 @@ export default {
     {
       name: "only-api-uses-database",
       comment:
-        "The front ends never import packages/database nor a database library: only apps/api does.",
+        "The front ends never import packages/database: only apps/api does (pg and Prisma are covered by only-database-package-uses-database-libraries).",
       severity: "error",
       from: { path: "^apps/", pathNot: "^apps/api/" },
+      to: { path: "^packages/database/|^@entana/database" },
+    },
+    {
+      name: "only-database-package-uses-database-libraries",
+      comment:
+        "Only packages/database may use the database driver or Prisma. Import from @entana/database.",
+      severity: "error",
+      // Everything cruised (src, tests, scripts) except the one package that owns the database.
+      from: { pathNot: "^packages/database/" },
       to: {
-        path: "^packages/database/|^@entana/database|node_modules/(@prisma|prisma|pg)/|^(@prisma/client|prisma|pg)$",
+        // First branch: a resolved module, including pnpm's node_modules/.pnpm/<pkg>@x/node_modules/<pkg>
+        // layout. Second branch: an unresolved module, reported under its bare name. Both end on a
+        // boundary, so pg-boss, pgx and @prismatic/x do not match.
+        path: DATABASE_LIBRARIES,
       },
     },
   ],
@@ -102,6 +118,8 @@ export default {
       // through its TypeScript source, so that the check does not depend on a build.
       conditionNames: ["types", "import", "require", "node", "default"],
     },
+    // Without it a type-only import is erased before the analysis and escapes every rule.
+    tsPreCompilationDeps: true,
     moduleSystems: ["es6", "cjs"],
     reporterOptions: { text: { highlightFocused: true } },
   },
