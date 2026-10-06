@@ -10,8 +10,9 @@
       "ignoreDependencies": ["pino-pretty"],
     },
     "packages/database": {
-      // Used by src/generated (written by `prisma generate`, not committed). Remove this line
-      // once src/index.ts exports the Prisma client.
+      // Imported only by src/generated (written by `prisma generate`, git-ignored): knip does
+      // not read git-ignored files, so it cannot see the import. The entry point (src/index.ts)
+      // does expose the generated client at runtime.
       "ignoreDependencies": ["@prisma/client"],
     },
   },

@@ -1,0 +1,15 @@
+{
+  // Emits the JavaScript that Node loads at runtime (the API): see ADR 0010. Only src is
+  // compiled, so the seed, the tests and the tool configuration never reach dist.
+  // The generated client imports its own files with the .ts extension (as Node's TypeScript
+  // support requires): the compiler rewrites them to .js.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "rewriteRelativeImportExtensions": true
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}
