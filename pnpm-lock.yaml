@@ -316,6 +316,9 @@ importers:
         specifier: 8.23.1
         version: 8.23.1
     devDependencies:
+      '@entana/password-hash':
+        specifier: workspace:*
+        version: link:../password-hash
       '@types/node':
         specifier: 24.19.1
         version: 24.19.1
@@ -331,6 +334,18 @@ importers:
       vitest:
         specifier: ^5.0.3
         version: 5.0.3(@types/node@24.19.1)(@vitest/coverage-v8@5.0.3)(vite@8.3.2(@types/node@24.19.1)(jiti@2.6.1)(yaml@2.9.1))
+
+  packages/password-hash:
+    devDependencies:
+      '@types/node':
+        specifier: 24.19.1
+        version: 24.19.1
+      '@vitest/coverage-v8':
+        specifier: 5.0.3
+        version: 5.0.3(vitest@5.0.3)
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@24.19.1)(@vitest/coverage-v8@5.0.3)(vite@8.3.2(@types/node@24.19.1)(jiti@2.7.0)(yaml@2.9.1))
 
 packages:
 

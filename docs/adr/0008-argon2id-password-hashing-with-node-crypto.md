@@ -2,6 +2,7 @@
 
 - Status: accepted
 - Date: 2026-10-05
+- Note: the module now lives in `packages/password-hash` (`@entana/password-hash`), see [ADR 0015](0015-password-hash-in-its-own-package.md).
 
 ## Context
 
