@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { Client } from "pg";
 import type { TestProject } from "vitest/node";
 import { describeDatabaseTarget, requireDatabaseUrl } from "./database-url.js";
+import { checkTestDatabaseHost, isRemoteOverrideEnabled } from "./test-database-guard.js";
 
 declare module "vitest" {
   export interface ProvidedContext {
@@ -60,9 +61,26 @@ async function createSchemaWithMigrations(databaseUrl: string, schema: string): 
   }
 }
 
+const REMOTE_DATABASE_OVERRIDE = "ENTANA_ALLOW_REMOTE_TEST_DB";
+
+// Runs before the first connection and DNS lookup. The texts are fixed: the connection string
+// holds the password and the host, and none of it is printed.
+function requireLocalDatabase(databaseUrl: string): void {
+  if (checkTestDatabaseHost(databaseUrl) === "allowed") return;
+  if (!isRemoteOverrideEnabled(process.env[REMOTE_DATABASE_OVERRIDE])) {
+    throw new Error(
+      `Refusing to run: DATABASE_URL does not point to this machine (localhost, 127.0.0.0/8 or [::1]). This suite creates and drops a schema. Set ${REMOTE_DATABASE_OVERRIDE}=1 only for a database that is meant for tests.`,
+    );
+  }
+  process.stderr.write(
+    `Warning: ${REMOTE_DATABASE_OVERRIDE}=1, schema changes will run on the configured database.\n`,
+  );
+}
+
 // One throwaway schema with a random name per run: the development data is never touched.
 export async function setup(project: TestProject): Promise<() => Promise<void>> {
   const databaseUrl = requireDatabaseUrl();
+  requireLocalDatabase(databaseUrl);
   const schema = `test_${randomBytes(6).toString("hex")}`;
   try {
     await createSchemaWithMigrations(databaseUrl, schema);

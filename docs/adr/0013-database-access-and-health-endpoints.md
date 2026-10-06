@@ -55,3 +55,5 @@ Known limitations:
 - **Readiness folded into liveness** (one endpoint, or a liveness endpoint that depends on the database). Not chosen, for the reason given under the health endpoints: a database outage would then make an orchestrator restart a healthy process.
 
 Follow-up done: the rule `only-database-package-uses-database-libraries` in `dependency-cruiser.config.mjs` (and `no-restricted-imports` in ESLint) now forbids `pg` and Prisma outside `packages/database`.
+
+Follow-up done: the limitation that the `packages/database` integration suite does not refuse non-local hosts is resolved (host allow-list in `tests/support/test-database-guard.ts`, override `ENTANA_ALLOW_REMOTE_TEST_DB=1`).
