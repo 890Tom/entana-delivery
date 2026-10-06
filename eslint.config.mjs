@@ -6,6 +6,23 @@ import prettier from "eslint-config-prettier";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+const DATABASE_MESSAGE =
+  "Only packages/database may use the database driver or Prisma. Import from @entana/database.";
+
+// `no-restricted-imports` cannot see `import("pg")`, so this selector covers it. The class after
+// the name keeps `pg-boss`, `pgx` and `@prismatic/x` out: only `pg`, `pg/...`, `prisma`, `prisma/...`
+// and `@prisma/...` match.
+const DYNAMIC_DATABASE_IMPORT = {
+  selector: "ImportExpression[source.value=/^(pg|prisma|@prisma)([^a-zA-Z0-9_-]|$)/]",
+  message: DATABASE_MESSAGE,
+};
+
+const DEFAULT_EXPORT = {
+  selector: "ExportDefaultDeclaration, ExportSpecifier[exported.name='default']",
+  message:
+    "No default exports: use a named export (only the configuration files listed below may have one).",
+};
+
 export default defineConfig(
   // Files that are never linted.
   {
@@ -86,12 +103,17 @@ export default defineConfig(
     plugins: { "@eslint-community/eslint-comments": eslintComments },
     rules: {
       "no-console": "error",
-      "no-restricted-syntax": [
+      "no-restricted-syntax": ["error", DEFAULT_EXPORT, DYNAMIC_DATABASE_IMPORT],
+      // Static imports, type-only imports and re-exports. packages/database is exempted below.
+      "no-restricted-imports": [
         "error",
         {
-          selector: "ExportDefaultDeclaration, ExportSpecifier[exported.name='default']",
-          message:
-            "No default exports: use a named export (only the configuration files listed below may have one).",
+          patterns: [
+            {
+              group: ["pg", "pg/**", "prisma", "prisma/**", "@prisma/**"],
+              message: DATABASE_MESSAGE,
+            },
+          ],
         },
       ],
       "@eslint-community/eslint-comments/require-description": "error",
@@ -117,6 +139,20 @@ export default defineConfig(
   // Add a framework's own file here (for example a route module) when one requires it.
   {
     files: ["**/*.config.{ts,mjs,js,cjs}"],
+    rules: { "no-restricted-syntax": ["error", DYNAMIC_DATABASE_IMPORT] },
+  },
+
+  // The single owner of the database driver and Prisma (ADR 0005). Same path as the
+  // `only-database-package-uses-database-libraries` rule of dependency-cruiser.config.mjs.
+  {
+    files: ["packages/database/**/*.{ts,tsx,mjs,js,cjs}"],
+    rules: {
+      "no-restricted-imports": "off",
+      "no-restricted-syntax": ["error", DEFAULT_EXPORT],
+    },
+  },
+  {
+    files: ["packages/database/**/*.config.{ts,mjs,js,cjs}"],
     rules: { "no-restricted-syntax": "off" },
   },
 
