@@ -1,4 +1,5 @@
 import type { DestinationStream } from "pino";
+import type { PrismaClient } from "@entana/database";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { Test } from "@nestjs/testing";
 import { AppModule } from "../../../src/app.module.js";
@@ -8,7 +9,9 @@ import {
   configureApplication,
 } from "../../../src/configure-application.js";
 import { createApplication } from "../../../src/create-application.js";
+import { DATABASE_CLIENT } from "../../../src/database/database-client.js";
 import { READINESS_TIMEOUT_MS } from "../../../src/health/readiness/readiness-timeout.js";
+import { DatabaseProbeModule } from "./database-probe.module.js";
 import { ProbeModule } from "./probe.module.js";
 
 /** The application exactly as `main.ts` builds it, initialised but not listening. */
@@ -48,6 +51,29 @@ export async function startAppWithReadinessTimeout(
   })
     .overrideProvider(READINESS_TIMEOUT_MS)
     .useValue(timeoutMs)
+    .compile();
+  const app = moduleRef.createNestApplication<NestExpressApplication>({
+    ...NEST_APPLICATION_OPTIONS,
+  });
+  configureApplication(app, config);
+  await app.init();
+  return app;
+}
+
+/**
+ * The real application module and configuration, with the given database client and the
+ * test-only route that runs a query. The client is built by the test (short connection timeout).
+ */
+export async function startAppWithDatabaseProbe(
+  config: AppConfig,
+  client: PrismaClient,
+  logDestination?: DestinationStream,
+): Promise<NestExpressApplication> {
+  const moduleRef = await Test.createTestingModule({
+    imports: [AppModule.register(config, logDestination), DatabaseProbeModule.register(config)],
+  })
+    .overrideProvider(DATABASE_CLIENT)
+    .useValue(client)
     .compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>({
     ...NEST_APPLICATION_OPTIONS,

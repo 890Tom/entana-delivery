@@ -15,5 +15,5 @@
     // package.json), and that source imports its own files with the .ts extension.
     "rewriteRelativeImportExtensions": true
   },
-  "include": ["src", "tests", "vitest.config.ts"]
+  "include": ["src", "tests", "vitest.config.ts", "vitest.integration.config.ts"]
 }

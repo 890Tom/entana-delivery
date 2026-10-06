@@ -40,6 +40,13 @@
       "cache": false,
       "env": ["DATABASE_URL"]
     },
+    // The API suite reads the compiled output of @entana/database (Node-style resolution), so the
+    // packages are rebuilt first. Never cached, for the same reason as above.
+    "@entana/api#test:integration": {
+      "dependsOn": ["^build", "db:generate"],
+      "cache": false,
+      "env": ["DATABASE_URL"]
+    },
     "test:coverage": {
       "dependsOn": ["^build", "db:generate"],
       "outputs": ["coverage/**"]

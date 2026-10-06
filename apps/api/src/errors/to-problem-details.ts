@@ -2,6 +2,11 @@ import { STATUS_CODES } from "node:http";
 import { HttpException } from "@nestjs/common";
 import { GENERIC_PROBLEM_TYPE, VALIDATION_PROBLEM_TYPE } from "@entana/contracts";
 import type { ProblemDetails } from "@entana/contracts";
+import type { DatabaseErrorKind } from "@entana/database";
+import {
+  mapDatabaseFailure,
+  readDatabaseFailureKind,
+} from "./database-failure/database-failure-mapping.js";
 import { RequestValidationError } from "./request-validation-error.js";
 import { ServiceNotReadyError } from "./service-not-ready-error.js";
 
@@ -35,32 +40,52 @@ export function readClientErrorStatus(error: unknown): number | undefined {
     : undefined;
 }
 
+export interface ResolvedFailure {
+  readonly problem: ProblemDetails;
+  /** Set only when the answer comes from a classified database failure (never `unknown`). */
+  readonly databaseKind: Exclude<DatabaseErrorKind, "unknown"> | undefined;
+}
+
+function resolved(problem: ProblemDetails): ResolvedFailure {
+  return { problem, databaseKind: undefined };
+}
+
 /**
- * The only place that turns an error into the answer sent to the client (RFC 9457).
+ * The only place that decides the answer sent to the client (RFC 9457), and whether it comes from
+ * a database failure: the log line and the body always agree because both read this result.
  * An error that is not a known client error never contributes its message to the answer.
  */
-export function toProblemDetails(error: unknown, instance: string): ProblemDetails {
+export function resolveFailure(error: unknown, instance: string): ResolvedFailure {
   if (error instanceof RequestValidationError) {
-    return {
+    return resolved({
       ...problem(400, error.message, instance),
       type: VALIDATION_PROBLEM_TYPE,
       errors: [...error.fieldErrors],
-    };
+    });
   }
   if (error instanceof ServiceNotReadyError) {
-    return problem(503, NOT_READY_DETAIL, instance);
+    return resolved(problem(503, NOT_READY_DETAIL, instance));
   }
   if (error instanceof HttpException) {
     const status = error.getStatus();
-    return problem(status, status < 500 ? error.message : INTERNAL_ERROR_DETAIL, instance);
+    return resolved(
+      problem(status, status < 500 ? error.message : INTERNAL_ERROR_DETAIL, instance),
+    );
   }
   const clientStatus = readClientErrorStatus(error);
   if (clientStatus !== undefined) {
-    return problem(
-      clientStatus,
-      CLIENT_ERROR_DETAILS[clientStatus] ?? titleOf(clientStatus),
-      instance,
+    return resolved(
+      problem(clientStatus, CLIENT_ERROR_DETAILS[clientStatus] ?? titleOf(clientStatus), instance),
     );
   }
-  return problem(500, INTERNAL_ERROR_DETAIL, instance);
+  const databaseKind = readDatabaseFailureKind(error);
+  if (databaseKind !== undefined) {
+    const { status, detail } = mapDatabaseFailure(databaseKind);
+    return { problem: problem(status, detail, instance), databaseKind };
+  }
+  return resolved(problem(500, INTERNAL_ERROR_DETAIL, instance));
+}
+
+export function toProblemDetails(error: unknown, instance: string): ProblemDetails {
+  return resolveFailure(error, instance).problem;
 }

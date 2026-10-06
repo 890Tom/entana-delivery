@@ -81,19 +81,20 @@ jobs:
 
   integration:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       HUSKY: "0"
-      # No password: the service container only listens inside this job, and trust auth keeps
-      # any credential out of the workflow file.
-      DATABASE_URL: postgresql://entana_ci@localhost:5432/entana_ci
+      # Throwaway CI values for a container that only lives inside this job. The password here
+      # and in POSTGRES_PASSWORD below must stay identical.
+      DATABASE_URL: postgresql://entana_ci:ci-only-7Kq2mX9vLd4R@localhost:5432/entana_ci
     services:
       postgres:
         # Same major version as docker-compose.yml.
         image: postgres:18-alpine
         env:
           POSTGRES_USER: entana_ci
+          POSTGRES_PASSWORD: ci-only-7Kq2mX9vLd4R
           POSTGRES_DB: entana_ci
-          POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5432:5432
         options: >-
@@ -102,6 +103,12 @@ jobs:
           --health-timeout 3s
           --health-retries 10
     steps:
+      # Runs psql inside the service container (the runner's own psql is not guaranteed). The
+      # publish filter selects the one container that publishes port 5432.
+      - name: Print the PostgreSQL server version
+        run: |
+          container=$(docker ps --filter ancestor=postgres:18-alpine --filter publish=5432 --format '{{.ID}}')
+          docker exec "${container}" psql -U entana_ci -d entana_ci -c 'SHOW server_version'
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
@@ -118,8 +125,12 @@ jobs:
         run: pnpm --filter @entana/database exec prisma migrate deploy
       - name: Check that schema.prisma and the migrations are in sync
         run: pnpm --filter @entana/database exec prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code
-      - name: Integration tests (PostgreSQL)
-        run: pnpm test:integration
+      # One step per suite, through Turborepo: --filter keeps the task dependencies (db:generate,
+      # ^build). Each suite creates and drops its own temporary schema in this database.
+      - name: Database integration tests
+        run: pnpm test:integration --filter=@entana/database
+      - name: API integration tests
+        run: pnpm test:integration --filter=@entana/api
 
   # Builds the production image and tests it from outside, through the published port: the
   # image's own health check runs inside the container and cannot see a wrong HOST.

@@ -6,7 +6,10 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { problemDetailsSchema } from "@entana/contracts";
+import { DATABASE_ERROR_KINDS } from "@entana/database";
 import { describe, expect, it } from "vitest";
+import { fixedDatabaseProblem } from "../../tests/support/fixed-database-problems.js";
+import { buildObservedDatabaseError } from "../../tests/support/observed-database-errors.js";
 import { toProblemDetails } from "./to-problem-details.js";
 import { RequestValidationError } from "./request-validation-error.js";
 import { ServiceNotReadyError } from "./service-not-ready-error.js";
@@ -150,6 +153,46 @@ describe("toProblemDetails", () => {
 
     it("answers 500 for a thrown value that is not an Error", () => {
       expect(toProblemDetails("boom", "/x").status).toBe(500);
+    });
+  });
+});
+
+describe("toProblemDetails: database failures", () => {
+  const instance = "/api/v1/things";
+
+  it.each(DATABASE_ERROR_KINDS)("answers the exact fixed body for %s", (kind) => {
+    expect(toProblemDetails(buildObservedDatabaseError(kind), instance)).toEqual(
+      fixedDatabaseProblem(kind, instance),
+    );
+  });
+
+  it("does not let an HTTP exception that wraps a database error become a database answer", () => {
+    const wrapped = new InternalServerErrorException("x", {
+      cause: buildObservedDatabaseError("unique_violation"),
+    });
+
+    expect(toProblemDetails(wrapped, instance)).toEqual(fixedDatabaseProblem("unknown", instance));
+  });
+
+  it("keeps the readiness answer for the typed readiness error", () => {
+    expect(toProblemDetails(new ServiceNotReadyError(), instance)).toEqual({
+      type: "about:blank",
+      title: "Service Unavailable",
+      status: 503,
+      detail: "The service is not ready.",
+      instance,
+    });
+  });
+
+  it("keeps a client error of the body parser, even when it also has a Prisma-looking code", () => {
+    const problem = toProblemDetails({ status: 413, code: "P2002" }, instance);
+
+    expect(problem).toEqual({
+      type: "about:blank",
+      title: "Payload Too Large",
+      status: 413,
+      detail: "The request body is too large.",
+      instance,
     });
   });
 });
