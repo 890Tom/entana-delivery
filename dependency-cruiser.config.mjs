@@ -2,6 +2,7 @@
 // Run with `pnpm lint:architecture`. A violation fails the command (and the CI job).
 //
 //   packages/contracts (pure)  ->  used by packages/database, apps/api and the front ends
+//   packages/password-hash (pure leaf)  ->  used by packages/database (seed) and apps
 //   apps never import each other; only apps/api and packages/database know the database.
 //   shipped code never imports test code.
 
@@ -41,6 +42,14 @@ export default {
       severity: "error",
       from: { path: "^packages/contracts/src" },
       to: { path: "^(apps|packages/(?!contracts/))|^@entana/" },
+    },
+    {
+      name: "password-hash-no-repo-imports",
+      comment:
+        "packages/password-hash is a leaf: it imports no application and no other workspace package, and only Node's own modules.",
+      severity: "error",
+      from: { path: "^packages/password-hash/src", pathNot: TEST_FILES },
+      to: { path: "^(apps|packages/(?!password-hash/))|^@entana/" },
     },
     {
       name: "contracts-no-framework-or-database-library",
