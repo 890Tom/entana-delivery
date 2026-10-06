@@ -2,7 +2,7 @@
   "globalDependencies": ["tsconfig.base.json", ".nvmrc"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "db:generate"],
       "outputs": ["dist/**"]
     },
     "db:generate": {
@@ -34,8 +34,9 @@
       "persistent": true
     },
     // Never cached: a cache hit would report success without querying the database.
-    // No dependency on db:generate: these tests use `pg` directly, not the generated client.
+    // The generated client is needed by the factory's integration test (a clean checkout has none).
     "test:integration": {
+      "dependsOn": ["db:generate"],
       "cache": false,
       "env": ["DATABASE_URL"]
     },

@@ -13,7 +13,7 @@
     "test:e2e": "turbo run test:e2e",
     "test:integration": "turbo run test:integration",
     "dev": "turbo run dev",
-    "lint": "eslint .",
+    "lint": "turbo run db:generate && eslint .",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "db:up": "docker compose up -d --wait",
