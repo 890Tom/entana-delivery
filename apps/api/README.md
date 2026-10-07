@@ -1,8 +1,8 @@
 # @entana/api
 
 NestJS 12 (ESM, Express) API. For now: liveness and readiness endpoints, access to PostgreSQL
-through `@entana/database`, and the production basics (configuration, logging, errors, security
-headers, API documentation). There is no business endpoint yet.
+through `@entana/database`, the public catalogue (`GET /api/v1/products`), and the production
+basics (configuration, logging, errors, security headers, API documentation).
 
 ## Run it
 
@@ -150,7 +150,7 @@ product, in display order (position, then name, then id), as `{ "products": [...
 `productListResponseSchema` of `@entana/contracts`, unchanged. Each product has `id`, `name`,
 `description` (`null` when blank), `priceAr` (integer ariary), `available` and
 `image: { key, alt }`. An unavailable product is still listed, with `available: false`; the
-internal `sku` is never selected. An empty catalogue answers `{ "products": [] }`.
+internal `sku` is never selected (see [ADR 0016](../../docs/adr/0016-public-product-catalogue.md)). An empty catalogue answers `{ "products": [] }`.
 
 - **No pagination:** the whole catalogue is returned on purpose, for a shop-sized catalogue.
 - **Cache:** `Cache-Control: public, max-age=30` on a success (the constant is

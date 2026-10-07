@@ -25,7 +25,7 @@ NestJS · Prisma · PostgreSQL · React + Vite (PWA) · MapLibre GL with OpenFre
 
 ## Getting started
 
-Today you can set up the development environment, run the checks, and start the database and the API (liveness and readiness endpoints only).
+Today you can set up the development environment, run the checks, and start the database and the API (liveness and readiness endpoints, and the public catalogue `GET /api/v1/products`).
 
 ### Prerequisites
 
@@ -70,7 +70,7 @@ pnpm db:validate       # checks the Prisma schema
 
 PostgreSQL listens on `127.0.0.1:5433` only, not on the network (set `POSTGRES_PORT` to change the port). Data is stored in the `postgres_data` Docker volume and survives `pnpm db:down`. To erase it, run `docker compose down -v`.
 
-Start the API (with the database running): `pnpm build && pnpm --filter @entana/api start`. See [`apps/api/README.md`](apps/api/README.md) for its configuration, health endpoints and Compose profile.
+Start the API (with the database running): `pnpm build && pnpm --filter @entana/api start`. See [`apps/api/README.md`](apps/api/README.md) for its configuration, health and catalogue endpoints and Compose profile.
 
 The goal for the first vertical slice is a first test order in under 10 minutes with `docker compose up`. That setup is not available yet.
 
