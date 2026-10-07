@@ -6,6 +6,7 @@ import { countRows, findChangedTables } from "./count-rows.js";
 import type { RowCounts } from "./count-rows.js";
 import type { SchemaObjects } from "./forbidden-strings.js";
 import { classifyDatabaseHost } from "./host-guard.js";
+import { cleanUpOnSignal } from "./interrupt-cleanup.js";
 import { readSchemaObjects, requireEnoughTables } from "./schema-objects.js";
 import { SetupError } from "./setup-error.js";
 import { generateThrowawayDatabaseName, isThrowawayDatabaseName } from "./throwaway-database.js";
@@ -176,7 +177,8 @@ async function attempt(step: string, action: () => Promise<void>): Promise<Setup
 
 // Also the cleanup of a failed setup. Every step runs whatever the previous one did, so that one
 // failure never hides another, and every client is closed so that the process can exit.
-async function finishRun(run: Run): Promise<void> {
+async function finishRun(run: Run, stopListeningToSignals: () => void): Promise<void> {
+  stopListeningToSignals();
   const failures: (SetupError | undefined)[] = [];
   try {
     failures.push(
@@ -201,6 +203,16 @@ async function finishRun(run: Run): Promise<void> {
   if (failure !== undefined) {
     throw failure;
   }
+}
+
+// The cleanup of an interruption by a signal: only what is needed to leave nothing behind, and
+// the same name check as the normal teardown (dropDatabase). It never compares the row counts.
+async function dropAfterInterruption(run: Run): Promise<void> {
+  await Promise.allSettled([run.throwaway?.$disconnect()]);
+  if (run.isCreated) {
+    await dropDatabase(run.admin, run.name);
+  }
+  await Promise.allSettled([run.configured.$disconnect(), run.admin.$disconnect()]);
 }
 
 async function prepareThrowawayDatabase(run: Run, databaseUrl: string): Promise<SchemaObjects> {
@@ -242,6 +254,7 @@ export async function setup(project: TestProject): Promise<() => Promise<void>> 
     isCreated: false,
     rowsBefore: undefined,
   };
+  const stopListeningToSignals = cleanUpOnSignal(() => dropAfterInterruption(run), run.name);
   try {
     const objects = await prepareThrowawayDatabase(run, databaseUrl);
     process.stdout.write(
@@ -254,8 +267,8 @@ export async function setup(project: TestProject): Promise<() => Promise<void>> 
   } catch (error) {
     // Best effort: when the database is down the cleanup fails too, and it must not hide the
     // clear message of the first failure.
-    await finishRun(run).catch(() => undefined);
+    await finishRun(run, stopListeningToSignals).catch(() => undefined);
     throw error;
   }
-  return () => finishRun(run);
+  return () => finishRun(run, stopListeningToSignals);
 }

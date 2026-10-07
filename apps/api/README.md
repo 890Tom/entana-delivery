@@ -194,9 +194,10 @@ only for a database meant for tests. It counts the rows of every table of the co
 before and after the run, and fails if they differ (so a development server writing to that
 database during the run can fail it too). Test files run one after another, and a test that
 empties or deletes rows calls `assertThrowawayDatabase` first; the setup checks the name of the
-database it creates and drops itself. If a run is killed (for example
-with `kill -9`), its empty `test_<hex>` database stays: list it with `\l test_*` in `psql` and
-remove it with `DROP DATABASE`.
+database it creates and drops itself. A run interrupted by SIGINT or SIGTERM (Ctrl+C, or turbo stopping the task after a sibling
+failed) drops its database before it exits. Only a hard kill (SIGKILL, for example `kill -9`)
+leaves its empty `test_<hex>` database: list it with `\l test_*` in `psql` and remove it with
+`DROP DATABASE`.
 
 Tests need the compiled `@entana/contracts` and `@entana/database` (Turborepo builds them first
 when you run the commands from the root).
