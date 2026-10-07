@@ -5,11 +5,18 @@
   "workspaces": {
     "apps/api": {
       // Started by `node dist/main.js` (the compiled output), so it is not found through a script.
-      "entry": ["src/main.ts"],
+      // The signal fixture is run by a child Vitest that signal-cleanup.integration.test.ts spawns.
+      "entry": [
+        "src/main.ts",
+        "vitest.signal-fixture.config.ts",
+        "tests/signal-fixture/*.fixture.ts",
+      ],
       // pino loads it by name (the `target` of the development transport), with no import.
       "ignoreDependencies": ["pino-pretty"],
     },
     "packages/database": {
+      // Run by a child Vitest that signal-cleanup.integration.test.ts spawns.
+      "entry": ["vitest.signal-fixture.config.ts", "tests/signal-fixture/*.fixture.ts"],
       // Imported only by src/generated (written by `prisma generate`, git-ignored): knip does
       // not read git-ignored files, so it cannot see the import. The entry point (src/index.ts)
       // does expose the generated client at runtime.
