@@ -82,3 +82,23 @@ export async function startAppWithDatabaseProbe(
   await app.init();
   return app;
 }
+
+/** The real application with the given database client in place of the one it builds itself. */
+export async function startAppWithClient(
+  config: AppConfig,
+  client: unknown,
+  logDestination?: DestinationStream,
+): Promise<NestExpressApplication> {
+  const moduleRef = await Test.createTestingModule({
+    imports: [AppModule.register(config, logDestination)],
+  })
+    .overrideProvider(DATABASE_CLIENT)
+    .useValue(client)
+    .compile();
+  const app = moduleRef.createNestApplication<NestExpressApplication>({
+    ...NEST_APPLICATION_OPTIONS,
+  });
+  configureApplication(app, config);
+  await app.init();
+  return app;
+}

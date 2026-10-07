@@ -127,7 +127,8 @@ stack frames but never its message, which could hold personal data.
 Every error is `application/problem+json` (RFC 9457) with `type`, `title`, `status`, `detail` and
 `instance` (the path, without the query string). A validation error adds `errors`, a list of
 `{ pointer, detail }` (JSON Pointer to the invalid field). An unexpected error is a generic 500:
-its message and stack are written to the logs only.
+its message and stack are written to the logs only. Every error answer carries
+`Cache-Control: no-store`.
 
 ## Health endpoints
 
@@ -141,6 +142,23 @@ Both answer with `Cache-Control: no-store`.
   no component and does not say that a database is involved. At most one check query is in flight
   at a time: calls that arrive while it is pending share its result. A failure is logged once,
   with a reason that is only `timeout`, `connection` or `query`.
+
+## Catalogue endpoint
+
+`GET /api/v1/products` is public (no authentication, no query parameter). It returns every active
+product, in display order (position, then name, then id), as `{ "products": [...] }`: the shape is
+`productListResponseSchema` of `@entana/contracts`, unchanged. Each product has `id`, `name`,
+`description` (`null` when blank), `priceAr` (integer ariary), `available` and
+`image: { key, alt }`. An unavailable product is still listed, with `available: false`; the
+internal `sku` is never selected. An empty catalogue answers `{ "products": [] }`.
+
+- **No pagination:** the whole catalogue is returned on purpose, for a shop-sized catalogue.
+- **Cache:** `Cache-Control: public, max-age=30` on a success (the constant is
+  `CATALOG_CACHE_CONTROL`; the value is a product decision to confirm). Every error answer carries
+  `Cache-Control: no-store`.
+- **Errors:** an unreachable database is the fixed `503` of "Database errors" below; anything else,
+  including a corrupt row, is the generic `500` (no product name, id or column in the answer, and
+  none in the logs).
 
 ## Database errors
 

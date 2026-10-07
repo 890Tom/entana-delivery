@@ -19,6 +19,20 @@ function compileWith(databaseUrl: string): Promise<TestingModule> {
   }).compile();
 }
 
+describe("DatabaseModule.register", () => {
+  it("describes the same module for the same configuration, so that Nest builds one client", () => {
+    const config = buildConfig(fakeUrl);
+
+    expect(DatabaseModule.register(config)).toBe(DatabaseModule.register(config));
+  });
+
+  it("describes another module for another configuration object, even an equal one", () => {
+    expect(DatabaseModule.register(buildConfig(fakeUrl))).not.toBe(
+      DatabaseModule.register(buildConfig(fakeUrl)),
+    );
+  });
+});
+
 describe("DatabaseModule", () => {
   it("provides a client built from the configured URL, without a database running", async () => {
     const moduleRef = await compileWith(fakeUrl);

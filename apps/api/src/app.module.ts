@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
 import type { DestinationStream } from "pino";
 import type { AppConfig } from "./config/app-config.js";
+import { CatalogModule } from "./catalog/catalog.module.js";
 import { NotFoundFallback } from "./errors/not-found-fallback.js";
 import { HealthModule } from "./health/health.module.js";
 import { createLoggingModule } from "./logging/create-logging-module.js";
@@ -12,7 +13,11 @@ export class AppModule {
   static register(config: AppConfig, logDestination?: DestinationStream): DynamicModule {
     return {
       module: AppModule,
-      imports: [createLoggingModule(config, logDestination), HealthModule.register(config)],
+      imports: [
+        createLoggingModule(config, logDestination),
+        HealthModule.register(config),
+        CatalogModule.register(config),
+      ],
       providers: [NotFoundFallback],
     };
   }
