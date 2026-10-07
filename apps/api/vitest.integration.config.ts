@@ -9,7 +9,7 @@ export default defineConfig({
   test: {
     include: ["tests/integration/**/*.test.ts"],
     globalSetup: ["tests/integration/support/global-setup.ts"],
-    // One shared temporary schema, created once for the whole run.
+    // One shared throwaway database, created once for the whole run.
     fileParallelism: false,
   },
 });

@@ -186,10 +186,17 @@ The end-to-end tests also use test-only routes (`tests/e2e/support/probe.module.
 exercise validation and errors; the real application has none, and a test checks it.
 
 `test:integration` needs a running database: start it with `pnpm db:up`. `DATABASE_URL` is read
-from the environment or from the root `.env`. The suite creates a temporary schema, applies the
-migrations in it and drops it at the end, and it refuses to run, before any schema change, when the
-host of `DATABASE_URL` is not `localhost`, `127.0.0.1` or `[::1]`. Setting
-`ENTANA_ALLOW_REMOTE_TEST_DB=1` lifts that check, only for a database meant for tests.
+from the environment or from the root `.env`. The suite creates a throwaway database on the same
+server (`test_` and lowercase hex, so the role needs `CREATEDB`), applies the migrations in it and
+drops it at the end. It refuses to run, before any connection, when the host of `DATABASE_URL` is
+not `localhost`, `127.0.0.1` or `[::1]`; setting `ENTANA_ALLOW_REMOTE_TEST_DB=1` lifts that check,
+only for a database meant for tests. It counts the rows of every table of the configured database
+before and after the run, and fails if they differ (so a development server writing to that
+database during the run can fail it too). Test files run one after another, and a test that
+empties or deletes rows calls `assertThrowawayDatabase` first; the setup checks the name of the
+database it creates and drops itself. If a run is killed (for example
+with `kill -9`), its empty `test_<hex>` database stays: list it with `\l test_*` in `psql` and
+remove it with `DROP DATABASE`.
 
 Tests need the compiled `@entana/contracts` and `@entana/database` (Turborepo builds them first
 when you run the commands from the root).

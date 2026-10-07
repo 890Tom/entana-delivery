@@ -91,3 +91,7 @@ Limits of the suite, each from the matcher:
 
 - **Matching on error messages everywhere.** Not chosen: standards §6 says never to match on messages, and a message can hold names, SQL and values. The one exception is limited to the pool timeout, which has nothing else to match on.
 - **`instanceof` checks on the Prisma error classes.** Not chosen: class identity breaks if a package is loaded twice (comment in the classifier), so properties are read by duck typing.
+
+## Note, 2026-10-07
+
+The API integration suite described above ran on a temporary schema selected with `search_path`. That isolation covered raw SQL only: the Prisma model API qualifies tables with `public`, so model calls (`client.customer.create`, and so on) reached the configured database. The suite now creates one throwaway database per run (`test_` and lowercase hex), applies the migrations in it, drops it at the end and fails if the configured database changed; this replaced the schema. The text above is left as it was written.

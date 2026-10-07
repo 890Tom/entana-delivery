@@ -29,7 +29,7 @@ function randomPhone(): string {
 type Remember = (value: string) => string;
 
 /**
- * One REAL operation per violation, run through a client on the temporary schema, so that
+ * One REAL operation per violation, run through a client on the throwaway database, so that
  * PostgreSQL itself raises the error. The routes below and the positive control of the suite run
  * the same functions.
  */

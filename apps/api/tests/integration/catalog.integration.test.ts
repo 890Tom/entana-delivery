@@ -4,9 +4,10 @@ import { createPrismaClient } from "@entana/database";
 import type { PrismaClient } from "@entana/database";
 import { afterAll, beforeEach, describe, expect, inject, it } from "vitest";
 import { CatalogService } from "../../src/catalog/catalog.service.js";
+import { assertThrowawayDatabase } from "./support/assert-throwaway-database.js";
 
 const client = createPrismaClient({
-  connectionString: inject("schemaConnectionString"),
+  connectionString: inject("throwawayConnectionString"),
   maxConnections: 1,
 });
 const service = new CatalogService(client);
@@ -46,6 +47,7 @@ async function insertProduct(database: PrismaClient, seed: ProductSeed = {}): Pr
 
 describe("CatalogService against a real PostgreSQL", () => {
   beforeEach(async () => {
+    await assertThrowawayDatabase(client);
     await client.product.deleteMany();
   });
 

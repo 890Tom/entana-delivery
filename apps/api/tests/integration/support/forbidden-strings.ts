@@ -6,12 +6,12 @@ export interface SchemaObjects {
 }
 
 export interface ForbiddenStringInputs {
-  readonly schemaName: string;
+  readonly databaseName: string;
   readonly schemaObjects: SchemaObjects;
   /** The exact values inserted and the UUIDs used by the request under test. */
   readonly usedValues: readonly string[];
   readonly password: string;
-  /** The connection string of the temporary schema (it holds the password). */
+  /** The connection string of the throwaway database (it holds the password). */
   readonly connectionString: string;
 }
 
@@ -111,7 +111,7 @@ export function buildForbiddenStrings(inputs: ForbiddenStringInputs): ForbiddenS
       // The password in both forms (decoded, and as it is written in a URL), and the full URL.
       ...secretEntries("the password", [inputs.password, encodeURIComponent(inputs.password)]),
       ...secretEntries("the connection string", [inputs.connectionString]),
-      ...secretEntries("the schema name", [inputs.schemaName]),
+      ...secretEntries("the database name", [inputs.databaseName]),
       ...publicEntries([
         ...HIGH_SIGNAL_WORDS,
         ...schemaObjects.constraints,

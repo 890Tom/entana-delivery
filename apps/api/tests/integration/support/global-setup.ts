@@ -1,38 +1,31 @@
-import { randomBytes } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
 import { createPrismaClient } from "@entana/database";
 import type { PrismaClient } from "@entana/database";
 import type { TestProject } from "vitest/node";
+import { applyMigrations } from "./apply-migrations.js";
+import { countRows, findChangedTables } from "./count-rows.js";
+import type { RowCounts } from "./count-rows.js";
 import type { SchemaObjects } from "./forbidden-strings.js";
+import { classifyDatabaseHost } from "./host-guard.js";
+import { readSchemaObjects, requireEnoughTables } from "./schema-objects.js";
+import { SetupError } from "./setup-error.js";
+import { generateThrowawayDatabaseName, isThrowawayDatabaseName } from "./throwaway-database.js";
 
 declare module "vitest" {
   export interface ProvidedContext {
-    temporarySchema: string;
-    /** Points at the temporary schema through the `options` parameter. Holds the password. */
-    schemaConnectionString: string;
+    /** Name of the database created for this run: `test_` and lowercase hex. */
+    throwawayDatabase: string;
+    /** Points at the throwaway database. Holds the password. */
+    throwawayConnectionString: string;
+    /** The configured database, for read-only checks that it is refused. Holds the password. */
+    configuredDatabaseUrl: string;
     schemaObjects: SchemaObjects;
   }
 }
 
-// This suite reads files of another package on purpose: the migrations are immutable and they are
-// part of what is tested (the real constraints, with their real names). The apps/api code never
-// does this, and the API cannot import pg: the Prisma client of @entana/database runs the SQL.
-const MIGRATIONS_DIRECTORY = new URL(
-  "../../../../../packages/database/prisma/migrations/",
-  import.meta.url,
-);
-
-/** A failure whose text is ours: the only kind of error the setup lets through as it is. */
-class SetupError extends Error {}
-
-// This suite creates and drops a schema, and runs the migrations: it must never reach a database
-// that is not the developer's own by accident (a production URL left in the shell or in .env).
-const LOOPBACK_HOSTS: ReadonlySet<string> = new Set(["localhost", "127.0.0.1", "[::1]"]);
 const REMOTE_DATABASE_OVERRIDE = "ENTANA_ALLOW_REMOTE_TEST_DB";
-
-// Fewer tables than this means the migrations did not run as expected: the check would be empty.
-const MINIMUM_TABLE_COUNT = 12;
 const REACHABILITY_TIMEOUT_MS = 3000;
+// Always present on a PostgreSQL server: the connection that creates and drops the throwaway one.
+const MAINTENANCE_DATABASE = "postgres";
 
 // Node and Prisma 7 do not read .env files: the root .env is loaded here, as in prisma.config.ts.
 // A missing file is fine: in CI the variables come from the environment.
@@ -59,14 +52,11 @@ function requireDatabaseUrl(): string {
 }
 
 function requireLocalDatabase(databaseUrl: string): void {
-  let hostname: string;
-  try {
-    ({ hostname } = new URL(databaseUrl));
-  } catch {
-    // The parse error is dropped on purpose: it carries the input.
+  const kind = classifyDatabaseHost(databaseUrl);
+  if (kind === "invalid") {
     throw new SetupError("DATABASE_URL is not a valid URL.");
   }
-  if (!LOOPBACK_HOSTS.has(hostname) && process.env[REMOTE_DATABASE_OVERRIDE] !== "1") {
+  if (kind === "remote" && process.env[REMOTE_DATABASE_OVERRIDE] !== "1") {
     throw new SetupError(
       `Refusing to run: the database host is not local. Set ${REMOTE_DATABASE_OVERRIDE}=1 only for a database that is meant for tests.`,
     );
@@ -79,9 +69,10 @@ function describeDatabaseTarget(databaseUrl: string): string {
   return `${hostname}:${port}`;
 }
 
-function withSearchPath(databaseUrl: string, schema: string): string {
+// The URL of another database of the same server, derived without printing any part of the original.
+function withDatabase(databaseUrl: string, database: string): string {
   const url = new URL(databaseUrl);
-  url.searchParams.set("options", `-c search_path=${schema}`);
+  url.pathname = `/${database}`;
   return url.toString();
 }
 
@@ -97,74 +88,16 @@ async function requireReachableDatabase(admin: PrismaClient, databaseUrl: string
   }
 }
 
-function readMigrationsInOrder(): { name: string; sql: string }[] {
-  let names: string[];
-  try {
-    names = readdirSync(MIGRATIONS_DIRECTORY, { withFileTypes: true })
-      .filter((entry) => entry.isDirectory())
-      .map((entry) => entry.name)
-      .sort();
-  } catch {
-    throw new SetupError(`The migrations folder cannot be read: ${MIGRATIONS_DIRECTORY.pathname}`);
-  }
-  if (names.length === 0) {
-    throw new SetupError(`The migrations folder is empty: ${MIGRATIONS_DIRECTORY.pathname}`);
-  }
-  return names.map((name) => ({
-    name,
-    sql: readFileSync(new URL(`${name}/migration.sql`, MIGRATIONS_DIRECTORY), "utf8"),
-  }));
-}
-
-// Prisma's SQL is not schema-qualified: it lands in the first schema of the search path.
-async function applyMigrations(schemaClient: PrismaClient): Promise<void> {
-  for (const migration of readMigrationsInOrder()) {
-    await schemaClient.$executeRawUnsafe(migration.sql);
-  }
-}
-
-async function readNames(query: Promise<{ name: unknown }[]>): Promise<string[]> {
-  const rows = await query;
-  return rows.flatMap((row) => (typeof row.name === "string" ? [row.name] : []));
-}
-
-// Every name the database could repeat in an error: the leak check is derived from the real schema.
-async function readSchemaObjects(client: PrismaClient, schema: string): Promise<SchemaObjects> {
-  return {
-    tables: await readNames(
-      client.$queryRaw`SELECT table_name AS name FROM information_schema.tables WHERE table_schema = ${schema}`,
-    ),
-    columns: await readNames(
-      client.$queryRaw`SELECT DISTINCT column_name AS name FROM information_schema.columns WHERE table_schema = ${schema}`,
-    ),
-    constraints: await readNames(
-      client.$queryRaw`SELECT con.conname AS name FROM pg_constraint con JOIN pg_namespace ns ON ns.oid = con.connamespace WHERE ns.nspname = ${schema}`,
-    ),
-    indexes: await readNames(
-      client.$queryRaw`SELECT indexname AS name FROM pg_indexes WHERE schemaname = ${schema}`,
-    ),
-  };
-}
-
-function requireEnoughTables(objects: SchemaObjects): void {
-  if (objects.tables.length < MINIMUM_TABLE_COUNT) {
-    throw new SetupError(
-      `Only ${String(objects.tables.length)} tables were found in the temporary schema (at least ${String(MINIMUM_TABLE_COUNT)} expected): the migrations did not run as expected.`,
-    );
-  }
-}
-
-async function cleanUp(
-  admin: PrismaClient,
-  schemaClient: PrismaClient | undefined,
-  schemaToDrop: string | undefined,
-): Promise<void> {
-  // The pools are closed so that the process can exit.
-  await schemaClient?.$disconnect();
-  if (schemaToDrop !== undefined) {
-    await admin.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schemaToDrop}" CASCADE`);
-  }
-  await admin.$disconnect();
+// Mutable on purpose: it records how far the setup got, so that the cleanup does only what is needed.
+interface Run {
+  readonly name: string;
+  /** Connected to the maintenance database: creates and drops the throwaway one. */
+  readonly admin: PrismaClient;
+  /** Connected to the configured database, for read-only row counts only. */
+  readonly configured: PrismaClient;
+  throwaway: PrismaClient | undefined;
+  isCreated: boolean;
+  rowsBefore: RowCounts | undefined;
 }
 
 // A step that fails for a reason of its own (a driver error can quote the connection string or
@@ -180,46 +113,149 @@ async function runStep<T>(step: string, action: () => Promise<T>): Promise<T> {
   }
 }
 
-// One throwaway schema with a random name per run: the development data is never touched.
+// The role must be allowed to create the throwaway database: fail early with a clear message.
+async function requireCreateDatabasePrivilege(admin: PrismaClient): Promise<void> {
+  const rows = await admin.$queryRaw<
+    { allowed: boolean }[]
+  >`SELECT (rolcreatedb OR rolsuper) AS allowed FROM pg_roles WHERE rolname = current_user`;
+  if (rows[0]?.allowed !== true) {
+    throw new SetupError(
+      "The database role of DATABASE_URL cannot create databases (CREATEDB is required to run this suite).",
+    );
+  }
+}
+
+// CREATE and DROP run on the maintenance database, where assertThrowawayDatabase cannot apply:
+// the name is checked here instead, because it ends up in a statement and in a session kill.
+function requireThrowawayName(name: string): void {
+  if (!isThrowawayDatabaseName(name)) {
+    throw new SetupError("The throwaway database name does not match test_ and lowercase hex.");
+  }
+}
+
+async function createDatabase(admin: PrismaClient, name: string): Promise<void> {
+  requireThrowawayName(name);
+  await admin.$executeRawUnsafe(`CREATE DATABASE "${name}"`);
+}
+
+async function dropDatabase(admin: PrismaClient, name: string): Promise<void> {
+  requireThrowawayName(name);
+  await admin.$executeRaw`SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = ${name} AND pid <> pg_backend_pid()`;
+  await admin.$executeRawUnsafe(`DROP DATABASE IF EXISTS "${name}"`);
+}
+
+async function requireDatabaseGone(admin: PrismaClient, name: string): Promise<void> {
+  const rows = await admin.$queryRaw<
+    { found: number }[]
+  >`SELECT 1 AS found FROM pg_database WHERE datname = ${name}`;
+  if (rows.length > 0) {
+    throw new SetupError("The throwaway database still exists after the teardown.");
+  }
+}
+
+async function requireConfiguredDatabaseUnchanged(run: Run): Promise<void> {
+  if (run.rowsBefore === undefined) {
+    return;
+  }
+  const changed = findChangedTables(run.rowsBefore, await countRows(run.configured));
+  if (changed.length > 0) {
+    throw new SetupError(
+      `The row counts of the configured database changed (tables: ${changed.join(", ")}). Either a test did not use the throwaway database, or something else wrote to the configured database during the run (a running development server, for example).`,
+    );
+  }
+}
+
+async function attempt(step: string, action: () => Promise<void>): Promise<SetupError | undefined> {
+  try {
+    await runStep(step, action);
+    return undefined;
+  } catch (error) {
+    return error instanceof SetupError ? error : new SetupError(`The teardown failed: ${step}.`);
+  }
+}
+
+// Also the cleanup of a failed setup. Every step runs whatever the previous one did, so that one
+// failure never hides another, and every client is closed so that the process can exit.
+async function finishRun(run: Run): Promise<void> {
+  const failures: (SetupError | undefined)[] = [];
+  try {
+    failures.push(
+      await attempt("closing the throwaway client", async () => run.throwaway?.$disconnect()),
+      await attempt("dropping the throwaway database", async () => {
+        if (run.isCreated) {
+          await dropDatabase(run.admin, run.name);
+        }
+      }),
+      await attempt("checking the throwaway database is gone", () =>
+        requireDatabaseGone(run.admin, run.name),
+      ),
+      await attempt("comparing the configured database", () =>
+        requireConfiguredDatabaseUnchanged(run),
+      ),
+    );
+  } finally {
+    await run.configured.$disconnect();
+    await run.admin.$disconnect();
+  }
+  const failure = failures.find((candidate) => candidate !== undefined);
+  if (failure !== undefined) {
+    throw failure;
+  }
+}
+
+async function prepareThrowawayDatabase(run: Run, databaseUrl: string): Promise<SchemaObjects> {
+  await requireReachableDatabase(run.admin, databaseUrl);
+  await runStep("checking the role", () => requireCreateDatabasePrivilege(run.admin));
+  run.rowsBefore = await runStep("counting the rows of the configured database", () =>
+    countRows(run.configured),
+  );
+  if (Object.keys(run.rowsBefore).length === 0) {
+    process.stdout.write("The configured database has no tables: nothing to compare afterwards.\n");
+  }
+  // Set before the statement: if its answer is lost, the cleanup still drops the name (IF EXISTS).
+  run.isCreated = true;
+  await runStep("creating the throwaway database", () => createDatabase(run.admin, run.name));
+  const throwaway = createPrismaClient({
+    connectionString: withDatabase(databaseUrl, run.name),
+    maxConnections: 1,
+  });
+  run.throwaway = throwaway;
+  await runStep("applying the migrations", () => applyMigrations(throwaway));
+  const objects = await runStep("reading the schema", () => readSchemaObjects(throwaway));
+  requireEnoughTables(objects);
+  return objects;
+}
+
+// One throwaway database with a random name per run: the development data is never touched.
 export async function setup(project: TestProject): Promise<() => Promise<void>> {
   const databaseUrl = requireDatabaseUrl();
-  const schema = `test_${randomBytes(6).toString("hex")}`;
-  const schemaConnectionString = withSearchPath(databaseUrl, schema);
-  const admin = createPrismaClient({
-    connectionString: databaseUrl,
-    maxConnections: 1,
-    connectionTimeoutMs: REACHABILITY_TIMEOUT_MS,
-  });
-  let schemaClient: PrismaClient | undefined;
-  let isSchemaCreated = false;
-  try {
-    await requireReachableDatabase(admin, databaseUrl);
-    await runStep("creating the schema", () =>
-      admin.$executeRawUnsafe(`CREATE SCHEMA "${schema}"`),
-    );
-    isSchemaCreated = true;
-    schemaClient = createPrismaClient({
-      connectionString: schemaConnectionString,
+  const name = generateThrowawayDatabaseName();
+  const run: Run = {
+    name,
+    admin: createPrismaClient({
+      connectionString: withDatabase(databaseUrl, MAINTENANCE_DATABASE),
       maxConnections: 1,
-    });
-    const client = schemaClient;
-    await runStep("applying the migrations", () => applyMigrations(client));
-    const schemaObjects = await runStep("reading the schema", () =>
-      readSchemaObjects(client, schema),
-    );
-    requireEnoughTables(schemaObjects);
+      connectionTimeoutMs: REACHABILITY_TIMEOUT_MS,
+    }),
+    configured: createPrismaClient({ connectionString: databaseUrl, maxConnections: 1 }),
+    throwaway: undefined,
+    isCreated: false,
+    rowsBefore: undefined,
+  };
+  try {
+    const objects = await prepareThrowawayDatabase(run, databaseUrl);
     process.stdout.write(
-      `Temporary schema ready: ${String(schemaObjects.tables.length)} tables, ${String(schemaObjects.constraints.length)} constraints, ${String(schemaObjects.indexes.length)} indexes.\n`,
+      `Throwaway database ready: ${String(objects.tables.length)} tables, ${String(objects.constraints.length)} constraints, ${String(objects.indexes.length)} indexes.\n`,
     );
-    project.provide("temporarySchema", schema);
-    project.provide("schemaConnectionString", schemaConnectionString);
-    project.provide("schemaObjects", schemaObjects);
+    project.provide("throwawayDatabase", name);
+    project.provide("throwawayConnectionString", withDatabase(databaseUrl, name));
+    project.provide("configuredDatabaseUrl", databaseUrl);
+    project.provide("schemaObjects", objects);
   } catch (error) {
-    // Best effort, and only for a schema this run created: a failed CREATE SCHEMA must never lead
-    // to dropping one that belongs to someone else. When the database is down the cleanup fails
-    // too, and it must not hide the clear message of the first failure.
-    await cleanUp(admin, schemaClient, isSchemaCreated ? schema : undefined).catch(() => undefined);
+    // Best effort: when the database is down the cleanup fails too, and it must not hide the
+    // clear message of the first failure.
+    await finishRun(run).catch(() => undefined);
     throw error;
   }
-  return () => cleanUp(admin, schemaClient, schema);
+  return () => finishRun(run);
 }
