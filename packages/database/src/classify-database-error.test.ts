@@ -1,22 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { prismaError, uniqueFailure } from "../tests/support/prisma-error-fixtures.ts";
 import { classifyDatabaseError, DATABASE_ERROR_KINDS } from "./classify-database-error.ts";
 
-// The shapes below were observed in the integration tests (Prisma 7.10.0, pg 8.23.1): a Prisma
-// error carries its own `code` and, for a driver failure, `meta.driverAdapterError.cause`.
-function prismaError(code: string, driverCause?: Record<string, unknown>): Record<string, unknown> {
-  const meta: Record<string, unknown> = { modelName: "customer" };
-  if (driverCause !== undefined) {
-    meta.driverAdapterError = { name: "DriverAdapterError", cause: driverCause };
-  }
-  return { name: "PrismaClientKnownRequestError", code, meta };
-}
-
 const connectionFailure = prismaError("P2010", { kind: "DatabaseNotReachable" });
-const uniqueFailure = prismaError("P2002", {
-  kind: "UniqueConstraintViolation",
-  originalCode: "23505",
-});
 const poolTimeoutText = "Connection terminated due to connection timeout";
 
 function nestCause(depth: number, innermost: unknown): unknown {

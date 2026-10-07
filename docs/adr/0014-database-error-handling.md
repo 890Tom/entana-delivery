@@ -97,3 +97,19 @@ Limits of the suite, each from the matcher:
 The API integration suite described above ran on a temporary schema selected with `search_path`. That isolation covered raw SQL only: the Prisma model API qualifies tables with `public`, so model calls (`client.customer.create`, and so on) reached the configured database. The suite now creates one throwaway database per run (`test_` and lowercase hex), applies the migrations in it, drops it at the end and fails if the configured database changed; this replaced the schema. The text above is left as it was written.
 
 The classifier integration test in `packages/database` had the same weakness: it ran on a temporary schema, and its Prisma model calls wrote to `public` of the configured database. That suite now also runs in a throwaway database per run, with the same row-count proof (2026-10-07).
+
+## Note, 2026-10-07 (connection failures through a host name)
+
+The classifier now also gives `connection` to these shapes, observed with Prisma 7.10.0, `@prisma/adapter-pg` 7.10.0, `pg` 8.23.1 and Node 24.21.0:
+
+- a string `code` of `ECONNREFUSED` on the error itself;
+- Prisma code `P1017` (model query) or `P2010` (raw query), each together with driver kind `ConnectionClosed`: a server that accepts the connection and closes it. Only these two pairs were observed, and the pair rule is a deliberate allow-list: the kind alone is not accepted, and a pair is added only after a new observation;
+- a string `code` of `EPIPE` on the error itself, seen once in 200 runs of the same accept-then-reset case;
+- driver `originalCode` `57P01` (the server shut down during a query); it counts under any Prisma code, like the `23xxx` SQLSTATEs.
+
+A deployed application connects through a host name, which can resolve to several addresses; there, a refused connection does not have the shape of an IP-literal host (`P1001`, `DatabaseNotReachable`) and was answered as a 500. A host name that does not resolve (`.invalid`) already gives `P1001` and needed no change. The decision text above is left as it was written.
+
+- `EPIPE` cannot be provoked on demand, so it is covered by a unit test built from the observed shape and not by a real-error integration test. This is a deliberate departure from one real-error integration test per shape.
+- Known limitation: a plain close of the connection (not a reset) sometimes (about 1 in 12) gives a `pg` error with no code and no structural property, only its text. It is not matched and stays `unknown` (a 500). Trigger to revisit: `reason: unknown` seen in the logs during a real database restart.
+- Classification is by shape: a `connection` kind does not say which dependency failed (the database, a proxy, the network or a name server).
+- A 503 received during a write does not say whether the write was applied.

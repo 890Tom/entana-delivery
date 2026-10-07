@@ -1,6 +1,7 @@
 import { randomInt, randomUUID } from "node:crypto";
 import net from "node:net";
-import { describe, expect, inject, it } from "vitest";
+import { Client } from "pg";
+import { describe, expect, inject, it, vi } from "vitest";
 
 import { classifyDatabaseError } from "../../src/classify-database-error.ts";
 import type { DatabaseErrorKind } from "../../src/classify-database-error.ts";
@@ -134,6 +135,101 @@ describe("classifyDatabaseError (real PostgreSQL, Prisma client from createPrism
     );
 
     expect(outcome).toBe("connection");
+  });
+
+  // The shape of this error depends on how `localhost` resolves (::1, 127.0.0.1 or both), so only
+  // the kind is asserted, never the raw error. A deployed application connects through a name.
+  it("gives connection when the host is localhost and nothing listens on the port", async () => {
+    const port = await findClosedPort();
+
+    const outcome = await classifyFailureOf(
+      `postgresql://shop@localhost:${String(port)}/entana`,
+      (client) => client.$queryRaw`SELECT 1`,
+      { connectionTimeoutMs: 300 },
+    );
+
+    expect(outcome).toBe("connection");
+  });
+
+  // Reset, not a plain close: a plain close sometimes gives pg's code-less "terminated unexpectedly"
+  // error instead (about 1 in 12 runs), which has no structure to match. The same event gives
+  // P1017 for a model query and P2010 for a raw query, each with driver kind ConnectionClosed.
+  // The connection timeout is generous: the server answers at once, so it only guards a hang.
+  it.each([
+    [
+      "a model query",
+      (client: PrismaClient) => client.customer.findFirst({ select: { id: true } }),
+    ],
+    ["a raw query", (client: PrismaClient) => client.$queryRaw`SELECT 1`],
+  ])(
+    "gives connection when the server accepts the connection and resets it (%s)",
+    async (_name, query) => {
+      const server = net.createServer((socket) => {
+        socket.on("error", () => undefined);
+        socket.resetAndDestroy();
+      });
+      await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+      const address = server.address();
+      try {
+        if (address === null || typeof address === "string")
+          throw new Error("No port was assigned.");
+
+        const outcome = await classifyFailureOf(
+          `postgresql://shop@127.0.0.1:${String(address.port)}/entana`,
+          query,
+          { connectionTimeoutMs: 2000 },
+        );
+
+        expect(outcome).toBe("connection");
+      } finally {
+        await new Promise<void>((resolve) => {
+          server.close(() => {
+            resolve();
+          });
+        });
+      }
+    },
+  );
+
+  // The backend is ended by its exact pid, and only if it belongs to the throwaway database. The
+  // setup is outside the classified part: a failed setup must show as itself, not as `unknown`.
+  it("gives connection when the backend of a running query is terminated", async () => {
+    const connectionString = inject("throwawayConnectionString");
+    const admin = new Client({ connectionString });
+    // One connection only, so the pid read below is the one that runs the long query.
+    const client = createPrismaClient({ connectionString, maxConnections: 1 });
+    await admin.connect();
+    try {
+      await assertThrowawayDatabase(admin);
+      await assertThrowawayDatabase(client);
+      const rows = await client.$queryRaw<{ pid: number }[]>`SELECT pg_backend_pid() AS pid`;
+      const pid = rows[0]?.pid;
+      if (pid === undefined) throw new Error("No backend pid was returned.");
+      const running = client.$queryRaw`SELECT pg_sleep(5)::text AS slept`.then(
+        () => "no error" as const,
+        (error: unknown) => classifyDatabaseError(error),
+      );
+      await vi.waitFor(
+        async () => {
+          const { rowCount } = await admin.query(
+            "SELECT 1 FROM pg_stat_activity WHERE pid = $1 AND datname = current_database() AND wait_event = 'PgSleep'",
+            [pid],
+          );
+          expect(rowCount).toBe(1);
+        },
+        { timeout: 3000 },
+      );
+      const terminated = await admin.query<{ terminated: boolean }>(
+        "SELECT pg_terminate_backend(pid) AS terminated FROM pg_stat_activity WHERE pid = $1 AND datname = current_database()",
+        [pid],
+      );
+      expect(terminated.rows).toEqual([{ terminated: true }]);
+
+      expect(await running).toBe("connection");
+    } finally {
+      await client.$disconnect();
+      await admin.end();
+    }
   });
 
   // Pinned to pg 8.23.1 and Prisma 7.10.0: this error has no code, so the classifier matches the

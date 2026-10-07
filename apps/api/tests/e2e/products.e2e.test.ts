@@ -16,6 +16,7 @@ const PASSWORD = "s3cret-pass-word";
 const DATABASE_USER = "products-user";
 const DATABASE_NAME = "products-db";
 const ERROR_LEVEL = 50;
+const SETTLE_MS = 200;
 
 const GENERIC_PROBLEM = {
   type: "about:blank",
@@ -37,6 +38,11 @@ function failureLinesOf(logs: LogCapture): Record<string, unknown>[] {
   return logs
     .entries()
     .filter((entry) => String(entry.msg).startsWith("IncompleteActiveProductError"));
+}
+
+// The line written for a classified database failure: a fixed message and the kind as `reason`.
+function databaseFailureLines(logs: LogCapture): Record<string, unknown>[] {
+  return logs.entries().filter((entry) => entry.msg === "Database operation failed.");
 }
 
 // A port nobody listens on: it was free a moment ago, and it is closed again.
@@ -144,6 +150,42 @@ describe("GET /api/v1/products, without a database", () => {
     });
     // The port is looked for with its host: a bare five-digit number could match a timestamp.
     const secrets = [PASSWORD, DATABASE_USER, `127.0.0.1:${String(port)}`, DATABASE_NAME];
+    for (const secret of secrets) {
+      expect(JSON.stringify([response.body, response.headers])).not.toContain(secret);
+      expect(logs.text()).not.toContain(secret);
+    }
+  });
+
+  // A deployed application connects through a host name, which can resolve to ::1 and 127.0.0.1:
+  // the raw error is not asserted, only what the client and the logs get.
+  it("answers the same fixed 503 when the host is localhost and nothing listens, with one failure line", async () => {
+    const port = await findClosedPort();
+    const url = `postgresql://${DATABASE_USER}:${PASSWORD}@localhost:${String(port)}/${DATABASE_NAME}`;
+    app = await startRealApp(
+      buildTestConfig({ DATABASE_URL: url, LOG_LEVEL: "info" }),
+      logs.stream,
+    );
+    logs.reset();
+
+    const response = await request(app.getHttpServer()).get(PRODUCTS_PATH);
+
+    expect(response.status).toBe(503);
+    expect(response.headers["content-type"]).toMatch(/^application\/problem\+json/);
+    expect(response.body).toEqual({
+      type: "about:blank",
+      title: "Service Unavailable",
+      status: 503,
+      detail: "The service is temporarily unavailable.",
+      instance: PRODUCTS_PATH,
+    });
+    await vi.waitFor(() => {
+      expect(databaseFailureLines(logs).length).toBeGreaterThan(0);
+    });
+    // Let a second line, if there were one, arrive before counting: the claim is "exactly one".
+    await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
+    expect(databaseFailureLines(logs)).toHaveLength(1);
+    expect(databaseFailureLines(logs)[0]).toMatchObject({ reason: "connection" });
+    const secrets = [PASSWORD, DATABASE_USER, `localhost:${String(port)}`, DATABASE_NAME];
     for (const secret of secrets) {
       expect(JSON.stringify([response.body, response.headers])).not.toContain(secret);
       expect(logs.text()).not.toContain(secret);
