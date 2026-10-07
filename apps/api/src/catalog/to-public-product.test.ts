@@ -1,13 +1,8 @@
 import { publicProductSchema } from "@entana/contracts";
-import type { Product } from "@entana/database";
 import { describe, expect, it } from "vitest";
 import { IncompleteActiveProductError } from "./incomplete-active-product-error.js";
 import { toPublicProduct } from "./to-public-product.js";
-
-type CatalogRow = Pick<
-  Product,
-  "id" | "name" | "description" | "priceAr" | "available" | "imageKey" | "imageAlt"
->;
+import type { CatalogRow } from "./to-public-product.js";
 
 function buildRow(overrides: Partial<CatalogRow> = {}): CatalogRow {
   return {
@@ -34,7 +29,7 @@ describe("toPublicProduct", () => {
     });
   });
 
-  it("builds the image from the key and the alt text", () => {
+  it("maps whatever key and alt text the row holds (no value hard-coded)", () => {
     const product = toPublicProduct(buildRow({ imageKey: "k-1", imageAlt: "alt text 1" }));
 
     expect(product.image).toEqual({ key: "k-1", alt: "alt text 1" });
@@ -48,6 +43,9 @@ describe("toPublicProduct", () => {
     ["empty", ""],
     ["spaces", "   "],
     ["tabs and newlines", " \t\n "],
+    // \S treats these as white space too: a description made of them is blank.
+    ["non-breaking spaces", "\u00a0\u00a0"],
+    ["ideographic spaces", "\u3000"],
   ])("turns a %s description into null", (_label, description) => {
     expect(toPublicProduct(buildRow({ description })).description).toBeNull();
   });
@@ -63,7 +61,9 @@ describe("toPublicProduct", () => {
   });
 
   it("produces output the strict public schema accepts", () => {
-    expect(publicProductSchema.safeParse(toPublicProduct(buildRow())).success).toBe(true);
+    const product = toPublicProduct(buildRow());
+
+    expect(publicProductSchema.parse(product)).toEqual(product);
   });
 
   describe("an active row without a complete photo", () => {
@@ -71,19 +71,19 @@ describe("toPublicProduct", () => {
     const secretAlt = "secret-alt-9c1d";
     const secretName = "secret-name-5b2e";
 
-    function messageOf(row: CatalogRow): string {
+    function thrownBy(row: CatalogRow): unknown {
       try {
         toPublicProduct(row);
       } catch (error) {
-        expect(error).toBeInstanceOf(IncompleteActiveProductError);
-        return error instanceof Error ? error.message : "";
+        return error;
       }
-      return "";
+      return undefined;
     }
 
     it.each([
       ["image key", { imageKey: null, imageAlt: secretAlt }],
       ["image alt", { imageKey: secretKey, imageAlt: null }],
+      ["image key and alt", { imageKey: null, imageAlt: null }],
     ])("throws a typed error when the %s is null", (_label, photo) => {
       const row = buildRow({ ...photo, name: secretName });
 
@@ -93,10 +93,12 @@ describe("toPublicProduct", () => {
     it.each([
       ["image key", { imageKey: null, imageAlt: secretAlt }],
       ["image alt", { imageKey: secretKey, imageAlt: null }],
+      ["image key and alt", { imageKey: null, imageAlt: null }],
     ])("keeps row values out of the message when the %s is null", (_label, photo) => {
-      const message = messageOf(buildRow({ ...photo, name: secretName }));
+      const failure = thrownBy(buildRow({ ...photo, name: secretName }));
 
-      expect(message).not.toBe("");
+      expect(failure).toBeInstanceOf(IncompleteActiveProductError);
+      const message = failure instanceof Error ? failure.message : "";
       for (const secret of [secretKey, secretAlt, secretName]) {
         expect(message).not.toContain(secret);
       }
