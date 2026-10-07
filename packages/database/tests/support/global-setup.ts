@@ -3,6 +3,7 @@ import { Client } from "pg";
 import type { TestProject } from "vitest/node";
 import { countRows, findChangedTables } from "./count-rows.js";
 import type { RowCounts } from "./count-rows.js";
+import { cleanUpOnSignal } from "./interrupt-cleanup.js";
 import { describeDatabaseTarget, requireDatabaseUrl } from "./database-url.js";
 import { checkTestDatabaseHost, isRemoteOverrideEnabled } from "./test-database-guard.js";
 import { generateThrowawayDatabaseName, isThrowawayDatabaseName } from "./throwaway-database.js";
@@ -155,7 +156,8 @@ async function attempt(step: string, action: () => Promise<void>): Promise<Setup
 
 // Also the cleanup of a failed setup. Every step runs whatever the previous one did, so that one
 // failure never hides another, and every client is closed so that the process can exit.
-async function finishRun(run: Run): Promise<void> {
+async function finishRun(run: Run, stopListeningToSignals: () => void): Promise<void> {
+  stopListeningToSignals();
   const failures: (SetupError | undefined)[] = [];
   try {
     failures.push(
@@ -176,6 +178,16 @@ async function finishRun(run: Run): Promise<void> {
   }
   const failure = failures.find((candidate) => candidate !== undefined);
   if (failure !== undefined) throw failure;
+}
+
+// The cleanup of an interruption by a signal: only what is needed to leave nothing behind, and
+// the same name check as the normal teardown (dropDatabase). It never compares the row counts.
+async function dropAfterInterruption(run: Run): Promise<void> {
+  await Promise.allSettled([run.throwaway?.end()]);
+  if (run.isCreated) {
+    await dropDatabase(run.admin, run.name);
+  }
+  await Promise.allSettled([run.configured.end(), run.admin.end()]);
 }
 
 async function prepareThrowawayDatabase(run: Run, databaseUrl: string): Promise<string> {
@@ -231,6 +243,7 @@ export async function setup(project: TestProject): Promise<() => Promise<void>> 
   requireParseableUrl(databaseUrl);
   const name = generateThrowawayDatabaseName();
   const run = await openRun(databaseUrl, name);
+  const stopListeningToSignals = cleanUpOnSignal(() => dropAfterInterruption(run), run.name);
   try {
     const throwawayUrl = await prepareThrowawayDatabase(run, databaseUrl);
     project.provide("throwawayDatabase", name);
@@ -238,8 +251,8 @@ export async function setup(project: TestProject): Promise<() => Promise<void>> 
     project.provide("configuredDatabaseUrl", databaseUrl);
   } catch (error) {
     // Best effort: it must not hide the clear message of the first failure.
-    await finishRun(run).catch(() => undefined);
+    await finishRun(run, stopListeningToSignals).catch(() => undefined);
     throw error instanceof SetupError ? error : new SetupError("The test setup failed.");
   }
-  return () => finishRun(run);
+  return () => finishRun(run, stopListeningToSignals);
 }

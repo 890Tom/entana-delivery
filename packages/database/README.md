@@ -48,7 +48,7 @@ How they stay out of your way:
 - Each test runs in a transaction that is rolled back.
 - If PostgreSQL is not reachable, the run fails with a message telling you to start it. Nothing is skipped silently, in CI either.
 
-If a run is killed (for example with `kill -9`), its empty `test_<hex>` database stays on the server. List leftovers with `\l test_*` in `psql` and remove them with `DROP DATABASE test_<hex>`. They are harmless, and in CI the container is thrown away.
+A run interrupted by SIGINT or SIGTERM (Ctrl+C, or turbo stopping the task after a sibling failed) drops its database before it exits. Only a hard kill (SIGKILL, for example `kill -9`) leaves its empty `test_<hex>` database on the server: list it with `\l test_*` in `psql` and remove it with `DROP DATABASE test_<hex>`. In CI the container is thrown away.
 
 A test checks that every CHECK constraint of the schema has a test case. When you add a constraint in a migration, add its case in `tests/integration/check-constraints.integration.test.ts`, or that test fails.
 
