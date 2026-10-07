@@ -1,11 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, inject, it } from "vitest";
 
 import { createPrismaClient } from "../../src/create-prisma-client.ts";
-import { requireDatabaseUrl } from "../support/database-url.ts";
 
 describe("createPrismaClient (real PostgreSQL)", () => {
   it("runs a query and disconnects cleanly", async () => {
-    const client = createPrismaClient({ connectionString: requireDatabaseUrl() });
+    const client = createPrismaClient({ connectionString: inject("throwawayConnectionString") });
 
     try {
       const rows = await client.$queryRaw<{ one: number }[]>`SELECT 1 AS one`;

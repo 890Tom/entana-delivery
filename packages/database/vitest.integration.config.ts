@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     include: ["tests/integration/**/*.test.ts"],
     globalSetup: ["tests/support/global-setup.ts"],
-    // One shared temporary schema, and rows such as shop_setting(id = 1) cannot coexist.
+    // One shared throwaway database, and rows such as shop_setting(id = 1) cannot coexist.
     fileParallelism: false,
   },
 });
