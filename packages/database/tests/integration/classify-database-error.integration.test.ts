@@ -7,20 +7,13 @@ import type { DatabaseErrorKind } from "../../src/classify-database-error.ts";
 import { createPrismaClient } from "../../src/create-prisma-client.ts";
 import type { PrismaClient } from "../../src/generated/client.ts";
 import type { DatabaseClientOptions } from "../../src/pool-settings.ts";
-import { requireDatabaseUrl } from "../support/database-url.ts";
+import { assertThrowawayDatabase } from "../support/assert-throwaway-database.ts";
 
 // These tests are the check of the header of classify-database-error.ts: when Prisma or pg is
 // upgraded, a failure here means an observed error shape has changed and the classifier must be
 // revisited. A failure only ever shows kinds, never the raw error.
 
 type Outcome = DatabaseErrorKind | "no error";
-
-// The temporary schema is selected through the `options` parameter of the connection string.
-function temporarySchemaUrl(): string {
-  const url = new URL(requireDatabaseUrl());
-  url.searchParams.set("options", `-c search_path=${inject("temporarySchema")}`);
-  return url.toString();
-}
 
 // Each call opens its own client and always closes it.
 async function classifyFailureOf(
@@ -37,6 +30,17 @@ async function classifyFailureOf(
   } finally {
     await client.$disconnect();
   }
+}
+
+// For the cases that really reach the database: the connection is to the throwaway database of
+// the run, and the guard runs before the statement (some of them write).
+function classifyFailureOnThrowaway(
+  action: (client: PrismaClient) => Promise<unknown>,
+): Promise<Outcome> {
+  return classifyFailureOf(inject("throwawayConnectionString"), async (client) => {
+    await assertThrowawayDatabase(client);
+    return action(client);
+  });
 }
 
 function uniquePhone(): string {
@@ -60,7 +64,7 @@ describe("classifyDatabaseError (real PostgreSQL, Prisma client from createPrism
   it("gives unique_violation for the same customer phone twice", async () => {
     const phoneE164 = uniquePhone();
 
-    const outcome = await classifyFailureOf(temporarySchemaUrl(), async (client) => {
+    const outcome = await classifyFailureOnThrowaway(async (client) => {
       await client.customer.create({ data: { phoneE164 } });
       await client.customer.create({ data: { phoneE164 } });
     });
@@ -71,7 +75,7 @@ describe("classifyDatabaseError (real PostgreSQL, Prisma client from createPrism
   it("gives unique_violation for a duplicate phone inside an interactive transaction", async () => {
     const phoneE164 = uniquePhone();
 
-    const outcome = await classifyFailureOf(temporarySchemaUrl(), (client) =>
+    const outcome = await classifyFailureOnThrowaway((client) =>
       client.$transaction(async (transaction) => {
         await transaction.customer.create({ data: { phoneE164 } });
         await transaction.customer.create({ data: { phoneE164 } });
@@ -82,7 +86,7 @@ describe("classifyDatabaseError (real PostgreSQL, Prisma client from createPrism
   });
 
   it("gives foreign_key_violation for an order item that points to unknown ids", async () => {
-    const outcome = await classifyFailureOf(temporarySchemaUrl(), (client) =>
+    const outcome = await classifyFailureOnThrowaway((client) =>
       client.orderItem.create({
         data: {
           orderId: randomUUID(),
@@ -98,7 +102,7 @@ describe("classifyDatabaseError (real PostgreSQL, Prisma client from createPrism
   });
 
   it("gives check_violation for a customer with an invalid phone number", async () => {
-    const outcome = await classifyFailureOf(temporarySchemaUrl(), (client) =>
+    const outcome = await classifyFailureOnThrowaway((client) =>
       client.customer.create({ data: { phoneE164: "not-a-phone-number" } }),
     );
 
@@ -106,8 +110,7 @@ describe("classifyDatabaseError (real PostgreSQL, Prisma client from createPrism
   });
 
   it("gives not_null_violation when a required column is omitted (raw SQL)", async () => {
-    const outcome = await classifyFailureOf(
-      temporarySchemaUrl(),
+    const outcome = await classifyFailureOnThrowaway(
       (client) => client.$executeRaw`INSERT INTO customer (id) VALUES (${randomUUID()}::uuid)`,
     );
 
@@ -115,7 +118,7 @@ describe("classifyDatabaseError (real PostgreSQL, Prisma client from createPrism
   });
 
   it("gives record_not_found for an update of a missing record", async () => {
-    const outcome = await classifyFailureOf(temporarySchemaUrl(), (client) =>
+    const outcome = await classifyFailureOnThrowaway((client) =>
       client.customer.update({ where: { id: randomUUID() }, data: { phoneE164: uniquePhone() } }),
     );
 

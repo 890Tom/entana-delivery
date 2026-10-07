@@ -10,7 +10,7 @@ import { partOfLine } from "./support/output-parts.js";
 // main suite would pass while checking nothing: this is the test that would fail first.
 describe("the matcher, given the raw error of each real operation", () => {
   const client = createPrismaClient({
-    connectionString: inject("schemaConnectionString"),
+    connectionString: inject("throwawayConnectionString"),
     maxConnections: 1,
   });
 
@@ -39,7 +39,7 @@ describe("the matcher, given the raw error of each real operation", () => {
     async (_name, operation) => {
       const { text, used } = await rawErrorOf(operation);
       const forbidden = buildForbiddenStrings({
-        schemaName: inject("temporarySchema"),
+        databaseName: inject("throwawayDatabase"),
         schemaObjects: inject("schemaObjects"),
         usedValues: used,
         password: "",

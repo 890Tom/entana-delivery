@@ -16,6 +16,13 @@ class DatabaseShutdown implements OnModuleDestroy {
   }
 }
 
+// Nest tells two dynamic modules apart by the object that describes them, not by what it contains:
+// each call of `register` would be a module of its own, with its own client and its own pool. One
+// object per configuration makes every module that imports the database share the one client.
+// The key is the identity of the configuration object: a copy of it (`{ ...config }`) is another
+// key, hence another client. database.module.test.ts and tests/e2e/products.e2e.test.ts fail then.
+const registrations = new WeakMap<AppConfig, DynamicModule>();
+
 /**
  * Provides the PrismaClient under DATABASE_CLIENT. Not global: a module that needs the database
  * imports this one, so that the dependency is visible. The client connects on its first query, so
@@ -25,7 +32,11 @@ class DatabaseShutdown implements OnModuleDestroy {
 @Module({})
 export class DatabaseModule {
   static register(config: AppConfig): DynamicModule {
-    return {
+    const known = registrations.get(config);
+    if (known !== undefined) {
+      return known;
+    }
+    const registration: DynamicModule = {
       module: DatabaseModule,
       providers: [
         {
@@ -37,5 +48,7 @@ export class DatabaseModule {
       ],
       exports: [DATABASE_CLIENT],
     };
+    registrations.set(config, registration);
+    return registration;
   }
 }

@@ -11,17 +11,24 @@ import { ServiceNotReadyError } from "./service-not-ready-error.js";
 interface FakeResponse {
   statusCode: number | undefined;
   contentType: string | undefined;
+  headers: Record<string, string>;
   body: unknown;
+  setHeader(name: string, value: string): FakeResponse;
   status(code: number): FakeResponse;
   type(value: string): FakeResponse;
   json(value: unknown): FakeResponse;
 }
 
-function buildResponse(): FakeResponse {
+function buildResponse(headers: Record<string, string> = {}): FakeResponse {
   const response: FakeResponse = {
     statusCode: undefined,
     contentType: undefined,
+    headers,
     body: undefined,
+    setHeader(name, value) {
+      response.headers[name] = value;
+      return response;
+    },
     status(code) {
       response.statusCode = code;
       return response;
@@ -43,14 +50,26 @@ function buildLogger(): { error: Mock; warn: Mock; log: Mock } {
   return { error: vi.fn(), warn: vi.fn(), log: vi.fn() };
 }
 
-function handle(error: unknown, path = "/api/v1/things?page=2"): FakeResponse {
-  const response = buildResponse();
+function handle(
+  error: unknown,
+  path = "/api/v1/things?page=2",
+  headers: Record<string, string> = {},
+): FakeResponse {
+  const response = buildResponse(headers);
   const host = new ExecutionContextHost([{ originalUrl: path }, response]);
   new ProblemDetailsFilter(buildLogger()).catch(error, host);
   return response;
 }
 
 describe("ProblemDetailsFilter", () => {
+  it("never lets a shared cache keep an error answer, whatever the route set before it failed", () => {
+    const response = handle(new NotFoundException("Nothing here"), "/api/v1/things", {
+      "Cache-Control": "public, max-age=30",
+    });
+
+    expect(response.headers).toEqual({ "Cache-Control": "no-store" });
+  });
+
   it("answers with the problem details media type and the status of the error", () => {
     const response = handle(new NotFoundException());
     expect(response.statusCode).toBe(404);

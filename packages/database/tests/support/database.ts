@@ -1,19 +1,18 @@
 import { Client, DatabaseError } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, inject } from "vitest";
-import { requireDatabaseUrl } from "./database-url.js";
+import { assertThrowawayDatabase } from "./assert-throwaway-database.js";
 
-// Every test runs in a transaction that is rolled back: tests never see each other's rows.
+// Every test runs in a transaction that is rolled back: tests never see each other's rows. The
+// connection is to the throwaway database of the run, never to the configured one.
 export function useRollbackTransaction(): () => Client {
   let client: Client | undefined;
 
   beforeAll(async () => {
-    client = new Client({
-      connectionString: requireDatabaseUrl(),
-      options: `-c search_path=${inject("temporarySchema")}`,
-    });
+    client = new Client({ connectionString: inject("throwawayConnectionString") });
     await client.connect();
   });
   beforeEach(async () => {
+    if (client !== undefined) await assertThrowawayDatabase(client);
     await client?.query("BEGIN");
   });
   afterEach(async () => {

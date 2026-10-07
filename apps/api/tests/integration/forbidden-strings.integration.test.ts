@@ -20,14 +20,14 @@ describe("the matcher of forbidden strings", () => {
   const shortName = [...objects.tables, ...objects.columns].find(
     (name) => name.length < MINIMUM_NAME_LENGTH,
   );
-  const schemaName = inject("temporarySchema");
+  const databaseName = inject("throwawayDatabase");
   const usedValue = "stored-value-0a1b2c3d";
   const uuid = "0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
   const password = "hunter2:pass@word";
   const encodedPassword = encodeURIComponent(password);
   const connectionString = `postgresql://shop:${encodedPassword}@db.internal:5432/entana?options=x`;
   const forbidden: ForbiddenStrings = buildForbiddenStrings({
-    schemaName,
+    databaseName,
     schemaObjects: objects,
     usedValues: [usedValue, uuid],
     password,
@@ -91,7 +91,7 @@ describe("the matcher of forbidden strings", () => {
     ["an index name", { msg: `index ${index}` }, index.toLowerCase()],
     ["a value that was inserted", { msg: `saved ${usedValue}` }, VALUE_LABEL],
     ["a UUID that was used", { msg: uuid.toUpperCase() }, VALUE_LABEL],
-    ["the schema name", { msg: `in ${schemaName}` }, "the schema name"],
+    ["the database name", { msg: `in ${databaseName}` }, "the database name"],
     ["the password", { msg: `password ${password}` }, "the password"],
     ["the password as written in a URL", { msg: `x ${encodedPassword}` }, "the password"],
     ["the word violates", { msg: "it Violates a rule" }, "violates"],
@@ -117,7 +117,7 @@ describe("the matcher of forbidden strings", () => {
 
   it("flags the connection string when the password is not what it holds", () => {
     const withoutPassword = buildForbiddenStrings({
-      schemaName,
+      databaseName,
       schemaObjects: objects,
       usedValues: [],
       password: "",
@@ -130,8 +130,8 @@ describe("the matcher of forbidden strings", () => {
   });
 
   it("never returns the secret itself, only its label", () => {
-    const leaks = [usedValue, password, encodedPassword, connectionString, schemaName].map((text) =>
-      findLeak(forbidden, partOfLine("failure log", { msg: text })),
+    const leaks = [usedValue, password, encodedPassword, connectionString, databaseName].map(
+      (text) => findLeak(forbidden, partOfLine("failure log", { msg: text })),
     );
 
     expect(leaks.join("|")).not.toMatch(/hunter2|0a1b2c3d|postgresql:|test_/);

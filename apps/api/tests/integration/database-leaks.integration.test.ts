@@ -91,16 +91,16 @@ describe("real PostgreSQL violations through the real API", () => {
   const keyOnlyNames = new Set<string>();
 
   function databasePassword(): string {
-    return decodeURIComponent(new URL(inject("schemaConnectionString")).password);
+    return decodeURIComponent(new URL(inject("throwawayConnectionString")).password);
   }
 
   function forbiddenStrings(): ForbiddenStrings {
     return buildForbiddenStrings({
-      schemaName: inject("temporarySchema"),
+      databaseName: inject("throwawayDatabase"),
       schemaObjects: inject("schemaObjects"),
       usedValues: usedValues?.all() ?? [],
       password: databasePassword(),
-      connectionString: inject("schemaConnectionString"),
+      connectionString: inject("throwawayConnectionString"),
     });
   }
 
@@ -140,7 +140,7 @@ describe("real PostgreSQL violations through the real API", () => {
 
   beforeAll(async () => {
     const config = buildTestConfig({
-      DATABASE_URL: inject("schemaConnectionString"),
+      DATABASE_URL: inject("throwawayConnectionString"),
       LOG_LEVEL: "info",
     });
     app = await startAppWithFailureCases(config, logs.stream);

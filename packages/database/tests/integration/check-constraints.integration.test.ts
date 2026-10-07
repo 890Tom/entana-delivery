@@ -1,4 +1,4 @@
-import { describe, expect, inject, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { expectViolation, SQLSTATE, useRollbackTransaction } from "../support/database.js";
 import { constraintCases } from "./check-constraint-cases.js";
 
@@ -11,7 +11,8 @@ describe("CHECK constraints of the migrations", () => {
          FROM pg_constraint con
          JOIN pg_namespace ns ON ns.oid = con.connamespace
         WHERE con.contype = 'c' AND ns.nspname = $1`,
-      [inject("temporarySchema")],
+      // The migrations land in `public` of the throwaway database.
+      ["public"],
     );
 
     const inDatabase = result.rows.map((row) => row.conname).sort();

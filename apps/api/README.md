@@ -127,7 +127,8 @@ stack frames but never its message, which could hold personal data.
 Every error is `application/problem+json` (RFC 9457) with `type`, `title`, `status`, `detail` and
 `instance` (the path, without the query string). A validation error adds `errors`, a list of
 `{ pointer, detail }` (JSON Pointer to the invalid field). An unexpected error is a generic 500:
-its message and stack are written to the logs only.
+its message and stack are written to the logs only. Every error answer carries
+`Cache-Control: no-store`.
 
 ## Health endpoints
 
@@ -141,6 +142,23 @@ Both answer with `Cache-Control: no-store`.
   no component and does not say that a database is involved. At most one check query is in flight
   at a time: calls that arrive while it is pending share its result. A failure is logged once,
   with a reason that is only `timeout`, `connection` or `query`.
+
+## Catalogue endpoint
+
+`GET /api/v1/products` is public (no authentication, no query parameter). It returns every active
+product, in display order (position, then name, then id), as `{ "products": [...] }`: the shape is
+`productListResponseSchema` of `@entana/contracts`, unchanged. Each product has `id`, `name`,
+`description` (`null` when blank), `priceAr` (integer ariary), `available` and
+`image: { key, alt }`. An unavailable product is still listed, with `available: false`; the
+internal `sku` is never selected. An empty catalogue answers `{ "products": [] }`.
+
+- **No pagination:** the whole catalogue is returned on purpose, for a shop-sized catalogue.
+- **Cache:** `Cache-Control: public, max-age=30` on a success (the constant is
+  `CATALOG_CACHE_CONTROL`; the value is a product decision to confirm). Every error answer carries
+  `Cache-Control: no-store`.
+- **Errors:** an unreachable database is the fixed `503` of "Database errors" below; anything else,
+  including a corrupt row, is the generic `500` (no product name, id or column in the answer, and
+  none in the logs).
 
 ## Database errors
 
@@ -186,10 +204,18 @@ The end-to-end tests also use test-only routes (`tests/e2e/support/probe.module.
 exercise validation and errors; the real application has none, and a test checks it.
 
 `test:integration` needs a running database: start it with `pnpm db:up`. `DATABASE_URL` is read
-from the environment or from the root `.env`. The suite creates a temporary schema, applies the
-migrations in it and drops it at the end, and it refuses to run, before any schema change, when the
-host of `DATABASE_URL` is not `localhost`, `127.0.0.1` or `[::1]`. Setting
-`ENTANA_ALLOW_REMOTE_TEST_DB=1` lifts that check, only for a database meant for tests.
+from the environment or from the root `.env`. The suite creates a throwaway database on the same
+server (`test_` and lowercase hex, so the role needs `CREATEDB`), applies the migrations in it and
+drops it at the end. It refuses to run, before any connection, when the host of `DATABASE_URL` is
+not `localhost`, `127.0.0.1` or `[::1]`; setting `ENTANA_ALLOW_REMOTE_TEST_DB=1` lifts that check,
+only for a database meant for tests. It counts the rows of every table of the configured database
+before and after the run, and fails if they differ (so a development server writing to that
+database during the run can fail it too). Test files run one after another, and a test that
+empties or deletes rows calls `assertThrowawayDatabase` first; the setup checks the name of the
+database it creates and drops itself. A run interrupted by SIGINT or SIGTERM (Ctrl+C, or turbo stopping the task after a sibling
+failed) drops its database before it exits. Only a hard kill (SIGKILL, for example `kill -9`)
+leaves its empty `test_<hex>` database: list it with `\l test_*` in `psql` and remove it with
+`DROP DATABASE`.
 
 Tests need the compiled `@entana/contracts` and `@entana/database` (Turborepo builds them first
 when you run the commands from the root).

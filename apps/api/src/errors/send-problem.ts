@@ -67,5 +67,8 @@ export function sendProblem(
     // The client only gets the generic answer; the logs get what is needed to find the cause.
     logger.error(describeForLog(error));
   }
+  // A route may have set a public Cache-Control before it failed (Nest applies @Header before the
+  // handler runs): an error must never be kept by a shared cache.
+  response.setHeader("Cache-Control", "no-store");
   response.status(problem.status).type(PROBLEM_DETAILS_CONTENT_TYPE).json(problem);
 }

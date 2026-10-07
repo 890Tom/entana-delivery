@@ -11,6 +11,7 @@
     "tests",
     "prisma.config.ts",
     "vitest.config.ts",
-    "vitest.integration.config.ts"
+    "vitest.integration.config.ts",
+    "vitest.signal-fixture.config.ts"
   ]
 }
