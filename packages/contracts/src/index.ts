@@ -1,3 +1,7 @@
+export { productListResponseSchema } from "./catalog/product-list-response.js";
+export type { ProductListResponse } from "./catalog/product-list-response.js";
+export { publicProductSchema } from "./catalog/public-product.js";
+export type { PublicProduct } from "./catalog/public-product.js";
 export { formatAmount } from "./format-amount.js";
 export { healthResponseSchema } from "./health.js";
 export type { HealthResponse } from "./health.js";
