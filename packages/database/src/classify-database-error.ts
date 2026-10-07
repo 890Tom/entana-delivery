@@ -12,6 +12,26 @@
 //   connection            Prisma code P2010 (raw SQL); driver kind DatabaseNotReachable, no originalCode
 //   timeout               plain Error with no code and no meta: the only property is its error text
 //                         (see isPoolConnectTimeout, the single exception to the "no error text" rule)
+// More `connection` shapes, observed on 2026-10-07 (Prisma 7.10.0, @prisma/adapter-pg 7.10.0,
+// pg 8.23.1, Node 24.21.0). With a host name that resolves to several addresses (`localhost`), a
+// refused connection does not have the shape of an IP-literal host:
+//   connection            string `code` ECONNREFUSED on the error itself, no meta.driverAdapterError
+//   connection            Prisma code P1017 (model query) or P2010 (raw query) AND driver kind
+//                         ConnectionClosed, a server that accepts the connection and closes it; the
+//                         pair is required, never the kind alone, and no other pair was observed
+//   connection            string `code` EPIPE on the error itself (meta holds only modelName): the
+//                         same event as above, seen once in 200 runs of accept-then-reset. A
+//                         deliberate departure from "one real-error integration test per shape":
+//                         it cannot be provoked on demand, so only a unit test built from the
+//                         observed shape covers it
+//   connection            driver originalCode 57P01 (admin_shutdown: the server stopped, or the
+//                         backend was terminated, during a query), with whatever Prisma code
+// With an IP-literal host or a name that does not resolve (`.invalid`), the refused connection is
+// P1001 with kind DatabaseNotReachable, listed above. meta.driverAdapterError.cause then holds the
+// host and the port: nothing of meta is ever copied or returned.
+// Known limit, not classified: a plain close (not a reset) sometimes (about 1 in 12) gives pg's
+// code-less "Connection terminated unexpectedly" Error, with no structural property to read. It
+// stays `unknown`: the error text is not matched (the pool timeout is the one exception).
 // P2010 and P2039 are generic: they are classified through the driver error, never alone.
 // RE-VERIFY every line above when Prisma, the adapter or pg is upgraded: the integration tests
 // (tests/integration/classify-database-error.integration.test.ts) provoke each real error.
@@ -37,10 +57,15 @@ export type DatabaseErrorKind = (typeof DATABASE_ERROR_KINDS)[number];
 const MAX_CAUSE_DEPTH = 5;
 
 // Maps, not objects: a lookup with a hostile key such as "constructor" finds nothing.
-const PRISMA_CODE_KINDS: ReadonlyMap<string, DatabaseErrorKind> = new Map([
+// Keyed by the string `code` of an error: Prisma codes, and the code of a refused connection.
+const ERROR_CODE_KINDS: ReadonlyMap<string, DatabaseErrorKind> = new Map([
   ["P2002", "unique_violation"],
   ["P2003", "foreign_key_violation"],
   ["P2025", "record_not_found"],
+  // Not a Prisma code: what Prisma gives, as its `code`, a refused connection to a host name.
+  ["ECONNREFUSED", "connection"],
+  // Seen once in 200 runs, not reproducible on demand: a unit test only (see the header).
+  ["EPIPE", "connection"],
 ]);
 
 const SQLSTATE_KINDS: ReadonlyMap<string, DatabaseErrorKind> = new Map([
@@ -48,6 +73,7 @@ const SQLSTATE_KINDS: ReadonlyMap<string, DatabaseErrorKind> = new Map([
   ["23503", "foreign_key_violation"],
   ["23514", "check_violation"],
   ["23502", "not_null_violation"],
+  ["57P01", "connection"],
 ]);
 
 const DRIVER_KIND_KINDS: ReadonlyMap<string, DatabaseErrorKind> = new Map([
@@ -55,6 +81,19 @@ const DRIVER_KIND_KINDS: ReadonlyMap<string, DatabaseErrorKind> = new Map([
   ["ForeignKeyConstraintViolation", "foreign_key_violation"],
   ["NullConstraintViolation", "not_null_violation"],
   ["DatabaseNotReachable", "connection"],
+]);
+
+// A driver kind that counts only under the Prisma codes it was observed with: Prisma code, then
+// driver kind. P1017 is a model query, P2010 a raw query, for the same closed connection.
+const CONNECTION_CLOSED_KINDS: ReadonlyMap<string, DatabaseErrorKind> = new Map([
+  ["ConnectionClosed", "connection"],
+]);
+const DRIVER_KINDS_BY_PRISMA_CODE: ReadonlyMap<
+  string,
+  ReadonlyMap<string, DatabaseErrorKind>
+> = new Map([
+  ["P1017", CONNECTION_CLOSED_KINDS],
+  ["P2010", CONNECTION_CLOSED_KINDS],
 ]);
 
 // Observed with pg 8.23.1 (pg-pool 3.14.0) and Prisma 7.10.0, for a server that accepts the
@@ -79,10 +118,10 @@ function readString(value: unknown, key: string): string | undefined {
 }
 
 function lookup(
-  map: ReadonlyMap<string, DatabaseErrorKind>,
+  map: ReadonlyMap<string, DatabaseErrorKind> | undefined,
   key: string | undefined,
 ): DatabaseErrorKind | undefined {
-  return key === undefined ? undefined : map.get(key);
+  return key === undefined ? undefined : map?.get(key);
 }
 
 // The error, then its causes: bounded, and safe against a cycle.
@@ -106,14 +145,16 @@ function classifyDriverError(node: unknown): DatabaseErrorKind | undefined {
     readProperty(readProperty(node, "meta"), "driverAdapterError"),
     "cause",
   );
+  const driverKind = readString(driverError, "kind");
   return (
     lookup(SQLSTATE_KINDS, readString(driverError, "originalCode")) ??
-    lookup(DRIVER_KIND_KINDS, readString(driverError, "kind"))
+    lookup(DRIVER_KIND_KINDS, driverKind) ??
+    lookup(DRIVER_KINDS_BY_PRISMA_CODE.get(readString(node, "code") ?? ""), driverKind)
   );
 }
 
 function classifyNode(node: unknown): DatabaseErrorKind | undefined {
-  return classifyDriverError(node) ?? lookup(PRISMA_CODE_KINDS, readString(node, "code"));
+  return classifyDriverError(node) ?? lookup(ERROR_CODE_KINDS, readString(node, "code"));
 }
 
 // The only place that reads an error text, and the last check tried: a pool timeout has no code,
