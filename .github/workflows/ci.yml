@@ -126,7 +126,9 @@ jobs:
       - name: Check that schema.prisma and the migrations are in sync
         run: pnpm --filter @entana/database exec prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code
       # One step per suite, through Turborepo: --filter keeps the task dependencies (db:generate,
-      # ^build). Each suite creates and drops its own temporary schema in this database.
+      # ^build). Each suite creates its own throwaway database (test_ and lowercase hex) on this
+      # server, applies the migrations to it and drops it at the end, also on a termination signal.
+      # The role is the superuser of the service image, so it is allowed to create databases.
       - name: Database integration tests
         run: pnpm test:integration --filter=@entana/database
       - name: API integration tests
