@@ -24,6 +24,18 @@ jobs:
           for f in LICENSE README.md CONTRIBUTING.md SECURITY.md CODE_OF_CONDUCT.md .gitleaks.toml; do
             test -f "$f" || { echo "Missing $f"; exit 1; }
           done
+      - name: Check the dependency release-age policy
+        run: |
+          # Read the values pnpm applies, not the file text: a comment or a typo cannot fool this.
+          # corepack installs the pnpm version pinned in package.json.
+          corepack enable
+          age=$(pnpm config get minimumReleaseAge --json)
+          strict=$(pnpm config get minimumReleaseAgeStrict --json)
+          exclude=$(pnpm config get minimumReleaseAgeExclude --json)
+          case "$age" in ''|*[!0-9]*) echo "minimumReleaseAge must be set to a number of minutes (got: $age)"; exit 1;; esac
+          [ "$age" -ge 1440 ] || { echo "minimumReleaseAge must be at least 1440 minutes (got: $age)"; exit 1; }
+          [ "$strict" = "true" ] || { echo "minimumReleaseAgeStrict must be true (got: $strict)"; exit 1; }
+          [ "$exclude" = "[]" ] || { echo "minimumReleaseAgeExclude must be empty (got: $exclude)"; exit 1; }
 
   secrets-scan:
     runs-on: ubuntu-latest

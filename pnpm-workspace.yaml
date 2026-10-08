@@ -9,3 +9,8 @@ allowBuilds:
   "@scarf/scarf": false
   # The native binary comes from a platform package, so the install script is not needed.
   "@swc/core": false
+# Supply chain: refuse (never silently accept) a version published less than 24 hours ago.
+# The exclude list stays empty; an emergency exception is a manual edit (see CONTRIBUTING.md).
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+minimumReleaseAgeExclude: []
