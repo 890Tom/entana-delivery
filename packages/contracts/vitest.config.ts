@@ -7,7 +7,7 @@ export default defineConfig({
       provider: "v8",
       // Explicit, so that a source file without any test still counts as uncovered.
       include: ["src/**/*.ts"],
-      exclude: ["src/**/*.test.ts"],
+      exclude: ["src/**/*.test.ts", "src/**/test-support/**"],
       thresholds: {
         lines: 90,
         functions: 90,

@@ -1,0 +1,90 @@
+import { z } from "zod";
+import {
+  hasControlCharacter,
+  hasControlCharacterOtherThanNewline,
+  hasInvisibleCharacter,
+} from "./text-checks.js";
+
+// Every string rule below follows one order: `.max(..., { abort: true })` first, so that an
+// oversized string is rejected on its length alone, then the pattern or refinement. Zod keeps
+// running the other checks after a failed one unless the check aborts. Lengths are Unicode code
+// points (what Zod 4 counts, checked by a test): an emoji is 1, a letter plus a combining accent
+// is 2, and a grapheme cluster is not counted as one.
+// Nothing here transforms the value (no trim, no coercion): the API normalises the phone number.
+// Messages are fixed texts: they never repeat the value, which can be a phone number.
+
+const MAX_PHONE_LENGTH = 32;
+const MAX_CONTACT_NAME_LENGTH = 80;
+const MAX_CUSTOMER_NOTE_LENGTH = 300;
+const MAX_LANDMARK_LENGTH = 200;
+const MAX_ITEMS = 30;
+const MAX_QUANTITY = 99;
+
+const INVISIBLE_CHARACTER_MESSAGE = "must not contain an invisible or text-direction character";
+
+const noControlCharacter = (value: string): boolean => !hasControlCharacter(value);
+
+const noInvisibleCharacter = (value: string): boolean => !hasInvisibleCharacter(value);
+
+const boundedText = (maxLength: number): z.ZodString => {
+  return z.string().min(1, "is required").max(maxLength, { abort: true, error: "is too long" });
+};
+
+const nonBlankText = (maxLength: number): z.ZodString => {
+  return boundedText(maxLength).regex(/\S/, "must contain a non-whitespace character");
+};
+
+const hasUniqueProductIds = (items: readonly { productId: string }[]): boolean => {
+  // Lower-cased for the comparison only: z.uuid() accepts both cases, and the value is not changed.
+  return new Set(items.map((item) => item.productId.toLowerCase())).size === items.length;
+};
+
+const orderItemSchema = z.strictObject({
+  // z.uuid() accepts versions 1 to 8: the database generates version 7, other writers version 4.
+  productId: z.uuid(),
+  quantity: z.number().int().min(1).max(MAX_QUANTITY),
+});
+
+const locationSchema = z.strictObject({
+  // z.number() rejects NaN and the infinities; the bounds are inclusive.
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+});
+
+/**
+ * The body of an order creation. Strict: a price, a total, a fee, a status, a customer id or
+ * any other property the client should not choose is rejected. The server recomputes all money.
+ *
+ * `phone` is checked for shape and length only; `normalizePhone` produces the E.164 value.
+ * `location` is required: the customer picks a point (pin, place or own position).
+ * Phone number and coordinates are personal data: never log a parsed request.
+ */
+export const createOrderRequestSchema = z.strictObject({
+  phone: boundedText(MAX_PHONE_LENGTH).regex(
+    /^[0-9+ ().-]+$/,
+    "must contain only digits, +, spaces, parentheses, dots and hyphens",
+  ),
+  contactName: nonBlankText(MAX_CONTACT_NAME_LENGTH)
+    .refine(noControlCharacter, "must not contain a control character")
+    .refine(noInvisibleCharacter, INVISIBLE_CHARACTER_MESSAGE),
+  customerNote: z
+    .string()
+    .max(MAX_CUSTOMER_NOTE_LENGTH, { abort: true, error: "is too long" })
+    .refine(
+      (value) => !hasControlCharacterOtherThanNewline(value),
+      "must not contain a control character other than a newline",
+    )
+    .refine(noInvisibleCharacter, INVISIBLE_CHARACTER_MESSAGE)
+    .optional(),
+  landmarkText: nonBlankText(MAX_LANDMARK_LENGTH)
+    .refine(noControlCharacter, "must not contain a control character")
+    .refine(noInvisibleCharacter, INVISIBLE_CHARACTER_MESSAGE),
+  location: locationSchema,
+  items: z
+    .array(orderItemSchema)
+    .min(1, "must contain at least one item")
+    .max(MAX_ITEMS, "must contain at most 30 items")
+    .refine(hasUniqueProductIds, "must not contain the same product twice"),
+});
+
+export type CreateOrderRequest = z.infer<typeof createOrderRequestSchema>;
