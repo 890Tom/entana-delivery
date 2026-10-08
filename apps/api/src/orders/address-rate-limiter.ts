@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import type { NextFunction, Request, Response } from "express";
 import { CLOCK } from "../clock.js";
 import type { Clock } from "../clock.js";
+import { resolveRequestId } from "../logging/pino-http-options.js";
 import { normalizeAddress } from "./normalize-address.js";
 import { AddressRateLimitedError } from "./order-errors.js";
 import {
@@ -33,8 +34,13 @@ export class AddressRateLimiter {
     );
   }
 
+  /** How many addresses are tracked now (bounded by ADDRESS_MAX_TRACKED). */
+  get trackedAddresses(): number {
+    return this.limiter.size;
+  }
+
   /** Mounted on the orders path: only the creation (POST on the collection itself) is counted. */
-  readonly middleware = (request: Request, _response: Response, next: NextFunction): void => {
+  readonly middleware = (request: Request, response: Response, next: NextFunction): void => {
     if (request.method !== "POST" || request.path !== "/") {
       next();
       return;
@@ -46,6 +52,9 @@ export class AddressRateLimiter {
     // The request stops before the access logger of the application, which sits after the body
     // parser: this fixed line is its access line. It holds no address, header, query or body.
     this.logger.warn("order_creation_address_limited");
+    // The request id is set by the access logger, which this request never reaches. Without it
+    // this answer would have fewer headers than the per-phone 429 and could be told apart.
+    response.setHeader("X-Request-Id", resolveRequestId(request.headers["x-request-id"]));
     next(new AddressRateLimitedError());
   };
 }

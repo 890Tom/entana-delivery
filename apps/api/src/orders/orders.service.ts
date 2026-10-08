@@ -82,9 +82,13 @@ export class OrdersService {
     if (phoneE164 === null) {
       throw new InvalidPhoneError();
     }
-    const attempt: Attempt = { request, idempotencyKey, phoneE164 };
+    // The one place where the key is normalised: a uuid is valid in both cases, and the database
+    // compares text, so "ABC…" and "abc…" would be two keys. Every lookup and the stored value
+    // below use this form.
+    const normalizedKey = idempotencyKey.toLowerCase();
+    const attempt: Attempt = { request, idempotencyKey: normalizedKey, phoneE164 };
     // Before any transaction: a replay takes no lock and writes nothing.
-    const existing = await findOrderByIdempotencyKey(this.database, idempotencyKey);
+    const existing = await findOrderByIdempotencyKey(this.database, normalizedKey);
     return existing === null ? this.createWithRetries(attempt) : toReplay(existing, attempt);
   }
 

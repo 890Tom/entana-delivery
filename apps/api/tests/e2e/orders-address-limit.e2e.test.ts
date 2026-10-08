@@ -27,6 +27,14 @@ const CREATED_RESPONSE = {
   createdAt: "2026-10-08T08:00:00.000Z",
 } as const;
 
+const VOLATILE_HEADERS = ["date", "x-request-id"];
+
+function withoutVolatileHeaders(headers: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(headers).filter(([name]) => !VOLATILE_HEADERS.includes(name)),
+  );
+}
+
 describe("POST /api/v1/orders: the limit per address", () => {
   let app: NestExpressApplication;
   const clock = {
@@ -165,6 +173,18 @@ describe("POST /api/v1/orders: the limit per address", () => {
     expect(products.status).toBe(200);
   });
 
+  it("gives the refused response a request id, and echoes a valid one sent by the client", async () => {
+    await exhaust("203.0.113.14");
+
+    const generated = await from("203.0.113.14");
+    const echoed = await from("203.0.113.14").set("X-Request-Id", "client-request-id-42");
+    const rejected = await from("203.0.113.14").set("X-Request-Id", "bad id with spaces!");
+
+    expect(generated.headers["x-request-id"]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(echoed.headers["x-request-id"]).toBe("client-request-id-42");
+    expect(rejected.headers["x-request-id"]).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
   it("answers an identical body for the address limit and for the phone limit", async () => {
     await exhaust("203.0.113.10");
     const byAddress = await from("203.0.113.10");
@@ -174,8 +194,14 @@ describe("POST /api/v1/orders: the limit per address", () => {
     expect(byAddress.status).toBe(429);
     expect(byPhone.status).toBe(429);
     expect(byPhone.text).toBe(byAddress.text);
+    expect(byPhone.body).toEqual(FIXED_429);
     expect(byAddress.headers["retry-after"]).toBe("600");
-    expect(byPhone.headers["retry-after"]).toBe("3600");
+    // Whole header set: only the values that change on every response may differ, but both
+    // responses must carry the same header names.
+    expect(Object.keys(byPhone.headers).sort()).toEqual(Object.keys(byAddress.headers).sort());
+    expect(withoutVolatileHeaders(byPhone.headers)).toEqual(
+      withoutVolatileHeaders(byAddress.headers),
+    );
   });
 
   it("writes one line for a refused request, with no body, header, query or address", async () => {

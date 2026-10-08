@@ -28,6 +28,22 @@ describe("problemDetailsSchema", () => {
     expect(problemDetailsSchema.safeParse({ ...problem, productIds: [1] }).success).toBe(false);
   });
 
+  it("refuses product ids that are not uuids", () => {
+    const result = problemDetailsSchema.safeParse({ ...problem, productIds: ["not-a-uuid"] });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts 30 product ids and refuses 31, the most an order can hold", () => {
+    const ids = (count: number): string[] =>
+      Array.from(
+        { length: count },
+        (_, index) => `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`,
+      );
+
+    expect(problemDetailsSchema.safeParse({ ...problem, productIds: ids(30) }).success).toBe(true);
+    expect(problemDetailsSchema.safeParse({ ...problem, productIds: ids(31) }).success).toBe(false);
+  });
+
   it("refuses a success status", () => {
     expect(problemDetailsSchema.safeParse({ ...problem, status: 200 }).success).toBe(false);
   });

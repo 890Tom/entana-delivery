@@ -153,7 +153,7 @@ describe("POST /api/v1/orders: responses", () => {
         error: () => new OrderRateLimitedError(),
         status: 429,
         body: { ...FIXED_429 },
-        headers: { "retry-after": "3600" },
+        headers: { "retry-after": "600" },
       },
       {
         name: "a creation that failed after several attempts",

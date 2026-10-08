@@ -1,4 +1,4 @@
-import { createOrderResponseSchema } from "@entana/contracts";
+import { createOrderResponseSchema, problemDetailsSchema } from "@entana/contracts";
 import type { CreateOrderRequest } from "@entana/contracts";
 import type { PrismaClient } from "@entana/database";
 import type { NestExpressApplication } from "@nestjs/platform-express";
@@ -121,6 +121,64 @@ describe("POST /api/v1/orders on a real PostgreSQL", () => {
       expect(findChangedTables(before, await countRows(client))).toEqual([]);
     });
 
+    it("replays the same key written in upper case: 201, the replay header, no new row", async () => {
+      const body = orderFor(await oneProduct());
+      const key = newKey();
+      expect(key).not.toBe(key.toUpperCase());
+      const first = await post(body, key.toLowerCase());
+      expect(first.status).toBe(201);
+      const before = await countRows(client);
+
+      const replay = await post(body, key.toUpperCase());
+
+      expect(replay.status).toBe(201);
+      expect(replay.headers["idempotent-replayed"]).toBe("true");
+      expect(replay.body).toEqual(first.body);
+      expect(findChangedTables(before, await countRows(client))).toEqual([]);
+    });
+
+    it("stores the key in lower case", async () => {
+      const key = newKey();
+
+      await post(orderFor(await oneProduct()), key.toUpperCase());
+
+      const order = await client.customerOrder.findFirstOrThrow();
+      expect(order.idempotencyKey).toBe(key.toLowerCase());
+    });
+
+    it("detects a conflict whatever the case of the key", async () => {
+      const productId = await oneProduct();
+      const key = newKey();
+      await post(orderFor(productId), key.toLowerCase());
+
+      const response = await post(
+        orderFor(productId, { contactName: "Someone Else" }),
+        key.toUpperCase(),
+      );
+
+      expect(response.status).toBe(409);
+      expect(await client.customerOrder.count()).toBe(1);
+    });
+
+    it("creates one order for two simultaneous requests with the two spellings of a key", async () => {
+      const body = orderFor(await oneProduct());
+      const key = newKey();
+
+      const responses = await Promise.all([
+        post(body, key.toLowerCase()),
+        post(body, key.toUpperCase()),
+        post(body, key.toLowerCase()),
+        post(body, key.toUpperCase()),
+      ]);
+
+      expect(responses.map((response) => response.status)).toEqual([201, 201, 201, 201]);
+      const replays = responses.filter(
+        (response) => response.headers["idempotent-replayed"] === "true",
+      );
+      expect(replays).toHaveLength(3);
+      expect(await client.customerOrder.count()).toBe(1);
+    });
+
     it("answers 409 for the same key with another body", async () => {
       const productId = await oneProduct();
       const key = newKey();
@@ -226,6 +284,9 @@ describe("POST /api/v1/orders on a real PostgreSQL", () => {
         const response = await post(orderFor(productId));
 
         expect(response.status).toBe(422);
+        // The ids come from the request, which the request schema has already checked: they
+        // always pass the (uuid, at most 30) response schema.
+        expect(problemDetailsSchema.safeParse(response.body).success).toBe(true);
         expect(response.body).toEqual({
           type: "about:blank",
           title: "Unprocessable Entity",
@@ -236,6 +297,23 @@ describe("POST /api/v1/orders on a real PostgreSQL", () => {
         });
       },
     );
+
+    it("lists only the unusable ids, as the client wrote them, among usable ones", async () => {
+      const usable = await oneProduct();
+      const unusable = await insertProduct(client, { available: false });
+      const body = buildOrderRequest([
+        { productId: usable, quantity: 1 },
+        { productId: unusable.toUpperCase(), quantity: 1 },
+      ]);
+
+      const response = await post(body);
+
+      expect(response.status).toBe(422);
+      expect((response.body as { productIds: string[] }).productIds).toEqual([
+        unusable.toUpperCase(),
+      ]);
+      expect(problemDetailsSchema.safeParse(response.body).success).toBe(true);
+    });
 
     it("answers a fixed 422 for an order that is too large", async () => {
       const productId = await oneProduct({ priceAr: 1_000_000_000 });
@@ -261,7 +339,7 @@ describe("POST /api/v1/orders on a real PostgreSQL", () => {
       const response = await post(orderFor(productId));
 
       expect(response.status).toBe(429);
-      expect(response.headers["retry-after"]).toBe("3600");
+      expect(response.headers["retry-after"]).toBe("600");
       expect(response.body).toEqual(FIXED_429);
       expect(await client.customerOrder.count()).toBe(5);
     });

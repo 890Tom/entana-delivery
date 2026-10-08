@@ -11,7 +11,7 @@ import {
   UnavailableProductsError,
   UnsupportedContentTypeError,
 } from "./order-errors.js";
-import { ADDRESS_RETRY_AFTER_SECONDS, PHONE_RETRY_AFTER_SECONDS } from "./order-http-limits.js";
+import { RATE_LIMIT_RETRY_AFTER_SECONDS } from "./order-http-limits.js";
 
 /** What the HTTP layer answers for a typed error of the order creation. */
 export interface OrderFailure {
@@ -35,11 +35,11 @@ function retryAfter(seconds: number): Readonly<Record<string, string>> {
   return { "Retry-After": String(seconds) };
 }
 
-const TOO_MANY_REQUESTS = (seconds: number): OrderFailure => ({
+const TOO_MANY_REQUESTS: OrderFailure = {
   status: 429,
   detail: TOO_MANY_REQUESTS_DETAIL,
-  headers: retryAfter(seconds),
-});
+  headers: retryAfter(RATE_LIMIT_RETRY_AFTER_SECONDS),
+};
 
 // Errors whose answer does not depend on their content.
 const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
@@ -57,8 +57,8 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
     { status: 409, detail: "The idempotency key was already used for a different request." },
   ],
   [OrderTooLargeError, { status: 422, detail: "The order total is too large." }],
-  [OrderRateLimitedError, TOO_MANY_REQUESTS(PHONE_RETRY_AFTER_SECONDS)],
-  [AddressRateLimitedError, TOO_MANY_REQUESTS(ADDRESS_RETRY_AFTER_SECONDS)],
+  [OrderRateLimitedError, TOO_MANY_REQUESTS],
+  [AddressRateLimitedError, TOO_MANY_REQUESTS],
   [
     UnsupportedContentTypeError,
     { status: 415, detail: "The content type of the request is not supported." },
