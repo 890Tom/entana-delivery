@@ -9,7 +9,10 @@
     "start": "node --env-file-if-exists=../../.env dist/main.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "pnpm test:coverage:unit",
+    "test:coverage:unit": "COVERAGE_PART=1 vitest run --reporter=default --reporter=blob --outputFile.blob=.vitest-reports/blobs/unit.json --coverage --coverage.reportsDirectory=.vitest-reports/coverage-unit",
+    "test:coverage:integration": "COVERAGE_PART=1 vitest run --config vitest.integration.config.ts --reporter=default --reporter=blob --outputFile.blob=.vitest-reports/blobs/integration.json --coverage --coverage.reportsDirectory=.vitest-reports/coverage-integration",
+    "test:coverage:merge": "vitest run --merge-reports=.vitest-reports/blobs --coverage",
     "test:e2e": "vitest run tests/e2e",
     "test:integration": "vitest run --config vitest.integration.config.ts"
   },

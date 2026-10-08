@@ -5,10 +5,13 @@ import { createOrderRequestSchema } from "../create-order-request.js";
 
 export const FIRST_PRODUCT_ID = "3b241101-e2bb-4255-8caf-4136c566a962";
 export const SECOND_PRODUCT_ID = "0190a5b2-7c3d-7e4f-8a1b-2c3d4e5f6a7b";
+/** 43 characters of the base64url alphabet, as 32 random bytes give. Built from a low-entropy filler on purpose: a random-looking literal is flagged by the secrets scan. */
+export const VALID_TRACKING_TOKEN = "FAKE".padEnd(43, "0");
 
 /** A valid request; `overrides` replaces or adds fields, so a test changes one thing at a time. */
 export const buildRequest = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
   phone: "034 12 345 67",
+  trackingToken: VALID_TRACKING_TOKEN,
   contactName: "Rakoto Andry",
   customerNote: "Portail bleu, sonner deux fois",
   landmarkText: "En face de la pharmacie Ankorondrano",

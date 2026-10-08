@@ -150,6 +150,8 @@ jobs:
         run: pnpm test:integration --filter=@entana/database
       - name: API integration tests
         run: pnpm test:integration --filter=@entana/api
+      - name: API coverage (unit and integration)
+        run: pnpm test:coverage:api
 
   # Builds the production image and tests it from outside, through the published port: the
   # image's own health check runs inside the container and cannot see a wrong HOST.

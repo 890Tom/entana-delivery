@@ -9,6 +9,8 @@ export { computeOrderTotal } from "./orders/compute-order-total.js";
 export type { OrderLineAmount } from "./orders/compute-order-total.js";
 export { createOrderRequestSchema } from "./orders/create-order-request.js";
 export type { CreateOrderRequest } from "./orders/create-order-request.js";
+export { createOrderResponseSchema } from "./orders/create-order-response.js";
+export type { CreateOrderResponse } from "./orders/create-order-response.js";
 export { idempotencyKeySchema } from "./orders/idempotency-key.js";
 export type { IdempotencyKey } from "./orders/idempotency-key.js";
 export { normalizePhone } from "./orders/normalize-phone.js";
