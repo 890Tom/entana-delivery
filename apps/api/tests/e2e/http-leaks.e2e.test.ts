@@ -6,6 +6,7 @@ import { startAppWithProbe } from "./support/create-test-app.js";
 import { captureLogs } from "./support/log-capture.js";
 import { buildTestConfig } from "./support/test-config.js";
 
+const STRICT_INSTANCE = "/api/v1/probe/strict";
 const NOT_FOUND_DETAIL = "The requested resource was not found.";
 const VALIDATION_TYPE = "urn:entana:problem:validation-error";
 const HOSTILE = ["FAKE-QUERY-8841", "SECRETBODY8841", "polluted8841"];
@@ -139,14 +140,9 @@ describe("responses to hostile requests carry no request text", () => {
 
   it.each([
     ["a top-level array", '["SECRETBODY8841"]', VALIDATION_TYPE],
-    // The strict JSON parser refuses these two before validation.
+    // The strict JSON parser refuses these two.
     ["null", "null", "about:blank"],
     ["a string", '"SECRETBODY8841"', "about:blank"],
-    [
-      "__proto__ nested in a record",
-      '{"labels":{"__proto__":{"polluted8841":true}}}',
-      VALIDATION_TYPE,
-    ],
   ])("answers %s with a fixed problem", async (_name, body, type) => {
     const response = await http()
       .post("/api/v1/probe/strict")
@@ -155,6 +151,24 @@ describe("responses to hostile requests carry no request text", () => {
 
     expect(response.status).toBe(400);
     expect(response.body).toMatchObject({ type });
+    expectNoRequestText(response);
+    expect(Object.hasOwn(Object.prototype, "polluted8841")).toBe(false);
+  });
+
+  it("refuses a __proto__ key nested in a record with the exact fixed problem", async () => {
+    const response = await http()
+      .post("/api/v1/probe/strict")
+      .set("Content-Type", "application/json")
+      .send('{"labels":{"__proto__":{"polluted8841":true}}}');
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      type: "about:blank",
+      title: "Bad Request",
+      status: 400,
+      detail: "The request body is not acceptable.",
+      instance: STRICT_INSTANCE,
+    });
     expectNoRequestText(response);
     expect(Object.hasOwn(Object.prototype, "polluted8841")).toBe(false);
   });

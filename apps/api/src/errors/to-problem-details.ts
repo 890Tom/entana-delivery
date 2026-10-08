@@ -9,6 +9,7 @@ import {
 } from "./database-failure/database-failure-mapping.js";
 import { mapOrderFailure, toOrderProblem } from "../orders/order-failure.js";
 import { RequestValidationError } from "./request-validation-error.js";
+import { UnacceptableBodyError } from "./unacceptable-body-error.js";
 import { ServiceNotReadyError } from "./service-not-ready-error.js";
 
 const INTERNAL_ERROR_DETAIL = "An unexpected error occurred.";
@@ -97,6 +98,9 @@ export function resolveFailure(error: unknown, instance: string): ResolvedFailur
       type: VALIDATION_PROBLEM_TYPE,
       errors: [...error.fieldErrors],
     });
+  }
+  if (error instanceof UnacceptableBodyError) {
+    return resolved(problem(400, error.message, instance));
   }
   if (error instanceof ServiceNotReadyError) {
     return resolved(problem(503, NOT_READY_DETAIL, instance));

@@ -5,7 +5,14 @@ import type { CreateOrderResult } from "../../src/orders/orders.service.js";
 import { startOrdersApp } from "./support/start-orders-app.js";
 import type { OrderServiceDouble } from "./support/start-orders-app.js";
 import { buildTestConfig } from "./support/test-config.js";
-import { ORDERS_PATH, buildFakeBody, newKey, validationProblem } from "../support/order-http.js";
+import {
+  DETAILS,
+  ORDERS_PATH,
+  buildFakeBody,
+  newKey,
+  problemBody,
+  validationProblem,
+} from "../support/order-http.js";
 
 const CREATED: CreateOrderResult = {
   response: {
@@ -55,17 +62,15 @@ describe("POST /api/v1/orders: hostile input", () => {
     const pollutedValue = (): object => JSON.parse('{"__proto__":{"polluted":true}}') as object;
 
     it.each([
-      ["the body", [""], (): Record<string, unknown> => ({ ...pollutedValue() })],
+      ["the body", (): Record<string, unknown> => ({ ...pollutedValue() })],
       [
         "location",
-        ["/location"],
         (): Record<string, unknown> => ({
           location: { lat: 1, lng: 1, ...pollutedValue() },
         }),
       ],
       [
         "an item",
-        ["/items/0"],
         (): Record<string, unknown> => ({
           items: [
             {
@@ -76,21 +81,20 @@ describe("POST /api/v1/orders: hostile input", () => {
           ],
         }),
       ],
-    ])(
-      "answers 400 for one inside %s, names its parent, and pollutes nothing",
-      async (_name, pointers, make) => {
-        const body = JSON.stringify({ ...buildFakeBody(), ...make() });
-        expect(body).toContain('"__proto__"');
+    ])("answers a fixed 400 for one inside %s and pollutes nothing", async (_name, make) => {
+      const body = JSON.stringify({ ...buildFakeBody(), ...make() });
+      expect(body).toContain('"__proto__"');
 
-        const response = await postJson(body);
+      const response = await postJson(body);
 
-        expect(response.status).toBe(400);
-        expect(response.body).toEqual(validationProblem(pointers));
-        expect(createOrder).not.toHaveBeenCalled();
-        expect(Object.hasOwn(Object.prototype, "polluted")).toBe(false);
-        expect(({} as Record<string, unknown>).polluted).toBeUndefined();
-      },
-    );
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual(
+        problemBody(400, "Bad Request", "The request body is not acceptable."),
+      );
+      expect(createOrder).not.toHaveBeenCalled();
+      expect(Object.hasOwn(Object.prototype, "polluted")).toBe(false);
+      expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+    });
   });
 
   describe("hostile property names", () => {
@@ -99,8 +103,6 @@ describe("POST /api/v1/orders: hostile input", () => {
       ["a newline", "line1\nline2-FAKE-NEWLINE"],
       ["html", "<script>alert('FAKE-HTML')</script>"],
       ["a right-to-left override", "‮gnp.FAKE-RTL"],
-      ["a constructor name", "constructor"],
-      ["a prototype name", "prototype"],
     ];
 
     it.each(hostileKeys)("does not repeat an unknown key made of %s", async (_name, key) => {
@@ -109,11 +111,22 @@ describe("POST /api/v1/orders: hostile input", () => {
       const response = await postJson(body);
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(validationProblem([""]));
+      expect(response.body).toEqual(validationProblem([["", DETAILS.unrecognized_keys]]));
       expect(response.text).not.toContain(key.slice(0, 40));
       expect(response.text).not.toContain("FAKE-");
       expect(JSON.stringify(response.headers)).not.toContain("FAKE-");
       expect(response.text.length).toBeLessThan(500);
+    });
+
+    // The validation pipe would delete these two silently, so the request is refused before it.
+    it.each(["constructor", "prototype"])("refuses an own %s key with a fixed 400", async (key) => {
+      const response = await postJson({ ...buildFakeBody(), [key]: "FAKE-VALUE-4417" });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual(
+        problemBody(400, "Bad Request", "The request body is not acceptable."),
+      );
+      expect(createOrder).not.toHaveBeenCalled();
     });
 
     it("does not repeat a hostile key nested in the location", async () => {
@@ -121,7 +134,7 @@ describe("POST /api/v1/orders: hostile input", () => {
 
       const response = await postJson(body);
 
-      expect(response.body).toEqual(validationProblem(["/location"]));
+      expect(response.body).toEqual(validationProblem([["/location", DETAILS.unrecognized_keys]]));
       expect(response.text).not.toContain("FAKE-NESTED");
     });
   });
@@ -136,13 +149,13 @@ describe("POST /api/v1/orders: hostile input", () => {
     it("points at an object where an array was expected, with no index", async () => {
       const response = await postJson({ ...buildFakeBody(), items: { "0": itemOf(1, 0) } });
 
-      expect(response.body).toEqual(validationProblem(["/items"]));
+      expect(response.body).toEqual(validationProblem([["/items", DETAILS.invalid_type]]));
     });
 
     it("points at a negative quantity by the index in the structure", async () => {
       const response = await postJson({ ...buildFakeBody(), items: [itemOf(1, 0), itemOf(-1, 1)] });
 
-      expect(response.body).toEqual(validationProblem(["/items/1/quantity"]));
+      expect(response.body).toEqual(validationProblem([["/items/1/quantity", DETAILS.too_small]]));
     });
 
     it("points at a huge index without growing, whatever the size of the array", async () => {

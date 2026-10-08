@@ -6,6 +6,7 @@ import type { AppConfig } from "./config/app-config.js";
 import { rejectBody } from "./errors/body-rejected-error.js";
 import { AddressRateLimiter } from "./orders/address-rate-limiter.js";
 import { ORDER_CREATION_PATH } from "./orders/order-http-limits.js";
+import { rejectPrototypeKey } from "./errors/reject-prototype-key.js";
 import { setupSwagger } from "./docs/setup-swagger.js";
 import { ProblemDetailsFilter } from "./errors/problem-details.filter.js";
 import { toRequestValidationError } from "./errors/request-validation-error.js";
@@ -47,6 +48,8 @@ export function configureApplication(app: NestExpressApplication, config: AppCon
   // Replaces Nest's default parser (NEST_APPLICATION_OPTIONS) to set the size limit.
   app.useBodyParser("json", { limit: `${String(config.bodyLimitKb)}kb` });
   app.use(rejectBody);
+  // Every route: a "__proto__" key would be removed silently by the validation pipe.
+  app.use(rejectPrototypeKey);
 
   app.setGlobalPrefix(API_PREFIX);
   app.enableVersioning({ type: VersioningType.URI });

@@ -191,8 +191,12 @@ replay (same key, same request) answers the same `201` and the same body with
 
 No answer, log line or error repeats a value the client sent: not the phone number, the name, the
 note, the landmark, the coordinates, the tracking token or the name of an unknown property. A
-validation error carries a fixed text and a pointer only; an unknown property is reported on its
-parent object (pointer `""`).
+validation error carries a pointer and a fixed text chosen by the kind of failure (see "Errors"); an
+unknown property is reported on its parent object (pointer `""`), and the `Idempotency-Key` header
+on `/headers/idempotencyKey`. On every JSON route, a body that holds a `__proto__`, `constructor`
+or `prototype` key at any depth, or that is more than 64 levels deep or has more than 100 000
+values, is refused with a fixed 400 before validation (the validation pipe of Nest would otherwise
+delete those keys silently and accept the rest).
 
 **Client address and `TRUST_PROXY`.** The per-address limit counts `request.ip`. Without
 `TRUST_PROXY` that is the address of the TCP peer, so **behind a reverse proxy every client shares

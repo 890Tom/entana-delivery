@@ -23,7 +23,7 @@ export interface OrderFailure {
   readonly headers?: Readonly<Record<string, string>>;
 }
 
-export const INVALID_VALUE_DETAIL = "The value is not valid.";
+const INVALID_VALUE_DETAIL = "The value is not valid.";
 const REQUEST_INVALID_DETAIL = "The request is invalid.";
 // One text for both limits: a caller must not learn which one it hit.
 const TOO_MANY_REQUESTS_DETAIL = "Too many requests. Try again later.";

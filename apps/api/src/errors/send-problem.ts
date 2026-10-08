@@ -55,10 +55,11 @@ export function sendProblem(
   logger: ErrorLogger,
 ): void {
   // originalUrl, not path: Express makes `path` relative to the router that handles the request.
-  const { problem, databaseKind, headers = {} } = resolveFailure(
-    error,
-    toProblemInstance(request.originalUrl),
-  );
+  const {
+    problem,
+    databaseKind,
+    headers = {},
+  } = resolveFailure(error, toProblemInstance(request.originalUrl));
 
   // Exactly one branch writes: a classified database failure logs its kind only, the readiness
   // check logged its own failure already (a second line would only repeat it), and any other
