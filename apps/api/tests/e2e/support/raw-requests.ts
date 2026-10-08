@@ -8,6 +8,7 @@ import { ORDERS_PATH, newKey } from "../../support/order-http.js";
 export function postOversizedBody(
   app: NestExpressApplication,
   address: string,
+  contentType = "application/json",
 ): Promise<{ status: number; body: unknown }> {
   const { port } = app.getHttpServer().address() as AddressInfo;
   return new Promise((resolve, reject) => {
@@ -18,7 +19,7 @@ export function postOversizedBody(
         method: "POST",
         path: ORDERS_PATH,
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": contentType,
           "Content-Length": 1_000_000,
           "Idempotency-Key": newKey(),
           "X-Forwarded-For": address,

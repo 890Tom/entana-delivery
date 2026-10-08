@@ -16,13 +16,16 @@ import {
   ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
-import { createOrderResponseSchema, problemDetailsSchema } from "@entana/contracts";
+import {
+  createOrderRequestSchema,
+  createOrderResponseSchema,
+  problemDetailsSchema,
+} from "@entana/contracts";
 import type { CreateOrderRequest, CreateOrderResponse } from "@entana/contracts";
 import type { Response } from "express";
 import { CREATE_ORDER_BODY_SCHEMA } from "./order-openapi.js";
 import { JsonContentTypeGuard } from "./json-content-type.guard.js";
 import {
-  CreateOrderBodyPipe,
   IDEMPOTENCY_KEY_HEADER,
   idempotencyKeyHeader,
   IdempotencyKeyPipe,
@@ -108,7 +111,7 @@ export class OrdersController {
   @documentProblems()
   async create(
     @idempotencyKeyHeader(IdempotencyKeyPipe) idempotencyKey: string,
-    @Body(CreateOrderBodyPipe) body: CreateOrderRequest,
+    @Body({ schema: createOrderRequestSchema }) body: CreateOrderRequest,
     @Res({ passthrough: true }) response: Response,
   ): Promise<CreateOrderResponse> {
     const result = await this.ordersService.createOrder(body, idempotencyKey);

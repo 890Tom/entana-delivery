@@ -2,8 +2,15 @@ import {
   BadRequestException,
   ForbiddenException,
   HttpException,
-  InternalServerErrorException,
+  ConflictException,
+  MethodNotAllowedException,
+  NotAcceptableException,
   NotFoundException,
+  PayloadTooLargeException,
+  UnauthorizedException,
+  UnprocessableEntityException,
+  UnsupportedMediaTypeException,
+  InternalServerErrorException,
 } from "@nestjs/common";
 import { problemDetailsSchema } from "@entana/contracts";
 import { DATABASE_ERROR_KINDS } from "@entana/database";
@@ -11,8 +18,13 @@ import { describe, expect, it } from "vitest";
 import { fixedDatabaseProblem } from "../../tests/support/fixed-database-problems.js";
 import { buildObservedDatabaseError } from "../../tests/support/observed-database-errors.js";
 import { toProblemDetails } from "./to-problem-details.js";
-import { RequestValidationError } from "./request-validation-error.js";
+import { RequestValidationError, VALIDATION_DETAILS } from "./request-validation-error.js";
 import { ServiceNotReadyError } from "./service-not-ready-error.js";
+
+// Zod's own issues, which the pipe receives at run time, carry more than the Standard Schema type.
+function zodIssue<T extends object>(fields: T): T {
+  return fields;
+}
 
 describe("toProblemDetails", () => {
   it("describes a Nest HTTP exception with its status", () => {
@@ -25,14 +37,44 @@ describe("toProblemDetails", () => {
     });
   });
 
-  it("keeps the message the developer wrote for an HTTP exception", () => {
-    const problem = toProblemDetails(new ForbiddenException("Not your order."), "/x");
-    expect(problem).toMatchObject({ status: 403, detail: "Not your order." });
+  it.each([
+    [new BadRequestException("SECRET-A"), 400, "The request is invalid."],
+    [new UnauthorizedException("SECRET-A"), 401, "Authentication is required."],
+    [new ForbiddenException("SECRET-A"), 403, "This action is not allowed."],
+    [
+      new NotFoundException("Cannot GET /FAKE-PATH-8841?q=FAKE-QUERY-8841"),
+      404,
+      "The requested resource was not found.",
+    ],
+    [new MethodNotAllowedException("SECRET-A"), 405, "This method is not allowed."],
+    [new NotAcceptableException("SECRET-A"), 406, "The requested format is not available."],
+    [new ConflictException("SECRET-A"), 409, "The request conflicts with the current state."],
+    [new PayloadTooLargeException("SECRET-A"), 413, "The request body is too large."],
+    [
+      new UnsupportedMediaTypeException("SECRET-A"),
+      415,
+      "The content type of the request is not supported.",
+    ],
+    [new UnprocessableEntityException("SECRET-A"), 422, "The request could not be processed."],
+    [new HttpException("SECRET-A", 429), 429, "Too many requests."],
+    [new HttpException("SECRET-A", 499), 499, "The request could not be completed."],
+  ])(
+    "answers an HTTP exception with a fixed detail chosen by its status (%#)",
+    (error, status, detail) => {
+      const problem = toProblemDetails(error, "/x");
+      expect(problem).toMatchObject({ status, detail });
+      expect(JSON.stringify(problem)).not.toMatch(/SECRET-A|FAKE-/);
+    },
+  );
+
+  it("never reads the message of an HTTP exception with an unlisted status", () => {
+    const problem = toProblemDetails(new HttpException("secret 0612345678", 418), "/x");
+    expect(problem.detail).toBe("The request could not be completed.");
   });
 
-  it("keeps the message of an HTTP exception that has a status without a standard name", () => {
-    const problem = toProblemDetails(new HttpException("Custom.", 499), "/x");
-    expect(problem).toMatchObject({ status: 499, title: "Error", detail: "Custom." });
+  it("never reads the response body of an HTTP exception", () => {
+    const error = new HttpException({ message: "SECRET-B", extra: "SECRET-B" }, 409);
+    expect(JSON.stringify(toProblemDetails(error, "/x"))).not.toContain("SECRET-B");
   });
 
   it("hides the message of an HTTP exception that is a server error", () => {
@@ -60,10 +102,10 @@ describe("toProblemDetails", () => {
   });
 
   describe("validation errors", () => {
-    it("lists the invalid fields as JSON pointers", () => {
+    it("lists the invalid fields as JSON pointers with a fixed detail per code", () => {
       const error = new RequestValidationError([
-        { message: "Too small", path: ["items", 0, "quantity"] },
-        { message: "Required", path: [{ key: "phone" }] },
+        zodIssue({ code: "too_small", message: "Too small: 8841", path: ["items", 0, "quantity"] }),
+        zodIssue({ code: "invalid_type", message: "Required", path: [{ key: "phone" }] }),
       ]);
       expect(toProblemDetails(error, "/api/v1/orders")).toMatchObject({
         type: "urn:entana:problem:validation-error",
@@ -71,24 +113,97 @@ describe("toProblemDetails", () => {
         status: 400,
         detail: "The request is invalid.",
         errors: [
-          { pointer: "/items/0/quantity", detail: "Too small" },
-          { pointer: "/phone", detail: "Required" },
+          { pointer: "/items/0/quantity", detail: VALIDATION_DETAILS.too_small },
+          { pointer: "/phone", detail: VALIDATION_DETAILS.invalid_type },
         ],
       });
     });
 
-    it("points at the whole body when the issue has no path", () => {
-      const error = new RequestValidationError([{ message: "Expected an object" }]);
+    it("never reads the message of an issue", () => {
+      const error = new RequestValidationError([
+        zodIssue({ code: "custom", message: "SECRET-TEXT" }),
+      ]);
+      expect(JSON.stringify(toProblemDetails(error, "/x"))).not.toContain("SECRET-TEXT");
+    });
+
+    it("uses the default detail for an unknown or missing code", () => {
+      const error = new RequestValidationError([
+        zodIssue({ code: "invalid_union", message: "m" }),
+        zodIssue({ code: "toString", message: "m" }),
+        { message: "m" },
+      ]);
       expect(toProblemDetails(error, "/x").errors).toEqual([
-        { pointer: "", detail: "Expected an object" },
+        { pointer: "", detail: VALIDATION_DETAILS.default },
+        { pointer: "", detail: VALIDATION_DETAILS.default },
+        { pointer: "", detail: VALIDATION_DETAILS.default },
       ]);
     });
 
-    it("escapes the characters that are special in a JSON pointer", () => {
-      const error = new RequestValidationError([{ message: "m", path: ["a/b", "c~d"] }]);
+    it("points at the whole body when the issue has no path", () => {
+      const error = new RequestValidationError([zodIssue({ code: "invalid_type", message: "m" })]);
       expect(toProblemDetails(error, "/x").errors).toEqual([
-        { pointer: "/a~1b/c~0d", detail: "m" },
+        { pointer: "", detail: VALIDATION_DETAILS.invalid_type },
       ]);
+    });
+
+    it.each([
+      [["a", "b/c", "d"], "/a"],
+      [["a", "c~d"], "/a"],
+      [["a", "", "b"], "/a"],
+      [["1abc"], ""],
+      [["a".repeat(42)], ""],
+      [["a".repeat(41), "b"], `/${"a".repeat(41)}/b`],
+      [["a", -1, "b"], "/a"],
+      [["a", 1000, "b"], "/a"],
+      [["a", 100_000], "/a"],
+      [["a", 1.5], "/a"],
+      [["a", Number.NaN], "/a"],
+      [["a", Number.POSITIVE_INFINITY], "/a"],
+      [["a", { key: 5 }], "/a/5"],
+      [["a", 999, "b"], "/a/999/b"],
+      [["a", 0], "/a/0"],
+      [["a", Symbol("s"), "b"], "/a"],
+      [["__proto__"], ""],
+      [["a", { key: "FAKE-KEY-8841" }], "/a"],
+      [["a", { key: "okKey" }], "/a/okKey"],
+    ])("builds a safe pointer from %j", (path, pointer) => {
+      const error = new RequestValidationError([
+        zodIssue({ code: "invalid_type", message: "m", path }),
+      ]);
+      expect(toProblemDetails(error, "/x").errors?.[0]?.pointer).toBe(pointer);
+    });
+
+    it("points at the parent object for unrecognized keys, whatever the keys", () => {
+      const error = new RequestValidationError([
+        zodIssue({ code: "unrecognized_keys", keys: ["FAKE-KEY-8841"], message: "m", path: ["a"] }),
+      ]);
+      expect(toProblemDetails(error, "/x").errors).toEqual([
+        { pointer: "/a", detail: VALIDATION_DETAILS.unrecognized_keys },
+      ]);
+    });
+
+    it.each([
+      [19, 19],
+      [20, 20],
+      [21, 20],
+      [5000, 20],
+    ])("reports %i issues as %i errors, the first ones", (count, reported) => {
+      const issues = Array.from({ length: count }, (_, index) =>
+        zodIssue({ code: "custom", message: "m", path: [index] }),
+      );
+      const pointers = toProblemDetails(new RequestValidationError(issues), "/x").errors?.map(
+        (error) => error.pointer,
+      );
+      expect(pointers).toHaveLength(reported);
+      expect(pointers?.[reported - 1]).toBe(`/${String(reported - 1)}`);
+    });
+
+    it("has a distinct plain sentence for each code", () => {
+      const details = Object.values(VALIDATION_DETAILS);
+      expect(new Set(details).size).toBe(details.length);
+      for (const detail of details) {
+        expect(detail).toMatch(/^[A-Z][A-Za-z ,'-]+\.$/);
+      }
     });
   });
 

@@ -2,50 +2,21 @@ import { Injectable, createParamDecorator } from "@nestjs/common";
 import type { ExecutionContext } from "@nestjs/common";
 import type { Request } from "express";
 import type { PipeTransform } from "@nestjs/common";
-import { createOrderRequestSchema, idempotencyKeySchema } from "@entana/contracts";
-import type { CreateOrderRequest } from "@entana/contracts";
+import { idempotencyKeySchema } from "@entana/contracts";
 import { RequestValidationError } from "../errors/request-validation-error.js";
-import { INVALID_VALUE_DETAIL } from "./order-failure.js";
-
-type Issues = ConstructorParameters<typeof RequestValidationError>[0];
-type IssuePath = NonNullable<Issues[number]["path"]>;
 
 export const IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
-const IDEMPOTENCY_KEY_POINTER_PATH = ["headers", "idempotency-key"] as const;
 
-// The default message of a schema can repeat what the client sent (Zod lists the unknown keys of
-// a strict object by name), so only the path survives: it comes from the structure of the
-// schema, or from an array index, never from a key the client chose (an unknown key is reported
-// on its parent). One entry per field.
-function toFixedIssues(paths: readonly (IssuePath | undefined)[]): Issues {
-  const seen = new Set<string>();
-  const issues: Issues[number][] = [];
-  for (const path of paths) {
-    const identity = JSON.stringify(path ?? []);
-    if (!seen.has(identity)) {
-      seen.add(identity);
-      issues.push({ message: INVALID_VALUE_DETAIL, path });
-    }
-  }
-  return issues;
-}
-
-/**
- * Validates the body of an order creation with the shared schema and answers with fixed texts
- * only. It is used on the parameter instead of the global validation pipe, whose messages can
- * repeat what the client sent. It does not remove a `__proto__` key before validating (the global
- * pipe does): the strict schema must see it and refuse the request.
- */
-@Injectable()
-export class CreateOrderBodyPipe implements PipeTransform<unknown, CreateOrderRequest> {
-  transform(value: unknown): CreateOrderRequest {
-    const result = createOrderRequestSchema.safeParse(value);
-    if (!result.success) {
-      throw new RequestValidationError(toFixedIssues(result.error.issues.map((i) => i.path)));
-    }
-    return result.data;
-  }
-}
+// The generic pointer rule refuses a header name (the hyphen of "idempotency-key"), so the header
+// is reported through this constant path: it is written here, never taken from the request, and it
+// gives the pointer "/headers/idempotencyKey". The code selects the fixed detail; the value of the
+// header is never read into the answer.
+const IDEMPOTENCY_KEY_ISSUE = {
+  code: "invalid_format",
+  // Required by the type; never read: the detail comes from the code.
+  message: "The Idempotency-Key header is not valid.",
+  path: ["headers", "idempotencyKey"],
+} as const;
 
 /** The `Idempotency-Key` header: required, one value, a uuid. The answer names only the header. */
 @Injectable()
@@ -53,7 +24,7 @@ export class IdempotencyKeyPipe implements PipeTransform<unknown, string> {
   transform(value: unknown): string {
     const result = idempotencyKeySchema.safeParse(value);
     if (!result.success) {
-      throw new RequestValidationError(toFixedIssues([IDEMPOTENCY_KEY_POINTER_PATH]));
+      throw new RequestValidationError([IDEMPOTENCY_KEY_ISSUE]);
     }
     return result.data;
   }

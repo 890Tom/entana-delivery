@@ -4,10 +4,12 @@ import type { NestExpressApplication } from "@nestjs/platform-express";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CreateOrderResult } from "../../src/orders/orders.service.js";
+import { postOversizedBody } from "./support/raw-requests.js";
 import { startOrdersApp } from "./support/start-orders-app.js";
 import type { OrderServiceDouble } from "./support/start-orders-app.js";
 import { buildTestConfig } from "./support/test-config.js";
 import {
+  DETAILS,
   HEADER_POINTER,
   ORDERS_PATH,
   buildFakeBody,
@@ -60,6 +62,12 @@ async function postWithTwoKeys(
     outgoing.end(body);
   });
 }
+
+const UNSUPPORTED = problemBody(
+  415,
+  "Unsupported Media Type",
+  "The content type of the request is not supported.",
+);
 
 describe("POST /api/v1/orders: validation", () => {
   let app: NestExpressApplication;
@@ -137,6 +145,45 @@ describe("POST /api/v1/orders: validation", () => {
       expect(response.status).toBe(contentType === "APPLICATION/JSON" ? 201 : 415);
     });
 
+    it.each([
+      ["a form post", "application/x-www-form-urlencoded", "phone=FAKE-5521&contactName=x"],
+      [
+        "a multipart post",
+        "multipart/form-data; boundary=FAKE",
+        "--FAKE\r\n\r\nFAKE-5521\r\n--FAKE--",
+      ],
+      ["a non-UTF-8 charset", "application/json; charset=latin1", JSON.stringify(buildFakeBody())],
+    ])("answers the same fixed 415 for %s", async (_name, contentType, payload) => {
+      const response = await post()
+        .set("Idempotency-Key", newKey())
+        .set("Content-Type", contentType)
+        .send(payload);
+
+      expect(response.status).toBe(415);
+      expect(response.body).toEqual(UNSUPPORTED);
+      expect(response.text).not.toContain("FAKE");
+      expect(createOrder).not.toHaveBeenCalled();
+    });
+
+    it("answers 415 to a form post that looks like it comes from another site", async () => {
+      const response = await post()
+        .set("Origin", "https://FAKE-other-site.example")
+        .set("Idempotency-Key", newKey())
+        .set("Content-Type", "text/plain")
+        .send(JSON.stringify(buildFakeBody()));
+
+      expect(response.status).toBe(415);
+      expect(response.body).toEqual(UNSUPPORTED);
+      expect(createOrder).not.toHaveBeenCalled();
+    });
+
+    it("answers 415, not 413, for an oversized body of another content type", async () => {
+      const response = await postOversizedBody(app, "198.51.100.252", "text/plain");
+
+      expect(response.status).toBe(415);
+      expect(response.body).toEqual(UNSUPPORTED);
+    });
+
     it("answers 415 when there is no content type at all", async () => {
       const response = await post().set("Idempotency-Key", newKey());
 
@@ -149,7 +196,7 @@ describe("POST /api/v1/orders: validation", () => {
         .send(JSON.stringify(buildFakeBody()));
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(validationProblem([HEADER_POINTER]));
+      expect(response.body).toEqual(validationProblem([[HEADER_POINTER, DETAILS.invalid_format]]));
       expect(createOrder).not.toHaveBeenCalled();
     });
 
@@ -161,7 +208,7 @@ describe("POST /api/v1/orders: validation", () => {
       const response = await postJson(buildFakeBody(), key);
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(validationProblem([HEADER_POINTER]));
+      expect(response.body).toEqual(validationProblem([[HEADER_POINTER, DETAILS.invalid_format]]));
       expect(JSON.stringify(response.body)).not.toContain("FAKE-");
     });
 
@@ -169,7 +216,7 @@ describe("POST /api/v1/orders: validation", () => {
       const response = await postWithTwoKeys(app, JSON.stringify(buildFakeBody()));
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(validationProblem([HEADER_POINTER]));
+      expect(response.body).toEqual(validationProblem([[HEADER_POINTER, DETAILS.invalid_format]]));
       expect(createOrder).not.toHaveBeenCalled();
     });
   });
@@ -192,13 +239,15 @@ describe("POST /api/v1/orders: validation", () => {
       expect(JSON.stringify(response.body)).not.toContain("FAKE-BROKEN");
     });
 
-    it("answers 400 for an own __proto__ key, which must not be silently dropped", async () => {
+    it("answers a fixed 400 for an own __proto__ key, which must not be silently dropped", async () => {
       const raw = JSON.stringify(buildFakeBody()).replace("{", '{"__proto__":{"isAdmin":true},');
 
       const response = await postJson(raw);
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(validationProblem([""]));
+      expect(response.body).toEqual(
+        problemBody(400, "Bad Request", "The request body is not acceptable."),
+      );
       expect(createOrder).not.toHaveBeenCalled();
     });
 
@@ -213,15 +262,30 @@ describe("POST /api/v1/orders: validation", () => {
       const response = await postJson({ ...buildFakeBody(), ...extra });
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(validationProblem([""]));
+      expect(response.body).toEqual(validationProblem([["", DETAILS.unrecognized_keys]]));
       expect(createOrder).not.toHaveBeenCalled();
+    });
+
+    // One case per kind of schema failure the order body can produce. The detail comes from the
+    // code of the failure only; the pointer from the structure of the schema.
+    it.each([
+      ["the wrong type", { contactName: 42 }, "/contactName", DETAILS.invalid_type],
+      ["a list that is too short", { items: [] }, "/items", DETAILS.too_small],
+      ["a text that is too long", { contactName: "x".repeat(81) }, "/contactName", DETAILS.too_big],
+      ["a text with the wrong format", { phone: "call me" }, "/phone", DETAILS.invalid_format],
+      ["a text refused by a rule", { contactName: "a\u0001b" }, "/contactName", DETAILS.custom],
+    ])("gives its own fixed detail for %s", async (_name, change, pointer, detail) => {
+      const response = await postJson({ ...buildFakeBody(), ...change });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual(validationProblem([[pointer, detail]]));
     });
 
     it("names only the invalid field for an invalid location", async () => {
       const response = await postJson({ ...buildFakeBody(), location: { lat: 91, lng: 47.5 } });
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(validationProblem(["/location/lat"]));
+      expect(response.body).toEqual(validationProblem([["/location/lat", DETAILS.too_big]]));
       expect(createOrder).not.toHaveBeenCalled();
     });
 
@@ -245,7 +309,11 @@ describe("POST /api/v1/orders: validation", () => {
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual(
-        validationProblem(["/phone", "/trackingToken", "/contactName"]),
+        validationProblem([
+          ["/phone", DETAILS.invalid_format],
+          ["/trackingToken", DETAILS.too_small],
+          ["/contactName", DETAILS.invalid_type],
+        ]),
       );
       expect(response.text).not.toMatch(/FAKE-|4242424242/);
     });

@@ -191,8 +191,12 @@ replay (same key, same request) answers the same `201` and the same body with
 
 No answer, log line or error repeats a value the client sent: not the phone number, the name, the
 note, the landmark, the coordinates, the tracking token or the name of an unknown property. A
-validation error carries a fixed text and a pointer only; an unknown property is reported on its
-parent object (pointer `""`).
+validation error carries a pointer and a fixed text chosen by the kind of failure (see "Errors"); an
+unknown property is reported on its parent object (pointer `""`), and the `Idempotency-Key` header
+on `/headers/idempotencyKey`. On every JSON route, a body that holds a `__proto__`, `constructor`
+or `prototype` key at any depth, or that is more than 64 levels deep or has more than 100 000
+values, is refused with a fixed 400 before validation (the validation pipe of Nest would otherwise
+delete those keys silently and accept the rest).
 
 **Client address and `TRUST_PROXY`.** The per-address limit counts `request.ip`. Without
 `TRUST_PROXY` that is the address of the TCP peer, so **behind a reverse proxy every client shares
@@ -266,7 +270,10 @@ The end-to-end tests boot the real module, so they catch it. Interfaces and toke
 | `pnpm --filter @entana/api test:integration` | The tests that use a real PostgreSQL. Needs a running database. |
 
 The end-to-end tests also use test-only routes (`tests/e2e/support/probe.module.ts`) to
-exercise validation and errors; the real application has none, and a test checks it.
+exercise validation and errors; the real application has none, and a test checks it. A validation
+error carries a pointer and a fixed detail only, never a key, a value or a message from the request. The same holds for every HTTP error: its
+detail is a fixed sentence chosen by status, and `instance` is the request path only when it is made of
+URL path characters (at most 200, no query or fragment), otherwise `about:blank`.
 
 `test:integration` needs a running database: start it with `pnpm db:up`. `DATABASE_URL` is read
 from the environment or from the root `.env`. The suite creates a throwaway database on the same
@@ -284,3 +291,9 @@ leaves its empty `test_<hex>` database: list it with `\l test_*` in `psql` and r
 
 Tests need the compiled `@entana/contracts` and `@entana/database` (Turborepo builds them first
 when you run the commands from the root).
+
+## Known follow-ups
+
+- `instance` of an error is the raw request path (see "Errors"). When the tracking route is added,
+  its task must build `instance` from the route template when a route matched, and include an e2e
+  test proving that a distinctive fake token in the path appears in no body, header or log.

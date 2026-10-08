@@ -23,6 +23,7 @@ import {
   newKey,
   problemBody,
   validationProblem,
+  INVALID_PHONE_DETAIL,
 } from "../support/order-http.js";
 
 const CREATED: CreateOrderResult = {
@@ -115,7 +116,7 @@ describe("POST /api/v1/orders: responses", () => {
         name: "an invalid phone number",
         error: () => new InvalidPhoneError(),
         status: 400,
-        body: validationProblem(["/phone"]),
+        body: validationProblem([["/phone", INVALID_PHONE_DETAIL]]),
       },
       {
         name: "a blocked customer",

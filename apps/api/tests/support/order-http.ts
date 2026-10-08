@@ -24,17 +24,21 @@ export const FIXED_429 = {
 } as const;
 
 const VALIDATION_TYPE = "urn:entana:problem:validation-error";
-const NOT_VALID = "The value is not valid.";
-export const HEADER_POINTER = "/headers/idempotency-key";
+/** The detail the order service gives to an invalid phone number (not a schema failure). */
+export const INVALID_PHONE_DETAIL = "The value is not valid.";
+export const HEADER_POINTER = "/headers/idempotencyKey";
 
-export function validationProblem(pointers: readonly string[]): Record<string, unknown> {
+/** The validation problem of the order route; each error is a pointer and its fixed detail. */
+export function validationProblem(
+  errors: readonly (readonly [pointer: string, detail: string])[],
+): Record<string, unknown> {
   return {
     type: VALIDATION_TYPE,
     title: "Bad Request",
     status: 400,
     detail: "The request is invalid.",
     instance: ORDERS_PATH,
-    errors: pointers.map((pointer) => ({ pointer, detail: NOT_VALID })),
+    errors: errors.map(([pointer, detail]) => ({ pointer, detail })),
   };
 }
 
@@ -45,3 +49,13 @@ export function problemBody(
 ): Record<string, unknown> {
   return { type: "about:blank", title, status, detail, instance: ORDERS_PATH };
 }
+
+/** The fixed details, written out on purpose: a changed wording or swapped codes must fail tests. */
+export const DETAILS = {
+  invalid_type: "This field has the wrong type.",
+  too_small: "This field is too small or too short.",
+  too_big: "This field is too large or too long.",
+  invalid_format: "This field does not have the expected format.",
+  custom: "This field is not acceptable.",
+  unrecognized_keys: "This object has fields that are not allowed.",
+} as const;
