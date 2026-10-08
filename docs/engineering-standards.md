@@ -8,6 +8,7 @@ These rules keep the codebase consistent. Tooling enforces what it can (TypeScri
 - One responsibility per module and per function. Prefer small pure functions.
 - Explicit over implicit: types, names, errors.
 - Every behaviour is tested. Tests are the executable specification.
+- Proportion. Code, limits and tests are sized to the real risk and the real behaviour: no branch, table entry or limit for a case no code produces yet, and no defence against a threat that a lower layer already bounds (a body size limit already bounds a parser, for example). Add it when the case exists.
 
 ## 2. TypeScript
 
@@ -77,6 +78,9 @@ These rules keep the codebase consistent. Tooling enforces what it can (TypeScri
 - Arrange, act, assert. One reason to fail per test. Deterministic and independent tests. Builders for test data.
 - Do not mock the database or our own domain code; mock only external boundaries.
 - A bug fix starts with a failing test. Coverage thresholds are a floor, not the goal.
+- Test a behaviour once, at the lowest layer that proves it. End-to-end tests cover the HTTP contract (status, shape, headers), not rules already proved by a unit test. Do not repeat a case at several layers.
+- For hostile input, one representative case per class (a hostile key, a hostile value, a hostile path), not every variant of it.
+- No assertion on elapsed time, and no snapshot of the response of a route the change does not touch.
 
 **Enforced by:** `pnpm test:coverage` in CI: Vitest coverage thresholds per package, kept as floors (90% lines, functions, branches and statements for `contracts` and for `packages/database/src`). The thresholds only go up. Review only: test quality, the pyramid, a failing test before a bug fix.
 
@@ -99,4 +103,4 @@ These rules keep the codebase consistent. Tooling enforces what it can (TypeScri
 - Documentation and ADR updated when a decision was made.
 - No commented-out code, no TODO without a reference.
 - Migrations reviewed. Accessibility checked for user interface changes.
-- Reviewed with the reviewer agents before the pull request.
+- Reviewed by the agents that CLAUDE.md requires for this kind of change.
