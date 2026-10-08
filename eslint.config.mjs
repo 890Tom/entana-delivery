@@ -23,6 +23,30 @@ const DEFAULT_EXPORT = {
     "No default exports: use a named export (only the configuration files listed below may have one).",
 };
 
+// Naming (engineering standards, section 3). Shared by the global rule and by the React override.
+const NAMING_RULES = [
+  { selector: "default", format: ["camelCase"], leadingUnderscore: "allow" },
+  { selector: "import", format: null },
+  // Keys of object literals and types follow external shapes (database columns, HTTP).
+  { selector: ["objectLiteralProperty", "typeProperty", "enumMember"], format: null },
+  // UPPER_SNAKE_CASE is for module-level constants only, never for mutable state.
+  {
+    selector: "variable",
+    modifiers: ["const", "global"],
+    format: ["camelCase", "UPPER_CASE"],
+    leadingUnderscore: "allow",
+  },
+  { selector: "typeLike", format: ["PascalCase"] },
+  { selector: "function", format: ["camelCase"] },
+  {
+    selector: ["variable", "parameter", "classProperty", "parameterProperty"],
+    types: ["boolean"],
+    format: ["PascalCase"],
+    prefix: ["is", "has", "can"],
+    leadingUnderscore: "allow",
+  },
+];
+
 export default defineConfig(
   // Files that are never linted.
   {
@@ -62,28 +86,20 @@ export default defineConfig(
   // Naming (engineering standards, section 3).
   {
     rules: {
+      "@typescript-eslint/naming-convention": ["error", ...NAMING_RULES],
+    },
+  },
+
+  // React components are functions named in PascalCase. Only the front end's .tsx files may do
+  // this: a component is a function declaration, so a PascalCase variable is still refused.
+  {
+    files: ["apps/client/**/*.tsx"],
+    rules: {
       "@typescript-eslint/naming-convention": [
         "error",
-        { selector: "default", format: ["camelCase"], leadingUnderscore: "allow" },
-        { selector: "import", format: null },
-        // Keys of object literals and types follow external shapes (database columns, HTTP).
-        { selector: ["objectLiteralProperty", "typeProperty", "enumMember"], format: null },
-        // UPPER_SNAKE_CASE is for module-level constants only, never for mutable state.
-        {
-          selector: "variable",
-          modifiers: ["const", "global"],
-          format: ["camelCase", "UPPER_CASE"],
-          leadingUnderscore: "allow",
-        },
-        { selector: "typeLike", format: ["PascalCase"] },
-        { selector: "function", format: ["camelCase"] },
-        {
-          selector: ["variable", "parameter", "classProperty", "parameterProperty"],
-          types: ["boolean"],
-          format: ["PascalCase"],
-          prefix: ["is", "has", "can"],
-          leadingUnderscore: "allow",
-        },
+        ...NAMING_RULES.map((rule) =>
+          rule.selector === "function" ? { ...rule, format: ["camelCase", "PascalCase"] } : rule,
+        ),
       ],
     },
   },
