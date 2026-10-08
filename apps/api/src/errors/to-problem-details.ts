@@ -22,6 +22,30 @@ const CLIENT_ERROR_DETAILS: Readonly<Record<number, string>> = {
   415: "The content type of the request is not supported.",
 };
 
+// The message and the body of an HTTP exception are never read: Nest's router writes the method
+// and the URL of the request into the message of its 404 ("Cannot GET /path?query").
+const HTTP_EXCEPTION_DETAILS: Readonly<Record<number, string>> = {
+  400: "The request is invalid.",
+  401: "Authentication is required.",
+  403: "This action is not allowed.",
+  404: "The requested resource was not found.",
+  405: "This method is not allowed.",
+  406: "The requested format is not available.",
+  409: "The request conflicts with the current state.",
+  413: "The request body is too large.",
+  415: "The content type of the request is not supported.",
+  422: "The request could not be processed.",
+  429: "Too many requests.",
+};
+const DEFAULT_CLIENT_ERROR_DETAIL = "The request could not be completed.";
+
+function httpExceptionDetail(status: number): string {
+  if (status >= 500) {
+    return INTERNAL_ERROR_DETAIL;
+  }
+  return HTTP_EXCEPTION_DETAILS[status] ?? DEFAULT_CLIENT_ERROR_DETAIL;
+}
+
 function titleOf(status: number): string {
   return STATUS_CODES[status] ?? "Error";
 }
@@ -79,9 +103,7 @@ export function resolveFailure(error: unknown, instance: string): ResolvedFailur
   }
   if (error instanceof HttpException) {
     const status = error.getStatus();
-    return resolved(
-      problem(status, status < 500 ? error.message : INTERNAL_ERROR_DETAIL, instance),
-    );
+    return resolved(problem(status, httpExceptionDetail(status), instance));
   }
   const clientStatus = readClientErrorStatus(error);
   if (clientStatus !== undefined) {

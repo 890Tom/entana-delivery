@@ -266,7 +266,10 @@ The end-to-end tests boot the real module, so they catch it. Interfaces and toke
 | `pnpm --filter @entana/api test:integration` | The tests that use a real PostgreSQL. Needs a running database. |
 
 The end-to-end tests also use test-only routes (`tests/e2e/support/probe.module.ts`) to
-exercise validation and errors; the real application has none, and a test checks it.
+exercise validation and errors; the real application has none, and a test checks it. A validation
+error carries a pointer and a fixed detail only, never a key, a value or a message from the request. The same holds for every HTTP error: its
+detail is a fixed sentence chosen by status, and `instance` is the request path only when it is made of
+URL path characters (at most 200, no query or fragment), otherwise `about:blank`.
 
 `test:integration` needs a running database: start it with `pnpm db:up`. `DATABASE_URL` is read
 from the environment or from the root `.env`. The suite creates a throwaway database on the same
@@ -284,3 +287,9 @@ leaves its empty `test_<hex>` database: list it with `\l test_*` in `psql` and r
 
 Tests need the compiled `@entana/contracts` and `@entana/database` (Turborepo builds them first
 when you run the commands from the root).
+
+## Known follow-ups
+
+- `instance` of an error is the raw request path (see "Errors"). When the tracking route is added,
+  its task must build `instance` from the route template when a route matched, and include an e2e
+  test proving that a distinctive fake token in the path appears in no body, header or log.

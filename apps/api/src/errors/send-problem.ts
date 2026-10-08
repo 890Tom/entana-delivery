@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import type { DatabaseErrorKind } from "@entana/database";
 import { mapDatabaseFailure } from "./database-failure/database-failure-mapping.js";
 import { ServiceNotReadyError } from "./service-not-ready-error.js";
+import { toProblemInstance } from "./problem-instance.js";
 import { resolveFailure } from "./to-problem-details.js";
 
 /** The only field a database failure line carries: a member of the closed list of kinds. */
@@ -54,9 +55,10 @@ export function sendProblem(
   logger: ErrorLogger,
 ): void {
   // originalUrl, not path: Express makes `path` relative to the router that handles the request.
-  // The query string is left out of the instance: it can hold personal data.
-  const [path = ""] = request.originalUrl.split("?");
-  const { problem, databaseKind, headers = {} } = resolveFailure(error, path);
+  const { problem, databaseKind, headers = {} } = resolveFailure(
+    error,
+    toProblemInstance(request.originalUrl),
+  );
 
   // Exactly one branch writes: a classified database failure logs its kind only, the readiness
   // check logged its own failure already (a second line would only repeat it), and any other

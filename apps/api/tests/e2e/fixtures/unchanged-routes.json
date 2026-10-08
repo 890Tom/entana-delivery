@@ -1,0 +1,59 @@
+{
+  "health": {
+    "status": 200,
+    "contentType": "application/json; charset=utf-8",
+    "cacheControl": "no-store",
+    "body": {
+      "status": "ok",
+      "service": "@entana/api"
+    }
+  },
+  "readiness": {
+    "status": 503,
+    "contentType": "application/problem+json; charset=utf-8",
+    "cacheControl": "no-store",
+    "body": {
+      "type": "about:blank",
+      "title": "Service Unavailable",
+      "status": 503,
+      "detail": "The service is not ready.",
+      "instance": "/api/v1/health/ready"
+    }
+  },
+  "products": {
+    "status": 500,
+    "contentType": "application/problem+json; charset=utf-8",
+    "cacheControl": "no-store",
+    "body": {
+      "type": "about:blank",
+      "title": "Internal Server Error",
+      "status": 500,
+      "detail": "An unexpected error occurred.",
+      "instance": "/api/v1/products"
+    }
+  },
+  "notFound": {
+    "status": 404,
+    "contentType": "application/problem+json; charset=utf-8",
+    "cacheControl": "no-store",
+    "body": {
+      "type": "about:blank",
+      "title": "Not Found",
+      "status": 404,
+      "detail": "The requested resource was not found.",
+      "instance": "/api/v1/unknown"
+    }
+  },
+  "malformedJson": {
+    "status": 400,
+    "contentType": "application/problem+json; charset=utf-8",
+    "cacheControl": "no-store",
+    "body": {
+      "type": "about:blank",
+      "title": "Bad Request",
+      "status": 400,
+      "detail": "The request body is not valid JSON.",
+      "instance": "/api/v1/probe/validation"
+    }
+  }
+}
