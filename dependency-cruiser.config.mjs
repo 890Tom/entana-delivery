@@ -72,6 +72,13 @@ export default {
       to: { path: TEST_FILES },
     },
     {
+      name: "production-code-does-not-import-test-support",
+      comment: "Test support code must not be imported by production code.",
+      severity: "error",
+      from: { path: "^apps/[^/]+/", pathNot: TEST_FILES + "|^apps/[^/]+/src/test-support/" },
+      to: { path: "^apps/[^/]+/src/test-support/" },
+    },
+    {
       name: "packages-no-app-imports",
       comment: "Dependencies point towards the packages, never towards an application.",
       severity: "error",
@@ -92,6 +99,21 @@ export default {
       severity: "error",
       from: { path: "^apps/", pathNot: "^apps/api/" },
       to: { path: "^packages/database/|^@entana/database" },
+    },
+    {
+      name: "front-ends-only-import-contracts",
+      comment: "Front ends may import only @entana/contracts and no Node built-in.",
+      severity: "error",
+      from: { path: "^apps/(client|admin)/" },
+      to: { path: "^packages/(?!contracts/)|^@entana/(?!contracts(/|$))" },
+    },
+    {
+      name: "front-ends-no-node-builtins",
+      comment: "Front ends may import only @entana/contracts and no Node built-in.",
+      severity: "error",
+      from: { path: "^apps/(client|admin)/" },
+      // `core` covers both `node:fs` and bare names such as `fs`.
+      to: { dependencyTypes: ["core"] },
     },
     {
       name: "only-database-package-uses-database-libraries",

@@ -2,6 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { App } from "./app";
+import { expectNoAccessibilityViolations } from "./test-support/expect-no-accessibility-violations";
 
 afterEach(() => {
   cleanup();
@@ -18,5 +19,11 @@ describe("App", () => {
     const { container } = render(<App />);
 
     expect(container.innerHTML).toBe("<h1>Entana Delivery</h1>");
+  });
+
+  it("has no accessibility violation", async () => {
+    const { container } = render(<App />);
+
+    await expectNoAccessibilityViolations(container);
   });
 });
