@@ -11,6 +11,8 @@
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
     "test:e2e": "turbo run test:e2e",
+    "test:scripts": "node --test \"scripts/*.test.mjs\"",
+    "check:bundle": "node scripts/check-bundle-size.mjs",
     "test:integration": "turbo run test:integration",
     "dev": "turbo run dev",
     "lint": "turbo run db:generate && eslint .",

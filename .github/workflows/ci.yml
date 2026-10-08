@@ -90,6 +90,11 @@ jobs:
         run: pnpm test:coverage
       - name: Build
         run: pnpm build
+      # Fails above 300 KB gzip for the initial download and writes the sizes to the job summary.
+      - name: Check the client bundle budget
+        run: |
+          pnpm test:scripts
+          pnpm check:bundle
 
   integration:
     runs-on: ubuntu-latest
