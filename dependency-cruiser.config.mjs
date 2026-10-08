@@ -72,6 +72,13 @@ export default {
       to: { path: TEST_FILES },
     },
     {
+      name: "production-code-does-not-import-test-support",
+      comment: "Test support code must not be imported by production code.",
+      severity: "error",
+      from: { path: "^apps/[^/]+/", pathNot: TEST_FILES + "|^apps/[^/]+/src/test-support/" },
+      to: { path: "^apps/[^/]+/src/test-support/" },
+    },
+    {
       name: "packages-no-app-imports",
       comment: "Dependencies point towards the packages, never towards an application.",
       severity: "error",
