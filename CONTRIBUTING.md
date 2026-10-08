@@ -28,6 +28,10 @@ Thank you for your interest. This project is in early development: please open a
 
 TypeScript in strict mode, no `any`, small functions with explicit names, comments that explain _why_. Formatting and linting are enforced by tooling. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm lint:architecture`, `pnpm knip` and `pnpm test:coverage`.
 
+## Dependency release age
+
+pnpm refuses any version published less than 24 hours ago (`minimumReleaseAge` in `pnpm-workspace.yaml`, strict). The normal answer is to wait. In an emergency (for example a security fix), a maintainer may add the exact `name@version` to `minimumReleaseAgeExclude` by hand, in a pull request that says why. Remove the entry once the version is 24 hours old. CI fails if the list is not empty.
+
 ## Reporting security issues
 
 Do not open a public issue. See [SECURITY.md](SECURITY.md).
