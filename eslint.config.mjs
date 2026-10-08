@@ -3,6 +3,7 @@ import eslintComments from "@eslint-community/eslint-plugin-eslint-comments";
 import { defineConfig } from "eslint/config";
 import checkFile from "eslint-plugin-check-file";
 import prettier from "eslint-config-prettier";
+import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -22,6 +23,13 @@ const DEFAULT_EXPORT = {
   message:
     "No default exports: use a named export (only the configuration files listed below may have one).",
 };
+
+const DANGEROUSLY_SET_INNER_HTML = {
+  selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+  message: "dangerouslySetInnerHTML is forbidden: it opens the door to HTML injection (XSS).",
+};
+
+const RESTRICTED_SYNTAX = [DEFAULT_EXPORT, DYNAMIC_DATABASE_IMPORT];
 
 // Naming (engineering standards, section 3). Shared by the global rule and by the React override.
 const NAMING_RULES = [
@@ -119,7 +127,7 @@ export default defineConfig(
     plugins: { "@eslint-community/eslint-comments": eslintComments },
     rules: {
       "no-console": "error",
-      "no-restricted-syntax": ["error", DEFAULT_EXPORT, DYNAMIC_DATABASE_IMPORT],
+      "no-restricted-syntax": ["error", ...RESTRICTED_SYNTAX],
       // Static imports, type-only imports and re-exports. packages/database is exempted below.
       "no-restricted-imports": [
         "error",
@@ -136,6 +144,22 @@ export default defineConfig(
       "@eslint-community/eslint-comments/no-unlimited-disable": "error",
       "@eslint-community/eslint-comments/disable-enable-pair": "error",
     },
+  },
+
+  // Front end: hooks correctness, and no way to inject HTML or evaluate strings as code.
+  // `no-restricted-syntax` replaces the global list, so the global entries are repeated.
+  {
+    files: ["apps/client/**/*.tsx"],
+    plugins: { "react-hooks": reactHooks },
+    rules: {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "error",
+      "no-restricted-syntax": ["error", ...RESTRICTED_SYNTAX, DANGEROUSLY_SET_INNER_HTML],
+    },
+  },
+  {
+    files: ["apps/client/**/*.{ts,tsx}"],
+    rules: { "no-eval": "error", "no-implied-eval": "error", "no-new-func": "error" },
   },
 
   // File names are kebab-case: `order-status.ts`, `order-status.test.ts`.
@@ -183,7 +207,7 @@ export default defineConfig(
 
   // A test file groups many cases in one `describe` callback, so only that limit is lifted.
   {
-    files: ["**/*.test.ts", "**/tests/**/*.ts"],
+    files: ["**/*.test.{ts,tsx}", "**/tests/**/*.{ts,tsx}"],
     rules: { "max-lines-per-function": "off" },
   },
 

@@ -94,6 +94,21 @@ export default {
       to: { path: "^packages/database/|^@entana/database" },
     },
     {
+      name: "front-ends-only-import-contracts",
+      comment: "Front ends may import only @entana/contracts and no Node built-in.",
+      severity: "error",
+      from: { path: "^apps/(client|admin)/" },
+      to: { path: "^packages/(?!contracts/)|^@entana/(?!contracts(/|$))" },
+    },
+    {
+      name: "front-ends-no-node-builtins",
+      comment: "Front ends may import only @entana/contracts and no Node built-in.",
+      severity: "error",
+      from: { path: "^apps/(client|admin)/" },
+      // `core` covers both `node:fs` and bare names such as `fs`.
+      to: { dependencyTypes: ["core"] },
+    },
+    {
       name: "only-database-package-uses-database-libraries",
       comment:
         "Only packages/database may use the database driver or Prisma. Import from @entana/database.",
