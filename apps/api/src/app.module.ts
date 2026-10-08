@@ -5,6 +5,7 @@ import type { AppConfig } from "./config/app-config.js";
 import { CatalogModule } from "./catalog/catalog.module.js";
 import { NotFoundFallback } from "./errors/not-found-fallback.js";
 import { HealthModule } from "./health/health.module.js";
+import { OrdersModule } from "./orders/orders.module.js";
 import { createLoggingModule } from "./logging/create-logging-module.js";
 
 @Module({})
@@ -17,6 +18,7 @@ export class AppModule {
         createLoggingModule(config, logDestination),
         HealthModule.register(config),
         CatalogModule.register(config),
+        OrdersModule.register(config),
       ],
       providers: [NotFoundFallback],
     };

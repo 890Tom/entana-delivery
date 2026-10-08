@@ -4,22 +4,26 @@ import type { DynamicModule } from "@nestjs/common";
 import { ClockModule } from "../clock.module.js";
 import type { AppConfig } from "../config/app-config.js";
 import { DatabaseModule } from "../database/database.module.js";
+import { AddressRateLimiter } from "./address-rate-limiter.js";
+import { OrdersController } from "./orders.controller.js";
 import { DEFAULT_PHONE_COUNTRY_CODE, ORDER_RANDOM_BYTES, OrdersService } from "./orders.service.js";
 
-/** The order creation service. No controller yet: the HTTP layer is a later task. */
+/** The order creation: the service, the route and the limit per address. */
 @Module({})
 export class OrdersModule {
   static register(config: AppConfig): DynamicModule {
     return {
       module: OrdersModule,
       imports: [DatabaseModule.register(config), ClockModule],
+      controllers: [OrdersController],
       providers: [
         OrdersService,
+        AddressRateLimiter,
         // The order code is not a secret, but it must not be predictable: a secure source.
         { provide: ORDER_RANDOM_BYTES, useValue: randomBytes },
         { provide: DEFAULT_PHONE_COUNTRY_CODE, useValue: config.defaultPhoneCountryCode },
       ],
-      exports: [OrdersService],
+      exports: [OrdersService, AddressRateLimiter],
     };
   }
 }
