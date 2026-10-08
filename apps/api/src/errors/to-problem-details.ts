@@ -7,6 +7,7 @@ import {
   mapDatabaseFailure,
   readDatabaseFailureKind,
 } from "./database-failure/database-failure-mapping.js";
+import { mapOrderFailure, toOrderProblem } from "../orders/order-failure.js";
 import { RequestValidationError } from "./request-validation-error.js";
 import { ServiceNotReadyError } from "./service-not-ready-error.js";
 
@@ -42,6 +43,8 @@ export function readClientErrorStatus(error: unknown): number | undefined {
 
 export interface ResolvedFailure {
   readonly problem: ProblemDetails;
+  /** Headers the answer must carry (Retry-After of a rate limit). */
+  readonly headers?: Readonly<Record<string, string>>;
   /** Set only when the answer comes from a classified database failure (never `unknown`). */
   readonly databaseKind: Exclude<DatabaseErrorKind, "unknown"> | undefined;
 }
@@ -56,6 +59,14 @@ function resolved(problem: ProblemDetails): ResolvedFailure {
  * An error that is not a known client error never contributes its message to the answer.
  */
 export function resolveFailure(error: unknown, instance: string): ResolvedFailure {
+  const orderFailure = mapOrderFailure(error);
+  if (orderFailure !== undefined) {
+    return {
+      problem: toOrderProblem(orderFailure, instance),
+      databaseKind: undefined,
+      ...(orderFailure.headers === undefined ? {} : { headers: orderFailure.headers }),
+    };
+  }
   if (error instanceof RequestValidationError) {
     return resolved({
       ...problem(400, error.message, instance),

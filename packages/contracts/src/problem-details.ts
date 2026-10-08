@@ -24,6 +24,8 @@ export const problemDetailsSchema = z.object({
   detail: z.string(),
   instance: z.string(),
   errors: z.array(fieldErrorSchema).optional(),
+  /** Extension member (RFC 9457, 3.2) of the unavailable products problem: the ids the client sent. */
+  productIds: z.array(z.uuid()).max(30).optional(),
 });
 
 export type ProblemDetails = z.infer<typeof problemDetailsSchema>;

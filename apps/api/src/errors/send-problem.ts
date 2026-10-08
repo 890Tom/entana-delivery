@@ -56,7 +56,7 @@ export function sendProblem(
   // originalUrl, not path: Express makes `path` relative to the router that handles the request.
   // The query string is left out of the instance: it can hold personal data.
   const [path = ""] = request.originalUrl.split("?");
-  const { problem, databaseKind } = resolveFailure(error, path);
+  const { problem, databaseKind, headers = {} } = resolveFailure(error, path);
 
   // Exactly one branch writes: a classified database failure logs its kind only, the readiness
   // check logged its own failure already (a second line would only repeat it), and any other
@@ -70,5 +70,8 @@ export function sendProblem(
   // A route may have set a public Cache-Control before it failed (Nest applies @Header before the
   // handler runs): an error must never be kept by a shared cache.
   response.setHeader("Cache-Control", "no-store");
+  for (const [name, value] of Object.entries(headers)) {
+    response.setHeader(name, value);
+  }
   response.status(problem.status).type(PROBLEM_DETAILS_CONTENT_TYPE).json(problem);
 }

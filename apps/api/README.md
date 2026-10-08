@@ -160,6 +160,71 @@ internal `sku` is never selected (see [ADR 0016](../../docs/adr/0016-public-prod
   including a corrupt row, is the generic `500` (no product name, id or column in the answer, and
   none in the logs).
 
+## Order endpoint
+
+`POST /api/v1/orders` creates an order. Public, no account. Documented in the OpenAPI page
+(`/api/docs`, development and test only).
+
+**How to call it.** `Content-Type: application/json` (anything else is a 415) and an
+`Idempotency-Key` header holding a uuid, sent **once** (upper or lower case, it is stored in lower case; a missing, malformed or repeated
+header is a 400 that names only the header). The client generates both the idempotency key (once per order,
+reused to retry) and the tracking token (32 random bytes in base64url, 43 characters): the API
+stores only the hash of the token and never returns it. The body is the `createOrderRequestSchema`
+of `@entana/contracts`; it is strict, so a price, a total, a fee or a status sent by the client is
+a 400. The server prices the order from the database.
+
+On success: `201` with `{ orderCode, status, totalAr, createdAt }` and `Cache-Control: no-store`. A
+replay (same key, same request) answers the same `201` and the same body with
+`Idempotent-Replayed: true`, and writes nothing.
+
+| Status | When                                                                                                | Body                                                             |
+| ------ | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 400    | Invalid body, invalid phone number or invalid `Idempotency-Key`                                     | `errors[]` with the JSON Pointer of each invalid field, no value |
+| 403    | The customer is blocked                                                                             | Fixed, the same for every refusal of this kind                   |
+| 409    | The key was already used for another request (another body **or** another phone)                    | Fixed, the same for every conflict                               |
+| 413    | Body larger than `BODY_LIMIT_KB`                                                                    | Fixed                                                            |
+| 415    | Content type is not `application/json`                                                              | Fixed                                                            |
+| 422    | A product is unknown, inactive or unavailable (one answer for all three), or the order is too large | Fixed, plus `productIds`: only the ids the client sent           |
+| 429    | More than 20 requests per address in 10 minutes, or a sixth order in an hour for one phone          | The same body and the same headers for both, `Retry-After: 600`  |
+| 500    | Creation failed after several attempts, or any unexpected error                                     | Generic                                                          |
+| 503    | The database is unreachable                                                                         | Fixed                                                            |
+
+No answer, log line or error repeats a value the client sent: not the phone number, the name, the
+note, the landmark, the coordinates, the tracking token or the name of an unknown property. A
+validation error carries a fixed text and a pointer only; an unknown property is reported on its
+parent object (pointer `""`).
+
+**Client address and `TRUST_PROXY`.** The per-address limit counts `request.ip`. Without
+`TRUST_PROXY` that is the address of the TCP peer, so **behind a reverse proxy every client shares
+the proxy's address, and after 20 orders in 10 minutes the API refuses everybody**. Behind one
+proxy set `TRUST_PROXY=1` (see Configuration) and make sure the proxy overwrites or appends
+`X-Forwarded-For`. An IPv4-mapped IPv6 address (`::ffff:a.b.c.d`) counts as the IPv4 address, and
+an IPv6 address counts by its /64 prefix. The address is never logged.
+
+**Limits, stated plainly.**
+
+- The per-phone limit (5 orders per hour) can be used to block a known number: anybody who knows a
+  phone number can send it five orders and keep it refused. It is a trade-off of an account-less
+  service.
+- A `429` received from an address that is not itself limited implies that the phone number has
+  reached its limit (five recent orders). Both `429` answers are identical, body and headers, with
+  the same fixed `Retry-After: 600`. Timing is still a distinguisher (the address refusal needs no
+  database work), so do not rely on the two being indistinguishable. `600` understates the phone
+  block, which lasts up to an hour: a client that obeys it may be refused again.
+- The per-address limit is in memory and per instance: it is lost on restart, and several
+  instances each count on their own (a shared store would be needed). It tracks at most 10 000
+  addresses and evicts the least recently seen one that is not limited. If every tracked address is
+  limited, a new address is allowed through untracked (a documented trade-off: refusing it would let
+  a flood lock everybody out); the per-phone limit and the idempotency still apply. IPv6 is counted
+  per /64 prefix.
+- A request refused by the address limiter never reaches the access logger, so it has no access
+  log line: it writes one fixed warning line (`order_creation_address_limited`), without address,
+  header, query or body.
+- Deployment item: nothing warns at startup when `TRUST_PROXY` is left at `false` in production
+  behind a proxy (see above). Check it when you deploy.
+- The `409`, `403` and `422` answers say whether a key is in use, a customer is blocked, or a
+  product id is unusable: they are the only status codes beyond the above that reveal anything.
+
 ## Database errors
 
 A database failure that reaches the error filter is answered with a fixed status and a fixed
