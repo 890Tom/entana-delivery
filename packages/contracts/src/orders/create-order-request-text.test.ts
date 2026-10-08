@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createOrderRequestSchema } from "./create-order-request.js";
 import {
   FIRST_PRODUCT_ID,
+  VALID_TRACKING_TOKEN,
   buildRequest,
   isAccepted,
   issueMessages,
@@ -79,6 +80,7 @@ describe("createOrderRequestSchema free text", () => {
     it("is rejected by the strict schema and never reaches Object.prototype", () => {
       const body = parseJsonObject(
         `{"__proto__":{"polluted":true},"phone":"034 12 345 67","contactName":"Rakoto",` +
+          `"trackingToken":"${VALID_TRACKING_TOKEN}",` +
           `"landmarkText":"pharmacie","location":{"lat":0,"lng":0},` +
           `"items":[{"productId":"${FIRST_PRODUCT_ID}","quantity":1}]}`,
       );

@@ -10,6 +10,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
+    "test:coverage:api": "turbo run test:coverage:merge --filter=@entana/api",
     "test:e2e": "turbo run test:e2e",
     "test:scripts": "node --test \"scripts/*.test.mjs\"",
     "check:bundle": "node scripts/check-bundle-size.mjs",

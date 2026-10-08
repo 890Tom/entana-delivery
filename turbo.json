@@ -47,6 +47,24 @@
       "cache": false,
       "env": ["DATABASE_URL"]
     },
+    // API coverage in three steps: the unit run and the integration run each write a partial
+    // report, then the merge applies the 90% floor to the two together (`pnpm test:coverage:api`).
+    // The integration run and the merge are never cached: a cache hit would report success without
+    // querying the database. The other packages keep their cached coverage.
+    "@entana/api#test:coverage:unit": {
+      "dependsOn": ["^build", "db:generate"],
+      "outputs": [".vitest-reports/blobs/unit.json"]
+    },
+    "@entana/api#test:coverage:integration": {
+      "dependsOn": ["^build", "db:generate"],
+      "cache": false,
+      "env": ["DATABASE_URL"]
+    },
+    "@entana/api#test:coverage:merge": {
+      "dependsOn": ["test:coverage:unit", "test:coverage:integration"],
+      "cache": false,
+      "outputs": ["coverage/**"]
+    },
     "test:coverage": {
       "dependsOn": ["^build", "db:generate"],
       "outputs": ["coverage/**"]

@@ -51,7 +51,7 @@ describe("createOrderRequestSchema", () => {
   });
 
   describe("required fields", () => {
-    it.each(["phone", "contactName", "landmarkText", "location", "items"])(
+    it.each(["phone", "trackingToken", "contactName", "landmarkText", "location", "items"])(
       "rejects a request without %s",
       (field) => {
         expect(rejectedPaths(without(field))).toEqual([field]);
@@ -65,6 +65,7 @@ describe("createOrderRequestSchema", () => {
     it("rejects an empty object for every required field", () => {
       expect(rejectedPaths({})).toEqual([
         "phone",
+        "trackingToken",
         "contactName",
         "landmarkText",
         "location",

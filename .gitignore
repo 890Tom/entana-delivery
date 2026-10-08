@@ -5,6 +5,7 @@ dist/
 build/
 .turbo/
 coverage/
+.vitest-reports/
 
 # Environment and secrets (keep the example only)
 .env

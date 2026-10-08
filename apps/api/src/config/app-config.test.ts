@@ -40,6 +40,7 @@ describe("parseConfig", () => {
       bodyLimitKb: 100,
       isSwaggerEnabled: false,
       databaseUrl: validDatabaseUrl,
+      defaultPhoneCountryCode: "261",
     });
   });
 
@@ -54,6 +55,7 @@ describe("parseConfig", () => {
       BODY_LIMIT_KB: "20",
       SWAGGER_ENABLED: "true",
       DATABASE_URL: "postgresql://entana:s3cret-pass-word@localhost:5433/entana",
+      DEFAULT_PHONE_COUNTRY_CODE: "33",
     });
     expect(config).toEqual({
       nodeEnv: "production",
@@ -65,7 +67,27 @@ describe("parseConfig", () => {
       bodyLimitKb: 20,
       isSwaggerEnabled: true,
       databaseUrl: "postgresql://entana:s3cret-pass-word@localhost:5433/entana",
+      defaultPhoneCountryCode: "33",
     });
+  });
+
+  describe("default phone country code", () => {
+    it("is 261 when unset", () => {
+      expect(parse({}).defaultPhoneCountryCode).toBe("261");
+    });
+
+    it.each(["1", "33", "261"])("accepts %s", (value) => {
+      expect(parse({ DEFAULT_PHONE_COUNTRY_CODE: value }).defaultPhoneCountryCode).toBe(value);
+    });
+
+    it.each(["0", "061", "2610", "+261", "26a", " 261", "٢٦١"])(
+      "refuses %j and names the variable",
+      (value) => {
+        expect(expectInvalid({ DEFAULT_PHONE_COUNTRY_CODE: value }).issues[0]).toMatch(
+          /^DEFAULT_PHONE_COUNTRY_CODE: /,
+        );
+      },
+    );
   });
 
   it("accepts the limits of the valid ranges", () => {
@@ -213,6 +235,7 @@ describe("parseConfig", () => {
     "TRUST_PROXY",
     "BODY_LIMIT_KB",
     "SWAGGER_ENABLED",
+    "DEFAULT_PHONE_COUNTRY_CODE",
   ])("never repeats the value it refused for %s, which could be a secret", (name) => {
     const error = expectInvalid({ [name]: "hunter2-secret" });
     // The message is printed at startup and the issues could be logged: neither may hold it.
