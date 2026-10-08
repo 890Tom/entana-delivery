@@ -24,12 +24,62 @@ const DEFAULT_EXPORT = {
     "No default exports: use a named export (only the configuration files listed below may have one).",
 };
 
-const DANGEROUSLY_SET_INNER_HTML = {
-  selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
-  message: "dangerouslySetInnerHTML is forbidden: it opens the door to HTML injection (XSS).",
-};
-
 const RESTRICTED_SYNTAX = [DEFAULT_EXPORT, DYNAMIC_DATABASE_IMPORT];
+
+// HTML injection in the front end (apps/client). Layers: these selectors and
+// `no-restricted-properties` catch the literal, visible forms. untrusted-text.test.tsx only
+// documents the safe pattern (React escapes `{value}`); it does not test real components, so
+// each component that shows customer or server text needs its own test. A strict
+// Content-Security-Policy at deployment and the review of third-party libraries cover what a
+// static rule cannot see: computed property names, URLs held in variables, props spread onto
+// elements ({...props}), aliases of `document`, libraries that inject HTML themselves, and
+// dynamic imports.
+// Reading `innerHTML` is not an injection, so only assignments are refused.
+const RENDER_TEXT_ADVICE = "Render text through React ({value}), never as HTML.";
+const URL_ATTRIBUTES = "/^(href|src|action|formAction|xlinkHref|data)$/";
+const DANGEROUS_URL = "/^\\s*(javascript|data|vbscript):/i";
+const HTML_INJECTION_SYNTAX = [
+  {
+    selector:
+      "JSXAttribute[name.name='dangerouslySetInnerHTML'], Property[key.name='dangerouslySetInnerHTML'], Property[key.value='dangerouslySetInnerHTML']",
+    message: `dangerouslySetInnerHTML is forbidden (JSX, createElement and plain objects). ${RENDER_TEXT_ADVICE}`,
+  },
+  {
+    selector:
+      "AssignmentExpression[left.type='MemberExpression'][left.property.name=/^(innerHTML|outerHTML|srcdoc)$/], AssignmentExpression[left.type='MemberExpression'][left.property.value=/^(innerHTML|outerHTML|srcdoc)$/]",
+    message: `Assigning innerHTML, outerHTML or srcdoc is forbidden. ${RENDER_TEXT_ADVICE}`,
+  },
+  {
+    selector:
+      "CallExpression[callee.property.name=/^(write|writeln)$/][callee.object.property.name='document']",
+    message: `window.document.write and writeln write raw HTML into the page. ${RENDER_TEXT_ADVICE}`,
+  },
+  {
+    selector: "JSXAttribute[name.name=/^srcDoc$/i]",
+    message: `srcDoc is forbidden: it embeds a whole HTML document. ${RENDER_TEXT_ADVICE}`,
+  },
+  {
+    selector: `JSXAttribute[name.name=${URL_ATTRIBUTES}] > Literal[value=${DANGEROUS_URL}], JSXAttribute[name.name=${URL_ATTRIBUTES}] > JSXExpressionContainer > Literal[value=${DANGEROUS_URL}], JSXAttribute[name.name=${URL_ATTRIBUTES}] > JSXExpressionContainer > TemplateLiteral > TemplateElement[value.cooked=${DANGEROUS_URL}]`,
+    message: `javascript:, data: and vbscript: URLs are forbidden in href, src and action. Use an https: or relative URL.`,
+  },
+];
+const HTML_INJECTION_PROPERTIES = [
+  ...[
+    "insertAdjacentHTML",
+    "createContextualFragment",
+    "setHTMLUnsafe",
+    "parseHTMLUnsafe",
+    "setHTML",
+  ].map((property) => ({
+    property,
+    message: `${property} parses a string as HTML. ${RENDER_TEXT_ADVICE}`,
+  })),
+  ...["write", "writeln"].map((property) => ({
+    object: "document",
+    property,
+    message: `document.${property} writes raw HTML into the page. ${RENDER_TEXT_ADVICE}`,
+  })),
+];
 
 // Naming (engineering standards, section 3). Shared by the global rule and by the React override.
 const NAMING_RULES = [
@@ -147,19 +197,26 @@ export default defineConfig(
   },
 
   // Front end: hooks correctness, and no way to inject HTML or evaluate strings as code.
-  // `no-restricted-syntax` replaces the global list, so the global entries are repeated.
+  // Test files get exactly the same rules: a test must not call these APIs either. Only the
+  // `max-lines-per-function` exemption below applies to them.
+  // `no-restricted-syntax` replaces the global list, so the shared entries are spread again.
   {
     files: ["apps/client/**/*.tsx"],
     plugins: { "react-hooks": reactHooks },
     rules: {
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "error",
-      "no-restricted-syntax": ["error", ...RESTRICTED_SYNTAX, DANGEROUSLY_SET_INNER_HTML],
     },
   },
   {
     files: ["apps/client/**/*.{ts,tsx}"],
-    rules: { "no-eval": "error", "no-implied-eval": "error", "no-new-func": "error" },
+    rules: {
+      "no-eval": "error",
+      "no-implied-eval": "error",
+      "no-new-func": "error",
+      "no-restricted-syntax": ["error", ...RESTRICTED_SYNTAX, ...HTML_INJECTION_SYNTAX],
+      "no-restricted-properties": ["error", ...HTML_INJECTION_PROPERTIES],
+    },
   },
 
   // File names are kebab-case: `order-status.ts`, `order-status.test.ts`.
