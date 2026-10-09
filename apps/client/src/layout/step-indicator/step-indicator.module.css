@@ -1,0 +1,69 @@
+/* Web only: the mock-up has no step indicator on mobile for the catalogue. */
+.nav {
+  display: none;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding: var(--space-4) var(--space-6);
+  margin: 0 auto;
+  list-style: none;
+}
+
+.current,
+.upcoming {
+  display: flex;
+  flex: 1 1 auto;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.current {
+  flex: none;
+  height: var(--size-cart-pill-height);
+  padding-inline: var(--space-3) var(--space-4);
+  font: var(--font-body-strong);
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+}
+
+.upcoming {
+  color: var(--color-text-muted);
+}
+
+/* The line that joins a step to the one before it. */
+.upcoming::before {
+  flex: 1 1 auto;
+  min-width: var(--space-5);
+  height: var(--border-width-strong);
+  margin-inline-end: var(--space-2);
+  content: "";
+  background: var(--color-border);
+}
+
+.dot {
+  flex: none;
+  width: var(--size-step-dot);
+  height: var(--size-step-dot);
+  border-radius: var(--radius-full);
+}
+
+.current .dot {
+  background: var(--color-surface-inverse);
+}
+
+.upcoming .dot {
+  background: var(--color-surface);
+  border: var(--border-width-strong) solid var(--color-border-input);
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .nav {
+    display: block;
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+}

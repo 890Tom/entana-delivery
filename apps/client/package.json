@@ -15,7 +15,8 @@
     "@entana/contracts": "workspace:*",
     "@tanstack/react-query": "5.104.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "wouter": "3.13.0"
   },
   "devDependencies": {
     "@testing-library/dom": "10.4.2",

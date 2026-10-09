@@ -115,6 +115,9 @@
   --size-stepper-count: 28px;
   --size-logo-height: 34px;
 
+  /* Layers (proposed role name: the design system gives the value 20 for the header only) */
+  --layer-header: 20;
+
   /* Opacity */
   --opacity-sold-out: 0.5;
   --opacity-skeleton-pulse: 0.5;

@@ -1,0 +1,4 @@
+/* Focus is moved here by code after a change of page; this is not a control to operate. */
+.main:focus-visible {
+  outline: none;
+}
