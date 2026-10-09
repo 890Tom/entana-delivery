@@ -1,0 +1,33 @@
+name: PR title
+
+# Kept apart from ci.yml: editing a title or a description must not restart the whole pipeline
+# (or cancel a run in progress). Only the title is checked here.
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: "0"
+      PR_TITLE: ${{ github.event.pull_request.title }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Only the root package is installed: commitlint and its configuration live there.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts --filter .
+      - name: Validate PR title (Conventional Commits)
+        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitlint
