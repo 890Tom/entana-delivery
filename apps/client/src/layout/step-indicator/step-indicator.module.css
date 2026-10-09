@@ -1,6 +1,11 @@
-/* Web only: the mock-up has no step indicator on mobile for the catalogue. */
+/* Web only, except where a screen asks for it (the cart): the catalogue has none on mobile. */
 .nav {
   display: none;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.onMobile {
+  display: block;
 }
 
 .list {
@@ -70,10 +75,33 @@
   border: var(--border-width-strong) solid var(--color-border-input);
 }
 
+/*
+ * On a narrow screen the five steps cannot all show their name: the next ones keep their icon and
+ * stay named for assistive technology (the same clipping as the visually hidden utility).
+ */
+@media (max-width: 1023px) {
+  .list {
+    padding-inline: var(--space-4);
+  }
+
+  .upcoming::before {
+    min-width: var(--space-2);
+  }
+}
+
 /* The one breakpoint of the design system (a media query cannot read a variable). */
 @media (min-width: 1024px) {
   .nav {
     display: block;
-    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  /* Undoes the visually hidden utility that the narrow layout puts on the names. */
+  .upcoming .label {
+    position: static;
+    width: auto;
+    aspect-ratio: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
   }
 }

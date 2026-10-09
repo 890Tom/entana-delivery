@@ -1,0 +1,38 @@
+/* Geometry shared by a cart line and its skeleton, so that nothing moves when the data arrives. */
+.line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-3);
+  padding-block: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.text {
+  height: calc(var(--font-size-body) * var(--line-height-body));
+}
+
+.name {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font: var(--font-body-strong);
+}
+
+.unitPrice {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.lineTotal {
+  margin: 0;
+  font: var(--font-body-strong);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  white-space: nowrap;
+}
+
+/* The selector of the card, at the width of its buttons and a count: not the whole row. */
+.stepper {
+  grid-column: 1 / -1;
+  width: calc(var(--size-touch-min) * 3 + 2 * (var(--space-half) + var(--border-width)));
+  height: calc(var(--size-touch-min) + 2 * (var(--space-half) + var(--border-width)));
+}

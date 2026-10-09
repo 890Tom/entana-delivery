@@ -1,5 +1,4 @@
 import type { ProductListResponse } from "@entana/contracts";
-import { useQuery } from "@tanstack/react-query";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { ReactElement } from "react";
 
@@ -8,15 +7,11 @@ import { texts } from "../../i18n/texts";
 import { useCart } from "../cart/cart-context";
 import { useCartReconciliation } from "../cart/use-cart-reconciliation";
 
-import { CatalogueError, fetchProducts } from "./api/fetch-products";
-import type { CatalogueErrorKind } from "./api/fetch-products";
+import { readCatalogueErrorKind } from "./api/fetch-products";
+import { useProducts } from "./api/use-products";
 import styles from "./catalogue.module.css";
 import { ProductCard } from "./product-card/product-card";
 import { ProductGridSkeleton } from "./product-grid-skeleton/product-grid-skeleton";
-
-function readErrorKind(error: unknown): CatalogueErrorKind {
-  return error instanceof CatalogueError ? error.kind : "unexpected";
-}
 
 function CatalogueBody({ query }: { query: UseQueryResult<ProductListResponse> }): ReactElement {
   if (query.isPending) {
@@ -33,7 +28,7 @@ function CatalogueBody({ query }: { query: UseQueryResult<ProductListResponse> }
           },
         }}
       >
-        {texts.catalogue.errors[readErrorKind(query.error)]}
+        {texts.catalogue.errors[readCatalogueErrorKind(query.error)]}
       </Notice>
     );
   }
@@ -52,10 +47,7 @@ function CatalogueBody({ query }: { query: UseQueryResult<ProductListResponse> }
 }
 
 export function Catalogue(): ReactElement {
-  const query = useQuery({
-    queryKey: ["products"],
-    queryFn: ({ signal }) => fetchProducts(signal),
-  });
+  const query = useProducts();
 
   const { hasRemovedUnavailable } = useCart();
   useCartReconciliation(query.data?.products);

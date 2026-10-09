@@ -1,8 +1,8 @@
+import { MAX_ORDER_LINES, MAX_ORDER_LINE_QUANTITY } from "@entana/contracts";
 import { describe, expect, it } from "vitest";
 
 import { buildProductId } from "../../test-support/build-product";
 
-import { MAX_CART_PRODUCTS, MAX_LINE_QUANTITY } from "./cart-limits";
 import { cartReducer, emptyCart } from "./cart-reducer";
 import type { CartState } from "./cart-reducer";
 
@@ -41,16 +41,16 @@ describe("cartReducer", () => {
   });
 
   it("never goes above the maximum quantity of a line", () => {
-    const full = cartOf([A, MAX_LINE_QUANTITY]);
+    const full = cartOf([A, MAX_ORDER_LINE_QUANTITY]);
 
     expect(cartReducer(full, { type: "increase", productId: A })).toBe(full);
   });
 
   it("refuses a new product once the cart holds the maximum number of products", () => {
-    const lines: [string, number][] = Array.from(
-      { length: MAX_CART_PRODUCTS },
-      (_unused, index) => [buildProductId(index + 10), 1],
-    );
+    const lines: [string, number][] = Array.from({ length: MAX_ORDER_LINES }, (_unused, index) => [
+      buildProductId(index + 10),
+      1,
+    ]);
     const full = cartOf(...lines);
 
     expect(cartReducer(full, { type: "increase", productId: A })).toBe(full);

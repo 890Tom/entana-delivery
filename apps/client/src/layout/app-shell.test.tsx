@@ -110,7 +110,7 @@ describe("application shell", () => {
 
     const busy = screen.getByRole("banner").querySelector('[aria-busy="true"]');
     expect(busy?.textContent).toBe(texts.common.loading);
-    expect(within(screen.getByRole("banner")).queryByRole("link")).toBeNull();
+    expect(within(screen.getByRole("banner")).queryByRole("link", { name: /accueil/ })).toBeNull();
     await screen.findByText("Sakafo");
   });
 

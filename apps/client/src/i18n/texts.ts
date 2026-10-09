@@ -28,6 +28,14 @@ export const texts: {
   readonly cart: {
     readonly badgeLabel: (count: number) => string;
     readonly removedUnavailable: string;
+    readonly screen: {
+      readonly title: string;
+      readonly heading: string;
+      readonly unitPrice: (formattedPrice: string) => string;
+      readonly subtotal: string;
+      readonly deliveryHint: string;
+      readonly empty: { readonly text: string; readonly action: string };
+    };
   };
   readonly catalogue: {
     readonly title: string;
@@ -67,9 +75,20 @@ export const texts: {
     back: "Retour aux produits",
   },
   cart: {
-    badgeLabel: (count) => `Panier, ${String(count)} ${count > 1 ? "articles" : "article"}`,
+    badgeLabel: (count) =>
+      count === 0
+        ? "Voir le panier"
+        : `Voir le panier, ${String(count)} ${count > 1 ? "articles" : "article"}`,
     removedUnavailable:
       "Certains produits ne sont plus disponibles et ont été retirés de votre panier.",
+    screen: {
+      title: "Panier",
+      heading: "Votre panier",
+      unitPrice: (formattedPrice) => `${formattedPrice} l'unité`,
+      subtotal: "Sous-total",
+      deliveryHint: "Frais de livraison selon votre zone.",
+      empty: { text: "Votre panier est vide.", action: "Voir les produits" },
+    },
   },
   catalogue: {
     title: "Nos produits",

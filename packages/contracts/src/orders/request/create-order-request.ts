@@ -18,8 +18,9 @@ const MAX_CONTACT_NAME_LENGTH = 80;
 const MAX_CUSTOMER_NOTE_LENGTH = 300;
 const MAX_LANDMARK_LENGTH = 200;
 const TRACKING_TOKEN_LENGTH = 43;
-const MAX_ITEMS = 30;
-const MAX_QUANTITY = 99;
+// Exported: the customer app stops a cart at the limits of the request it will have to send.
+export const MAX_ORDER_LINES = 30;
+export const MAX_ORDER_LINE_QUANTITY = 99;
 
 const INVISIBLE_CHARACTER_MESSAGE = "must not contain an invisible or text-direction character";
 
@@ -43,7 +44,7 @@ const hasUniqueProductIds = (items: readonly { productId: string }[]): boolean =
 const orderItemSchema = z.strictObject({
   // z.uuid() accepts versions 1 to 8: the database generates version 7, other writers version 4.
   productId: z.uuid(),
-  quantity: z.number().int().min(1).max(MAX_QUANTITY),
+  quantity: z.number().int().min(1).max(MAX_ORDER_LINE_QUANTITY),
 });
 
 const locationSchema = z.strictObject({
@@ -93,7 +94,7 @@ export const createOrderRequestSchema = z.strictObject({
   items: z
     .array(orderItemSchema)
     .min(1, "must contain at least one item")
-    .max(MAX_ITEMS, "must contain at most 30 items")
+    .max(MAX_ORDER_LINES, "must contain at most 30 items")
     .refine(hasUniqueProductIds, "must not contain the same product twice"),
 });
 

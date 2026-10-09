@@ -1,9 +1,9 @@
+import { MAX_ORDER_LINES } from "@entana/contracts";
 import { useEffect, useMemo, useReducer, useRef } from "react";
 import type { ReactElement, ReactNode } from "react";
 
 import { CART_CONTEXT } from "./cart-context";
 import type { CartContextValue } from "./cart-context";
-import { MAX_CART_PRODUCTS } from "./cart-limits";
 import { cartReducer, emptyCart } from "./cart-reducer";
 import { readStoredCart, serializeCart, writeStoredCart } from "./cart-storage";
 
@@ -43,7 +43,7 @@ export function CartProvider({ children }: { children: ReactNode }): ReactElemen
       ...actions,
       lines: state.lines,
       itemCount: state.lines.reduce((sum, line) => sum + line.quantity, 0),
-      isFull: state.lines.length >= MAX_CART_PRODUCTS,
+      isFull: state.lines.length >= MAX_ORDER_LINES,
       hasRemovedUnavailable: state.hasRemovedUnavailable,
       quantityOf: (productId) =>
         state.lines.find((line) => line.productId === productId)?.quantity ?? 0,
