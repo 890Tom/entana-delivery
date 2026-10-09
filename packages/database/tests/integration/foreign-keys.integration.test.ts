@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { assertThrowawayDatabase } from "../support/assert-throwaway-database.js";
-import { expectViolation, SQLSTATE, useRollbackTransaction } from "../support/database.js";
-import { insertOrderItem, insertProduct } from "../support/rows.js";
+import { assertThrowawayDatabase } from "../support/throwaway-database/assert-throwaway-database.js";
+import {
+  expectViolation,
+  SQLSTATE,
+  useRollbackTransaction,
+} from "../support/database-access/database.js";
+import { insertOrderItem, insertProduct } from "../support/database-access/rows.js";
 
 describe("referential integrity", () => {
   const db = useRollbackTransaction();

@@ -1,12 +1,18 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { Client } from "pg";
 import type { TestProject } from "vitest/node";
-import { countRows, findChangedTables } from "./count-rows.js";
-import type { RowCounts } from "./count-rows.js";
-import { cleanUpOnSignal } from "./interrupt-cleanup.js";
-import { describeDatabaseTarget, requireDatabaseUrl } from "./database-url.js";
-import { checkTestDatabaseHost, isRemoteOverrideEnabled } from "./test-database-guard.js";
-import { generateThrowawayDatabaseName, isThrowawayDatabaseName } from "./throwaway-database.js";
+import { countRows, findChangedTables } from "./database-access/count-rows.js";
+import type { RowCounts } from "./database-access/count-rows.js";
+import { cleanUpOnSignal } from "./interrupt/interrupt-cleanup.js";
+import { describeDatabaseTarget, requireDatabaseUrl } from "./throwaway-database/database-url.js";
+import {
+  checkTestDatabaseHost,
+  isRemoteOverrideEnabled,
+} from "./throwaway-database/test-database-guard.js";
+import {
+  generateThrowawayDatabaseName,
+  isThrowawayDatabaseName,
+} from "./throwaway-database/throwaway-database.js";
 
 declare module "vitest" {
   export interface ProvidedContext {

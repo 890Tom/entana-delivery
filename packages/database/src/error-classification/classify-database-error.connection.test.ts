@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { prismaError, uniqueFailure } from "../tests/support/prisma-error-fixtures.ts";
+import {
+  prismaError,
+  uniqueFailure,
+} from "../../tests/support/database-errors/prisma-error-fixtures.ts";
 import { classifyDatabaseError } from "./classify-database-error.ts";
 
 // Shapes observed on 2026-10-07 (Prisma 7.10.0, @prisma/adapter-pg 7.10.0, pg 8.23.1, Node 24.21.0)

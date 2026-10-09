@@ -1,6 +1,6 @@
 import { Client, DatabaseError } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, inject } from "vitest";
-import { assertThrowawayDatabase } from "./assert-throwaway-database.js";
+import { assertThrowawayDatabase } from "../throwaway-database/assert-throwaway-database.js";
 
 // Every test runs in a transaction that is rolled back: tests never see each other's rows. The
 // connection is to the throwaway database of the run, never to the configured one.

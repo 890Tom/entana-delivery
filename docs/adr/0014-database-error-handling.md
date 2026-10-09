@@ -11,7 +11,7 @@ The errors that Prisma and `pg` raise can contain table, constraint and column n
 
 ### Classification, in `packages/database`
 
-`classifyDatabaseError(error)` (`src/classify-database-error.ts`) turns any thrown value into one member of `DATABASE_ERROR_KINDS`: `unique_violation`, `foreign_key_violation`, `check_violation`, `not_null_violation`, `record_not_found`, `connection`, `timeout`, `unknown`.
+`classifyDatabaseError(error)` (`src/error-classification/classify-database-error.ts`) turns any thrown value into one member of `DATABASE_ERROR_KINDS`: `unique_violation`, `foreign_key_violation`, `check_violation`, `not_null_violation`, `record_not_found`, `connection`, `timeout`, `unknown`.
 
 - It is a pure function and never throws (the body is inside `try`/`catch` and falls back to `unknown`). It returns only a kind: no message, stack or name is returned, copied or logged.
 - The distinguishing property of each kind, as observed with Prisma 7.10.0, `@prisma/adapter-pg` 7.10.0 and `pg` 8.23.1 (the header comment of the file):

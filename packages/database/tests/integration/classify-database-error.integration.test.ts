@@ -3,12 +3,12 @@ import net from "node:net";
 import { Client } from "pg";
 import { describe, expect, inject, it, vi } from "vitest";
 
-import { classifyDatabaseError } from "../../src/classify-database-error.ts";
-import type { DatabaseErrorKind } from "../../src/classify-database-error.ts";
-import { createPrismaClient } from "../../src/create-prisma-client.ts";
+import { classifyDatabaseError } from "../../src/error-classification/classify-database-error.ts";
+import type { DatabaseErrorKind } from "../../src/error-classification/classify-database-error.ts";
+import { createPrismaClient } from "../../src/client/create-prisma-client.ts";
 import type { PrismaClient } from "../../src/generated/client.ts";
-import type { DatabaseClientOptions } from "../../src/pool-settings.ts";
-import { assertThrowawayDatabase } from "../support/assert-throwaway-database.ts";
+import type { DatabaseClientOptions } from "../../src/client/pool-settings.ts";
+import { assertThrowawayDatabase } from "../support/throwaway-database/assert-throwaway-database.ts";
 
 // These tests are the check of the header of classify-database-error.ts: when Prisma or pg is
 // upgraded, a failure here means an observed error shape has changed and the classifier must be

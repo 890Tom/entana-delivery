@@ -9,7 +9,7 @@ import {
   insertReseller,
   insertShopSetting,
   insertStaffUser,
-} from "../support/rows.js";
+} from "../support/database-access/rows.js";
 
 interface Scenario {
   name: string;

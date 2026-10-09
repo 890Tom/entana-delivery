@@ -1,9 +1,9 @@
 import { constants } from "node:os";
 import { Client } from "pg";
 import { afterAll, beforeAll, describe, expect, inject, it } from "vitest";
-import { assertThrowawayDatabase } from "../support/assert-throwaway-database.js";
-import { runSuiteInterruptedBy } from "../support/run-interrupted-suite.js";
-import { isThrowawayDatabaseName } from "../support/throwaway-database.js";
+import { assertThrowawayDatabase } from "../support/throwaway-database/assert-throwaway-database.js";
+import { runSuiteInterruptedBy } from "../support/interrupt/run-interrupted-suite.js";
+import { isThrowawayDatabaseName } from "../support/throwaway-database/throwaway-database.js";
 
 const TEST_TIMEOUT_MS = 120_000;
 

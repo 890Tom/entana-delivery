@@ -13,9 +13,9 @@ The API needs PostgreSQL. Prisma 7 requires a driver adapter (`@prisma/adapter-p
 - **The generated client is not committed.** `db:generate` runs before `build`, `typecheck`, `test` and `test:integration` through Turborepo (`turbo.json`), and before ESLint in `pnpm lint`, because typed linting reads the types of the generated client. Generation needs no database: without `DATABASE_URL`, `prisma.config.ts` uses a placeholder URL.
 - **Connection string, checked in two layers.**
   - The API configuration (`app-config.ts`) rejects any whitespace or control character in `DATABASE_URL`.
-  - The factory (`pool-settings.ts`) requires the `postgres:` or `postgresql:` scheme and validates the same string it passes to the pool, with no trimming.
+  - The factory (`src/client/pool-settings.ts`) requires the `postgres:` or `postgresql:` scheme and validates the same string it passes to the pool, with no trimming.
   - Errors are fixed messages naming the option, with no `cause`, and never contain the value, which holds the password.
-- **Pool settings, from `pool-settings.ts`.** `defaultMaxConnections = 10`, `maxConnectionsLimit = 50` (a larger value is refused at startup), `defaultConnectionTimeoutMs = 5000`. Both are optional options of the factory; the API uses the defaults.
+- **Pool settings, from `src/client/pool-settings.ts`.** `defaultMaxConnections = 10`, `maxConnectionsLimit = 50` (a larger value is refused at startup), `defaultConnectionTimeoutMs = 5000`. Both are optional options of the factory; the API uses the defaults.
 - **Lazy connection.** The pool connects on the first query, so the API starts without a running database and a failure shows up on the first query. An invalid URL still fails at startup.
 - **Two health endpoints** (`health.controller.ts`, `readiness.controller.ts`), both `Cache-Control: no-store`.
   - `GET /api/v1/health` is liveness. It never calls the database.
@@ -56,6 +56,6 @@ Known limitations:
 
 Follow-up done: the rule `only-database-package-uses-database-libraries` in `dependency-cruiser.config.mjs` (and `no-restricted-imports` in ESLint) now forbids `pg` and Prisma outside `packages/database`.
 
-Follow-up done: the limitation that the `packages/database` integration suite does not refuse non-local hosts is resolved (host allow-list in `tests/support/test-database-guard.ts`, override `ENTANA_ALLOW_REMOTE_TEST_DB=1`).
+Follow-up done: the limitation that the `packages/database` integration suite does not refuse non-local hosts is resolved (host allow-list in `tests/support/throwaway-database/test-database-guard.ts`, override `ENTANA_ALLOW_REMOTE_TEST_DB=1`).
 
 Note (2026-10-07): the API shares one client and one pool between the modules that import `DatabaseModule`; the mechanism and its tests are in [ADR 0016](0016-public-product-catalogue.md).

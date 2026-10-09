@@ -3,9 +3,9 @@ import { afterAll, beforeAll, describe, expect, inject, it } from "vitest";
 import {
   NotThrowawayDatabaseError,
   assertThrowawayDatabase,
-} from "../support/assert-throwaway-database.js";
-import { countRows, findChangedTables } from "../support/count-rows.js";
-import { isThrowawayDatabaseName } from "../support/throwaway-database.js";
+} from "../support/throwaway-database/assert-throwaway-database.js";
+import { countRows, findChangedTables } from "../support/database-access/count-rows.js";
+import { isThrowawayDatabaseName } from "../support/throwaway-database/throwaway-database.js";
 
 describe("the throwaway database of the run", () => {
   let throwaway: Client;

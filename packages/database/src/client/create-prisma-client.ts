@@ -1,6 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient } from "./generated/client.ts";
+import { PrismaClient } from "../generated/client.ts";
 import { InvalidDatabaseOptionsError, toPoolSettings } from "./pool-settings.ts";
 import type { DatabaseClientOptions } from "./pool-settings.ts";
 
