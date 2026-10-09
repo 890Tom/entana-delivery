@@ -74,7 +74,7 @@ describe("CatalogService against a real PostgreSQL", () => {
     expect(response.products).toHaveLength(2);
     for (const product of response.products) {
       expect(Object.keys(product).sort()).toEqual(contractKeys);
-      expect(Object.keys(product.image).sort()).toEqual(["alt", "key"]);
+      expect(Object.keys(product.image).sort()).toEqual(["alt", "url"]);
     }
   });
 
@@ -101,7 +101,7 @@ describe("CatalogService against a real PostgreSQL", () => {
       description: "Grilled over charcoal",
       priceAr: 12000,
       available: true,
-      imageKey: "products/zebu-skewers.jpg",
+      imageKey: "zebu-skewers.jpg",
       imageAlt: "Skewers on a grill",
     });
 
@@ -115,7 +115,7 @@ describe("CatalogService against a real PostgreSQL", () => {
         description: "Grilled over charcoal",
         priceAr: 12000,
         available: true,
-        image: { key: "products/zebu-skewers.jpg", alt: "Skewers on a grill" },
+        image: { url: "/media/products/zebu-skewers.jpg", alt: "Skewers on a grill" },
       },
     ]);
   });

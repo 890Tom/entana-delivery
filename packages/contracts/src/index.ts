@@ -31,7 +31,7 @@ export {
 export type { FieldError, ProblemDetails } from "./errors/problem-details.js";
 export { readinessResponseSchema } from "./health/readiness.js";
 export type { ReadinessResponse } from "./health/readiness.js";
-export { brandingFileNameSchema, instanceConfigSchema } from "./instance/instance-config.js";
+export { instanceConfigSchema, mediaFileNameSchema } from "./instance/instance-config.js";
 export type { InstanceConfig } from "./instance/instance-config.js";
 export { publicInstanceSchema, toPublicInstance } from "./instance/public-instance.js";
 export type { PublicInstance } from "./instance/public-instance.js";

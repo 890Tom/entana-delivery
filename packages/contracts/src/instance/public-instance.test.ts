@@ -36,4 +36,12 @@ describe("publicInstanceSchema", () => {
     );
     expect(publicInstanceSchema.safeParse({ ...valid, timezone: "UTC" }).success).toBe(false);
   });
+
+  it("refuses a shop name with a formatting character", () => {
+    const valid = toPublicInstance(config);
+
+    expect(publicInstanceSchema.safeParse({ ...valid, name: "Boutique\u202Eevil" }).success).toBe(
+      false,
+    );
+  });
 });

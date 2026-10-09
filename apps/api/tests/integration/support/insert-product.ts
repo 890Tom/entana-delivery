@@ -28,7 +28,7 @@ export async function insertProduct(
       active: true,
       available: true,
       position: 0,
-      imageKey: `products/${unique}.jpg`,
+      imageKey: `${unique}.jpg`,
       imageAlt: `Photo ${unique}`,
       // What the test sets wins over the defaults above.
       ...seed,

@@ -38,7 +38,8 @@ export async function seedCatalogue({ db, now }: SeedContext): Promise<Map<strin
       availability_changed_at: product.available ? now : daysBefore(now, 3),
       position: index + 1,
       // An active product needs a photo and its alternative text (ck_product_photo_when_active).
-      image_key: product.active ? `demo/placeholder-${product.key}.jpg` : null,
+      // The key is the name of the file in the products media folder; no image is in the repository.
+      image_key: product.active ? `placeholder-${product.key}.png` : null,
       image_alt: product.active ? `Placeholder picture of ${product.name}` : null,
     });
     products.set(product.key, { id, name: product.name, priceAr: product.priceAr });

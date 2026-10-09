@@ -11,7 +11,7 @@ Customers browse the catalogue without an account. `GET /api/v1/products` is pub
 
 1. **Strict public contract.**
    - `publicProductSchema` and `productListResponseSchema` (`packages/contracts/src/catalog`) are `z.strictObject`s.
-   - A product has `id`, `name`, `description` (nullable), `priceAr`, `available` and `image: { key, alt }`. `sku`, `position`, `active` and `availabilityChangedAt` are never exposed.
+   - A product has `id`, `name`, `description` (nullable), `priceAr`, `available` and `image: { url, alt }`. `sku`, `position`, `active` and `availabilityChangedAt` are never exposed.
    - The list is an object, `{ products: [...] }`, not a bare array. The tests refuse a bare array, an extra property next to `products`, and a product carrying a `sku` (`product-list-response.test.ts`, `public-product.test.ts`).
 2. **The `select` is the protection, the schema is not.**
    - `CatalogService.listActiveProducts` (`apps/api/src/catalog/catalog.service.ts`) reads an explicit list of seven columns, so `sku` never leaves the database.
@@ -37,7 +37,7 @@ Customers browse the catalogue without an account. `GET /api/v1/products` is pub
 - A column added to `product` is not public until it is added to the `select`, the mapper and the contract.
 - Because the schema is not applied at runtime, the `select` and the mapper are the only protection. Their tests (items 2 and 3) are the guard.
 - No pagination: every active product is returned (`catalog.service.ts`, one `findMany` without `take`). This is intended for a shop-sized catalogue.
-- `image.key` is an opaque identifier, not a URL (`public-product.ts`). Photo storage and how a key becomes an image address are not decided.
+- `image.url` is the photo address, built by the API from the stored key (`public-product.ts`); the key itself is not exposed.
 - The data is the same for every visitor: no per-user content, so `public` caching is safe.
 - Pool sharing depends on passing the same `AppConfig` object to every module. The two tests of item 5 fail otherwise.
 
@@ -45,3 +45,5 @@ Customers browse the catalogue without an account. `GET /api/v1/products` is pub
 
 - **Decorated DTO classes instead of shared schemas.** Not chosen: they cannot be shared with the front ends and describe each shape twice ([ADR 0011](0011-validation-with-standard-schema-and-shared-zod-contracts.md)).
 - **A global `DatabaseModule`.** Not chosen: a module that needs the database imports it, so the dependency is visible (comment in `database.module.ts`).
+
+_Updated on 2026-10-09 by task I3: the contract returns `image.url`, built by the API from the key (`/media/products/<file>`, key checked against the media file name pattern)._

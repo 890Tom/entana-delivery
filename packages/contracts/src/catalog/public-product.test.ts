@@ -12,7 +12,7 @@ function buildProduct(overrides: Record<string, unknown> = {}): Record<string, u
     description: "A fake product for the demo.",
     priceAr: 4500,
     available: true,
-    image: { key: "demo/placeholder-alpha.jpg", alt: "Placeholder picture of Alpha" },
+    image: { url: "/media/products/placeholder-alpha.jpg", alt: "Placeholder picture of Alpha" },
     ...overrides,
   };
 }
@@ -37,6 +37,10 @@ describe("publicProductSchema", () => {
 
     it("a product with an empty description", () => {
       expect(isAccepted(buildProduct({ description: "" }))).toBe(true);
+    });
+
+    it("a product without a photo file (null url) and its alt text", () => {
+      expect(isAccepted(buildProduct({ image: { url: null, alt: "Alt" } }))).toBe(true);
     });
 
     it("a product that is not available", () => {
@@ -88,7 +92,7 @@ describe("publicProductSchema", () => {
     });
 
     it("an image carrying an extra property", () => {
-      const image = { key: "demo/a.jpg", alt: "Alt", url: "https://example.test/a.jpg" };
+      const image = { url: null, alt: "Alt", key: "placeholder-alpha.jpg" };
 
       expect(isAccepted(buildProduct({ image }))).toBe(false);
     });
@@ -130,21 +134,31 @@ describe("publicProductSchema", () => {
     });
 
     it.each([
-      ["an empty key", { key: "", alt: "Alt" }],
-      ["a whitespace-only key", { key: "  ", alt: "Alt" }],
-      ["an empty alt", { key: "demo/a.jpg", alt: "" }],
-      ["a whitespace-only alt", { key: "demo/a.jpg", alt: "  " }],
-      ["a missing key", { alt: "Alt" }],
-      ["a missing alt", { key: "demo/a.jpg" }],
-      ["a numeric key", { key: 42, alt: "Alt" }],
-      ["a null alt", { key: "demo/a.jpg", alt: null }],
+      ["an empty alt", { url: null, alt: "" }],
+      ["a whitespace-only alt", { url: null, alt: "  " }],
+      ["a missing url", { alt: "Alt" }],
+      ["a missing alt", { url: null }],
+      ["a numeric url", { url: 42, alt: "Alt" }],
+      ["a null alt", { url: null, alt: null }],
     ])("an image with %s", (_label, image) => {
       expect(isAccepted(buildProduct({ image }))).toBe(false);
     });
 
     it.each([
+      ["an absolute URL", "https://example.test/media/products/a.jpg"],
+      ["a protocol-relative URL", "//example.test/media/products/a.jpg"],
+      ["another media folder", "/media/branding/a.jpg"],
+      ["a bare file name", "a.jpg"],
+      ["a file in a sub-folder", "/media/products/sub/a.jpg"],
+      ["a svg file", "/media/products/a.svg"],
+      ["a parent folder", "/media/products/../a.jpg"],
+    ])("an image url that is %s", (_label, url) => {
+      expect(isAccepted(buildProduct({ image: { url, alt: "Alt" } }))).toBe(false);
+    });
+
+    it.each([
       ["null", null],
-      ["a string", "demo/a.jpg"],
+      ["a string", "/media/products/a.jpg"],
       ["an array", []],
     ])("an image that is %s", (_label, image) => {
       expect(isAccepted(buildProduct({ image }))).toBe(false);
@@ -188,8 +202,8 @@ describe("publicProductSchema", () => {
     );
   });
 
-  it("exposes exactly the allow-listed image keys", () => {
-    expect(Object.keys(publicProductSchema.shape.image.shape).sort()).toStrictEqual(["alt", "key"]);
+  it("exposes exactly the allow-listed image fields", () => {
+    expect(Object.keys(publicProductSchema.shape.image.shape).sort()).toStrictEqual(["alt", "url"]);
   });
 
   it("infers the public product type from the schema", () => {
@@ -199,7 +213,7 @@ describe("publicProductSchema", () => {
       description: null,
       priceAr: 4500,
       available: true,
-      image: { key: "demo/placeholder-alpha.jpg", alt: "Placeholder picture of Alpha" },
+      image: { url: "/media/products/placeholder-alpha.jpg", alt: "Placeholder picture of Alpha" },
     };
 
     expect(isAccepted(product)).toBe(true);

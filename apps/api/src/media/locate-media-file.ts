@@ -1,6 +1,6 @@
 import { realpath, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { brandingFileNameSchema } from "@entana/contracts";
+import { mediaFileNameSchema } from "@entana/contracts";
 import { isMediaFolder } from "./media-folders.js";
 
 // Closed table: the type comes from the extension, never from the content.
@@ -33,7 +33,7 @@ export async function locateMediaFile(
   fileSystem: MediaFileSystem = { realpath, stat },
 ): Promise<MediaFileInfo | null> {
   const contentType = CONTENT_TYPES[name.slice(name.lastIndexOf(".") + 1)];
-  if (!isMediaFolder(folder) || !brandingFileNameSchema.safeParse(name).success) {
+  if (!isMediaFolder(folder) || !mediaFileNameSchema.safeParse(name).success) {
     return null;
   }
   if (contentType === undefined) {

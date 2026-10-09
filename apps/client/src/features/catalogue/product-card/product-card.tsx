@@ -1,5 +1,6 @@
 import type { PublicProduct } from "@entana/contracts";
 import { formatAmount } from "@entana/contracts";
+import { useState } from "react";
 import type { ReactElement } from "react";
 
 import { Badge } from "../../../components/badge/badge";
@@ -10,15 +11,29 @@ import styles from "./product-card.module.css";
 
 /** The description is not shown: the validated design has none on the card. */
 export function ProductCard({ product }: { product: PublicProduct }): ReactElement {
+  const [hasPhotoFailed, setHasPhotoFailed] = useState(false);
+  const { url, alt } = product.image;
+  const dimmed = product.available ? undefined : styles.dimmed;
   return (
     <article className={layout.card}>
-      {/* Photo storage is undecided: the alt text stands in, no URL is built from image.key. */}
+      {/* The square is sized by the layout, so a late or failed photo moves nothing. The URL is the API's own. */}
       <div className={[layout.photo, styles.photo].join(" ")}>
-        <div
-          className={[styles.placeholder, product.available ? undefined : styles.dimmed].join(" ")}
-        >
-          <p className={styles.alt}>{product.image.alt}</p>
-        </div>
+        {url !== null && !hasPhotoFailed ? (
+          <img
+            className={[styles.image, dimmed].join(" ")}
+            src={url}
+            alt={alt}
+            loading="lazy"
+            decoding="async"
+            onError={() => {
+              setHasPhotoFailed(true);
+            }}
+          />
+        ) : (
+          <div className={[styles.placeholder, dimmed].join(" ")}>
+            <p className={styles.alt}>{alt}</p>
+          </div>
+        )}
         {!product.available && (
           <div className={styles.badge}>
             <Badge>{texts.catalogue.product.unavailable}</Badge>

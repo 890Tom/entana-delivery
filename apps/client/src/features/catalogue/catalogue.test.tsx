@@ -154,8 +154,8 @@ describe("Catalogue error state", () => {
 describe("Catalogue list state", () => {
   it("shows the products in the order of the response, with name and image alt text", async () => {
     const products = [
-      buildProduct({ id: buildProductId(1), name: "Sakafo", image: { key: "a", alt: "Photo A" } }),
-      buildProduct({ id: buildProductId(2), name: "Mofo", image: { key: "b", alt: "Photo B" } }),
+      buildProduct({ id: buildProductId(1), name: "Sakafo", image: { url: null, alt: "Photo A" } }),
+      buildProduct({ id: buildProductId(2), name: "Mofo", image: { url: null, alt: "Photo B" } }),
     ];
     stubFetch(() => Promise.resolve(jsonResponse({ products })));
 
@@ -176,16 +176,6 @@ describe("Catalogue list state", () => {
     renderCatalogue();
 
     expect(await screen.findByText(formatAmount(12500), keepSpaces)).toBeTruthy();
-  });
-
-  it("builds no image element and no URL from the image key", async () => {
-    stubFetch(() => Promise.resolve(jsonResponse({ products: [buildProduct()] })));
-
-    const { container } = renderCatalogue();
-    await screen.findByText("Sakafo");
-
-    expect(container.querySelectorAll("img, a, [src], [href]")).toHaveLength(0);
-    expect(container.innerHTML).not.toContain("demo/sakafo.jpg");
   });
 
   it("marks an unavailable product with a text, and only that one", async () => {
@@ -215,7 +205,7 @@ describe("Catalogue list state", () => {
   it("shows markup in the name and the image alt text as plain text", async () => {
     const product = buildProduct({
       name: SCRIPT,
-      image: { key: "demo/x.jpg", alt: IMAGE },
+      image: { url: null, alt: IMAGE },
     });
     stubFetch(() => Promise.resolve(jsonResponse({ products: [product] })));
 

@@ -98,6 +98,10 @@ Only `.png`, `.webp` and `.jpg` are served (never `.svg`), with the content type
 `^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`, a missing file and a symbolic link all answer `404`; the name
 is checked before the disk is read.
 
+Product photos are dropped by hand in the products media folder, with the `.png`, `.webp` or `.jpg`
+extension (`.jpeg` is refused: rename it to `.jpg`). The name of the file is the product's image key.
+A product whose key is not such a name makes the catalogue answer the generic `500`.
+
 - **`MEDIA_ROOT`**: absolute path of the folder, holding `branding/` and `products/`. In
   production it is required and must exist, or the API stops with a message that names it. Outside
   production the default is `./media` at the repository root (ignored by git).
@@ -200,7 +204,7 @@ Both answer with `Cache-Control: no-store`.
 product, in display order (position, then name, then id), as `{ "products": [...] }`: the shape is
 `productListResponseSchema` of `@entana/contracts`, unchanged. Each product has `id`, `name`,
 `description` (`null` when blank), `priceAr` (integer ariary), `available` and
-`image: { key, alt }`. An unavailable product is still listed, with `available: false`; the
+`image: { url, alt }`: `url` is `/media/products/<file>`, built by the API from the product's image key (the raw key is never returned). An unavailable product is still listed, with `available: false`; the
 internal `sku` is never selected (see [ADR 0016](../../docs/adr/0016-public-product-catalogue.md)). An empty catalogue answers `{ "products": [] }`.
 
 - **No pagination:** the whole catalogue is returned on purpose, for a shop-sized catalogue.
