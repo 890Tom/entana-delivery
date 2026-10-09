@@ -41,6 +41,7 @@ describe("parseConfig", () => {
       isSwaggerEnabled: false,
       databaseUrl: validDatabaseUrl,
       instanceConfigPath: undefined,
+      mediaRoot: undefined,
     });
   });
 
@@ -56,6 +57,7 @@ describe("parseConfig", () => {
       SWAGGER_ENABLED: "true",
       DATABASE_URL: "postgresql://entana:s3cret-pass-word@localhost:5433/entana",
       INSTANCE_CONFIG_PATH: "/etc/entana/instance.config.yaml",
+      MEDIA_ROOT: "/media",
     });
     expect(config).toEqual({
       nodeEnv: "production",
@@ -68,6 +70,7 @@ describe("parseConfig", () => {
       isSwaggerEnabled: true,
       databaseUrl: "postgresql://entana:s3cret-pass-word@localhost:5433/entana",
       instanceConfigPath: "/etc/entana/instance.config.yaml",
+      mediaRoot: "/media",
     });
   });
 

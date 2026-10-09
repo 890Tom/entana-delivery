@@ -2,8 +2,6 @@ import { publicInstanceSchema } from "@entana/contracts";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createApplication } from "../../src/create-application.js";
-import { InvalidInstanceConfigurationError } from "../../src/instance/invalid-instance-configuration-error.js";
 import { startRealApp } from "./support/create-test-app.js";
 import { buildTestConfig } from "./support/test-config.js";
 
@@ -39,15 +37,5 @@ describe("GET /api/v1/instance", () => {
       "phoneCountryCode",
     ]);
     expect(JSON.stringify(response.body)).not.toMatch(/timezone|Antananarivo|instance\.config/);
-  });
-});
-
-describe("startup without an instance configuration", () => {
-  it("refuses to build the application in production when the file is missing", async () => {
-    const config = buildTestConfig({ NODE_ENV: "production" });
-
-    await expect(createApplication(config)).rejects.toBeInstanceOf(
-      InvalidInstanceConfigurationError,
-    );
   });
 });

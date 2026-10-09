@@ -51,7 +51,8 @@ export function configureApplication(app: NestExpressApplication, config: AppCon
   // Every route: a "__proto__" key would be removed silently by the validation pipe.
   app.use(rejectPrototypeKey);
 
-  app.setGlobalPrefix(API_PREFIX);
+  // The media are not part of the API: /media/<folder>/<file>, no prefix and no version.
+  app.setGlobalPrefix(API_PREFIX, { exclude: ["media/:folder/:file"] });
   app.enableVersioning({ type: VersioningType.URI });
 
   app.useGlobalPipes(

@@ -34,6 +34,7 @@ process prints the names of the invalid variables (never their values) and exits
 | `BODY_LIMIT_KB`        | `100`                        | Largest JSON request body, in kilobytes.                                    |
 | `SWAGGER_ENABLED`      | `development` or `test` only | Serves `/api/docs`.                                                         |
 | `DATABASE_URL`         | required                     | PostgreSQL URL. No whitespace or control character. See below.              |
+| `MEDIA_ROOT`           | `./media` outside production | Absolute path of the media folder. Required in production. See Media.       |
 | `INSTANCE_CONFIG_PATH` | demo file outside production | Path of the instance configuration file. Required in production. See below. |
 
 **`NODE_ENV`** defaults to `production`, so that a deployment that forgets it exposes nothing it
@@ -86,6 +87,32 @@ root, ignored by git. **It holds no secret**: its public part is served to every
   those of any route: an invalid file never reaches the route, because the API did not start.
 - **Phone numbers**: the order service reads `phoneCountryCode` from this file. It replaces the
   former phone country code environment variable, which is removed: set `phoneCountryCode` instead.
+
+## Media
+
+The API serves, read-only, the files of a media folder: `GET` and `HEAD /media/branding/<file>`
+and `/media/products/<file>` (no `/api` prefix, no version). No listing, no hidden file, no upload.
+Only `.png`, `.webp` and `.jpg` are served (never `.svg`), with the content type of the extension,
+`X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'` and
+`Cache-Control: public, max-age=3600`. A name that does not match
+`^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`, a missing file and a symbolic link all answer `404`; the name
+is checked before the disk is read.
+
+- **`MEDIA_ROOT`**: absolute path of the folder, holding `branding/` and `products/`. In
+  production it is required and must exist, or the API stops with a message that names it. Outside
+  production the default is `./media` at the repository root (ignored by git).
+- **Compose**: the `api` service mounts the named volume `media` on `/media` and the instance
+  file on `/config/instance.config.yaml`, **read-only**. `INSTANCE_CONFIG_FILE` (in `.env`) picks
+  the file on the host; the demo file is the default. The image holds no configuration and no
+  media, and sets neither variable: a container started without them refuses to start.
+- **Put a file in** (manual, until the administration can upload):
+  `docker compose cp ./logo.png api:/media/branding/logo.png`, then name it in `branding.logoFile`
+  of the instance file. The files must be readable by the user of the image (`node`).
+- **Backup**: the `media` volume is data, like the database: back both up together.
+  `docker compose down -v` deletes the volume, so the media with it.
+- **Volume created earlier with root as owner**: give it back to the image user (`node`) with
+  `docker compose run --rm --user root --entrypoint chown api -R node:node /media`. The
+  `--entrypoint` is needed because the entrypoint of the image is `node dist/main.js`.
 
 ## Container
 

@@ -72,6 +72,8 @@ const configSchema = z
     // Path of the instance configuration file. Absent: the demo file outside production, an error
     // in production (see loadInstanceConfig).
     INSTANCE_CONFIG_PATH: z.string().optional(),
+    // Absolute path of the media folder (branding/ and products/). Required in production.
+    MEDIA_ROOT: z.string().optional(),
   })
   .transform((env) => ({
     nodeEnv: env.NODE_ENV,
@@ -85,6 +87,7 @@ const configSchema = z
     isSwaggerEnabled: env.SWAGGER_ENABLED ?? env.NODE_ENV !== "production",
     databaseUrl: env.DATABASE_URL,
     instanceConfigPath: env.INSTANCE_CONFIG_PATH,
+    mediaRoot: env.MEDIA_ROOT,
   }));
 
 export type AppConfig = Readonly<z.output<typeof configSchema>>;

@@ -1,4 +1,5 @@
 import type { NestExpressApplication } from "@nestjs/platform-express";
+import { tmpdir } from "node:os";
 import request from "supertest";
 import { z } from "zod";
 import { afterEach, describe, expect, it } from "vitest";
@@ -34,7 +35,11 @@ describe("security headers", () => {
 describe("content security policy", () => {
   it("makes browsers upgrade insecure requests in production", async () => {
     app = await startRealApp(
-      buildTestConfig({ NODE_ENV: "production", INSTANCE_CONFIG_PATH: DEMO_INSTANCE_CONFIG_PATH }),
+      buildTestConfig({
+        NODE_ENV: "production",
+        INSTANCE_CONFIG_PATH: DEMO_INSTANCE_CONFIG_PATH,
+        MEDIA_ROOT: tmpdir(),
+      }),
     );
     const response = await request(app.getHttpServer()).get("/api/v1/health");
 
@@ -156,7 +161,11 @@ describe("API documentation", () => {
 
   it("is off by default in production", async () => {
     app = await startRealApp(
-      buildTestConfig({ NODE_ENV: "production", INSTANCE_CONFIG_PATH: DEMO_INSTANCE_CONFIG_PATH }),
+      buildTestConfig({
+        NODE_ENV: "production",
+        INSTANCE_CONFIG_PATH: DEMO_INSTANCE_CONFIG_PATH,
+        MEDIA_ROOT: tmpdir(),
+      }),
     );
 
     expect((await request(app.getHttpServer()).get("/api/docs")).status).toBe(404);
