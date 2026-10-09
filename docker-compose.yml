@@ -40,6 +40,9 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: "3000"
+      # Literal values: they are the paths of the two mounts below, not settings.
+      MEDIA_ROOT: /media
+      INSTANCE_CONFIG_PATH: /config/instance.config.yaml
       # Built from the database service's own variables, host = service name, container port.
       # Compose cannot percent-encode: the password must use only URL-safe characters
       # (letters, digits, - . _ ~) for this service.
@@ -47,8 +50,15 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       # Empty means no cross-origin browser is allowed.
       CORS_ORIGINS: ${CORS_ORIGINS:-}
+    volumes:
+      # The media (logo, icon, product photos): back it up with the database, and note that
+      # `docker compose down -v` deletes it.
+      - media:/media
+      # The shop description, read-only. The demo file by default; set INSTANCE_CONFIG_FILE in .env.
+      - ${INSTANCE_CONFIG_FILE:-./examples/demo/instance.config.yaml}:/config/instance.config.yaml:ro
     ports:
       - "${API_PORT:-3000}:3000"
 
 volumes:
   postgres_data:
+  media:

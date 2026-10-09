@@ -55,6 +55,12 @@ RUN rm -rf \
         /usr/local/bin/yarn /usr/local/bin/yarnpkg \
         /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
         /opt/yarn-v1.22.22
+# The media folder (a volume in Compose) and the folder of the instance configuration (a file
+# mounted read-only) belong to the user that runs the API. A named volume mounted on /media copies
+# this owner the first time it is created. Nothing of the brand is copied into the image, and no
+# ENV points to these folders: a container started without MEDIA_ROOT and INSTANCE_CONFIG_PATH
+# refuses to start and names the missing variable.
+RUN mkdir -p /media/branding /media/products /config && chown -R node:node /media /config
 USER node
 EXPOSE 3000
 # Node itself performs the check: the image has no curl.

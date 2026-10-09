@@ -38,7 +38,7 @@ import { resolveOrderLines } from "./rules/resolve-order-lines.js";
 export type RandomBytes = (count: number) => Uint8Array;
 
 export const ORDER_RANDOM_BYTES = Symbol("ORDER_RANDOM_BYTES");
-export const DEFAULT_PHONE_COUNTRY_CODE = Symbol("DEFAULT_PHONE_COUNTRY_CODE");
+export const PHONE_COUNTRY_CODE = Symbol("PHONE_COUNTRY_CODE");
 
 /** What the service needs from the database client: the PrismaClient fits. */
 export type OrdersDatabase = Pick<PrismaClient, "$transaction" | "customerOrder">;
@@ -66,7 +66,7 @@ export class OrdersService {
     @Inject(DATABASE_CLIENT) private readonly database: OrdersDatabase,
     @Inject(CLOCK) private readonly clock: Clock,
     @Inject(ORDER_RANDOM_BYTES) private readonly randomBytes: RandomBytes,
-    @Inject(DEFAULT_PHONE_COUNTRY_CODE) private readonly defaultPhoneCountryCode: string,
+    @Inject(PHONE_COUNTRY_CODE) private readonly phoneCountryCode: string,
   ) {}
 
   /**
@@ -78,7 +78,7 @@ export class OrdersService {
     request: CreateOrderRequest,
     idempotencyKey: string,
   ): Promise<CreateOrderResult> {
-    const phoneE164 = normalizePhone(request.phone, this.defaultPhoneCountryCode);
+    const phoneE164 = normalizePhone(request.phone, this.phoneCountryCode);
     if (phoneE164 === null) {
       throw new InvalidPhoneError();
     }

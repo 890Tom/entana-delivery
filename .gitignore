@@ -44,3 +44,9 @@ AGENTS.md
 
 # Generated Prisma client
 packages/database/src/generated/
+
+# Real instance configuration of this deployment (see examples/demo/instance.config.yaml)
+/instance.config.yaml
+
+# Local media folder (logo, icon, product photos of a real shop)
+/media/

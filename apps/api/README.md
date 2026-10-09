@@ -23,17 +23,19 @@ Environment variables, validated at startup by `src/config/app-config.ts`. If on
 process prints the names of the invalid variables (never their values) and exits with code 1.
 `pnpm dev` and `pnpm start` read the `.env` file at the repository root.
 
-| Variable          | Default                      | Meaning                                                                   |
-| ----------------- | ---------------------------- | ------------------------------------------------------------------------- |
-| `NODE_ENV`        | `production`                 | `development`, `test` or `production`. Readable logs only in development. |
-| `HOST`            | `0.0.0.0`                    | Interface to listen on. See below.                                        |
-| `PORT`            | `3000`                       | Port to listen on.                                                        |
-| `LOG_LEVEL`       | `info`                       | `fatal`, `error`, `warn`, `info`, `debug`, `trace` or `silent`.           |
-| `CORS_ORIGINS`    | empty                        | Allowed browser origins, comma separated. Empty: none.                    |
-| `TRUST_PROXY`     | `false`                      | Number of reverse proxies in front of the API. See below.                 |
-| `BODY_LIMIT_KB`   | `100`                        | Largest JSON request body, in kilobytes.                                  |
-| `SWAGGER_ENABLED` | `development` or `test` only | Serves `/api/docs`.                                                       |
-| `DATABASE_URL`    | required                     | PostgreSQL URL. No whitespace or control character. See below.            |
+| Variable               | Default                      | Meaning                                                                     |
+| ---------------------- | ---------------------------- | --------------------------------------------------------------------------- |
+| `NODE_ENV`             | `production`                 | `development`, `test` or `production`. Readable logs only in development.   |
+| `HOST`                 | `0.0.0.0`                    | Interface to listen on. See below.                                          |
+| `PORT`                 | `3000`                       | Port to listen on.                                                          |
+| `LOG_LEVEL`            | `info`                       | `fatal`, `error`, `warn`, `info`, `debug`, `trace` or `silent`.             |
+| `CORS_ORIGINS`         | empty                        | Allowed browser origins, comma separated. Empty: none.                      |
+| `TRUST_PROXY`          | `false`                      | Number of reverse proxies in front of the API. See below.                   |
+| `BODY_LIMIT_KB`        | `100`                        | Largest JSON request body, in kilobytes.                                    |
+| `SWAGGER_ENABLED`      | `development` or `test` only | Serves `/api/docs`.                                                         |
+| `DATABASE_URL`         | required                     | PostgreSQL URL. No whitespace or control character. See below.              |
+| `MEDIA_ROOT`           | `./media` outside production | Absolute path of the media folder. Required in production. See Media.       |
+| `INSTANCE_CONFIG_PATH` | demo file outside production | Path of the instance configuration file. Required in production. See below. |
 
 **`NODE_ENV`** defaults to `production`, so that a deployment that forgets it exposes nothing it
 should not (no API documentation, strict security headers, JSON logs). `.env.example` sets
@@ -62,6 +64,55 @@ one) stops the start too, with a message that never quotes the URL.
 
 After editing `packages/contracts`, run `pnpm --filter @entana/contracts build` (or restart
 `pnpm dev` from the root): the API loads the compiled output of `contracts`, not its source.
+
+## Instance configuration
+
+The shop itself (name, language, currency, time zone, phone country code, logo file names) is
+described by a YAML file, validated at startup by the schema in `packages/contracts`. Start from
+`examples/demo/instance.config.yaml`; the real file is `instance.config.yaml` at the repository
+root, ignored by git. **It holds no secret**: its public part is served to everybody.
+
+- **Where**: `INSTANCE_CONFIG_PATH`. Outside production, when it is unset, the API uses the demo
+  file. In production a missing variable or file stops the API (exit code 1) with a message in
+  French. A container must mount the file and set the variable.
+- **Validation**: the schema is strict, so an unknown key is an error. An invalid file stops the
+  API with the list of the invalid key names, never their values. `phoneCountryCode` is a string
+  (`"261"`, between quotes: unquoted, YAML reads a number and the file is refused).
+- **Limits**: 64 KiB at most; one YAML document; no custom tag, no merge key, no duplicate key;
+  no alias. Logo and icon files are bare names ending in `.png`, `.webp` or `.jpg`
+  (never `.svg`), served later under `/media/branding/`.
+- **`GET /api/v1/instance`**: public, `Cache-Control: public, max-age=60`. Answers
+  `publicInstanceSchema`: `name`, `locale`, `currency`, `phoneCountryCode`, `logoUrl`,
+  `appIconUrl`. The time zone and the file names stay on the server. The only error cases are
+  those of any route: an invalid file never reaches the route, because the API did not start.
+- **Phone numbers**: the order service reads `phoneCountryCode` from this file. It replaces the
+  former phone country code environment variable, which is removed: set `phoneCountryCode` instead.
+
+## Media
+
+The API serves, read-only, the files of a media folder: `GET` and `HEAD /media/branding/<file>`
+and `/media/products/<file>` (no `/api` prefix, no version). No listing, no hidden file, no upload.
+Only `.png`, `.webp` and `.jpg` are served (never `.svg`), with the content type of the extension,
+`X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'` and
+`Cache-Control: public, max-age=3600`. A name that does not match
+`^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`, a missing file and a symbolic link all answer `404`; the name
+is checked before the disk is read.
+
+- **`MEDIA_ROOT`**: absolute path of the folder, holding `branding/` and `products/`. In
+  production it is required and must exist, or the API stops with a message that names it. Outside
+  production the default is `./media` at the repository root (ignored by git).
+- **Compose**: the `api` service mounts the named volume `media` on `/media` and the instance
+  file on `/config/instance.config.yaml`, **read-only**. `INSTANCE_CONFIG_FILE` (in `.env`) picks
+  the file on the host; the demo file is the default. The image holds no configuration and no
+  media, and sets neither variable: a container started without them refuses to start.
+- **Put a file in** (manual, until the administration can upload):
+  `docker compose cp ./logo.png api:/media/branding/logo.png`, then name it in `branding.logoFile`
+  of the instance file. The files must be readable by the user of the image (`node`).
+- **Backup**: the `media` volume is data, like the database: back both up together.
+  `docker compose down -v` deletes the volume, so the media with it.
+- **Volume created earlier with root as owner**: give it back to the image user (`node`) with
+  `docker compose run --rm --user root --entrypoint chown api -R node:node /media`. The
+  `--entrypoint` is needed because the entrypoint of the image is `node dist/main.js`.
 
 ## Container
 

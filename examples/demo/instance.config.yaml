@@ -1,0 +1,19 @@
+# Configuration de démonstration : fictive, publique, sans donnée réelle.
+# Ne mettez AUCUN secret dans ce fichier (mot de passe, clé, jeton) : il décrit la boutique
+# et sa partie publique est servie à tous par GET /api/v1/instance. Les secrets restent dans
+# les variables d'environnement.
+# Pour une vraie boutique, copiez ce fichier en instance.config.yaml à la racine (ignoré par git)
+# ou indiquez son chemin avec INSTANCE_CONFIG_PATH.
+shop:
+  name: Boutique de démonstration
+locale:
+  default: fr
+  available: [fr]
+currency: MGA
+timezone: Indian/Antananarivo
+# Entre guillemets : sans eux, YAML lirait un nombre et le fichier serait refusé.
+phoneCountryCode: "261"
+# Facultatif : noms de fichiers seulement (png, webp ou jpg), servis sous /media/branding/.
+# branding:
+#   logoFile: logo.png
+#   appIconFile: app-icon.png

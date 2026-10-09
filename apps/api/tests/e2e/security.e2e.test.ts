@@ -1,9 +1,10 @@
 import type { NestExpressApplication } from "@nestjs/platform-express";
+import { tmpdir } from "node:os";
 import request from "supertest";
 import { z } from "zod";
 import { afterEach, describe, expect, it } from "vitest";
 import { startAppWithProbe, startRealApp } from "./support/create-test-app.js";
-import { buildTestConfig } from "./support/test-config.js";
+import { DEMO_INSTANCE_CONFIG_PATH, buildTestConfig } from "./support/test-config.js";
 
 const clientSchema = z.object({ ip: z.string() });
 const openApiSchema = z.object({
@@ -33,7 +34,13 @@ describe("security headers", () => {
 
 describe("content security policy", () => {
   it("makes browsers upgrade insecure requests in production", async () => {
-    app = await startRealApp(buildTestConfig({ NODE_ENV: "production" }));
+    app = await startRealApp(
+      buildTestConfig({
+        NODE_ENV: "production",
+        INSTANCE_CONFIG_PATH: DEMO_INSTANCE_CONFIG_PATH,
+        MEDIA_ROOT: tmpdir(),
+      }),
+    );
     const response = await request(app.getHttpServer()).get("/api/v1/health");
 
     expect(response.headers["content-security-policy"]).toContain("upgrade-insecure-requests");
@@ -153,7 +160,13 @@ describe("API documentation", () => {
   });
 
   it("is off by default in production", async () => {
-    app = await startRealApp(buildTestConfig({ NODE_ENV: "production" }));
+    app = await startRealApp(
+      buildTestConfig({
+        NODE_ENV: "production",
+        INSTANCE_CONFIG_PATH: DEMO_INSTANCE_CONFIG_PATH,
+        MEDIA_ROOT: tmpdir(),
+      }),
+    );
 
     expect((await request(app.getHttpServer()).get("/api/docs")).status).toBe(404);
   });
