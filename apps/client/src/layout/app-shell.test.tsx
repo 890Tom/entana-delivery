@@ -98,7 +98,9 @@ describe("application shell", () => {
 
     fireEvent.error(await screen.findByRole("img", { name: "Maison Démo" }));
 
-    expect(within(screen.getByRole("banner")).queryByRole("img")).toBeNull();
+    expect(
+      within(screen.getByRole("banner")).queryByRole("img", { name: "Maison Démo" }),
+    ).toBeNull();
     expect(within(screen.getByRole("banner")).getByText("Maison Démo")).toBeTruthy();
   });
 
@@ -119,7 +121,9 @@ describe("application shell", () => {
     expect(
       await within(screen.getByRole("banner")).findByText(texts.shell.genericName),
     ).toBeTruthy();
-    expect(within(screen.getByRole("banner")).queryByRole("img")).toBeNull();
+    expect(
+      within(screen.getByRole("banner")).queryByRole("img", { name: texts.shell.genericName }),
+    ).toBeNull();
     expect(screen.queryByRole("alert")).toBeNull();
     expect(await screen.findByText("Sakafo")).toBeTruthy();
   });

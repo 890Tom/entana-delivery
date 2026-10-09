@@ -1,0 +1,28 @@
+.badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-sm);
+}
+
+/* The round count: accent fill, ink text, at the top right of the bag. */
+.count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-icon-md);
+  height: var(--size-icon-md);
+  padding-inline: var(--space-1);
+  font: var(--font-body-strong);
+  font-size: var(--font-size-badge-count);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+}

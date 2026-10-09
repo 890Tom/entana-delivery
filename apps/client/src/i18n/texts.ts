@@ -25,11 +25,21 @@ export const texts: {
     readonly message: string;
     readonly back: string;
   };
+  readonly cart: {
+    readonly badgeLabel: (count: number) => string;
+    readonly removedUnavailable: string;
+  };
   readonly catalogue: {
     readonly title: string;
     readonly empty: string;
     readonly product: {
       readonly unavailable: string;
+      readonly add: string;
+      readonly addAria: (name: string) => string;
+      readonly quantityGroup: (name: string) => string;
+      readonly decreaseAria: (name: string) => string;
+      readonly removeAria: (name: string) => string;
+      readonly increaseAria: (name: string) => string;
     };
     readonly errors: Readonly<Record<CatalogueErrorKind, string>>;
   };
@@ -56,11 +66,22 @@ export const texts: {
     message: "Cette page n'existe pas ou a été déplacée.",
     back: "Retour aux produits",
   },
+  cart: {
+    badgeLabel: (count) => `Panier, ${String(count)} ${count > 1 ? "articles" : "article"}`,
+    removedUnavailable:
+      "Certains produits ne sont plus disponibles et ont été retirés de votre panier.",
+  },
   catalogue: {
     title: "Nos produits",
     empty: "Aucun produit disponible pour le moment.",
     product: {
       unavailable: "Indisponible aujourd'hui",
+      add: "Ajouter",
+      addAria: (name) => `Ajouter ${name} au panier`,
+      quantityGroup: (name) => `Quantité — ${name}`,
+      decreaseAria: (name) => `Retirer une unité de ${name}`,
+      removeAria: (name) => `Retirer ${name} du panier`,
+      increaseAria: (name) => `Ajouter une unité de ${name}`,
     },
     errors: {
       network: "Impossible de joindre le serveur. Vérifiez votre connexion.",

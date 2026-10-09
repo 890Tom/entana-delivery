@@ -1,0 +1,18 @@
+.stepper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-half);
+  background: var(--color-accent-soft);
+  border: var(--border-width) solid var(--color-accent-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.count {
+  flex: 1;
+  min-width: var(--size-stepper-count);
+  text-align: center;
+  font: var(--font-body-strong);
+  font-variant-numeric: tabular-nums;
+}

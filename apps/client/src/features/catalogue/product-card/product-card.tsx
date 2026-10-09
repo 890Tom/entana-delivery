@@ -7,6 +7,7 @@ import { Badge } from "../../../components/badge/badge";
 import { texts } from "../../../i18n/texts";
 import layout from "../card-layout.module.css";
 
+import { ProductCardAction } from "./product-card-action";
 import styles from "./product-card.module.css";
 
 /** The description is not shown: the validated design has none on the card. */
@@ -44,7 +45,9 @@ export function ProductCard({ product }: { product: PublicProduct }): ReactEleme
         <h2 className={styles.name}>{product.name}</h2>
         <p className={styles.price}>{formatAmount(product.priceAr)}</p>
       </div>
-      <div className={layout.action} />
+      <div className={layout.action}>
+        {product.available && <ProductCardAction productId={product.id} name={product.name} />}
+      </div>
     </article>
   );
 }
