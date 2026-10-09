@@ -3,10 +3,10 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./app";
-import { createQueryClient } from "./query-client";
+import { createQueryClient } from "./data-fetching/query-client";
 import { expectNoAccessibilityViolations } from "./test-support/expect-no-accessibility-violations";
 import { jsonResponse, stubFetch } from "./test-support/stub-fetch";
-import { texts } from "./texts";
+import { texts } from "./i18n/texts";
 
 function renderApp(): ReturnType<typeof render> {
   stubFetch(() => Promise.resolve(jsonResponse({ products: [] })));

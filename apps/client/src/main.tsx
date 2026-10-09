@@ -3,7 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "./app";
-import { createQueryClient } from "./query-client";
+import { createQueryClient } from "./data-fetching/query-client";
 import "./styles.css";
 
 const rootElement = document.getElementById("root");

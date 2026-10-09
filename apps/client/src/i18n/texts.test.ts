@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { CATALOGUE_ERROR_KINDS } from "./catalogue/fetch-products";
+import { CATALOGUE_ERROR_KINDS } from "../features/catalogue/api/fetch-products";
 import { texts } from "./texts";
 
 function collectStrings(value: unknown): string[] {

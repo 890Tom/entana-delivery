@@ -1,4 +1,4 @@
-import type { CatalogueErrorKind } from "./catalogue/fetch-products";
+import type { CatalogueErrorKind } from "../features/catalogue/api/fetch-products";
 
 // Fixed French texts. Error messages depend only on the kind of error, never on a server text.
 export const texts: {
