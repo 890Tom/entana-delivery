@@ -45,14 +45,24 @@
 }
 
 .dot {
+  display: flex;
   flex: none;
+  align-items: center;
+  justify-content: center;
   width: var(--size-step-dot);
   height: var(--size-step-dot);
   border-radius: var(--radius-full);
 }
 
 .current .dot {
+  color: var(--color-text-inverse);
   background: var(--color-surface-inverse);
+}
+
+/* The icon is smaller than its default size so that it sits inside the dot. */
+.dot svg {
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
 }
 
 .upcoming .dot {
