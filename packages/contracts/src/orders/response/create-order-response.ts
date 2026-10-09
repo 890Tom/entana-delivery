@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { orderCodeSchema } from "./order-code.js";
+import { orderCodeSchema } from "../code/order-code.js";
 
 /**
  * What the customer gets back after an order creation. Strict and minimal: no tracking token (the
