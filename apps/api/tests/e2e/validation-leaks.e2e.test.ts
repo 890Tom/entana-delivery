@@ -3,7 +3,7 @@ import type { FieldError } from "@entana/contracts";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { VALIDATION_DETAILS } from "../../src/errors/request-validation-error.js";
+import { VALIDATION_DETAILS } from "../../src/errors/request-body/request-validation-error.js";
 import { startAppWithProbe, startRealApp } from "./support/create-test-app.js";
 import { captureLogs } from "./support/log-capture.js";
 import { buildTestConfig } from "./support/test-config.js";

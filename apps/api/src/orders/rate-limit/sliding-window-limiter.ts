@@ -1,4 +1,4 @@
-import type { Clock } from "../clock.js";
+import type { Clock } from "../../clock/clock.js";
 
 export interface SlidingWindowOptions {
   readonly maxHits: number;

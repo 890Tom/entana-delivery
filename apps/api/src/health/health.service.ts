@@ -1,9 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { HealthResponse } from "@entana/contracts";
-import { APP_INFO } from "../app-info.js";
-import type { AppInfo } from "../app-info.js";
-import { CLOCK } from "../clock.js";
-import type { Clock } from "../clock.js";
+import { APP_INFO } from "../app-info/app-info.js";
+import type { AppInfo } from "../app-info/app-info.js";
+import { CLOCK } from "../clock/clock.js";
+import type { Clock } from "../clock/clock.js";
 
 const MILLISECONDS_PER_SECOND = 1000;
 

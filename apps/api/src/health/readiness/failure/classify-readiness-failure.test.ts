@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { classifyReadinessFailure } from "./classify-readiness-failure.js";
-import { ReadinessTimeoutError } from "./readiness-timeout-error.js";
+import { ReadinessTimeoutError } from "../timeout/readiness-timeout-error.js";
 
 function errorWithCode(code: string): Error {
   return Object.assign(new Error("message that must never be read"), { code });

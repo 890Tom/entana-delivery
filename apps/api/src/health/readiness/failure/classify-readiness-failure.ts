@@ -1,4 +1,4 @@
-import { ReadinessTimeoutError } from "./readiness-timeout-error.js";
+import { ReadinessTimeoutError } from "../timeout/readiness-timeout-error.js";
 
 /** The only values a readiness log line can carry about a failure. */
 export type ReadinessFailureReason = "timeout" | "connection" | "query";

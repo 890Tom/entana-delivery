@@ -1,6 +1,6 @@
 import { publicProductSchema } from "@entana/contracts";
 import { describe, expect, it } from "vitest";
-import { IncompleteActiveProductError } from "./incomplete-active-product-error.js";
+import { IncompleteActiveProductError } from "../errors/incomplete-active-product-error.js";
 import { toPublicProduct } from "./to-public-product.js";
 import type { CatalogRow } from "./to-public-product.js";
 

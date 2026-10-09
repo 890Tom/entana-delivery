@@ -1,8 +1,11 @@
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import type { Request } from "express";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { AddressRateLimiter } from "../../src/orders/address-rate-limiter.js";
-import { ADDRESS_MAX_REQUESTS, ADDRESS_MAX_TRACKED } from "../../src/orders/order-http-limits.js";
+import { AddressRateLimiter } from "../../src/orders/rate-limit/address-rate-limiter.js";
+import {
+  ADDRESS_MAX_REQUESTS,
+  ADDRESS_MAX_TRACKED,
+} from "../../src/orders/rate-limit/order-http-limits.js";
 import { startOrdersApp } from "./support/start-orders-app.js";
 import { buildTestConfig } from "./support/test-config.js";
 

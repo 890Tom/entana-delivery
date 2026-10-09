@@ -15,11 +15,14 @@ import {
 import { problemDetailsSchema } from "@entana/contracts";
 import { DATABASE_ERROR_KINDS } from "@entana/database";
 import { describe, expect, it } from "vitest";
-import { fixedDatabaseProblem } from "../../tests/support/fixed-database-problems.js";
-import { buildObservedDatabaseError } from "../../tests/support/observed-database-errors.js";
+import { fixedDatabaseProblem } from "../../../tests/support/fixed-database-problems.js";
+import { buildObservedDatabaseError } from "../../../tests/support/observed-database-errors.js";
 import { toProblemDetails } from "./to-problem-details.js";
-import { RequestValidationError, VALIDATION_DETAILS } from "./request-validation-error.js";
-import { ServiceNotReadyError } from "./service-not-ready-error.js";
+import {
+  RequestValidationError,
+  VALIDATION_DETAILS,
+} from "../request-body/request-validation-error.js";
+import { ServiceNotReadyError } from "../../health/readiness/failure/service-not-ready-error.js";
 
 // Zod's own issues, which the pipe receives at run time, carry more than the Standard Schema type.
 function zodIssue<T extends object>(fields: T): T {

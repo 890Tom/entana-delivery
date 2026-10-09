@@ -11,7 +11,7 @@ import {
   OrderRateLimitedError,
   OrderTooLargeError,
   UnavailableProductsError,
-} from "../../src/orders/order-errors.js";
+} from "../../src/orders/errors/order-errors.js";
 import type { CreateOrderResult } from "../../src/orders/orders.service.js";
 import { startOrdersApp } from "./support/start-orders-app.js";
 import type { OrderServiceDouble } from "./support/start-orders-app.js";

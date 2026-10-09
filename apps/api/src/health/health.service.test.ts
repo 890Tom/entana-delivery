@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Clock } from "../clock.js";
+import type { Clock } from "../clock/clock.js";
 import { HealthService } from "./health.service.js";
 
 function buildClock(startMs: number): {

@@ -3,13 +3,13 @@ import type { NestExpressApplication } from "@nestjs/platform-express";
 import helmet from "helmet";
 import { Logger } from "nestjs-pino";
 import type { AppConfig } from "./config/app-config.js";
-import { rejectBody } from "./errors/body-rejected-error.js";
-import { AddressRateLimiter } from "./orders/address-rate-limiter.js";
-import { ORDER_CREATION_PATH } from "./orders/order-http-limits.js";
-import { rejectPrototypeKey } from "./errors/reject-prototype-key.js";
+import { rejectBody } from "./errors/request-body/body-rejected-error.js";
+import { AddressRateLimiter } from "./orders/rate-limit/address-rate-limiter.js";
+import { ORDER_CREATION_PATH } from "./orders/rate-limit/order-http-limits.js";
+import { rejectPrototypeKey } from "./errors/request-body/reject-prototype-key.js";
 import { setupSwagger } from "./docs/setup-swagger.js";
-import { ProblemDetailsFilter } from "./errors/problem-details.filter.js";
-import { toRequestValidationError } from "./errors/request-validation-error.js";
+import { ProblemDetailsFilter } from "./errors/problem-details/problem-details.filter.js";
+import { toRequestValidationError } from "./errors/request-body/request-validation-error.js";
 
 /**
  * Options of the Nest application. The default body parser is off: `configureApplication` installs

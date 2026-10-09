@@ -6,7 +6,7 @@ import {
   CustomerBlockedError,
   OrderCreationFailedError,
   OrderRateLimitedError,
-} from "../../src/orders/order-errors.js";
+} from "../../src/orders/errors/order-errors.js";
 import {
   FAKE_CONTACT_NAME,
   FAKE_LANDMARK,

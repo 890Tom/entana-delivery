@@ -2,8 +2,8 @@ import type { DestinationStream } from "pino";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { Test } from "@nestjs/testing";
 import { AppModule } from "../../../src/app.module.js";
-import { CLOCK } from "../../../src/clock.js";
-import type { Clock } from "../../../src/clock.js";
+import { CLOCK } from "../../../src/clock/clock.js";
+import type { Clock } from "../../../src/clock/clock.js";
 import type { AppConfig } from "../../../src/config/app-config.js";
 import {
   NEST_APPLICATION_OPTIONS,

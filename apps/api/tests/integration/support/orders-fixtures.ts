@@ -1,7 +1,7 @@
 import { createPrismaClient } from "@entana/database";
 import type { PrismaClient } from "@entana/database";
 import { inject } from "vitest";
-import type { Clock } from "../../../src/clock.js";
+import type { Clock } from "../../../src/clock/clock.js";
 import { OrdersService } from "../../../src/orders/orders.service.js";
 import type { RandomBytes } from "../../../src/orders/orders.service.js";
 import { assertThrowawayDatabase } from "./assert-throwaway-database.js";

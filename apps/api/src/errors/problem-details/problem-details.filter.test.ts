@@ -3,10 +3,10 @@ import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-hos
 import { DATABASE_ERROR_KINDS } from "@entana/database";
 import { describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
-import { fixedDatabaseProblem } from "../../tests/support/fixed-database-problems.js";
-import { buildObservedDatabaseError } from "../../tests/support/observed-database-errors.js";
+import { fixedDatabaseProblem } from "../../../tests/support/fixed-database-problems.js";
+import { buildObservedDatabaseError } from "../../../tests/support/observed-database-errors.js";
 import { ProblemDetailsFilter } from "./problem-details.filter.js";
-import { ServiceNotReadyError } from "./service-not-ready-error.js";
+import { ServiceNotReadyError } from "../../health/readiness/failure/service-not-ready-error.js";
 
 interface FakeResponse {
   statusCode: number | undefined;

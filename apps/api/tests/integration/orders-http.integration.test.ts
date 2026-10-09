@@ -4,7 +4,7 @@ import type { PrismaClient } from "@entana/database";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import request from "supertest";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, inject, it } from "vitest";
-import { hashTrackingToken } from "../../src/orders/hash-tracking-token.js";
+import { hashTrackingToken } from "../../src/orders/rules/hash-tracking-token.js";
 import { startOrdersApp } from "../e2e/support/start-orders-app.js";
 import { captureLogs } from "../e2e/support/log-capture.js";
 import { buildTestConfig } from "../e2e/support/test-config.js";

@@ -1,11 +1,11 @@
 import { createOrderRequestSchema, createOrderResponseSchema } from "@entana/contracts";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { hashTrackingToken } from "../../src/orders/hash-tracking-token.js";
+import { hashTrackingToken } from "../../src/orders/rules/hash-tracking-token.js";
 import {
   InvalidPhoneError,
   OrderTooLargeError,
   UnavailableProductsError,
-} from "../../src/orders/order-errors.js";
+} from "../../src/orders/errors/order-errors.js";
 import {
   FAKE_CONTACT_NAME,
   FAKE_LANDMARK,

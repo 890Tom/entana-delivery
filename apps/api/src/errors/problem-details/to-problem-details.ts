@@ -6,11 +6,11 @@ import type { DatabaseErrorKind } from "@entana/database";
 import {
   mapDatabaseFailure,
   readDatabaseFailureKind,
-} from "./database-failure/database-failure-mapping.js";
-import { mapOrderFailure, toOrderProblem } from "../orders/order-failure.js";
-import { RequestValidationError } from "./request-validation-error.js";
-import { UnacceptableBodyError } from "./unacceptable-body-error.js";
-import { ServiceNotReadyError } from "./service-not-ready-error.js";
+} from "../database-failure/database-failure-mapping.js";
+import { mapOrderFailure, toOrderProblem } from "../../orders/http/order-failure.js";
+import { RequestValidationError } from "../request-body/request-validation-error.js";
+import { UnacceptableBodyError } from "../request-body/unacceptable-body-error.js";
+import { ServiceNotReadyError } from "../../health/readiness/failure/service-not-ready-error.js";
 
 const INTERNAL_ERROR_DETAIL = "An unexpected error occurred.";
 const NOT_READY_DETAIL = "The service is not ready.";

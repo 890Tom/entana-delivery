@@ -1,10 +1,10 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import type { NextFunction, Request, Response } from "express";
-import { CLOCK } from "../clock.js";
-import type { Clock } from "../clock.js";
-import { resolveRequestId } from "../logging/pino-http-options.js";
+import { CLOCK } from "../../clock/clock.js";
+import type { Clock } from "../../clock/clock.js";
+import { resolveRequestId } from "../../logging/pino-http-options.js";
 import { normalizeAddress } from "./normalize-address.js";
-import { AddressRateLimitedError } from "./order-errors.js";
+import { AddressRateLimitedError } from "../errors/order-errors.js";
 import {
   ADDRESS_MAX_REQUESTS,
   ADDRESS_MAX_TRACKED,

@@ -3,7 +3,7 @@ import type { DynamicModule } from "@nestjs/common";
 import type { DestinationStream } from "pino";
 import type { AppConfig } from "./config/app-config.js";
 import { CatalogModule } from "./catalog/catalog.module.js";
-import { NotFoundFallback } from "./errors/not-found-fallback.js";
+import { NotFoundFallback } from "./errors/problem-details/not-found-fallback.js";
 import { HealthModule } from "./health/health.module.js";
 import { OrdersModule } from "./orders/orders.module.js";
 import { createLoggingModule } from "./logging/create-logging-module.js";

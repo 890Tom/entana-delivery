@@ -23,13 +23,13 @@ import {
 } from "@entana/contracts";
 import type { CreateOrderRequest, CreateOrderResponse } from "@entana/contracts";
 import type { Response } from "express";
-import { CREATE_ORDER_BODY_SCHEMA } from "./order-openapi.js";
-import { JsonContentTypeGuard } from "./json-content-type.guard.js";
+import { CREATE_ORDER_BODY_SCHEMA } from "./http/order-openapi.js";
+import { JsonContentTypeGuard } from "./http/json-content-type.guard.js";
 import {
   IDEMPOTENCY_KEY_HEADER,
   idempotencyKeyHeader,
   IdempotencyKeyPipe,
-} from "./order-validation.js";
+} from "./http/order-validation.js";
 import { OrdersService } from "./orders.service.js";
 
 const REPLAY_HEADER = "Idempotent-Replayed";

@@ -1,6 +1,6 @@
 import type { PublicProduct } from "@entana/contracts";
 import type { Product } from "@entana/database";
-import { IncompleteActiveProductError } from "./incomplete-active-product-error.js";
+import { IncompleteActiveProductError } from "../errors/incomplete-active-product-error.js";
 
 /** The columns the public catalogue reads: sku and the other internal fields are not among them. */
 export type CatalogRow = Pick<

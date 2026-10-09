@@ -1,6 +1,6 @@
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import type { NestExpressApplication } from "@nestjs/platform-express";
-import { readAppInfo } from "../app-info.js";
+import { readAppInfo } from "../app-info/app-info.js";
 
 const DOCS_PATH = "api/docs";
 
