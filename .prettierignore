@@ -6,3 +6,4 @@ coverage
 .turbo
 docs/data-model.md
 packages/database/src/generated
+.claude/**
