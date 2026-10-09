@@ -1,4 +1,4 @@
-import { MAX_CART_PRODUCTS, MAX_LINE_QUANTITY } from "./cart-limits";
+import { MAX_ORDER_LINES, MAX_ORDER_LINE_QUANTITY } from "@entana/contracts";
 import type { CartLine } from "./cart-reducer";
 
 export const CART_STORAGE_KEY = "entana.cart.v1";
@@ -27,12 +27,12 @@ function parseLine(value: unknown): CartLine | undefined {
     typeof quantity === "number" &&
     Number.isInteger(quantity) &&
     quantity >= 1 &&
-    quantity <= MAX_LINE_QUANTITY;
+    quantity <= MAX_ORDER_LINE_QUANTITY;
   return isValid ? { productId, quantity } : undefined;
 }
 
 function parseLines(value: unknown): readonly CartLine[] {
-  if (!Array.isArray(value) || value.length > MAX_CART_PRODUCTS) {
+  if (!Array.isArray(value) || value.length > MAX_ORDER_LINES) {
     return [];
   }
   const lines = value.map(parseLine);

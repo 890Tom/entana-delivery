@@ -7,7 +7,11 @@ export { healthResponseSchema } from "./health/health.js";
 export type { HealthResponse } from "./health/health.js";
 export { computeOrderTotal } from "./orders/total/compute-order-total.js";
 export type { OrderLineAmount } from "./orders/total/compute-order-total.js";
-export { createOrderRequestSchema } from "./orders/request/create-order-request.js";
+export {
+  MAX_ORDER_LINES,
+  MAX_ORDER_LINE_QUANTITY,
+  createOrderRequestSchema,
+} from "./orders/request/create-order-request.js";
 export type { CreateOrderRequest } from "./orders/request/create-order-request.js";
 export { createOrderResponseSchema } from "./orders/response/create-order-response.js";
 export type { CreateOrderResponse } from "./orders/response/create-order-response.js";

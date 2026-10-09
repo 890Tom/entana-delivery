@@ -1,4 +1,4 @@
-import { MAX_CART_PRODUCTS, MAX_LINE_QUANTITY } from "./cart-limits";
+import { MAX_ORDER_LINES, MAX_ORDER_LINE_QUANTITY } from "@entana/contracts";
 
 /** The cart holds identifiers and quantities only: names and prices are read from the catalogue. */
 export interface CartLine {
@@ -24,12 +24,12 @@ export function emptyCart(lines: readonly CartLine[] = []): CartState {
 function increase(state: CartState, productId: string): CartState {
   const line = state.lines.find((candidate) => candidate.productId === productId);
   if (line === undefined) {
-    if (state.lines.length >= MAX_CART_PRODUCTS) {
+    if (state.lines.length >= MAX_ORDER_LINES) {
       return state;
     }
     return { ...state, lines: [...state.lines, { productId, quantity: 1 }] };
   }
-  if (line.quantity >= MAX_LINE_QUANTITY) {
+  if (line.quantity >= MAX_ORDER_LINE_QUANTITY) {
     return state;
   }
   return {

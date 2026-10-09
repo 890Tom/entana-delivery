@@ -5,7 +5,15 @@
   justify-content: center;
   width: 100%;
   height: 100%;
+  color: var(--color-text);
+  text-decoration: none;
   border-radius: var(--radius-sm);
+}
+
+@media (hover: hover) {
+  .badge:hover {
+    background: var(--color-accent-soft);
+  }
 }
 
 /* The round count: accent fill, ink text, at the top right of the bag. */

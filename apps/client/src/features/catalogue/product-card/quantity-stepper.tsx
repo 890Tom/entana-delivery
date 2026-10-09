@@ -1,8 +1,8 @@
+import { MAX_ORDER_LINE_QUANTITY } from "@entana/contracts";
 import type { ReactElement, Ref } from "react";
 
 import { IconButton } from "../../../components/icon-button/icon-button";
 import { texts } from "../../../i18n/texts";
-import { MAX_LINE_QUANTITY } from "../../cart/cart-limits";
 
 import styles from "./quantity-stepper.module.css";
 
@@ -38,7 +38,7 @@ export function QuantityStepper({
         ref={increaseRef}
         icon="plus"
         label={text.increaseAria(name)}
-        isDisabled={quantity >= MAX_LINE_QUANTITY}
+        isDisabled={quantity >= MAX_ORDER_LINE_QUANTITY}
         onClick={onIncrease}
       />
     </div>

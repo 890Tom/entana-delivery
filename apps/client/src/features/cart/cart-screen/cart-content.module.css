@@ -1,0 +1,44 @@
+.list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.subtotal {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.subtotalLabel {
+  font: var(--font-body-strong);
+}
+
+.subtotalAmount {
+  font: var(--font-title);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.emptyText {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* A link with the look of the secondary button. */
+.emptyAction {
+  text-decoration: none;
+}

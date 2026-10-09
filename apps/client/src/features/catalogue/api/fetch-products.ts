@@ -19,6 +19,10 @@ export class CatalogueError extends Error {
   }
 }
 
+export function readCatalogueErrorKind(error: unknown): CatalogueErrorKind {
+  return error instanceof CatalogueError ? error.kind : "unexpected";
+}
+
 /** GET the public catalogue. Rejects with a CatalogueError, or with the abort of `signal`. */
 export function fetchProducts(signal?: AbortSignal): Promise<ProductListResponse> {
   return fetchValidated({
