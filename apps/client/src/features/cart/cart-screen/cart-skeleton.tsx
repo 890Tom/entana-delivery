@@ -13,11 +13,11 @@ function SkeletonLine(): ReactElement {
   const block = [styles.block, line.text].join(" ");
   return (
     <li className={line.line}>
+      <div className={[styles.block, line.thumbnail].join(" ")} />
       <div>
         <div className={[block, styles.name].join(" ")} />
-        <div className={[block, styles.unitPrice].join(" ")} />
+        <div className={[block, styles.amount].join(" ")} />
       </div>
-      <div className={[block, styles.lineTotal].join(" ")} />
       <div className={[styles.block, styles.control, line.stepper].join(" ")} />
     </li>
   );

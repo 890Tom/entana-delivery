@@ -8,13 +8,8 @@
   width: 60%;
 }
 
-.unitPrice {
+.amount {
   width: 30%;
-}
-
-.lineTotal {
-  justify-self: end;
-  width: 6ch;
 }
 
 .control {

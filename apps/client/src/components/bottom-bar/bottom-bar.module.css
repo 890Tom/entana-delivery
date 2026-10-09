@@ -1,0 +1,82 @@
+.bar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: var(--layer-bar);
+  padding: var(--space-3) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  background: var(--color-surface);
+  box-shadow: var(--shadow-bar);
+}
+
+/* A link with the look of the primary button: ink fill, inverse text, full width. */
+.link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--size-button-height);
+  padding: 0 var(--space-5);
+  font: var(--font-body-strong);
+  color: var(--color-text-inverse);
+  text-decoration: none;
+  background: var(--color-surface-inverse);
+  border-radius: var(--radius);
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+@media (hover: hover) {
+  .link:hover {
+    background: var(--color-ink-hover);
+  }
+}
+
+.link:active {
+  transform: scale(var(--scale-pressed));
+}
+
+/* The size of an amount such as "12 000 Ar": the bar does not change when the amount arrives. */
+.amountPlaceholder {
+  display: inline-block;
+  width: 8ch;
+  height: 1em;
+  vertical-align: middle;
+  background: var(--color-text-disabled);
+  border-radius: var(--radius-sm);
+  animation: pulse var(--duration-pulse) var(--ease) infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: var(--opacity-skeleton-pulse);
+  }
+}
+
+/*
+ * The page is not hidden behind the bar: the main area keeps the bar's height free at its end,
+ * and a focused element scrolls clear of it. Both only while a bar is on the page.
+ */
+:root:has(.bar) {
+  scroll-padding-bottom: var(--size-bottom-bar);
+}
+
+:root:has(.bar) main {
+  padding-bottom: var(--size-bottom-bar);
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .bar {
+    display: none;
+  }
+
+  :root:has(.bar) {
+    scroll-padding-bottom: 0;
+  }
+
+  :root:has(.bar) main {
+    padding-bottom: 0;
+  }
+}
