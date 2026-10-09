@@ -1,0 +1,33 @@
+.block {
+  background: var(--color-skeleton);
+  border-radius: var(--radius);
+  animation: pulse var(--duration-pulse) var(--ease) infinite alternate;
+}
+
+.line {
+  border-radius: var(--radius-sm);
+}
+
+.name {
+  width: 60%;
+}
+
+.price {
+  width: 30%;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: var(--opacity-skeleton-pulse);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block {
+    animation: none;
+  }
+}

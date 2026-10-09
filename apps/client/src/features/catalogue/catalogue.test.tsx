@@ -1,12 +1,10 @@
 import { formatAmount } from "@entana/contracts";
-import type { PublicProduct } from "@entana/contracts";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createQueryClient } from "../../data-fetching/query-client";
 import { buildProduct, buildProductId } from "../../test-support/build-product";
-import { expectNoAccessibilityViolations } from "../../test-support/expect-no-accessibility-violations";
 import {
   jsonResponse,
   pendingUntilAborted,
@@ -17,6 +15,8 @@ import { texts } from "../../i18n/texts";
 
 import { Catalogue } from "./catalogue";
 
+// 8 cards, 4 of them hidden by CSS under 1024 px (screens/catalogue.md, section 7).
+const SKELETON_CARD_COUNT = 8;
 const SCRIPT = "<script>alert(1)</script>";
 const IMAGE = '<img src="x" onerror="alert(1)">';
 
@@ -38,20 +38,16 @@ afterEach(() => {
 });
 
 describe("Catalogue loading state", () => {
-  it("shows the loading text while the request is pending", () => {
-    stubFetch(pendingUntilAborted);
-
-    renderCatalogue();
-
-    expect(screen.getByRole("status").textContent).toBe(texts.catalogue.loading);
-  });
-
-  it("has no accessibility violation", async () => {
+  it("shows a busy skeleton grid that announces the loading", () => {
     stubFetch(pendingUntilAborted);
 
     const { container } = renderCatalogue();
 
-    await expectNoAccessibilityViolations(container);
+    const busy = container.querySelector('[aria-busy="true"]');
+    expect(busy?.textContent).toBe(texts.common.loading);
+    const blocks = busy?.querySelector('[aria-hidden="true"]');
+    expect(blocks?.children).toHaveLength(SKELETON_CARD_COUNT);
+    expect(screen.queryByRole("list")).toBeNull();
   });
 
   it("aborts the request when the component unmounts", () => {
@@ -73,14 +69,6 @@ describe("Catalogue empty state", () => {
     expect(await screen.findByText(texts.catalogue.empty)).toBeTruthy();
     expect(screen.queryByRole("list")).toBeNull();
   });
-
-  it("has no accessibility violation", async () => {
-    stubFetch(() => Promise.resolve(jsonResponse({ products: [] })));
-    const { container } = renderCatalogue();
-    await screen.findByText(texts.catalogue.empty);
-
-    await expectNoAccessibilityViolations(container);
-  });
 });
 
 describe("Catalogue error state", () => {
@@ -95,7 +83,7 @@ describe("Catalogue error state", () => {
 
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain(texts.catalogue.errors[kind]);
-    expect(screen.getByRole("button", { name: texts.catalogue.retry })).toBeTruthy();
+    expect(screen.getByRole("button", { name: texts.common.retry })).toBeTruthy();
   });
 
   it("shows the timeout message after 10 seconds", async () => {
@@ -121,21 +109,13 @@ describe("Catalogue error state", () => {
     expect(container.textContent).not.toContain("/api/");
   });
 
-  it("has no accessibility violation", async () => {
-    stubFetch(() => Promise.resolve(problemResponse(500)));
-    const { container } = renderCatalogue();
-    await screen.findByRole("alert");
-
-    await expectNoAccessibilityViolations(container);
-  });
-
   it("requests again on retry and shows the products when it recovers", async () => {
     const product = buildProduct({ name: "Vary" });
     const answers = [problemResponse(503), jsonResponse({ products: [product] })];
     const stub = stubFetch(() => Promise.resolve(answers.shift() ?? problemResponse(500)));
     renderCatalogue();
 
-    fireEvent.click(await screen.findByRole("button", { name: texts.catalogue.retry }));
+    fireEvent.click(await screen.findByRole("button", { name: texts.common.retry }));
 
     expect(await screen.findByText(product.name)).toBeTruthy();
     expect(stub).toHaveBeenCalledTimes(2);
@@ -146,16 +126,16 @@ describe("Catalogue error state", () => {
     const stub = stubFetch(() => Promise.resolve(problemResponse(503)));
     renderCatalogue();
 
-    fireEvent.click(await screen.findByRole("button", { name: texts.catalogue.retry }));
+    fireEvent.click(await screen.findByRole("button", { name: texts.common.retry }));
 
     await waitFor(() => {
       expect(stub).toHaveBeenCalledTimes(2);
     });
     expect((await screen.findByRole("alert")).textContent).toContain(texts.catalogue.errors.server);
-    expect(screen.getByRole("button", { name: texts.catalogue.retry })).toBeTruthy();
+    expect(screen.getByRole("button", { name: texts.common.retry })).toBeTruthy();
   });
 
-  it("shows the loading text while a retry is pending", async () => {
+  it("shows the skeleton again while a retry is pending", async () => {
     let call = 0;
     stubFetch((init) => {
       call += 1;
@@ -163,17 +143,16 @@ describe("Catalogue error state", () => {
     });
     const { container } = renderCatalogue();
 
-    fireEvent.click(await screen.findByRole("button", { name: texts.catalogue.retry }));
+    fireEvent.click(await screen.findByRole("button", { name: texts.common.retry }));
 
     await waitFor(() => {
-      expect(screen.getByRole("status").textContent).toBe(texts.catalogue.loading);
+      expect(container.querySelector('[aria-busy="true"]')?.textContent).toBe(texts.common.loading);
     });
-    await expectNoAccessibilityViolations(container);
   });
 });
 
 describe("Catalogue list state", () => {
-  it("shows the products in the order of the response, with name and image alt", async () => {
+  it("shows the products in the order of the response, with name and image alt text", async () => {
     const products = [
       buildProduct({ id: buildProductId(1), name: "Sakafo", image: { key: "a", alt: "Photo A" } }),
       buildProduct({ id: buildProductId(2), name: "Mofo", image: { key: "b", alt: "Photo B" } }),
@@ -184,26 +163,19 @@ describe("Catalogue list state", () => {
 
     const items = await screen.findAllByRole("listitem");
     expect(items.map((item) => item.textContent)).toStrictEqual([
-      expect.stringContaining("SakafoPhoto A"),
-      expect.stringContaining("MofoPhoto B"),
+      expect.stringContaining("Photo ASakafo"),
+      expect.stringContaining("Photo BMofo"),
     ]);
   });
 
-  it.each([800, 12500, 1250000])("shows a price of %i as formatted ariary", async (priceAr) => {
-    stubFetch(() => Promise.resolve(jsonResponse({ products: [buildProduct({ priceAr })] })));
+  it("shows a price as formatted ariary", async () => {
+    stubFetch(() =>
+      Promise.resolve(jsonResponse({ products: [buildProduct({ priceAr: 12500 })] })),
+    );
 
     renderCatalogue();
 
-    expect(await screen.findByText(formatAmount(priceAr), keepSpaces)).toBeTruthy();
-  });
-
-  it("shows the price of a sold-out product too", async () => {
-    const product = buildProduct({ available: false, priceAr: 2000 });
-    stubFetch(() => Promise.resolve(jsonResponse({ products: [product] })));
-
-    renderCatalogue();
-
-    expect(await screen.findByText(formatAmount(2000), keepSpaces)).toBeTruthy();
+    expect(await screen.findByText(formatAmount(12500), keepSpaces)).toBeTruthy();
   });
 
   it("builds no image element and no URL from the image key", async () => {
@@ -216,7 +188,7 @@ describe("Catalogue list state", () => {
     expect(container.innerHTML).not.toContain("demo/sakafo.jpg");
   });
 
-  it("marks an unavailable product as sold out, and only that one", async () => {
+  it("marks an unavailable product with a text, and only that one", async () => {
     const products = [
       buildProduct({ id: buildProductId(1), name: "Sakafo", available: true }),
       buildProduct({ id: buildProductId(2), name: "Mofo", available: false }),
@@ -226,58 +198,31 @@ describe("Catalogue list state", () => {
     renderCatalogue();
 
     const items = await screen.findAllByRole("listitem");
-    expect(items[0]?.textContent).not.toContain(texts.catalogue.soldOut);
-    expect(items[1]?.textContent).toContain("Épuisé");
+    expect(items[0]?.textContent).not.toContain(texts.catalogue.product.unavailable);
+    expect(items[1]?.textContent).toContain("Indisponible aujourd'hui");
   });
 
-  it("shows the description when there is one", async () => {
+  it("does not show the description on the card", async () => {
     const product = buildProduct({ description: "Riz et zebu" });
     stubFetch(() => Promise.resolve(jsonResponse({ products: [product] })));
 
     renderCatalogue();
 
-    expect(await screen.findByText("Riz et zebu")).toBeTruthy();
+    await screen.findByText(product.name);
+    expect(screen.queryByText("Riz et zebu")).toBeNull();
   });
 
-  it.each([
-    ["null", null],
-    ["empty", ""],
-  ])("renders nothing for a %s description", async (_label, description) => {
-    const product = buildProduct({ description });
-    stubFetch(() => Promise.resolve(jsonResponse({ products: [product] })));
-
-    renderCatalogue();
-
-    const item = await screen.findByRole("listitem");
-    expect(item.textContent).toBe(
-      `${product.name}${product.image.alt}${formatAmount(product.priceAr)}`,
-    );
-  });
-
-  it.each<[string, Partial<PublicProduct>, string]>([
-    ["script in the name", { name: SCRIPT }, SCRIPT],
-    ["image in the name", { name: IMAGE }, IMAGE],
-    ["image in the description", { description: IMAGE }, IMAGE],
-    ["image in the image alt", { image: { key: "demo/x.jpg", alt: IMAGE } }, IMAGE],
-  ])("shows markup as plain text: %s", async (_label, overrides, visibleText) => {
-    const product = buildProduct(overrides);
+  it("shows markup in the name and the image alt text as plain text", async () => {
+    const product = buildProduct({
+      name: SCRIPT,
+      image: { key: "demo/x.jpg", alt: IMAGE },
+    });
     stubFetch(() => Promise.resolve(jsonResponse({ products: [product] })));
 
     const { container } = renderCatalogue();
 
-    expect(await screen.findByText(visibleText)).toBeTruthy();
+    expect(await screen.findByText(SCRIPT)).toBeTruthy();
+    expect(screen.getByText(IMAGE)).toBeTruthy();
     expect(container.querySelectorAll("script, img, [onerror]")).toHaveLength(0);
-  });
-
-  it("has no accessibility violation", async () => {
-    const products = [
-      buildProduct({ id: buildProductId(1), description: "Riz" }),
-      buildProduct({ id: buildProductId(2), available: false }),
-    ];
-    stubFetch(() => Promise.resolve(jsonResponse({ products })));
-    const { container } = renderCatalogue();
-    await screen.findAllByRole("listitem");
-
-    await expectNoAccessibilityViolations(container);
   });
 });

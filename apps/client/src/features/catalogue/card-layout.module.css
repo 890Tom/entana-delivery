@@ -1,0 +1,25 @@
+/*
+ * Geometry shared by the product card and its skeleton, so that they cannot drift apart and
+ * nothing moves when the data arrives.
+ */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.photo {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius);
+}
+
+.line {
+  height: calc(var(--font-size-body) * var(--line-height-body));
+}
+
+/* Where the cart control will go: as tall as a touch target plus a small margin (52 px). */
+.action {
+  height: calc(var(--size-touch-min) + var(--space-1));
+  border-radius: var(--radius);
+}
