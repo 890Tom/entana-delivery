@@ -25,6 +25,16 @@
   list-style: none;
 }
 
+/* The card fills its grid cell, so that every card of a row is as tall as the tallest one. */
+.grid > li {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid > li > * {
+  flex: 1;
+}
+
 /* Skeleton cards 5 to 8 only fill the wider web grid. */
 .webOnly {
   display: none;

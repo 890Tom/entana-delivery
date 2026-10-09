@@ -142,13 +142,14 @@ describe("the product card cart control", () => {
     ).toBeTruthy();
   });
 
-  it("has no control on an unavailable product, only its badge", async () => {
+  it("has no add control on an unavailable product, only a disabled button", async () => {
     stubApi([SAKAFO, SOLD_OUT]);
     await renderCatalogue();
 
-    expect(screen.getByText(texts.catalogue.product.unavailable)).toBeTruthy();
+    const button = screen.getByRole("button", { name: texts.catalogue.product.unavailable });
+    expect(button.getAttribute("aria-disabled")).toBe("true");
     expect(screen.queryByRole("button", { name: /Koba/ })).toBeNull();
-    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(screen.getAllByRole("button")).toHaveLength(2);
   });
 
   it("has no accessibility violation with products in the cart", async () => {
