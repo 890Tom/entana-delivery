@@ -51,7 +51,7 @@ These rules keep the codebase consistent. Tooling enforces what it can (TypeScri
 
 - Domain errors are typed classes thrown by services and mapped to problem details in one place. Never match on error messages, never swallow an error.
 - Validate at the boundary with the shared Zod schemas; trust validated data inside.
-- One exception to the rule on error messages: a driver failure that has no code (the pg pool connection timeout) is recognised by its fixed text in a single function of `packages/database/src/classify-database-error.ts`, tried after every structural check and pinned by an integration test.
+- One exception to the rule on error messages: a driver failure that has no code (the pg pool connection timeout) is recognised by its fixed text in a single function of `packages/database/src/error-classification/classify-database-error.ts`, tried after every structural check and pinned by an integration test.
 
 **Enforced by:** ESLint (`no-floating-promises`, `only-throw-error`, `use-unknown-in-catch-callback-variable` from `strictTypeChecked`). Review only: typed domain errors, validation at the boundary.
 

@@ -1,6 +1,6 @@
 import { describe, expect, inject, it } from "vitest";
 
-import { createPrismaClient } from "../../src/create-prisma-client.ts";
+import { createPrismaClient } from "../../src/client/create-prisma-client.ts";
 
 describe("createPrismaClient (real PostgreSQL)", () => {
   it("runs a query and disconnects cleanly", async () => {

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { prismaError, uniqueFailure } from "../tests/support/prisma-error-fixtures.ts";
+import {
+  prismaError,
+  uniqueFailure,
+} from "../../tests/support/database-errors/prisma-error-fixtures.ts";
 import { classifyDatabaseError, DATABASE_ERROR_KINDS } from "./classify-database-error.ts";
 
 const connectionFailure = prismaError("P2010", { kind: "DatabaseNotReachable" });

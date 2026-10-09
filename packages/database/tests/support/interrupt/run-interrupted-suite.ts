@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 // Known debt: apps/api/tests/integration/support/run-interrupted-suite.ts repeats this file.
 
-const SUITE_DIRECTORY = fileURLToPath(new URL("../../", import.meta.url));
+const SUITE_DIRECTORY = fileURLToPath(new URL("../../../", import.meta.url));
 // The line ends with a newline: a chunk that stops in the middle of the name cannot match.
 const DATABASE_LINE = /FIXTURE_DATABASE=(test_[0-9a-f]+)\n/;
 const WAIT_MS = 30_000;

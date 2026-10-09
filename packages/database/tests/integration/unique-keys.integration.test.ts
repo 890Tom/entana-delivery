@@ -1,14 +1,18 @@
 import { randomUUID } from "node:crypto";
 import type { Client } from "pg";
 import { describe, expect, it } from "vitest";
-import { expectViolation, SQLSTATE, useRollbackTransaction } from "../support/database.js";
+import {
+  expectViolation,
+  SQLSTATE,
+  useRollbackTransaction,
+} from "../support/database-access/database.js";
 import {
   insertCustomer,
   insertOrder,
   insertOrderEvent,
   insertProduct,
   insertStaffUser,
-} from "../support/rows.js";
+} from "../support/database-access/rows.js";
 
 interface UniqueKeyCase {
   name: string;
