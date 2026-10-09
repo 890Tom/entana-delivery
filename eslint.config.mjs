@@ -115,6 +115,7 @@ export default defineConfig(
       "**/.turbo/**",
       "**/generated/**",
       "**/node_modules/**",
+      ".claude/**",
     ],
   },
 
