@@ -8,6 +8,23 @@ export const texts: {
     readonly loading: string;
     readonly retry: string;
   };
+  readonly shell: {
+    readonly genericName: string;
+    readonly homeLabel: (name: string) => string;
+    readonly steps: {
+      readonly label: string;
+      readonly cart: string;
+      readonly address: string;
+      readonly contact: string;
+      readonly send: string;
+      readonly tracking: string;
+    };
+  };
+  readonly notFound: {
+    readonly title: string;
+    readonly message: string;
+    readonly back: string;
+  };
   readonly catalogue: {
     readonly title: string;
     readonly empty: string;
@@ -20,6 +37,24 @@ export const texts: {
   common: {
     loading: "Chargement…",
     retry: "Réessayer",
+  },
+  shell: {
+    // Shown instead of the shop name when the instance configuration cannot be loaded.
+    genericName: "Boutique",
+    homeLabel: (name) => `${name} - accueil`,
+    steps: {
+      label: "Étapes de la commande",
+      cart: "Panier",
+      address: "Adresse",
+      contact: "Coordonnées",
+      send: "Envoi",
+      tracking: "Suivi",
+    },
+  },
+  notFound: {
+    title: "Page introuvable",
+    message: "Cette page n'existe pas ou a été déplacée.",
+    back: "Retour aux produits",
   },
   catalogue: {
     title: "Nos produits",

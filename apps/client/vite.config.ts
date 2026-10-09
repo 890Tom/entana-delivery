@@ -45,9 +45,10 @@ function themeFallback(): Plugin {
 
 // The dev server keeps Vite's default host (localhost only). `server.proxy` is read by
 // `vite dev` only: `vite build` and `vite preview` ignore it, so no proxy reaches production.
+// /media serves the shop logo, which the API hosts.
 export default defineConfig({
   plugins: [react(), themeFallback()],
   server: {
-    proxy: { "/api": "http://127.0.0.1:3000" },
+    proxy: { "/api": "http://127.0.0.1:3000", "/media": "http://127.0.0.1:3000" },
   },
 });

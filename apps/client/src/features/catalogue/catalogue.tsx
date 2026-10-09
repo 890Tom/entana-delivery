@@ -56,11 +56,11 @@ export function Catalogue(): ReactElement {
   });
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div className={styles.content}>
         <h1 className={styles.title}>{texts.catalogue.title}</h1>
         <CatalogueBody query={query} />
       </div>
-    </main>
+    </div>
   );
 }
