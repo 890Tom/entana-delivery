@@ -1,4 +1,5 @@
 import { formatAmount } from "@entana/contracts";
+import { createElement } from "react";
 import type { ReactElement, Ref } from "react";
 
 import { QuantityStepper } from "../../catalogue/product-card/quantity-stepper";
@@ -19,15 +20,25 @@ interface CartLineProps {
   readonly onDecrease: () => void;
   readonly onIncrease: () => void;
   readonly itemRef: Ref<HTMLLIElement>;
+  /** The name is a heading: one level under the title of the area the line is in. */
+  readonly headingLevel: "h2" | "h3";
+  readonly isCountAnnounced: boolean;
 }
 
 /** The name and the prices come from the loaded catalogue; the cart only holds the quantity. */
-export function CartLine({ line, onDecrease, onIncrease, itemRef }: CartLineProps): ReactElement {
+export function CartLine({
+  line,
+  onDecrease,
+  onIncrease,
+  itemRef,
+  headingLevel,
+  isCountAnnounced,
+}: CartLineProps): ReactElement {
   return (
     <li ref={itemRef} className={styles.line}>
       <CartThumbnail url={line.imageUrl} />
       <div>
-        <h2 className={styles.name}>{line.name}</h2>
+        {createElement(headingLevel, { className: styles.name }, line.name)}
         <p className={styles.lineTotal}>{formatAmount(line.unitPriceAr * line.quantity)}</p>
       </div>
       <div className={styles.stepper}>
@@ -37,6 +48,7 @@ export function CartLine({ line, onDecrease, onIncrease, itemRef }: CartLineProp
           increaseRef={null}
           onDecrease={onDecrease}
           onIncrease={onIncrease}
+          isCountAnnounced={isCountAnnounced}
         />
       </div>
     </li>

@@ -1,9 +1,6 @@
+/* The width and the side column belong to the page layout (`app-shell.module.css`). */
 .page {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
   padding: var(--space-4);
-  margin-inline: auto;
 }
 
 .content {
@@ -42,14 +39,8 @@
 
 /* The one breakpoint of the design system (a media query cannot read a variable). */
 @media (min-width: 1024px) {
-  /*
-   * Two columns: the content, then a column kept for the side cart, which a later task adds.
-   * Reserving it here keeps the cards at their final width (4 per row) when the cart arrives.
-   */
   .page {
-    grid-template-columns: minmax(0, 1fr) var(--size-sidebar-width);
-    gap: var(--space-6);
-    padding: var(--space-6);
+    padding: 0;
   }
 
   .content {

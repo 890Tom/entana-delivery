@@ -10,6 +10,18 @@
   gap: var(--space-4);
 }
 
+/* In the side cart the parts are `--space-3` apart, as in the card around them. */
+.footerPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
 .subtotal {
   display: flex;
   gap: var(--space-3);
@@ -36,6 +48,11 @@
 .emptyText {
   margin: 0;
   color: var(--color-text-muted);
+}
+
+.emptyTextPanel {
+  /* The focus lands here after the last removal: it is moved by code, not a control. */
+  outline: none;
 }
 
 /* A link with the look of the secondary button. */

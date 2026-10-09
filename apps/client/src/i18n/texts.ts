@@ -13,6 +13,8 @@ export const texts: {
   readonly shell: {
     readonly genericName: string;
     readonly homeLabel: (name: string) => string;
+    /** The way back from the cart screen to the catalogue. */
+    readonly back: string;
     readonly steps: {
       readonly label: string;
       readonly cart: string;
@@ -37,6 +39,12 @@ export const texts: {
       readonly deliveryHint: string;
       readonly empty: { readonly text: string; readonly action: string };
       readonly continue: string;
+    };
+    /** The side cart of the web layout. */
+    readonly panel: {
+      readonly title: string;
+      readonly empty: string;
+      readonly noAccount: string;
     };
   };
   readonly catalogue: {
@@ -64,6 +72,7 @@ export const texts: {
     // Shown instead of the shop name when the instance configuration cannot be loaded.
     genericName: "Boutique",
     homeLabel: (name) => `${name} - accueil`,
+    back: "Retour aux produits",
     steps: {
       label: "Étapes de la commande",
       cart: "Panier",
@@ -92,6 +101,11 @@ export const texts: {
       deliveryHint: "Frais de livraison selon votre zone.",
       empty: { text: "Votre panier est vide.", action: "Voir les produits" },
       continue: "Choisir où livrer",
+    },
+    panel: {
+      title: "Votre panier",
+      empty: "Votre panier est vide. Ajoutez des produits.",
+      noAccount: "Pas de compte à créer.",
     },
   },
   catalogue: {

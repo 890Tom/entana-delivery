@@ -49,12 +49,17 @@ async function renderCatalogue(): Promise<void> {
   await screen.findByRole("heading", { name: "Sakafo" });
 }
 
+// The side cart repeats the lines of the cart: the card controls are looked up in the main area.
+function catalogueArea(): HTMLElement {
+  return screen.getByRole("main");
+}
+
 function addButton(name: string): HTMLElement {
-  return screen.getByRole("button", { name: `Ajouter ${name} au panier` });
+  return within(catalogueArea()).getByRole("button", { name: `Ajouter ${name} au panier` });
 }
 
 function plusButton(name: string): HTMLElement {
-  return screen.getByRole("button", { name: `Ajouter une unité de ${name}` });
+  return within(catalogueArea()).getByRole("button", { name: `Ajouter une unité de ${name}` });
 }
 
 beforeEach(() => {
@@ -77,7 +82,7 @@ describe("the product card cart control", () => {
     fireEvent.click(plusButton("Sakafo"));
     fireEvent.click(addButton("Mofo"));
 
-    const group = screen.getByRole("group", { name: "Quantité — Sakafo" });
+    const group = within(catalogueArea()).getByRole("group", { name: "Quantité — Sakafo" });
     expect(group.textContent).toContain("2");
     expect(screen.getByRole("link", { name: "Voir le panier, 3 articles" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Ajouter Sakafo au panier" })).toBeNull();
@@ -97,7 +102,9 @@ describe("the product card cart control", () => {
     await renderCatalogue();
     fireEvent.click(addButton("Sakafo"));
 
-    fireEvent.click(screen.getByRole("button", { name: "Retirer Sakafo du panier" }));
+    fireEvent.click(
+      within(catalogueArea()).getByRole("button", { name: "Retirer Sakafo du panier" }),
+    );
 
     expect(document.activeElement).toBe(addButton("Sakafo"));
     expect(screen.getByRole("link", { name: "Voir le panier" })).toBeTruthy();
@@ -108,9 +115,13 @@ describe("the product card cart control", () => {
     seedCart([SAKAFO.id, 2]);
     await renderCatalogue();
 
-    fireEvent.click(screen.getByRole("button", { name: "Retirer une unité de Sakafo" }));
+    fireEvent.click(
+      within(catalogueArea()).getByRole("button", { name: "Retirer une unité de Sakafo" }),
+    );
 
-    expect(screen.getByRole("group", { name: "Quantité — Sakafo" }).textContent).toContain("1");
+    expect(
+      within(catalogueArea()).getByRole("group", { name: "Quantité — Sakafo" }).textContent,
+    ).toContain("1");
   });
 
   it("announces the quantity politely and disables plus at the maximum", async () => {
@@ -118,7 +129,7 @@ describe("the product card cart control", () => {
     seedCart([SAKAFO.id, MAX_ORDER_LINE_QUANTITY]);
     await renderCatalogue();
 
-    const group = screen.getByRole("group", { name: "Quantité — Sakafo" });
+    const group = within(catalogueArea()).getByRole("group", { name: "Quantité — Sakafo" });
     expect(within(group).getByText(String(MAX_ORDER_LINE_QUANTITY)).getAttribute("aria-live")).toBe(
       "polite",
     );

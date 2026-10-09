@@ -2,10 +2,12 @@ import type { ReactElement } from "react";
 
 import styles from "./icon.module.css";
 
-export type IconName = "plus" | "minus" | "trash" | "bag" | "map-pin" | "user" | "send" | "check";
+export type IconName =
+  "arrow-left" | "plus" | "minus" | "trash" | "bag" | "map-pin" | "user" | "send" | "check";
 
 // Inline line icons (no request, no package). Decorative: the control that holds one is named.
 const ICON_PATHS: Readonly<Record<IconName, readonly string[]>> = {
+  "arrow-left": ["m12 19-7-7 7-7", "M19 12H5"],
   plus: ["M5 12h14", "M12 5v14"],
   minus: ["M5 12h14"],
   trash: [

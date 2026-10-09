@@ -1,0 +1,44 @@
+/* Under the breakpoint the panel does not exist: `display: none` also leaves it out of the
+   accessibility tree and of the tab order, so nothing is announced or focused twice. */
+.panel {
+  position: sticky;
+  top: calc(var(--size-header-height) + var(--space-5));
+  display: none;
+  flex-direction: column;
+  align-self: start;
+  /* A long cart scrolls inside the card, so that the link under it stays reachable. */
+  max-height: calc(100dvh - var(--size-header-height) - 2 * var(--space-5));
+  padding: var(--space-4);
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  gap: var(--space-3);
+}
+
+.title {
+  margin: 0;
+  font: var(--font-body-strong);
+}
+
+/* The lines and what comes with them, one block pulled up by the gap that the line already has. */
+.lines {
+  display: flex;
+  flex-direction: column;
+  margin-top: calc(var(--space-3) * -1);
+  gap: var(--space-3);
+}
+
+.noAccount {
+  margin: 0;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .panel {
+    display: flex;
+  }
+}

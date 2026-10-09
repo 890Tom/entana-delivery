@@ -107,7 +107,7 @@ describe("the bottom bar of the catalogue", () => {
     stubApi(() => Promise.resolve(problemResponse(500)));
     seedSampleCart();
     renderAt("/");
-    await screen.findByRole("alert");
+    await within(screen.getByRole("main")).findByRole("alert");
 
     const link = getMainLink("Voir le panier");
 
@@ -122,7 +122,9 @@ describe("the bottom bar of the catalogue", () => {
     renderAt("/");
     await screen.findByRole("link", { name: viewCartWith(SAMPLE_TOTAL) });
 
-    fireEvent.click(screen.getByRole("button", { name: "Ajouter une unité de Sakafo" }));
+    fireEvent.click(
+      within(screen.getByRole("main")).getByRole("button", { name: "Ajouter une unité de Sakafo" }),
+    );
 
     await waitFor(() => {
       expect(screen.getByRole("link", { name: viewCartWith(NEXT_TOTAL) })).toBeTruthy();

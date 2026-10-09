@@ -12,15 +12,18 @@ interface QuantityStepperProps {
   readonly increaseRef: Ref<HTMLButtonElement>;
   readonly onDecrease: () => void;
   readonly onIncrease: () => void;
+  /** False when another stepper on the page already announces the same article. */
+  readonly isCountAnnounced?: boolean;
 }
 
-/** Minus (a bin at the last unit), the quantity, plus. The quantity is announced politely. */
+/** Minus (a bin at the last unit), the quantity, plus. The quantity is announced politely, unless told not to. */
 export function QuantityStepper({
   name,
   quantity,
   increaseRef,
   onDecrease,
   onIncrease,
+  isCountAnnounced = true,
 }: QuantityStepperProps): ReactElement {
   const text = texts.catalogue.product;
   const isLastUnit = quantity === 1;
@@ -31,7 +34,7 @@ export function QuantityStepper({
         label={isLastUnit ? text.removeAria(name) : text.decreaseAria(name)}
         onClick={onDecrease}
       />
-      <span className={styles.count} aria-live="polite">
+      <span className={styles.count} aria-live={isCountAnnounced ? "polite" : undefined}>
         {quantity}
       </span>
       <IconButton

@@ -1,10 +1,13 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useRoute } from "wouter";
 
+import { Icon } from "../../components/icon/icon";
+import iconButton from "../../components/icon-button/icon-button.module.css";
 import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
 import { useInstance } from "../../features/instance/use-instance";
 import { texts } from "../../i18n/texts";
+import { CART_PATH } from "../../routes";
 
 import { CartBadge } from "./cart-badge";
 import styles from "./header.module.css";
@@ -51,14 +54,33 @@ function HeaderBrand(): ReactElement {
   return <Brand name={instance.data.name} logoUrl={instance.data.logoUrl} />;
 }
 
+/** The way back from the cart screen, to the catalogue by its fixed address. */
+function BackLink(): ReactElement {
+  return (
+    <Link href="/" className={iconButton.button} aria-label={texts.shell.back}>
+      <Icon name="arrow-left" />
+    </Link>
+  );
+}
+
+/**
+ * The cart screen has a back link and its title, and no cart link (it is the cart). The title is
+ * plain text: the page's one heading is the one in its content.
+ */
 export function Header(): ReactElement {
+  const [isCartScreen] = useRoute(CART_PATH);
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
+        {isCartScreen && <BackLink />}
         <HeaderBrand />
-        <div className={styles.cartSlot}>
-          <CartBadge />
-        </div>
+        {isCartScreen ? (
+          <span className={styles.title}>{texts.cart.screen.title}</span>
+        ) : (
+          <div className={styles.cartSlot}>
+            <CartBadge />
+          </div>
+        )}
       </div>
     </header>
   );
