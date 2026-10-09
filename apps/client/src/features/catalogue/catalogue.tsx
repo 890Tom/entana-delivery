@@ -3,10 +3,10 @@ import { formatAmount } from "@entana/contracts";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactElement } from "react";
 
-import { texts } from "../texts";
+import { texts } from "../../i18n/texts";
 
-import { CatalogueError, fetchProducts } from "./fetch-products";
-import type { CatalogueErrorKind } from "./fetch-products";
+import { CatalogueError, fetchProducts } from "./api/fetch-products";
+import type { CatalogueErrorKind } from "./api/fetch-products";
 
 function readErrorKind(error: unknown): CatalogueErrorKind {
   return error instanceof CatalogueError ? error.kind : "unexpected";

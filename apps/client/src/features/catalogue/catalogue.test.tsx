@@ -4,16 +4,16 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createQueryClient } from "../query-client";
-import { buildProduct, buildProductId } from "../test-support/build-product";
-import { expectNoAccessibilityViolations } from "../test-support/expect-no-accessibility-violations";
+import { createQueryClient } from "../../data-fetching/query-client";
+import { buildProduct, buildProductId } from "../../test-support/build-product";
+import { expectNoAccessibilityViolations } from "../../test-support/expect-no-accessibility-violations";
 import {
   jsonResponse,
   pendingUntilAborted,
   problemResponse,
   stubFetch,
-} from "../test-support/stub-fetch";
-import { texts } from "../texts";
+} from "../../test-support/stub-fetch";
+import { texts } from "../../i18n/texts";
 
 import { Catalogue } from "./catalogue";
 
