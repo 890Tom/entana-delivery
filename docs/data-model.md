@@ -88,7 +88,7 @@ Written in the same transaction as the change it records. Index on `(order_id, c
 | available | boolean | set manually, never reset automatically |
 | availability_changed_at | timestamptz | |
 | position | integer | display order |
-| image_key | text, nullable | required to make the product visible |
+| image_key | text, nullable | required to make the product visible; the name of the photo file in the products media folder (png, webp or jpg, no path), turned into `/media/products/<key>` by the API |
 | image_alt | text, nullable | required to make the product visible |
 
 Constraint `ck_product_photo_when_active`: `CHECK (active = false OR (image_key IS NOT NULL AND image_alt IS NOT NULL))`. A visible product always has a photo and its alternative text.

@@ -2,17 +2,18 @@ import { z } from "zod";
 
 // A bare file name: no separator, no ".." and a raster extension (never svg, which can carry
 // script). The pattern is the whole defence, so a name that passes it is safe to place in a URL.
-const BRANDING_FILE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
-const BRANDING_FILE_EXTENSION = /\.(png|webp|jpg)$/;
+const MEDIA_FILE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+const MEDIA_FILE_EXTENSION = /\.(png|webp|jpg)$/;
 
-export const brandingFileNameSchema = z
+/** The name of a file of the media folder (branding or product photo). */
+export const mediaFileNameSchema = z
   .string()
-  .regex(BRANDING_FILE_PATTERN, "Must be a plain file name.")
-  .refine((name) => BRANDING_FILE_EXTENSION.test(name), "Must end with .png, .webp or .jpg.")
+  .regex(MEDIA_FILE_PATTERN, "Must be a plain file name.")
+  .refine((name) => MEDIA_FILE_EXTENSION.test(name), "Must end with .png, .webp or .jpg.")
   .refine((name) => !name.includes(".."), "Must not contain two consecutive dots.");
 
 // Control and format characters hide text or break lines in a name shown to every customer.
-const shopNameSchema = z
+export const shopNameSchema = z
   .string()
   .min(1)
   .max(80)
@@ -52,8 +53,8 @@ export const instanceConfigSchema = z.strictObject({
   phoneCountryCode: phoneCountryCodeSchema,
   branding: z
     .strictObject({
-      logoFile: brandingFileNameSchema.optional(),
-      appIconFile: brandingFileNameSchema.optional(),
+      logoFile: mediaFileNameSchema.optional(),
+      appIconFile: mediaFileNameSchema.optional(),
     })
     .optional(),
 });

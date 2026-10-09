@@ -1,5 +1,6 @@
 import { publicProductSchema } from "@entana/contracts";
 import { describe, expect, it } from "vitest";
+import { InvalidProductImageKeyError } from "../errors/invalid-product-image-key-error.js";
 import { IncompleteActiveProductError } from "../errors/incomplete-active-product-error.js";
 import { toPublicProduct } from "./to-public-product.js";
 import type { CatalogRow } from "./to-public-product.js";
@@ -11,7 +12,7 @@ function buildRow(overrides: Partial<CatalogRow> = {}): CatalogRow {
     description: "Grilled over charcoal",
     priceAr: 12000,
     available: true,
-    imageKey: "products/zebu-skewers.jpg",
+    imageKey: "zebu-skewers.jpg",
     imageAlt: "Skewers on a grill",
     ...overrides,
   };
@@ -25,14 +26,26 @@ describe("toPublicProduct", () => {
       description: "Grilled over charcoal",
       priceAr: 12000,
       available: true,
-      image: { key: "products/zebu-skewers.jpg", alt: "Skewers on a grill" },
+      image: { url: "/media/products/zebu-skewers.jpg", alt: "Skewers on a grill" },
     });
   });
 
   it("maps whatever key and alt text the row holds (no value hard-coded)", () => {
-    const product = toPublicProduct(buildRow({ imageKey: "k-1", imageAlt: "alt text 1" }));
+    const product = toPublicProduct(buildRow({ imageKey: "k-1.png", imageAlt: "alt text 1" }));
 
-    expect(product.image).toEqual({ key: "k-1", alt: "alt text 1" });
+    expect(product.image).toEqual({ url: "/media/products/k-1.png", alt: "alt text 1" });
+  });
+
+  it("does not expose the raw image key", () => {
+    const product = toPublicProduct(buildRow({ imageKey: "zebu-skewers.jpg" }));
+
+    expect(Object.keys(product.image).sort()).toEqual(["alt", "url"]);
+  });
+
+  it("lets the typed error of an invalid image key reach the caller", () => {
+    expect(() => toPublicProduct(buildRow({ imageKey: "products/zebu.jpg" }))).toThrow(
+      InvalidProductImageKeyError,
+    );
   });
 
   it("keeps a null description null", () => {

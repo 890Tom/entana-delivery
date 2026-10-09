@@ -96,7 +96,7 @@ describe("GET /api/v1/products, without a database", () => {
       description: null,
       priceAr: 12000,
       available: true,
-      imageKey: "products/zebu.jpg",
+      imageKey: "zebu.jpg",
       imageAlt: "Skewers",
     };
     // Only the client is replaced: the route, the service, the mapper and the filter are the real ones.
@@ -244,6 +244,37 @@ describe("GET /api/v1/products, without a database", () => {
       expect(failureLinesOf(logs)[0]?.level).toBe(ERROR_LEVEL);
       expect(logs.text()).not.toContain(rowName);
       expect(logs.text()).not.toContain(rowId);
+    });
+  });
+
+  describe("when an active row has an image key that is not a plain file name", () => {
+    const badKey = "products/secret-key-4d2c.jpg";
+
+    it("answers the generic 500, with no key in the body or the logs", async () => {
+      const row = {
+        id: "0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        name: "Zebu skewers",
+        description: null,
+        priceAr: 1000,
+        available: true,
+        imageKey: badKey,
+        imageAlt: "Skewers",
+      };
+      const client = {
+        product: { findMany: () => Promise.resolve([row]) },
+        $disconnect: () => undefined,
+      };
+      app = await startAppWithClient(buildTestConfig({ LOG_LEVEL: "info" }), client, logs.stream);
+      logs.reset();
+
+      const response = await request(app.getHttpServer()).get(PRODUCTS_PATH);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual(GENERIC_PROBLEM);
+      await vi.waitFor(() => {
+        expect(logs.text()).toContain("InvalidProductImageKeyError");
+      });
+      expect(logs.text()).not.toContain("secret-key-4d2c");
     });
   });
 

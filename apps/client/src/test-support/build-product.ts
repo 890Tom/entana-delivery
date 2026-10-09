@@ -12,7 +12,7 @@ export function buildProduct(overrides: Partial<PublicProduct> = {}): PublicProd
     description: null,
     priceAr: 4500,
     available: true,
-    image: { key: "demo/sakafo.jpg", alt: "Photo de sakafo" },
+    image: { url: "/media/products/sakafo.jpg", alt: "Photo de sakafo" },
     ...overrides,
   };
 }

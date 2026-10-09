@@ -20,7 +20,7 @@ describe("CatalogController", () => {
         description: null,
         priceAr: 12000,
         available: true,
-        imageKey: "products/zebu.jpg",
+        imageKey: "zebu.jpg",
         imageAlt: "Skewers",
       },
     ]);
@@ -35,7 +35,7 @@ describe("CatalogController", () => {
           description: null,
           priceAr: 12000,
           available: true,
-          image: { key: "products/zebu.jpg", alt: "Skewers" },
+          image: { url: "/media/products/zebu.jpg", alt: "Skewers" },
         },
       ],
     });

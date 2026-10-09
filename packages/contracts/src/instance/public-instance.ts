@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { brandingFileNameSchema, phoneCountryCodeSchema } from "./instance-config.js";
+import { mediaFileNameSchema, phoneCountryCodeSchema, shopNameSchema } from "./instance-config.js";
 import type { InstanceConfig } from "./instance-config.js";
 
 const BRANDING_URL_PREFIX = "/media/branding/";
@@ -9,14 +9,14 @@ const brandingUrlSchema = z
   .refine(
     (url) =>
       url.startsWith(BRANDING_URL_PREFIX) &&
-      brandingFileNameSchema.safeParse(url.slice(BRANDING_URL_PREFIX.length)).success,
+      mediaFileNameSchema.safeParse(url.slice(BRANDING_URL_PREFIX.length)).success,
     "Must be a branding media URL.",
   )
   .nullable();
 
 /** Response of GET /api/v1/instance: what the customer app may know. Nothing internal. */
 export const publicInstanceSchema = z.strictObject({
-  name: z.string().min(1),
+  name: shopNameSchema,
   locale: z.strictObject({ default: z.string(), available: z.array(z.string()).min(1) }),
   currency: z.literal("MGA"),
   phoneCountryCode: phoneCountryCodeSchema,

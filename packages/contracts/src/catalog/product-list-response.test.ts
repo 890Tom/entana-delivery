@@ -9,7 +9,7 @@ function buildProduct(id: string, name: string): Record<string, unknown> {
     description: null,
     priceAr: 4500,
     available: true,
-    image: { key: `demo/${name}.jpg`, alt: `Picture of ${name}` },
+    image: { url: `/media/products/${name}.jpg`, alt: `Picture of ${name}` },
   };
 }
 

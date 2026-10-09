@@ -1,6 +1,7 @@
 import type { PublicProduct } from "@entana/contracts";
 import type { Product } from "@entana/database";
 import { IncompleteActiveProductError } from "../errors/incomplete-active-product-error.js";
+import { toProductImageUrl } from "./to-product-image-url.js";
 
 /** The columns the public catalogue reads: sku and the other internal fields are not among them. */
 export type CatalogRow = Pick<
@@ -15,7 +16,7 @@ function toDescription(description: string | null): string | null {
 
 /**
  * Maps a row of an active product to its public shape. A row without a photo cannot exist
- * (CHECK), so it is an error, never a row to skip silently.
+ * (CHECK), so it is an error, never a row to skip silently. The raw image key stays here.
  */
 export function toPublicProduct(row: CatalogRow): PublicProduct {
   if (row.imageKey === null || row.imageAlt === null) {
@@ -27,6 +28,6 @@ export function toPublicProduct(row: CatalogRow): PublicProduct {
     description: toDescription(row.description),
     priceAr: row.priceAr,
     available: row.available,
-    image: { key: row.imageKey, alt: row.imageAlt },
+    image: { url: toProductImageUrl(row.imageKey), alt: row.imageAlt },
   };
 }
