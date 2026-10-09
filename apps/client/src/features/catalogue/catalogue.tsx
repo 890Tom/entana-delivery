@@ -9,6 +9,7 @@ import { useCartReconciliation } from "../cart/use-cart-reconciliation";
 
 import { readCatalogueErrorKind } from "./api/fetch-products";
 import { useProducts } from "./api/use-products";
+import { CatalogueBottomBar } from "./catalogue-bottom-bar";
 import styles from "./catalogue.module.css";
 import { ProductCard } from "./product-card/product-card";
 import { ProductGridSkeleton } from "./product-grid-skeleton/product-grid-skeleton";
@@ -59,6 +60,7 @@ export function Catalogue(): ReactElement {
         {hasRemovedUnavailable && <Notice tone="info">{texts.cart.removedUnavailable}</Notice>}
         <CatalogueBody query={query} />
       </div>
+      <CatalogueBottomBar query={query} />
     </div>
   );
 }

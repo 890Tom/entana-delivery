@@ -68,14 +68,41 @@ afterEach(() => {
 });
 
 describe("the cart screen", () => {
-  it("shows each line with its name, unit price, quantity and line price", async () => {
+  it("shows the photo of each product, as decoration since the name is beside it", async () => {
+    stubApi(catalogueOf(SAKAFO));
+    seedCart([SAKAFO.id, 1]);
+    renderAt("/panier");
+
+    const photo = (await findLine("Sakafo")).querySelector("img");
+
+    expect(photo?.getAttribute("src")).toBe("/media/products/sakafo.jpg");
+    expect(photo?.getAttribute("alt")).toBe("");
+  });
+
+  it("keeps the line, with an empty square, for a product without a photo", async () => {
+    const withoutPhoto = buildProduct({
+      id: buildProductId(4),
+      name: "Ranonapango",
+      image: { url: null, alt: "Photo à venir" },
+    });
+    stubApi(catalogueOf(withoutPhoto));
+    seedCart([withoutPhoto.id, 1]);
+    renderAt("/panier");
+
+    const line = await findLine("Ranonapango");
+
+    expect(line.querySelector("img")).toBeNull();
+    expect(line.textContent).not.toContain("Photo à venir");
+  });
+
+  it("shows each line with its name, quantity and line price (the unit price is not shown)", async () => {
     stubApi(catalogueOf(SAKAFO, MOFO));
     seedCart([SAKAFO.id, 2], [MOFO.id, 1]);
     renderAt("/panier");
 
     const sakafo = within(await findLine("Sakafo"));
 
-    expect(sakafo.getByText(texts.cart.screen.unitPrice("4 500 Ar"))).toBeTruthy();
+    expect(sakafo.queryByText("4 500 Ar")).toBeNull();
     expect(sakafo.getByRole("group", { name: "Quantité — Sakafo" }).textContent).toContain("2");
     expect(sakafo.getByText("9 000 Ar")).toBeTruthy();
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(texts.cart.screen.heading);
@@ -213,7 +240,8 @@ describe("the cart screen", () => {
 
     const item = await findLine("<img src=x onerror=alert(1)>");
 
-    expect(item.querySelector("img")).toBeNull();
+    // The product's own photo is an img; the one the name tries to inject (src "x") must not exist.
+    expect(item.querySelector('img[src="x"]')).toBeNull();
   });
 
   it("has no accessibility violation on the whole page with lines", async () => {

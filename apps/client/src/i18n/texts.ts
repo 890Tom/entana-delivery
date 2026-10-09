@@ -7,6 +7,8 @@ export const texts: {
   readonly common: {
     readonly loading: string;
     readonly retry: string;
+    /** Between the label of a link and the amount it shows. */
+    readonly amountSeparator: string;
   };
   readonly shell: {
     readonly genericName: string;
@@ -31,15 +33,16 @@ export const texts: {
     readonly screen: {
       readonly title: string;
       readonly heading: string;
-      readonly unitPrice: (formattedPrice: string) => string;
       readonly subtotal: string;
       readonly deliveryHint: string;
       readonly empty: { readonly text: string; readonly action: string };
+      readonly continue: string;
     };
   };
   readonly catalogue: {
     readonly title: string;
     readonly empty: string;
+    readonly viewCart: string;
     readonly product: {
       readonly unavailable: string;
       readonly add: string;
@@ -55,6 +58,7 @@ export const texts: {
   common: {
     loading: "Chargement…",
     retry: "Réessayer",
+    amountSeparator: " · ",
   },
   shell: {
     // Shown instead of the shop name when the instance configuration cannot be loaded.
@@ -84,15 +88,16 @@ export const texts: {
     screen: {
       title: "Panier",
       heading: "Votre panier",
-      unitPrice: (formattedPrice) => `${formattedPrice} l'unité`,
       subtotal: "Sous-total",
       deliveryHint: "Frais de livraison selon votre zone.",
       empty: { text: "Votre panier est vide.", action: "Voir les produits" },
+      continue: "Choisir où livrer",
     },
   },
   catalogue: {
     title: "Nos produits",
     empty: "Aucun produit disponible pour le moment.",
+    viewCart: "Voir le panier",
     product: {
       unavailable: "Indisponible aujourd'hui",
       add: "Ajouter",

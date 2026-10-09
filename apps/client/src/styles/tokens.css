@@ -114,9 +114,15 @@
   --size-icon-xl: 32px;
   --size-stepper-count: 28px;
   --size-logo-height: 34px;
+  /* The mobile bottom bar: padding above, button, padding below and the phone's safe area. */
+  --size-bottom-bar: calc(
+    var(--space-3) + var(--size-button-height) + var(--space-4) + env(safe-area-inset-bottom, 0px)
+  );
 
   /* Layers (proposed role name: the design system gives the value 20 for the header only) */
   --layer-header: 20;
+  /* Proposed (the design system writes a literal 10): the bottom bar sits under the header. */
+  --layer-bar: 10;
 
   /* Opacity */
   --opacity-sold-out: 0.5;

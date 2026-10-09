@@ -1,16 +1,17 @@
 import { formatAmount } from "@entana/contracts";
 import type { ReactElement, Ref } from "react";
 
-import { texts } from "../../../i18n/texts";
 import { QuantityStepper } from "../../catalogue/product-card/quantity-stepper";
 
 import styles from "./cart-line.module.css";
+import { CartThumbnail } from "./cart-thumbnail";
 
 export interface CartDisplayLine {
   readonly productId: string;
   readonly name: string;
   readonly unitPriceAr: number;
   readonly quantity: number;
+  readonly imageUrl: string | null;
 }
 
 interface CartLineProps {
@@ -24,13 +25,11 @@ interface CartLineProps {
 export function CartLine({ line, onDecrease, onIncrease, itemRef }: CartLineProps): ReactElement {
   return (
     <li ref={itemRef} className={styles.line}>
+      <CartThumbnail url={line.imageUrl} />
       <div>
         <h2 className={styles.name}>{line.name}</h2>
-        <p className={styles.unitPrice}>
-          {texts.cart.screen.unitPrice(formatAmount(line.unitPriceAr))}
-        </p>
+        <p className={styles.lineTotal}>{formatAmount(line.unitPriceAr * line.quantity)}</p>
       </div>
-      <p className={styles.lineTotal}>{formatAmount(line.unitPriceAr * line.quantity)}</p>
       <div className={styles.stepper}>
         <QuantityStepper
           name={line.name}
