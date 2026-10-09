@@ -44,3 +44,6 @@ AGENTS.md
 
 # Generated Prisma client
 packages/database/src/generated/
+
+# Real instance configuration of this deployment (see examples/demo/instance.config.yaml)
+/instance.config.yaml

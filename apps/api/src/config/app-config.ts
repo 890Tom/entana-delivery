@@ -54,13 +54,6 @@ const databaseUrlSchema = z
   .string()
   .regex(/^[^\s\p{Cc}]+$/u, "Must not contain whitespace or control characters.");
 
-// A country calling code is 1 to 3 digits and never starts with 0 (what normalizePhone accepts).
-// The message must not echo the value. Moving it to the instance configuration is a later task.
-const phoneCountryCodeSchema = z
-  .string()
-  .regex(/^[1-9][0-9]{0,2}$/, "Must be 1 to 3 digits and must not start with 0.")
-  .default("261");
-
 const configSchema = z
   .object({
     // Production when unset: a deployment that forgets the variable must not expose the API
@@ -76,7 +69,9 @@ const configSchema = z
     BODY_LIMIT_KB: z.coerce.number().int().min(1).max(10240).default(100),
     SWAGGER_ENABLED: z.stringbool().optional(),
     DATABASE_URL: databaseUrlSchema,
-    DEFAULT_PHONE_COUNTRY_CODE: phoneCountryCodeSchema,
+    // Path of the instance configuration file. Absent: the demo file outside production, an error
+    // in production (see loadInstanceConfig).
+    INSTANCE_CONFIG_PATH: z.string().optional(),
   })
   .transform((env) => ({
     nodeEnv: env.NODE_ENV,
@@ -89,7 +84,7 @@ const configSchema = z
     // The API documentation is off in production unless it is asked for.
     isSwaggerEnabled: env.SWAGGER_ENABLED ?? env.NODE_ENV !== "production",
     databaseUrl: env.DATABASE_URL,
-    defaultPhoneCountryCode: env.DEFAULT_PHONE_COUNTRY_CODE,
+    instanceConfigPath: env.INSTANCE_CONFIG_PATH,
   }));
 
 export type AppConfig = Readonly<z.output<typeof configSchema>>;
