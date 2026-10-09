@@ -21,7 +21,7 @@
   text-align: center;
 }
 
-/* Only the picture area is dimmed: the badge on top of it keeps its full contrast. */
+/* Only the picture area is dimmed. */
 .dimmed {
   opacity: var(--opacity-sold-out);
 }
@@ -37,18 +37,16 @@
   -webkit-box-orient: vertical;
 }
 
-.badge {
-  position: absolute;
-  top: var(--space-2);
-  left: var(--space-2);
-  max-width: calc(100% - 2 * var(--space-2));
-}
-
 /* The name and the price touch each other. */
 .name {
   margin: 0;
   font: var(--font-body-strong);
+  overflow: hidden;
   overflow-wrap: anywhere;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
 }
 
 .price {

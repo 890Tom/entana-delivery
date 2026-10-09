@@ -181,7 +181,7 @@ describe("Catalogue list state", () => {
     expect(await screen.findByText(formatAmount(12500), keepSpaces)).toBeTruthy();
   });
 
-  it("marks an unavailable product with a text, and only that one", async () => {
+  it("replaces the cart control of an unavailable product with a disabled button, and only that one", async () => {
     const products = [
       buildProduct({ id: buildProductId(1), name: "Sakafo", available: true }),
       buildProduct({ id: buildProductId(2), name: "Mofo", available: false }),
@@ -191,8 +191,11 @@ describe("Catalogue list state", () => {
     renderCatalogue();
 
     const items = await screen.findAllByRole("listitem");
-    expect(items[0]?.textContent).not.toContain(texts.catalogue.product.unavailable);
-    expect(items[1]?.textContent).toContain("Indisponible aujourd'hui");
+    const label = texts.catalogue.product.unavailable;
+    expect(items[0]?.textContent).not.toContain(label);
+    const button = screen.getByRole("button", { name: label });
+    expect(items[1]?.contains(button)).toBe(true);
+    expect(button.getAttribute("aria-disabled")).toBe("true");
   });
 
   it("does not show the description on the card", async () => {

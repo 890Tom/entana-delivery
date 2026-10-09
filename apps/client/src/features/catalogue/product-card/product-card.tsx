@@ -3,12 +3,28 @@ import { formatAmount } from "@entana/contracts";
 import { useState } from "react";
 import type { ReactElement } from "react";
 
-import { Badge } from "../../../components/badge/badge";
+import { Button } from "../../../components/button/button";
 import { texts } from "../../../i18n/texts";
 import layout from "../card-layout.module.css";
 
 import { ProductCardAction } from "./product-card-action";
 import styles from "./product-card.module.css";
+
+function ignoreClick(): void {
+  // A disabled button never calls it: `Button` requires a handler.
+}
+
+/** An unavailable product keeps the place of the cart control, as a disabled button. */
+function CardControl({ product }: { product: PublicProduct }): ReactElement {
+  if (product.available) {
+    return <ProductCardAction productId={product.id} name={product.name} />;
+  }
+  return (
+    <Button isDisabled onClick={ignoreClick}>
+      {texts.catalogue.product.unavailable}
+    </Button>
+  );
+}
 
 /** The description is not shown: the validated design has none on the card. */
 export function ProductCard({ product }: { product: PublicProduct }): ReactElement {
@@ -35,18 +51,13 @@ export function ProductCard({ product }: { product: PublicProduct }): ReactEleme
             <p className={styles.alt}>{alt}</p>
           </div>
         )}
-        {!product.available && (
-          <div className={styles.badge}>
-            <Badge>{texts.catalogue.product.unavailable}</Badge>
-          </div>
-        )}
       </div>
-      <div>
+      <div className={layout.text}>
         <h2 className={styles.name}>{product.name}</h2>
         <p className={styles.price}>{formatAmount(product.priceAr)}</p>
       </div>
       <div className={layout.action}>
-        {product.available && <ProductCardAction productId={product.id} name={product.name} />}
+        <CardControl product={product} />
       </div>
     </article>
   );

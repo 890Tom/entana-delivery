@@ -8,6 +8,11 @@
   gap: var(--space-3);
 }
 
+/* Takes the room left by short names, so that the cart controls of a row line up at the bottom. */
+.text {
+  flex: 1;
+}
+
 .photo {
   position: relative;
   aspect-ratio: 1 / 1;
