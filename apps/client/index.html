@@ -7,6 +7,8 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Last in the page so that it wins the cascade; deployment-specific, never bundled. -->
+    <link rel="stylesheet" href="/theme.local.css" />
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -109,9 +109,10 @@ export default {
     },
     {
       name: "front-ends-no-node-builtins",
-      comment: "Front ends may import only @entana/contracts and no Node built-in.",
+      comment:
+        "Front-end code (src) imports no Node built-in. Their tool configuration files (vite.config.ts) run in Node and are exempt.",
       severity: "error",
-      from: { path: "^apps/(client|admin)/" },
+      from: { path: "^apps/(client|admin)/src/" },
       // `core` covers both `node:fs` and bare names such as `fs`.
       to: { dependencyTypes: ["core"] },
     },

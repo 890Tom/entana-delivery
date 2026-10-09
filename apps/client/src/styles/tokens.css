@@ -1,0 +1,129 @@
+/*
+ * Design tokens: neutral demo values. A deployment replaces the values it wants to change in
+ * theme.local.css (git-ignored, served next to the app, loaded after this file). Components
+ * reference the semantic names only; the palette is the layer a theme changes.
+ *
+ * Customisable colour roles (the single list; a settings screen and a contrast check read it):
+ *   surface, surface-muted, surface-inverse
+ *   text, text-muted, text-inverse, text-disabled, text-on-accent, text-on-error
+ *   border, border-strong, border-input
+ *   accent, accent-soft, accent-strong
+ *   error, skeleton, focus-ring, ink-hover
+ *
+ * An "on" token is the text colour used on top of its fill: text-on-accent on accent,
+ * text-on-error on error, text-inverse on surface-inverse.
+ */
+:root {
+  /* Colours: palette */
+  --color-white: #fff;
+  --color-ink: #1a1a1a;
+  --color-neutral-50: #f4f4f5;
+  --color-neutral-200: #e0e0e2;
+  --color-neutral-400: #9a9aa0;
+  --color-neutral-500: #77777d;
+  --color-neutral-600: #55555a;
+  --color-accent-100: #dbeafe;
+  --color-accent-500: #60a5fa;
+  --color-accent-800: #1e40af;
+  --color-ink-hover: #333;
+  --color-error: #c62828;
+
+  /* Colours: roles */
+  --color-surface: var(--color-white);
+  --color-surface-muted: var(--color-neutral-50);
+  --color-surface-inverse: var(--color-ink);
+  --color-text: var(--color-ink);
+  --color-text-muted: var(--color-neutral-600);
+  --color-text-inverse: var(--color-white);
+  --color-text-disabled: var(--color-neutral-400);
+  --color-text-on-accent: var(--color-ink);
+  --color-text-on-error: var(--color-white);
+  --color-border: var(--color-neutral-200);
+  --color-border-strong: var(--color-ink);
+  --color-border-input: var(--color-neutral-500);
+  --color-accent: var(--color-accent-500);
+  --color-accent-soft: var(--color-accent-100);
+  --color-accent-strong: var(--color-accent-800);
+  --color-skeleton: var(--color-neutral-200);
+  --color-focus-ring: var(--color-ink);
+
+  /* Spacing */
+  --space-half: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Radii and borders */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-full: 999px;
+  --border-width: 1px;
+  --border-width-strong: 2px;
+  --focus-width: 3px;
+  --focus-offset: 2px;
+
+  /* Shadows */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 6%), 0 2px 6px rgb(0 0 0 / 6%);
+  --shadow-md: 0 2px 4px rgb(0 0 0 / 4%), 0 8px 24px rgb(0 0 0 / 8%);
+  --shadow-bar: 0 -6px 20px rgb(0 0 0 / 8%);
+  --shadow-header: 0 1px 0 rgb(0 0 0 / 6%), 0 4px 14px rgb(0 0 0 / 5%);
+  --shadow-float: 0 6px 24px rgb(0 0 0 / 16%);
+
+  /* Type scale: two sizes, two weights */
+  --font-family: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-size-body: 16px;
+  --font-size-title: 22px;
+  --font-size-badge-count: 12px;
+  --line-height-body: 1.4;
+  --line-height-title: 1.25;
+  --font-weight-regular: 400;
+  --font-weight-strong: 600;
+  --font-body: var(--font-weight-regular) var(--font-size-body) / var(--line-height-body)
+    var(--font-family);
+  --font-body-strong: var(--font-weight-strong) var(--font-size-body) / var(--line-height-body)
+    var(--font-family);
+  --font-title: var(--font-weight-strong) var(--font-size-title) / var(--line-height-title)
+    var(--font-family);
+  --font-title-regular: var(--font-weight-regular) var(--font-size-title) / var(--line-height-title)
+    var(--font-family);
+
+  /* Sizes */
+  --size-touch-min: 48px;
+  --size-button-height: 52px;
+  --size-header-height: 56px;
+  --size-content-max: 1120px;
+  --size-sidebar-width: 340px;
+  --size-readable-max: 560px;
+  --size-badge-height: 28px;
+  --size-cart-pill-height: 44px;
+  --size-step-dot: 32px;
+  --size-step-dot-compact: 28px;
+  --size-progress-segment: 6px;
+  --size-thumbnail: 64px;
+  --size-check-circle: 24px;
+  --size-success-circle: 64px;
+  --size-icon-xs: 16px;
+  --size-icon-sm: 18px;
+  --size-icon-md: 20px;
+  --size-icon-lg: 24px;
+  --size-icon-xl: 32px;
+  --size-stepper-count: 28px;
+  --size-logo-height: 34px;
+
+  /* Opacity */
+  --opacity-sold-out: 0.5;
+  --opacity-skeleton-pulse: 0.5;
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration: 200ms;
+  --duration-toast: 2000ms;
+  --duration-pulse: 1500ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --scale-pressed: 0.98;
+}
