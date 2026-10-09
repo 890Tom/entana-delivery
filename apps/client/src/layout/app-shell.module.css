@@ -2,3 +2,23 @@
 .main:focus-visible {
   outline: none;
 }
+
+/*
+ * The catalogue page on the web layout: the content, then a column of the sidebar width for the
+ * side cart. Keeping the column reserved keeps the cards at their final width (4 per row).
+ */
+.withSidebar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  margin-inline: auto;
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .withSidebar {
+    grid-template-columns: minmax(0, 1fr) var(--size-sidebar-width);
+    gap: var(--space-6);
+    padding: var(--space-6);
+  }
+}

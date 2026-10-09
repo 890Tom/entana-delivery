@@ -47,7 +47,7 @@ function CartBody({ query }: { query: UseQueryResult<ProductListResponse> }): Re
   }
   return (
     <Card>
-      <CartContent lines={toDisplayLines(lines, query.data.products)} />
+      <CartContent lines={toDisplayLines(lines, query.data.products)} variant="screen" />
     </Card>
   );
 }

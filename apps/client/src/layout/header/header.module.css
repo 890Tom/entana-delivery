@@ -47,6 +47,17 @@
   animation: pulse var(--duration-pulse) var(--ease) infinite alternate;
 }
 
+/* The title of the cart screen, set off from the logo by a rule. */
+.title {
+  padding-left: var(--space-3);
+  margin-left: var(--space-1);
+  overflow: hidden;
+  font: var(--font-body-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-left: var(--border-width) solid var(--color-border);
+}
+
 /* The place of the cart button, at its size on each layout. */
 .cartSlot {
   flex: none;

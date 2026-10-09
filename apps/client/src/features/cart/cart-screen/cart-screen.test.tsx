@@ -95,6 +95,31 @@ describe("the cart screen", () => {
     expect(line.textContent).not.toContain("Photo à venir");
   });
 
+  it("keeps the empty square when the photo cannot be loaded", async () => {
+    stubApi(catalogueOf(SAKAFO));
+    seedCart([SAKAFO.id, 1]);
+    renderAt("/panier");
+    const line = await findLine("Sakafo");
+
+    fireEvent.error(line.querySelector("img") ?? line);
+
+    expect(line.querySelector("img")).toBeNull();
+    expect(line.textContent).not.toContain("Photo à venir");
+  });
+
+  it("has a header with the way back to the catalogue and the screen title, and no cart link", async () => {
+    stubApi(catalogueOf(SAKAFO));
+    renderAt("/panier");
+    await screen.findByText(texts.cart.screen.empty.text);
+
+    const banner = within(screen.getByRole("banner"));
+
+    expect(banner.getByRole("link", { name: texts.shell.back }).getAttribute("href")).toBe("/");
+    expect(banner.getByText(texts.cart.screen.title)).toBeTruthy();
+    expect(banner.queryByRole("link", { name: /Voir le panier/ })).toBeNull();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+  });
+
   it("shows each line with its name, quantity and line price (the unit price is not shown)", async () => {
     stubApi(catalogueOf(SAKAFO, MOFO));
     seedCart([SAKAFO.id, 2], [MOFO.id, 1]);

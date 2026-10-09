@@ -12,6 +12,8 @@ interface NoticeProps {
   readonly tone: "error" | "info";
   readonly children: ReactNode;
   readonly action?: NoticeAction;
+  /** False when another notice on the page already announces the same thing (no live role). */
+  readonly isAnnounced?: boolean;
 }
 
 const TONES = {
@@ -19,10 +21,10 @@ const TONES = {
   info: { className: styles.info, role: "note", icon: "info" },
 } as const;
 
-export function Notice({ tone, children, action }: NoticeProps): ReactElement {
+export function Notice({ tone, children, action, isAnnounced = true }: NoticeProps): ReactElement {
   const { className, role, icon } = TONES[tone];
   return (
-    <div className={[styles.notice, className].join(" ")} role={role}>
+    <div className={[styles.notice, className].join(" ")} role={isAnnounced ? role : undefined}>
       <NoticeIcon name={icon} />
       <p className={styles.text}>{children}</p>
       {action !== undefined && (
