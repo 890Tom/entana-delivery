@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
-import { APP_INFO, readAppInfo } from "../app-info.js";
-import { ClockModule } from "../clock.module.js";
+import { APP_INFO, readAppInfo } from "../app-info/app-info.js";
+import { ClockModule } from "../clock/clock.module.js";
 import type { AppConfig } from "../config/app-config.js";
 import { DatabaseModule } from "../database/database.module.js";
 import { HealthController } from "./health.controller.js";
@@ -11,7 +11,7 @@ import { ReadinessService } from "./readiness/readiness.service.js";
 import {
   DEFAULT_READINESS_TIMEOUT_MS,
   READINESS_TIMEOUT_MS,
-} from "./readiness/readiness-timeout.js";
+} from "./readiness/timeout/readiness-timeout.js";
 
 @Module({})
 export class HealthModule {

@@ -1,7 +1,7 @@
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import request from "supertest";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { OrderRateLimitedError } from "../../src/orders/order-errors.js";
+import { OrderRateLimitedError } from "../../src/orders/errors/order-errors.js";
 import type { CreateOrderResult } from "../../src/orders/orders.service.js";
 import { captureLogs } from "./support/log-capture.js";
 import { postOversizedBody } from "./support/raw-requests.js";

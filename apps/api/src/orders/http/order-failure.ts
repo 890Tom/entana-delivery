@@ -10,8 +10,8 @@ import {
   OrderTooLargeError,
   UnavailableProductsError,
   UnsupportedContentTypeError,
-} from "./order-errors.js";
-import { RATE_LIMIT_RETRY_AFTER_SECONDS } from "./order-http-limits.js";
+} from "../errors/order-errors.js";
+import { RATE_LIMIT_RETRY_AFTER_SECONDS } from "../rate-limit/order-http-limits.js";
 
 /** What the HTTP layer answers for a typed error of the order creation. */
 export interface OrderFailure {

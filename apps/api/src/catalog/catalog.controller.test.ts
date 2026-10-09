@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CatalogController } from "./catalog.controller.js";
 import { CatalogService } from "./catalog.service.js";
 import type { CatalogDatabase } from "./catalog.service.js";
-import type { CatalogRow } from "./to-public-product.js";
+import type { CatalogRow } from "./mapping/to-public-product.js";
 
 // Only the client is replaced, since a Prisma delegate cannot exist without a database: the service
 // and the mapper are the real ones. The cast is at that boundary, and the rows are what the test gives.

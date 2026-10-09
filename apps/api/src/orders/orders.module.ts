@@ -1,10 +1,10 @@
 import { randomBytes } from "node:crypto";
 import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
-import { ClockModule } from "../clock.module.js";
+import { ClockModule } from "../clock/clock.module.js";
 import type { AppConfig } from "../config/app-config.js";
 import { DatabaseModule } from "../database/database.module.js";
-import { AddressRateLimiter } from "./address-rate-limiter.js";
+import { AddressRateLimiter } from "./rate-limit/address-rate-limiter.js";
 import { OrdersController } from "./orders.controller.js";
 import { DEFAULT_PHONE_COUNTRY_CODE, ORDER_RANDOM_BYTES, OrdersService } from "./orders.service.js";
 

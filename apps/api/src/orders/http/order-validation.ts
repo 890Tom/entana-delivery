@@ -3,7 +3,7 @@ import type { ExecutionContext } from "@nestjs/common";
 import type { Request } from "express";
 import type { PipeTransform } from "@nestjs/common";
 import { idempotencyKeySchema } from "@entana/contracts";
-import { RequestValidationError } from "../errors/request-validation-error.js";
+import { RequestValidationError } from "../../errors/request-body/request-validation-error.js";
 
 export const IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
 

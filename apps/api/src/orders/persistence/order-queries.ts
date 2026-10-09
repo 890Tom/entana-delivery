@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@entana/database";
-import type { StoredOrder } from "./matches-stored-order.js";
-import type { OrderableProduct } from "./resolve-order-lines.js";
+import type { StoredOrder } from "../rules/matches-stored-order.js";
+import type { OrderableProduct } from "../rules/resolve-order-lines.js";
 
 /** What the queries need from the client: the PrismaClient and its transaction client both fit. */
 export type OrderReader = Pick<

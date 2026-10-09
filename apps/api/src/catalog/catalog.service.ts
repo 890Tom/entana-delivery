@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import type { ProductListResponse } from "@entana/contracts";
 import type { PrismaClient } from "@entana/database";
 import { DATABASE_CLIENT } from "../database/database-client.js";
-import { toPublicProduct } from "./to-public-product.js";
+import { toPublicProduct } from "./mapping/to-public-product.js";
 
 /** What the service needs from the database client: the PrismaClient fits. */
 export interface CatalogDatabase {

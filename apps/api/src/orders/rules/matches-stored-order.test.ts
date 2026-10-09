@@ -8,7 +8,7 @@ import {
   FAKE_NOTE,
   FAKE_PHONE_E164,
   buildOrderRequest,
-} from "../../tests/support/order-request.js";
+} from "../../../tests/support/order-request.js";
 import { hashTrackingToken } from "./hash-tracking-token.js";
 import { matchesStoredOrder, toCreateOrderResponse } from "./matches-stored-order.js";
 import type { StoredOrder } from "./matches-stored-order.js";

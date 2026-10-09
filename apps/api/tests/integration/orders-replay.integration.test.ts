@@ -1,6 +1,6 @@
 import type { CreateOrderRequest } from "@entana/contracts";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { IdempotencyConflictError } from "../../src/orders/order-errors.js";
+import { IdempotencyConflictError } from "../../src/orders/errors/order-errors.js";
 import {
   FAKE_LAT,
   FAKE_LNG,

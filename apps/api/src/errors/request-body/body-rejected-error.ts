@@ -1,5 +1,5 @@
 import type { NextFunction } from "express";
-import { readClientErrorStatus } from "./to-problem-details.js";
+import { readClientErrorStatus } from "../problem-details/to-problem-details.js";
 
 /** A request body the JSON parser refused (malformed, too large, wrong type). Only its status is kept. */
 export class BodyRejectedError extends Error {

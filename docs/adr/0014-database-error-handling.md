@@ -56,7 +56,7 @@ The reasoning for the 500 on a CHECK or NOT NULL violation is that these rules a
 
 ### Logging
 
-`sendProblem` (`src/errors/send-problem.ts`) writes one line per failed request for a classified database failure: the fixed message `Database operation failed.` and a `reason` equal to the kind. The level comes from the mapping. The error object is never logged. `unknown` is not logged this way: the generic 500 path logs the error type and stack frames, as for any unexpected error.
+`sendProblem` (`src/errors/problem-details/send-problem.ts`) writes one line per failed request for a classified database failure: the fixed message `Database operation failed.` and a `reason` equal to the kind. The level comes from the mapping. The error object is never logged. `unknown` is not logged this way: the generic 500 path logs the error type and stack frames, as for any unexpected error.
 
 ### The leak suite, in `apps/api/tests/integration`
 

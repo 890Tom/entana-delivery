@@ -1,6 +1,9 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import type { PrismaClient } from "@entana/database";
-import { IdempotencyConflictError, OrderRateLimitedError } from "../../src/orders/order-errors.js";
+import {
+  IdempotencyConflictError,
+  OrderRateLimitedError,
+} from "../../src/orders/errors/order-errors.js";
 import { FAKE_PHONE_INPUT, buildOrderRequest } from "../support/order-request.js";
 import { insertProduct } from "./support/insert-product.js";
 import {

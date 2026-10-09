@@ -3,12 +3,12 @@ import { computeOrderTotal, generateOrderCode, normalizePhone } from "@entana/co
 import type { CreateOrderRequest, CreateOrderResponse } from "@entana/contracts";
 import { classifyDatabaseError } from "@entana/database";
 import type { PrismaClient } from "@entana/database";
-import { CLOCK } from "../clock.js";
-import type { Clock } from "../clock.js";
+import { CLOCK } from "../clock/clock.js";
+import type { Clock } from "../clock/clock.js";
 import { DATABASE_CLIENT } from "../database/database-client.js";
-import { insertOrder } from "./insert-order.js";
-import { matchesStoredOrder, toCreateOrderResponse } from "./matches-stored-order.js";
-import type { StoredOrder } from "./matches-stored-order.js";
+import { insertOrder } from "./persistence/insert-order.js";
+import { matchesStoredOrder, toCreateOrderResponse } from "./rules/matches-stored-order.js";
+import type { StoredOrder } from "./rules/matches-stored-order.js";
 import {
   CustomerBlockedError,
   IdempotencyConflictError,
@@ -17,22 +17,22 @@ import {
   OrderRateLimitedError,
   OrderTooLargeError,
   UnavailableProductsError,
-} from "./order-errors.js";
+} from "./errors/order-errors.js";
 import {
   doesAmountFitColumn,
   getRateLimitWindowStart,
   isRateLimited,
   MAX_CREATION_ATTEMPTS,
-} from "./order-limits.js";
+} from "./rules/order-limits.js";
 import {
   countOrdersSince,
   ensureCustomer,
   findOrderByIdempotencyKey,
   lockCustomerRow,
   readProducts,
-} from "./order-queries.js";
-import type { OrderReader } from "./order-queries.js";
-import { resolveOrderLines } from "./resolve-order-lines.js";
+} from "./persistence/order-queries.js";
+import type { OrderReader } from "./persistence/order-queries.js";
+import { resolveOrderLines } from "./rules/resolve-order-lines.js";
 
 /** n unpredictable bytes: the API passes node:crypto's `randomBytes`. */
 export type RandomBytes = (count: number) => Uint8Array;

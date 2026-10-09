@@ -17,7 +17,7 @@ Customers browse the catalogue without an account. `GET /api/v1/products` is pub
    - `CatalogService.listActiveProducts` (`apps/api/src/catalog/catalog.service.ts`) reads an explicit list of seven columns, so `sku` never leaves the database.
    - The schema is not applied to responses at runtime. It types the result, feeds the OpenAPI document and is checked in tests.
    - `catalog.integration.test.ts` ("asks the database for the public columns only…") pins the selected keys.
-3. **Pure mapper** (`to-public-product.ts`).
+3. **Pure mapper** (`catalog/mapping/to-public-product.ts`).
    - A `null` or blank description (no non-whitespace character) becomes `null`. Any other text is returned unchanged, without trimming.
    - `image` is never `null` for an active product: `ck_product_photo_when_active` forbids a row without photo ([`docs/data-model.md`](../data-model.md), [ADR 0007](0007-check-constraints-in-a-hand-written-migration.md)).
    - A row without `imageKey` or `imageAlt` raises `IncompleteActiveProductError`, whose fixed message holds no row data. The error filter answers the generic `500`, with no row data in the body (`products.e2e.test.ts`).

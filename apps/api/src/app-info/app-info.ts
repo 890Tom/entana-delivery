@@ -10,7 +10,7 @@ export const APP_INFO = Symbol("APP_INFO");
 /** Name and version from package.json. The path works from src/ and from dist/ alike. */
 export function readAppInfo(): AppInfo {
   const manifest: unknown = JSON.parse(
-    readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+    readFileSync(new URL("../../package.json", import.meta.url), "utf8"),
   );
   return manifestSchema.parse(manifest);
 }

@@ -1,8 +1,8 @@
 import { PROBLEM_DETAILS_CONTENT_TYPE } from "@entana/contracts";
 import type { Request, Response } from "express";
 import type { DatabaseErrorKind } from "@entana/database";
-import { mapDatabaseFailure } from "./database-failure/database-failure-mapping.js";
-import { ServiceNotReadyError } from "./service-not-ready-error.js";
+import { mapDatabaseFailure } from "../database-failure/database-failure-mapping.js";
+import { ServiceNotReadyError } from "../../health/readiness/failure/service-not-ready-error.js";
 import { toProblemInstance } from "./problem-instance.js";
 import { resolveFailure } from "./to-problem-details.js";
 
