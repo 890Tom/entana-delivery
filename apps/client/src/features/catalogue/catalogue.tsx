@@ -5,6 +5,8 @@ import type { ReactElement } from "react";
 
 import { Notice } from "../../components/notice/notice";
 import { texts } from "../../i18n/texts";
+import { useCart } from "../cart/cart-context";
+import { useCartReconciliation } from "../cart/use-cart-reconciliation";
 
 import { CatalogueError, fetchProducts } from "./api/fetch-products";
 import type { CatalogueErrorKind } from "./api/fetch-products";
@@ -55,10 +57,14 @@ export function Catalogue(): ReactElement {
     queryFn: ({ signal }) => fetchProducts(signal),
   });
 
+  const { hasRemovedUnavailable } = useCart();
+  useCartReconciliation(query.data?.products);
+
   return (
     <div className={styles.page}>
       <div className={styles.content}>
         <h1 className={styles.title}>{texts.catalogue.title}</h1>
+        {hasRemovedUnavailable && <Notice tone="info">{texts.cart.removedUnavailable}</Notice>}
         <CatalogueBody query={query} />
       </div>
     </div>

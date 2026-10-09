@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { Route, Switch } from "wouter";
 
+import { CartProvider } from "./features/cart/cart-provider";
 import { Catalogue } from "./features/catalogue/catalogue";
 import { texts } from "./i18n/texts";
 import { AppShell } from "./layout/app-shell";
@@ -14,11 +15,13 @@ function CataloguePage(): ReactElement {
 
 export function App(): ReactElement {
   return (
-    <AppShell>
-      <Switch>
-        <Route path="/" component={CataloguePage} />
-        <Route component={NotFound} />
-      </Switch>
-    </AppShell>
+    <CartProvider>
+      <AppShell>
+        <Switch>
+          <Route path="/" component={CataloguePage} />
+          <Route component={NotFound} />
+        </Switch>
+      </AppShell>
+    </CartProvider>
   );
 }

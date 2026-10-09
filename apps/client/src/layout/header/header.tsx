@@ -6,6 +6,7 @@ import visuallyHidden from "../../components/visually-hidden/visually-hidden.mod
 import { useInstance } from "../../features/instance/use-instance";
 import { texts } from "../../i18n/texts";
 
+import { CartBadge } from "./cart-badge";
 import styles from "./header.module.css";
 
 // The size of the logo, not a loaded state: the header keeps the same height with or without it.
@@ -55,8 +56,9 @@ export function Header(): ReactElement {
     <header className={styles.header}>
       <div className={styles.inner}>
         <HeaderBrand />
-        {/* Kept empty: the cart button comes with the cart, and the header must not move then. */}
-        <div className={styles.cartSlot} />
+        <div className={styles.cartSlot}>
+          <CartBadge />
+        </div>
       </div>
     </header>
   );

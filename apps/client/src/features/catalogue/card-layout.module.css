@@ -18,8 +18,13 @@
   height: calc(var(--font-size-body) * var(--line-height-body));
 }
 
-/* Where the cart control will go: as tall as a touch target plus a small margin (52 px). */
+/*
+ * The cart control: as tall as the quantity selector (touch buttons, inner padding and border,
+ * 54 px), the taller of its two states, so that "Add" turning into the selector moves nothing.
+ */
 .action {
-  height: calc(var(--size-touch-min) + var(--space-1));
+  display: flex;
+  align-items: center;
+  height: calc(var(--size-touch-min) + 2 * (var(--space-half) + var(--border-width)));
   border-radius: var(--radius);
 }

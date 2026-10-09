@@ -12,6 +12,7 @@ import {
   stubFetch,
 } from "../../test-support/stub-fetch";
 import { texts } from "../../i18n/texts";
+import { CartProvider } from "../cart/cart-provider";
 
 import { Catalogue } from "./catalogue";
 
@@ -26,7 +27,9 @@ const keepSpaces = { normalizer: (text: string): string => text };
 function renderCatalogue(): ReturnType<typeof render> {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <Catalogue />
+      <CartProvider>
+        <Catalogue />
+      </CartProvider>
     </QueryClientProvider>,
   );
 }
