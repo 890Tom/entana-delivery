@@ -4,7 +4,9 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./app";
 import { createQueryClient } from "./data-fetching/query-client";
-import "./styles.css";
+import "./styles/tokens.css";
+import "./styles/fonts.css";
+import "./styles/base.css";
 
 const rootElement = document.getElementById("root");
 if (rootElement === null) {
