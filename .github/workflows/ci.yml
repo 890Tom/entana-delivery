@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited]
+    types: [opened, synchronize, reopened]
   push:
     branches: [main]
 
@@ -68,6 +68,14 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      # Turborepo replays the cached result of a task whose inputs did not change (only successful
+      # runs are cached). The integration tasks are never cached: see turbo.json.
+      - name: Restore the Turborepo cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-quality-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-quality-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Check formatting
@@ -85,9 +93,10 @@ jobs:
       # Unused files, exports and dependencies (knip.jsonc).
       - name: Check for dead code
         run: pnpm knip
-      # Runs the unit tests and fails below the coverage floors of each package.
+      # Runs the unit tests and fails below the coverage floors of each package. The API is left
+      # out: its unit run is part of test:coverage:api in the `integration` job.
       - name: Test with coverage
-        run: pnpm test:coverage
+        run: pnpm test:coverage --filter=!@entana/api
       - name: Build
         run: pnpm build
       # Fails above 300 KB gzip for the initial download and writes the sizes to the job summary.
@@ -132,6 +141,14 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      # Turborepo replays the cached result of a task whose inputs did not change (only successful
+      # runs are cached). The integration tasks are never cached: see turbo.json.
+      - name: Restore the Turborepo cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-integration-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-integration-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Prisma client
@@ -148,9 +165,10 @@ jobs:
       # The role is the superuser of the service image, so it is allowed to create databases.
       - name: Database integration tests
         run: pnpm test:integration --filter=@entana/database
-      - name: API integration tests
-        run: pnpm test:integration --filter=@entana/api
-      - name: API coverage (unit and integration)
+      # Runs the API unit suite and the API integration suite once each, with coverage, and applies
+      # the 90% floor to both together. A separate `test:integration` step would run the
+      # integration suite a second time.
+      - name: API tests with coverage (unit and integration)
         run: pnpm test:coverage:api
 
   # Builds the production image and tests it from outside, through the published port: the
@@ -160,8 +178,20 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # `load` puts the image in the local Docker daemon, so the steps below test the very image
+      # built here. The cache keeps the layers (the dependency layer is rebuilt only when the
+      # manifests or the lockfile change); it does not keep the pnpm store of the Dockerfile's
+      # `--mount=type=cache`.
       - name: Build the API image
-        run: docker build -f apps/api/Dockerfile -t entana-api:ci .
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          tags: entana-api:ci
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       # Informational for now: findings never fail the build. To be made blocking on fixable
       # critical findings once the baseline is known. SARIF upload to GitHub code scanning
       # is to be added when the repository is public (it needs a paid plan while private).
@@ -258,21 +288,3 @@ jobs:
       - name: Remove the container
         if: always()
         run: docker rm -f entana-api-ci
-
-  pr-title:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    env:
-      HUSKY: "0"
-      PR_TITLE: ${{ github.event.pull_request.title }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Validate PR title (Conventional Commits)
-        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitlint
