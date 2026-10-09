@@ -1,0 +1,13 @@
+/*
+ * The design system says "no wrap", but the longest label ("Indisponible aujourd'hui") is wider
+ * than a 156 px card: the text wraps inside the pill instead of being cut off.
+ */
+.badge {
+  display: inline-block;
+  min-height: var(--size-badge-height);
+  padding: var(--space-1) var(--space-3);
+  font: var(--font-body-strong);
+  color: var(--color-text-inverse);
+  background: var(--color-surface-inverse);
+  border-radius: var(--radius-full);
+}

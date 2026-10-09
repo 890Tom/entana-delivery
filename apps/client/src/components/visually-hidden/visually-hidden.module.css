@@ -1,0 +1,12 @@
+/*
+ * Text for assistive technology only. The one literal of this file: a 1 px box, the smallest one
+ * that screen readers still read. The height follows from the aspect ratio.
+ */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

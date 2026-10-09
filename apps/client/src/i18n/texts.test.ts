@@ -27,7 +27,7 @@ describe("texts", () => {
     expect(new Set(messages).size).toBe(CATALOGUE_ERROR_KINDS.length);
   });
 
-  it("uses the wording of the specification for a sold-out product", () => {
-    expect(texts.catalogue.soldOut).toBe("Épuisé");
+  it("uses the wording of the mock-up for an unavailable product", () => {
+    expect(texts.catalogue.product.unavailable).toBe("Indisponible aujourd'hui");
   });
 });

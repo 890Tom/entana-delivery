@@ -1,0 +1,52 @@
+.photo {
+  overflow: hidden;
+  background: var(--color-surface-muted);
+  box-shadow: var(--shadow-md);
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--space-3);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* Only the picture area is dimmed: the badge on top of it keeps its full contrast. */
+.dimmed {
+  opacity: var(--opacity-sold-out);
+}
+
+/* The alt text stands in for the photo; three lines at most, so a long one cannot break the square. */
+.alt {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.badge {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  max-width: calc(100% - 2 * var(--space-2));
+}
+
+/* The name and the price touch each other. */
+.name {
+  margin: 0;
+  font: var(--font-body-strong);
+  overflow-wrap: anywhere;
+}
+
+.price {
+  margin: 0;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

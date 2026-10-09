@@ -1,22 +1,32 @@
 import type { CatalogueErrorKind } from "../features/catalogue/api/fetch-products";
 
-// Fixed French texts. Error messages depend only on the kind of error, never on a server text.
+// Fixed French texts, keyed as in the screen specification. Error messages depend only on the
+// kind of error, never on a server text. The title is a generic default: a deployment's own
+// wording will come from the instance configuration.
 export const texts: {
-  readonly appTitle: string;
-  readonly catalogue: {
+  readonly common: {
     readonly loading: string;
-    readonly empty: string;
     readonly retry: string;
-    readonly soldOut: string;
+  };
+  readonly catalogue: {
+    readonly title: string;
+    readonly empty: string;
+    readonly product: {
+      readonly unavailable: string;
+    };
     readonly errors: Readonly<Record<CatalogueErrorKind, string>>;
   };
 } = {
-  appTitle: "Entana Delivery",
-  catalogue: {
-    loading: "Chargement du catalogue…",
-    empty: "Aucun produit disponible pour le moment.",
+  common: {
+    loading: "Chargement…",
     retry: "Réessayer",
-    soldOut: "Épuisé",
+  },
+  catalogue: {
+    title: "Nos produits",
+    empty: "Aucun produit disponible pour le moment.",
+    product: {
+      unavailable: "Indisponible aujourd'hui",
+    },
     errors: {
       network: "Impossible de joindre le serveur. Vérifiez votre connexion.",
       timeout: "Le serveur met trop de temps à répondre.",
