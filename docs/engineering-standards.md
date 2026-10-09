@@ -58,7 +58,7 @@ These rules keep the codebase consistent. Tooling enforces what it can (TypeScri
 ## 7. API
 
 - Routes live under `/api/v1`, with plural nouns and one error shape everywhere (RFC 9457 problem details). Response shapes are defined in `contracts`.
-- Every endpoint is documented in OpenAPI and has end-to-end tests for success and for each error case.
+- Every endpoint is documented in OpenAPI and has end-to-end tests of its contract: the success, and one case per kind of error it can answer (validation, authorisation, conflict...), not one per input.
 - Authorisation is checked per route and per object.
 
 **Enforced by:** review, and the end-to-end tests of each endpoint.
