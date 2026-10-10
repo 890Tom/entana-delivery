@@ -1,0 +1,35 @@
+/* The marker is as high as the disc plus the tail, the tail overlapping the disc by `--space-1`. */
+.marker {
+  position: relative;
+  width: var(--size-map-pin);
+  height: calc(var(--size-map-pin) + var(--size-map-pin-tail-height) - var(--space-1));
+}
+
+.disc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-map-pin);
+  height: var(--size-map-pin);
+  color: var(--color-text-inverse);
+  background: var(--color-surface-inverse);
+  border: var(--border-width-strong) solid var(--color-surface);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+}
+
+.house {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+}
+
+.tail {
+  position: absolute;
+  top: calc(var(--size-map-pin) - var(--space-1));
+  left: calc(50% - var(--size-map-pin-tail-half));
+  width: 0;
+  height: 0;
+  border-top: var(--size-map-pin-tail-height) solid var(--color-surface-inverse);
+  border-right: var(--size-map-pin-tail-half) solid transparent;
+  border-left: var(--size-map-pin-tail-half) solid transparent;
+}

@@ -16,4 +16,41 @@ describe("step indicator", () => {
       expect(step.querySelector("svg")).not.toBeNull();
     }
   });
+
+  it("marks the given step as the current one and the steps before it as done", () => {
+    render(<StepIndicator current={1} />);
+
+    const steps = screen.getByRole("navigation", { name: texts.shell.steps.label });
+    const current = steps.querySelectorAll('[aria-current="step"]');
+    expect(current).toHaveLength(1);
+    expect(current[0]?.textContent).toContain(texts.shell.steps.address);
+    // Only the cart is behind the customer: it alone carries the "done" mark.
+    const doneMarks = screen.getAllByText(texts.shell.steps.done);
+    expect(doneMarks).toHaveLength(1);
+    expect(doneMarks[0]?.closest("li")?.textContent).toContain(texts.shell.steps.cart);
+  });
+
+  it("never makes a done step a link", () => {
+    render(<StepIndicator current={1} />);
+
+    expect(screen.queryAllByRole("link")).toHaveLength(0);
+  });
+
+  it("puts the position above the steps", () => {
+    render(<StepIndicator current={1} />);
+
+    const position = screen.getByText(texts.shell.steps.position(2, 5));
+    const list = screen.getByRole("list");
+
+    expect(position.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("says the position of the current step, as step 1 of 5 by default", () => {
+    const { rerender } = render(<StepIndicator />);
+    expect(screen.getByText(texts.shell.steps.position(1, 5))).toBeTruthy();
+
+    rerender(<StepIndicator current={1} />);
+
+    expect(screen.getByText(texts.shell.steps.position(2, 5))).toBeTruthy();
+  });
 });

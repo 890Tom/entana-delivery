@@ -15,8 +15,13 @@ export const texts: {
     readonly homeLabel: (name: string) => string;
     /** The way back from the cart screen to the catalogue. */
     readonly back: string;
+    /** The way back from the delivery screen to the cart. */
+    readonly backToCart: string;
     readonly steps: {
       readonly label: string;
+      /** Read after the name of a step that is already behind the customer. */
+      readonly done: string;
+      readonly position: (current: number, total: number) => string;
       readonly cart: string;
       readonly address: string;
       readonly contact: string;
@@ -28,6 +33,31 @@ export const texts: {
     readonly title: string;
     readonly message: string;
     readonly back: string;
+  };
+  /** Here "point" is the marker on the map; "Repère" is the written field of the next task. */
+  readonly delivery: {
+    /** The title of the document; the page heading is `heading`. */
+    readonly title: string;
+    readonly heading: string;
+    readonly subtitle: string;
+    readonly place: string;
+    readonly placed: string;
+    readonly locate: string;
+    readonly geo: {
+      readonly denied: string;
+      readonly unavailable: string;
+      readonly timeout: string;
+    };
+    readonly map: {
+      readonly label: string;
+      /** Read by a screen reader on the map itself: how to move it without a pointer. */
+      readonly canvasLabel: string;
+      readonly markerLabel: string;
+      readonly zoomIn: string;
+      readonly zoomOut: string;
+      readonly toggleAttribution: string;
+      readonly failed: string;
+    };
   };
   readonly cart: {
     readonly badgeLabel: (count: number) => string;
@@ -73,8 +103,11 @@ export const texts: {
     genericName: "Boutique",
     homeLabel: (name) => `${name} - accueil`,
     back: "Retour aux produits",
+    backToCart: "Retour au panier",
     steps: {
       label: "Étapes de la commande",
+      done: "(terminé)",
+      position: (current, total) => `Étape ${String(current)} sur ${String(total)}`,
       cart: "Panier",
       address: "Adresse",
       contact: "Coordonnées",
@@ -86,6 +119,28 @@ export const texts: {
     title: "Page introuvable",
     message: "Cette page n'existe pas ou a été déplacée.",
     back: "Retour aux produits",
+  },
+  delivery: {
+    title: "Livraison",
+    heading: "Où livrer\u00a0?",
+    subtitle: "Touchez la carte pour placer le point de livraison.",
+    place: "Placer ici",
+    placed: "Point placé.",
+    locate: "Utiliser ma position",
+    geo: {
+      denied: "Position refusée. Autorisez-la dans votre navigateur ou touchez la carte.",
+      unavailable: "Position indisponible. Touchez la carte pour placer le point.",
+      timeout: "La position met trop de temps. Réessayez ou touchez la carte.",
+    },
+    map: {
+      label: "Carte du point de livraison",
+      canvasLabel: "Carte. Flèches pour la déplacer, plus et moins pour zoomer.",
+      markerLabel: "Point de livraison",
+      zoomIn: "Zoom avant",
+      zoomOut: "Zoom arrière",
+      toggleAttribution: "Afficher les crédits de la carte",
+      failed: "La carte n'a pas pu se charger. Réessayez ou utilisez votre position.",
+    },
   },
   cart: {
     badgeLabel: (count) =>

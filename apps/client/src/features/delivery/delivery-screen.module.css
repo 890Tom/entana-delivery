@@ -1,0 +1,31 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding: var(--space-4);
+  margin-inline: auto;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.title,
+.subtitle {
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .page {
+    gap: var(--space-5);
+    padding: var(--space-6);
+  }
+}

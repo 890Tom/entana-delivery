@@ -1,32 +1,52 @@
-/* Web only, except where a screen asks for it (the cart): the catalogue has none on mobile. */
+/* The same on every screen and at every width. */
 .nav {
-  display: none;
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
-.onMobile {
-  display: block;
+.inner {
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding: var(--space-4) var(--space-6);
+  margin: 0 auto;
 }
 
 .list {
   display: flex;
   align-items: center;
-  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
-  padding: var(--space-4) var(--space-6);
-  margin: 0 auto;
+  padding: 0;
+  margin: 0;
   list-style: none;
 }
 
+/* "Étape 2 sur 5": the position in words, above the steps. */
+.position {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-muted);
+}
+
+/*
+ * One step: the joining line, then the step itself. Every step but the first shares the free
+ * width, so that all the joining lines are of the same length (the first has no line).
+ */
+.done,
 .current,
 .upcoming {
   display: flex;
   flex: 1 1 auto;
+  align-items: center;
+}
+
+.list > :first-child {
+  flex: none;
+}
+
+.step {
+  display: flex;
+  flex: none;
   gap: var(--space-2);
   align-items: center;
 }
 
-.current {
-  flex: none;
+.current .step {
   height: var(--size-cart-pill-height);
   padding-inline: var(--space-3) var(--space-4);
   font: var(--font-body-strong);
@@ -35,18 +55,22 @@
   box-shadow: var(--shadow-sm);
 }
 
-.upcoming {
+.upcoming .step {
   color: var(--color-text-muted);
 }
 
 /* The line that joins a step to the one before it. */
-.upcoming::before {
+.joiner {
   flex: 1 1 auto;
   min-width: var(--space-5);
   height: var(--border-width-strong);
-  margin-inline-end: var(--space-2);
-  content: "";
+  margin-inline: var(--space-2);
   background: var(--color-border);
+}
+
+.done .joiner,
+.current .joiner {
+  background: var(--color-border-strong);
 }
 
 .dot {
@@ -59,7 +83,8 @@
   border-radius: var(--radius-full);
 }
 
-.current .dot {
+.current .dot,
+.done .dot {
   color: var(--color-text-inverse);
   background: var(--color-surface-inverse);
 }
@@ -80,23 +105,19 @@
  * stay named for assistive technology (the same clipping as the visually hidden utility).
  */
 @media (max-width: 1023px) {
-  .list {
+  .inner {
     padding-inline: var(--space-4);
   }
 
-  .upcoming::before {
+  .joiner {
     min-width: var(--space-2);
   }
 }
 
 /* The one breakpoint of the design system (a media query cannot read a variable). */
 @media (min-width: 1024px) {
-  .nav {
-    display: block;
-  }
-
   /* Undoes the visually hidden utility that the narrow layout puts on the names. */
-  .upcoming .label {
+  .label {
     position: static;
     width: auto;
     aspect-ratio: auto;

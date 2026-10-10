@@ -79,6 +79,8 @@
   --font-size-body: 16px;
   --font-size-title: 22px;
   --font-size-badge-count: 12px;
+  /* Proposed: the smallest size of the design system, for the map credits (same value as above). */
+  --font-size-attribution: 12px;
   --line-height-body: 1.4;
   --line-height-title: 1.25;
   --font-weight-regular: 400;
@@ -114,6 +116,12 @@
   --size-icon-xl: 32px;
   --size-stepper-count: 28px;
   --size-logo-height: 34px;
+  /* Proposed: the delivery map (the prototype writes 260 and 560 as literals) and its marker. */
+  --size-map-height: 260px;
+  --size-map-height-large: 560px;
+  --size-map-pin: 40px;
+  --size-map-pin-tail-half: 6px;
+  --size-map-pin-tail-height: 10px;
   /* The mobile bottom bar: padding above, button, padding below and the phone's safe area. */
   --size-bottom-bar: calc(
     var(--space-3) + var(--size-button-height) + var(--space-4) + env(safe-area-inset-bottom, 0px)

@@ -82,10 +82,23 @@
   }
 }
 
+/* The delivery screen: back and title on a phone only, the cart link on the web layout only. */
+.inner .webOnly {
+  display: none;
+}
+
 /* The one breakpoint of the design system (a media query cannot read a variable). */
 @media (min-width: 1024px) {
   .inner {
     padding-inline: var(--space-6);
+  }
+
+  .inner .phoneOnly {
+    display: none;
+  }
+
+  .inner .webOnly {
+    display: block;
   }
 
   .cartSlot {

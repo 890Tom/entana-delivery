@@ -16,9 +16,20 @@
   transition: transform var(--duration-fast) var(--ease);
 }
 
+/* Selection and state colours only: the soft accent fill, with its strong border and text. */
+.accent {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
+  border: var(--border-width-strong) solid var(--color-accent-strong);
+}
+
 @media (hover: hover) {
   .button:hover:not([aria-disabled="true"]) {
     background: var(--color-surface-muted);
+  }
+
+  .accent:hover:not([aria-disabled="true"]) {
+    background: var(--color-accent);
   }
 }
 
