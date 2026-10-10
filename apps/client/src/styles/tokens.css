@@ -97,6 +97,8 @@
   /* Sizes */
   --size-touch-min: 48px;
   --size-button-height: 52px;
+  /* The control of a text field: the same height as a button (components.md, TextField). */
+  --size-field-height: var(--size-button-height);
   --size-header-height: 56px;
   --size-content-max: 1120px;
   --size-sidebar-width: 340px;

@@ -1,8 +1,10 @@
 import type { ProductListResponse } from "@entana/contracts";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { ReactElement, ReactNode } from "react";
+import { Link } from "wouter";
 
 import { BottomBar } from "../../../components/bottom-bar/bottom-bar";
+import bar from "../../../components/bottom-bar/bottom-bar.module.css";
 import { Notice } from "../../../components/notice/notice";
 import { texts } from "../../../i18n/texts";
 import { useDocumentTitle } from "../../../layout/document-title/use-document-title";
@@ -64,6 +66,14 @@ export function CartScreen(): ReactElement {
         <h1 className={styles.title}>{texts.cart.screen.heading}</h1>
         {hasRemovedUnavailable && <Notice tone="info">{texts.cart.removedUnavailable}</Notice>}
         <CartBody query={query} />
+        {itemCount > 0 && (
+          // From 1024 px the fixed bar is not displayed: this link, shown from there, replaces it.
+          <div className={styles.desktopAction}>
+            <Link href={DELIVERY_PATH} className={bar.link}>
+              {texts.cart.screen.continue}
+            </Link>
+          </div>
+        )}
       </div>
       {itemCount > 0 && <BottomBar href={DELIVERY_PATH} label={texts.cart.screen.continue} />}
     </div>

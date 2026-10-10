@@ -26,9 +26,18 @@
   margin: 0;
 }
 
+/* The link that replaces the fixed bar on a wide window: not displayed under 1024 px. */
+.desktopAction {
+  display: none;
+}
+
 /* The one breakpoint of the design system (a media query cannot read a variable). */
 @media (min-width: 1024px) {
   .page {
     padding: var(--space-6);
+  }
+
+  .desktopAction {
+    display: block;
   }
 }

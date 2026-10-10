@@ -7,9 +7,11 @@
   box-shadow: var(--shadow-bar);
 }
 
-/* A link with the look of the primary button: ink fill, inverse text, full width. */
+/* A link or a submit button with the look of the primary button: ink fill, inverse text, full width. */
 .link {
   display: flex;
+  cursor: pointer;
+  border: 0;
   align-items: center;
   justify-content: center;
   width: 100%;

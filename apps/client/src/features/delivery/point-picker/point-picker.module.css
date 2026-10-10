@@ -1,11 +1,24 @@
-/* On a phone the map, then the buttons, in one column. */
+/*
+ * Three areas, so that each part has one place whatever the width: on a phone the map, the notice
+ * about it, then the side column, in one column. The gaps are margins, because an area that is
+ * not rendered (no notice) must not leave a gap behind it.
+ */
 .layout {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-areas:
+    "map"
+    "notice"
+    "side";
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.notice {
+  grid-area: notice;
+  margin-block-end: var(--space-4);
 }
 
 .side {
+  grid-area: side;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -14,7 +27,9 @@
 /* The map box: sized by the delivery screen's layout, clipped to its rounded corners. */
 .frame {
   position: relative;
+  grid-area: map;
   height: var(--size-map-height);
+  margin-block-end: var(--space-4);
   overflow: hidden;
   background: var(--color-surface-muted);
   border-radius: var(--radius);
@@ -113,16 +128,20 @@
 
 /* The one breakpoint of the design system (a media query cannot read a variable). */
 @media (min-width: 1024px) {
-  /* The map beside a raised card: the card holds the buttons (the field and the fee come next). */
+  /* The map beside a raised card (the buttons, the field, the fee); the notice sits above it. */
   .layout {
-    display: grid;
+    grid-template-areas:
+      "map notice"
+      "map side";
     grid-template-columns: minmax(0, 1fr) var(--size-sidebar-width);
-    gap: var(--space-6);
+    grid-template-rows: auto 1fr;
+    column-gap: var(--space-6);
     align-items: start;
   }
 
   .frame {
     height: var(--size-map-height-large);
+    margin-block-end: 0;
   }
 
   .side {

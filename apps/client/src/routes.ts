@@ -5,6 +5,12 @@ export const CART_PATH = "/panier";
 export const DELIVERY_PATH = "/livraison";
 
 /**
+ * The address of the contact details screen, the one after the delivery screen. Nothing is
+ * served there yet: the address leads to the "not found" page until that screen exists.
+ */
+export const CONTACT_PATH = "/coordonnees";
+
+/**
  * The step of the order (0 is the first) that each screen belongs to. A screen listed here gets
  * the same step indicator as the others: a new screen of the order is added to this table. The
  * catalogue is not listed: choosing products is not a step of the order, and has no indicator.

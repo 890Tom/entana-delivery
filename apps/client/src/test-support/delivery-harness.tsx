@@ -36,7 +36,9 @@ export function stubApi(): ReturnType<typeof vi.fn> {
   return fetchStub;
 }
 
+/** A cart with one product, in a new session: the delivery draft of an earlier test is gone. */
 export function seedCart(): void {
+  sessionStorage.clear();
   localStorage.setItem(
     CART_STORAGE_KEY,
     JSON.stringify({ version: 1, lines: [{ productId: PRODUCT.id, quantity: 1 }] }),
@@ -79,3 +81,17 @@ export const placeButton = (): HTMLElement =>
   screen.getByRole("button", { name: texts.delivery.place });
 export const locateButton = (): HTMLElement =>
   screen.getByRole("button", { name: texts.delivery.locate });
+
+export const landmarkField = (): HTMLInputElement =>
+  screen.getByRole<HTMLInputElement>("textbox", { name: texts.delivery.landmark.label });
+
+/** The two "Continuer" of the page: the one of the fixed bar, then the one of the side card. */
+export function continueButtons(): { readonly bar: HTMLElement; readonly card: HTMLElement } {
+  const buttons = screen.getAllByRole("button", { name: texts.delivery.continue });
+  const bar = buttons.find((button) => button.closest("form") === null);
+  const card = buttons.find((button) => button.closest("form") !== null);
+  if (bar === undefined || card === undefined || buttons.length !== 2) {
+    throw new Error("The page must hold one Continuer in the bar and one in the form");
+  }
+  return { bar, card };
+}

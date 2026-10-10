@@ -13,6 +13,7 @@ const library = vi.hoisted(() => {
     mapOptions: undefined as Record<string, unknown> | undefined,
     controls: [] as unknown[],
     eased: [] as unknown[],
+    jumped: [] as unknown[],
     isRemoved: false,
     shouldThrow: false,
     handlers: {} as Record<string, Handler[]>,
@@ -40,6 +41,9 @@ const library = vi.hoisted(() => {
     }
     easeTo(options: unknown): void {
       state.eased.push(options);
+    }
+    jumpTo(options: unknown): void {
+      state.jumped.push(options);
     }
     readonly touchZoomRotate = { disableRotation: (): void => undefined };
     readonly keyboard = { disableRotation: (): void => undefined };
@@ -92,6 +96,13 @@ vi.mock("maplibre-gl/dist/maplibre-gl.css", () => ({}));
 
 const { state } = library;
 
+// jsdom has no matchMedia: the preference of the system is what a test says it is.
+function stubReducedMotion(isReduced: boolean): void {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: isReduced && query === "(prefers-reduced-motion: reduce)",
+  }));
+}
+
 function buildOptions(overrides: Partial<MapAdapterOptions> = {}): MapAdapterOptions {
   return {
     container: document.createElement("div"),
@@ -120,6 +131,8 @@ beforeEach(() => {
   state.mapOptions = undefined;
   state.controls = [];
   state.eased = [];
+  state.jumped = [];
+  stubReducedMotion(false);
   state.isRemoved = false;
   state.shouldThrow = false;
   state.handlers = {};
@@ -229,5 +242,15 @@ describe("the MapLibre adapter", () => {
     expect(state.eased).toEqual([{ center: [47.5, -18.9], zoom: 16 }]);
     expect(center).toEqual({ lat: -18.9, lng: 47.5 });
     expect(state.isRemoved).toBe(true);
+  });
+
+  it("jumps to a point, without animation, when the system asks for less motion", async () => {
+    stubReducedMotion(true);
+    const adapter = await loadReady(buildOptions());
+
+    adapter.centreOn({ lat: -18.9, lng: 47.5 }, 16);
+
+    expect(state.jumped).toEqual([{ center: [47.5, -18.9], zoom: 16 }]);
+    expect(state.eased).toEqual([]);
   });
 });

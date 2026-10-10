@@ -34,7 +34,7 @@ export const texts: {
     readonly message: string;
     readonly back: string;
   };
-  /** Here "point" is the marker on the map; "Repère" is the written field of the next task. */
+  /** Here "point" is the marker on the map; "Repère" is the written field. */
   readonly delivery: {
     /** The title of the document; the page heading is `heading`. */
     readonly title: string;
@@ -43,6 +43,17 @@ export const texts: {
     readonly place: string;
     readonly placed: string;
     readonly locate: string;
+    /** The written landmark field, mandatory. */
+    readonly landmark: {
+      readonly label: string;
+      readonly hint: string;
+      readonly error: string;
+    };
+    /** Shown when the customer continues without having placed the point on the map. */
+    readonly pointMissing: string;
+    readonly continue: string;
+    /** The delivery fee line, shared with the next screens of the order. */
+    readonly fee: { readonly label: string; readonly free: string };
     readonly geo: {
       readonly denied: string;
       readonly unavailable: string;
@@ -127,6 +138,14 @@ export const texts: {
     place: "Placer ici",
     placed: "Point placé.",
     locate: "Utiliser ma position",
+    landmark: {
+      label: "Repère",
+      hint: "Ex. portail bleu, près de l'école",
+      error: "Indiquez un repère pour le livreur.",
+    },
+    pointMissing: "Placez le point de livraison sur la carte.",
+    continue: "Continuer",
+    fee: { label: "Livraison", free: "Gratuite" },
     geo: {
       denied: "Position refusée. Autorisez-la dans votre navigateur ou touchez la carte.",
       unavailable: "Position indisponible. Touchez la carte pour placer le point.",

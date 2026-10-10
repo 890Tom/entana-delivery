@@ -1,4 +1,4 @@
-import type { ReactElement, ReactNode } from "react";
+import type { ReactElement, ReactNode, Ref } from "react";
 
 import { NoticeIcon } from "./notice-icons";
 import styles from "./notice.module.css";
@@ -14,6 +14,9 @@ interface NoticeProps {
   readonly action?: NoticeAction;
   /** False when another notice on the page already announces the same thing (no live role). */
   readonly isAnnounced?: boolean;
+  /** Makes the notice a place that a script can move the focus to (not a stop of the Tab key). */
+  readonly ref?: Ref<HTMLDivElement>;
+  readonly tabIndex?: -1;
 }
 
 const TONES = {
@@ -21,10 +24,22 @@ const TONES = {
   info: { className: styles.info, role: "note", icon: "info" },
 } as const;
 
-export function Notice({ tone, children, action, isAnnounced = true }: NoticeProps): ReactElement {
+export function Notice({
+  tone,
+  children,
+  action,
+  isAnnounced = true,
+  ref,
+  tabIndex,
+}: NoticeProps): ReactElement {
   const { className, role, icon } = TONES[tone];
   return (
-    <div className={[styles.notice, className].join(" ")} role={isAnnounced ? role : undefined}>
+    <div
+      ref={ref}
+      tabIndex={tabIndex}
+      className={[styles.notice, className].join(" ")}
+      role={isAnnounced ? role : undefined}
+    >
       <NoticeIcon name={icon} />
       <p className={styles.text}>{children}</p>
       {action !== undefined && (

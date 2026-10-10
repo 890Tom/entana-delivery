@@ -61,7 +61,14 @@ function createAdapter(
   return {
     setMarker,
     centreOn: (point, zoom) => {
-      map.easeTo({ center: [point.lng, point.lat], zoom });
+      const center: [number, number] = [point.lng, point.lat];
+      const view = { center, zoom };
+      // No animation when the system asks for less motion.
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        map.jumpTo(view);
+        return;
+      }
+      map.easeTo(view);
     },
     getCenter: () => {
       const { lat, lng } = map.getCenter().wrap();
