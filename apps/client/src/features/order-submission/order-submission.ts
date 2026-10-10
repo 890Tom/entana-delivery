@@ -1,10 +1,13 @@
 import { createOrderRequestSchema } from "@entana/contracts";
 
-import { buildOrderRequest } from "./build-order-request";
-import type { OrderDrafts, OrderRequestBody } from "./build-order-request";
-import { addConfirmedOrder, removeExpiredConfirmedOrders } from "./confirmed-orders-storage";
-import { createAttemptIds } from "./order-attempt-ids";
-import { isSameRequest } from "./is-same-request";
+import { buildOrderRequest } from "./request/build-order-request";
+import type { OrderDrafts, OrderRequestBody } from "./request/build-order-request";
+import {
+  addConfirmedOrder,
+  removeExpiredConfirmedOrders,
+} from "./storage/confirmed-orders-storage";
+import { createAttemptIds } from "./request/order-attempt-ids";
+import { isSameRequest } from "./request/is-same-request";
 import { isReplayable, isReplayedOnNetworkReturn } from "./order-submission-types";
 import type {
   OrderAttempt,
@@ -12,8 +15,12 @@ import type {
   OrderSubmissionResult,
   OrderSubmissionState,
 } from "./order-submission-types";
-import { clearStoredAttempt, readStoredAttempt, writeStoredAttempt } from "./pending-order-storage";
-import { sendOrder } from "./send-order";
+import {
+  clearStoredAttempt,
+  readStoredAttempt,
+  writeStoredAttempt,
+} from "./storage/pending-order-storage";
+import { sendOrder } from "./request/send-order";
 
 /** The time of day, as milliseconds since the epoch: received, so that a test decides it. */
 type Clock = () => number;

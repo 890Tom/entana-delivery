@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildAttempt, CREATED_BODY } from "../../test-support/build-order-submission";
-import { buildProductId } from "../../test-support/build-product";
-import { jsonResponse, pendingUntilAborted, stubFetch } from "../../test-support/stub-fetch";
+import { buildAttempt, CREATED_BODY } from "../../../test-support/build-order-submission";
+import { buildProductId } from "../../../test-support/build-product";
+import { jsonResponse, pendingUntilAborted, stubFetch } from "../../../test-support/stub-fetch";
 
 import { sendOrder } from "./send-order";
 

@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 
 import { Notice } from "../../components/notice/notice";
 import { texts } from "../../i18n/texts";
-import { useCart } from "../cart/cart-context";
+import { useCart } from "../cart/cart-state/cart-context";
 import { useCartReconciliation } from "../cart/reconciliation/use-cart-reconciliation";
 
 import { readCatalogueErrorKind } from "./api/fetch-products";

@@ -11,13 +11,13 @@ import { buildProductId } from "../../test-support/build-product";
 import { resetOrderSubmission } from "../../test-support/reset-order-submission";
 import { jsonResponse } from "../../test-support/stub-fetch";
 import { CART_STORAGE_KEY } from "../cart/storage/cart-storage";
-import { CartProvider } from "../cart/cart-provider";
+import { CartProvider } from "../cart/cart-state/cart-provider";
 import { ContactDraftProvider } from "../contact/contact-draft/contact-draft-provider";
 import { CONTACT_DRAFT_STORAGE_KEY } from "../contact/contact-draft/contact-draft-storage";
 import { DeliveryDraftProvider } from "../delivery/delivery-draft/delivery-draft-provider";
 import { DELIVERY_DRAFT_STORAGE_KEY } from "../delivery/delivery-draft/delivery-draft-storage";
 
-import { CONFIRMED_ORDERS_STORAGE_KEY } from "./confirmed-orders-storage";
+import { CONFIRMED_ORDERS_STORAGE_KEY } from "./storage/confirmed-orders-storage";
 import { useOrderSubmission } from "./use-order-submission";
 
 const PRODUCT = buildProductId(1);

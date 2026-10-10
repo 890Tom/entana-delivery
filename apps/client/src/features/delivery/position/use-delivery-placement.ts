@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 
-import { useDeliveryDraft } from "./delivery-draft/delivery-draft-context";
-import type { GeoPoint } from "./map/map-adapter";
-import { locate } from "./position/locate";
-import type { LocateFailure } from "./position/locate";
-import { toDeliveryPoint } from "./rules/to-delivery-point";
+import { useDeliveryDraft } from "../delivery-draft/delivery-draft-context";
+import type { GeoPoint } from "../map/map-adapter";
+import { locate } from "./locate";
+import type { LocateFailure } from "./locate";
+import { toDeliveryPoint } from "../rules/to-delivery-point";
 
 export interface DeliveryPlacement {
   readonly point: GeoPoint | null;

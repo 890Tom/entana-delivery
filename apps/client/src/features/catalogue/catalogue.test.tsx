@@ -12,7 +12,7 @@ import {
   stubFetch,
 } from "../../test-support/stub-fetch";
 import { texts } from "../../i18n/texts";
-import { CartProvider } from "../cart/cart-provider";
+import { CartProvider } from "../cart/cart-state/cart-provider";
 
 import { Catalogue } from "./catalogue";
 

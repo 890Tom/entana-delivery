@@ -3,7 +3,7 @@ import type { ReactElement, RefObject } from "react";
 
 import { Button } from "../../../components/button/button";
 import { texts } from "../../../i18n/texts";
-import { useCart } from "../../cart/cart-context";
+import { useCart } from "../../cart/cart-state/cart-context";
 
 import { QuantityStepper } from "./quantity-stepper";
 

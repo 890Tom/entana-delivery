@@ -8,7 +8,7 @@ import { Notice } from "../../components/notice/notice";
 import { texts } from "../../i18n/texts";
 import { useDocumentTitle } from "../../layout/document-title/use-document-title";
 import { CART_PATH, DELIVERY_PATH } from "../../routes";
-import { useCart } from "../cart/cart-context";
+import { useCart } from "../cart/cart-state/cart-context";
 import { useCartReconciliation } from "../cart/reconciliation/use-cart-reconciliation";
 import { useProducts } from "../catalogue/api/use-products";
 import { useDeliveryDraft } from "../delivery/delivery-draft/delivery-draft-context";

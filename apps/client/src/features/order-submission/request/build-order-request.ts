@@ -1,10 +1,10 @@
 import { createOrderRequestSchema, parsePhoneNumber } from "@entana/contracts";
 import type { CreateOrderRequest } from "@entana/contracts";
 
-import type { CartLine } from "../cart/rules/cart-reducer";
+import type { CartLine } from "../../cart/rules/cart-reducer";
 
-import { ORDER_FIELDS } from "./order-submission-types";
-import type { OrderField } from "./order-submission-types";
+import { ORDER_FIELDS } from "../order-submission-types";
+import type { OrderField } from "../order-submission-types";
 
 type OrderLocation = CreateOrderRequest["location"];
 

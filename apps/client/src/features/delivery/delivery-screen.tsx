@@ -9,15 +9,15 @@ import visuallyHidden from "../../components/visually-hidden/visually-hidden.mod
 import { texts } from "../../i18n/texts";
 import { useDocumentTitle } from "../../layout/document-title/use-document-title";
 import { CART_PATH } from "../../routes";
-import { useCart } from "../cart/cart-context";
+import { useCart } from "../cart/cart-state/cart-context";
 import { useInstance } from "../instance/use-instance";
 
 import { DeliveryForm } from "./delivery-form/delivery-form";
 import { useDeliveryForm } from "./delivery-form/use-delivery-form";
 import styles from "./delivery-screen.module.css";
 import { PointPicker } from "./point-picker/point-picker";
-import { useDeliveryPlacement } from "./use-delivery-placement";
-import type { DeliveryPlacement } from "./use-delivery-placement";
+import { useDeliveryPlacement } from "./position/use-delivery-placement";
+import type { DeliveryPlacement } from "./position/use-delivery-placement";
 
 /**
  * The announcement of a placed point. The same sentence twice in a row would not be read again by

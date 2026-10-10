@@ -7,7 +7,7 @@ import { BottomBar } from "../../../components/bottom-bar/bottom-bar";
 import type { BottomBarAmount } from "../../../components/bottom-bar/bottom-bar";
 import { texts } from "../../../i18n/texts";
 import { CART_PATH } from "../../../routes";
-import { useCart } from "../../cart/cart-context";
+import { useCart } from "../../cart/cart-state/cart-context";
 import { toDisplayLines } from "../../cart/rules/to-display-lines";
 
 function readAmount(

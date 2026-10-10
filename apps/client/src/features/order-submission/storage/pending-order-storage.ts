@@ -1,6 +1,6 @@
 import { createOrderRequestSchema, idempotencyKeySchema } from "@entana/contracts";
 
-import type { OrderAttempt } from "./order-submission-types";
+import type { OrderAttempt } from "../order-submission-types";
 
 /** Versioned: a change of the stored shape starts a new key, and the old content is ignored. */
 export const PENDING_ORDER_STORAGE_ITEM = "entana.pending-order.v1";

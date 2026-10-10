@@ -5,14 +5,14 @@ import { buildCleanup, created, status } from "../../test-support/order-submissi
 import { resetOrderSubmission } from "../../test-support/reset-order-submission";
 import { jsonResponse, stubFetch } from "../../test-support/stub-fetch";
 
-import { CONFIRMED_ORDERS_STORAGE_KEY } from "./confirmed-orders-storage";
+import { CONFIRMED_ORDERS_STORAGE_KEY } from "./storage/confirmed-orders-storage";
 import {
   dismissOrderSubmission,
   getOrderSubmissionState,
   retryOrder,
   submitOrder,
 } from "./order-submission";
-import { PENDING_ORDER_STORAGE_ITEM } from "./pending-order-storage";
+import { PENDING_ORDER_STORAGE_ITEM } from "./storage/pending-order-storage";
 
 const cleanup = buildCleanup;
 
