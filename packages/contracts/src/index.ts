@@ -25,6 +25,8 @@ export {
   formatNationalNumber,
   maxNationalDigits,
 } from "./orders/phone-numbering/format-national-number.js";
+export { extractNationalDigits } from "./orders/phone-numbering/extract-national-digits.js";
+export { operatorPrefixes } from "./orders/phone-numbering/operator-prefixes.js";
 export { parsePhoneNumber } from "./orders/phone-numbering/parse-phone-number.js";
 export type {
   PhoneParseResult,

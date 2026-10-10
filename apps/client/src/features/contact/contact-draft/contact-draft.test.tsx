@@ -5,6 +5,7 @@ import {
   NAME,
   NOTE,
   PHONE,
+  PHONE_DISPLAY,
   continueButtons,
   fillValidContact,
   nameField,
@@ -35,7 +36,7 @@ describe("the contact draft", () => {
     reopenContact();
 
     expect((await nameField()).value).toBe(NAME);
-    expect((await phoneField()).value).toBe(PHONE);
+    expect((await phoneField()).value).toBe(PHONE_DISPLAY);
     expect((await noteField()).value).toBe(NOTE);
   });
 

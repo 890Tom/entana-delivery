@@ -1,5 +1,13 @@
 import type { CatalogueErrorKind } from "../features/catalogue/api/fetch-products";
 
+/** "32, 33 ou 34": commas, and "ou" before the last item. */
+function listWithOr(items: readonly string[]): string {
+  const last = items.at(-1);
+  return items.length < 2 || last === undefined
+    ? items.join("")
+    : `${items.slice(0, -1).join(", ")} ou ${last}`;
+}
+
 // Fixed French texts, keyed as in the screen specification. Error messages depend only on the
 // kind of error, never on a server text. The title is a generic default: a deployment's own
 // wording will come from the instance configuration.
@@ -85,7 +93,12 @@ export const texts: {
       readonly placeholder: string;
       /** The country code shown before what the customer types. */
       readonly prefix: (countryCode: string) => string;
-      readonly error: string;
+      readonly errors: {
+        readonly missingDigits: string;
+        /** Names what a number must start with: the prefixes come from the contract. */
+        readonly invalidPrefix: (prefixes: readonly string[]) => string;
+        readonly invalid: string;
+      };
       /** In place of the field when the configuration, which holds the country code, fails. */
       readonly configurationError: string;
     };
@@ -205,7 +218,11 @@ export const texts: {
       hint: "Nous vous appelons pour confirmer.",
       placeholder: "Ex. 34 12 345 67",
       prefix: (countryCode) => `+${countryCode}`,
-      error: "Indiquez un numéro de téléphone valide.",
+      errors: {
+        missingDigits: "Il manque des chiffres.",
+        invalidPrefix: (prefixes) => `Ce numéro ne commence pas par ${listWithOr(prefixes)}.`,
+        invalid: "Indiquez un numéro de téléphone valide.",
+      },
       configurationError: "Nous n'avons pas pu charger la configuration.",
     },
     note: {

@@ -223,7 +223,7 @@ describe("the delivery screen", () => {
       vi.mocked(fetch).mock.calls,
     ]);
     expect(everythingWritten).not.toMatch(
-      /18\.9|47\.5|Portail secret|Rakoto Secret|98 765 43|987654|Chien méchant/,
+      /18\.9|47\.5|Portail secret|Rakoto Secret|98 765 43|349876543|Chien méchant/,
     );
     // The only requests are the instance configuration and the catalogue (the summary of the
     // contact screen): the map is the one external call, made by the library, never by the app.

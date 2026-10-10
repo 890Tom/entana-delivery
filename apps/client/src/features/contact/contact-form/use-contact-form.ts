@@ -6,7 +6,8 @@ import { REVIEW_PATH } from "../../../routes";
 import { useInstance } from "../../instance/use-instance";
 import { useContactDraft } from "../contact-draft/contact-draft-context";
 import { isValidContactName, isValidCustomerNote } from "../rules/contact-rules";
-import { isValidPhone } from "../rules/phone-number";
+import { checkPhone, toPhoneDisplay } from "../rules/phone-input";
+import type { PhoneIssue } from "../rules/phone-input";
 
 type FocusTarget = "name" | "phone" | "instance" | "note";
 
@@ -26,9 +27,13 @@ export interface ContactFormState {
   readonly retryConfiguration: () => void;
   readonly isNameInvalid: boolean;
   readonly isPhoneInvalid: boolean;
+  /** Why the number is refused, whether or not it is shown yet. */
+  readonly phoneIssue: PhoneIssue | null;
+  /** The field is left: an incomplete number is then told. */
+  readonly onPhoneBlur: () => void;
   readonly isNoteInvalid: boolean;
   readonly nameRef: RefObject<HTMLInputElement | null>;
-  readonly phoneRef: RefObject<HTMLInputElement | null>;
+  readonly phoneRef: RefObject<HTMLElement | null>;
   readonly noteRef: RefObject<HTMLTextAreaElement | null>;
   readonly noticeRef: RefObject<HTMLDivElement | null>;
   readonly submit: () => void;
@@ -60,7 +65,7 @@ function useFocusTargets(): {
   // A new object for each request, so that a second refusal moves the focus again.
   const [request, setRequest] = useState<{ readonly target: FocusTarget } | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
-  const phoneRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLElement>(null);
   const noteRef = useRef<HTMLTextAreaElement>(null);
   const noticeRef = useRef<HTMLDivElement>(null);
   // After the render that shows the errors, so that the element to focus exists.
@@ -78,26 +83,63 @@ function useFocusTargets(): {
   };
 }
 
+/** Once the country code is known, a draft from the storage (or typed before) is put in form. */
+function useNormalizedDraft(
+  countryCode: string | undefined,
+  phone: string,
+  setPhone: (phone: string) => void,
+): void {
+  const isNormalized = useRef(false);
+  useEffect(() => {
+    if (countryCode === undefined || isNormalized.current) {
+      return;
+    }
+    isNormalized.current = true;
+    const display = toPhoneDisplay(phone, countryCode);
+    if (display !== phone) {
+      setPhone(display);
+    }
+  }, [countryCode, phone, setPhone]);
+}
+
 /**
- * The country code of the instance and what it makes of the typed number: the number cannot be
- * checked while the code is not there, and the code is never guessed.
+ * The country code of the instance and what it makes of the number: it cannot be checked while
+ * the code is not there, and the code is never guessed.
  */
-function usePhoneCheck(phone: string): {
+function usePhoneCheck(
+  phone: string,
+  setPhone: (phone: string) => void,
+): {
   readonly countryCode: string | undefined;
   readonly state: PhoneState;
+  readonly issue: PhoneIssue | null;
+  readonly hasLeft: boolean;
+  readonly leave: () => void;
   readonly retry: () => void;
 } {
   const instance = useInstance();
+  const [hasLeft, setHasLeft] = useState(false);
   const countryCode = instance.data?.phoneCountryCode;
+  useNormalizedDraft(countryCode, phone, setPhone);
+
+  const check = countryCode === undefined ? null : checkPhone(phone, countryCode);
   let state: PhoneState = "loading";
-  if (countryCode !== undefined) {
-    state = isValidPhone(phone, countryCode) ? "valid" : "invalid";
+  if (check !== null) {
+    state = check.ok ? "valid" : "invalid";
   } else if (instance.isError) {
     state = "failed";
   }
   return {
     countryCode,
     state,
+    issue: check === null || check.ok ? null : check.issue,
+    hasLeft,
+    // An empty field that is left says nothing: it is only asked for when the form is sent.
+    leave: () => {
+      if (phone !== "") {
+        setHasLeft(true);
+      }
+    },
     retry: () => {
       void instance.refetch();
     },
@@ -115,7 +157,7 @@ export function useContactForm(): ContactFormState {
   const [, navigate] = useLocation();
   const [hasTried, setHasTried] = useState(false);
   const { refs, focus } = useFocusTargets();
-  const phone = usePhoneCheck(draft.phone);
+  const phone = usePhoneCheck(draft.phone, draft.setPhone);
   const isNameValid = isValidContactName(draft.name);
   const isNoteValid = isValidCustomerNote(draft.note);
 
@@ -142,7 +184,9 @@ export function useContactForm(): ContactFormState {
     isConfigurationFailed: phone.state === "failed",
     retryConfiguration: phone.retry,
     isNameInvalid: hasTried && !isNameValid,
-    isPhoneInvalid: hasTried && phone.state === "invalid",
+    isPhoneInvalid: (hasTried || phone.hasLeft) && phone.state === "invalid",
+    phoneIssue: phone.issue,
+    onPhoneBlur: phone.leave,
     isNoteInvalid: hasTried && !isNoteValid,
     submit,
   };

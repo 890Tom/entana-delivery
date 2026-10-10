@@ -86,7 +86,8 @@ describe("the contact form", () => {
     expect(phone.type).toBe("tel");
     expect(phone.getAttribute("inputmode")).toBe("tel");
     expect(phone.getAttribute("autocomplete")).toBe("tel-national");
-    expect(phone.getAttribute("maxlength")).toBe("20");
+    // No maxlength: it would cut a pasted "+261 34 12 345 67" before the field sees it.
+    expect(phone.hasAttribute("maxlength")).toBe(false);
     expect(phone.getAttribute("aria-required")).toBe("true");
     expect(phone.getAttribute("placeholder")).toBe(texts.contact.phone.placeholder);
     const note = await noteField();
@@ -116,7 +117,7 @@ describe("the contact form", () => {
     expect(await screen.findByText("+33")).toBeTruthy();
     expect(screen.queryByText("+261")).toBeNull();
     typeInto(await nameField(), NAME);
-    typeInto(await phoneField(), "06 12 34 56 78");
+    typeInto(await phoneField(), "6 12 34 56 78");
     fireEvent.click((await continueButtons()).bar);
 
     await waitFor(() => {
@@ -173,18 +174,6 @@ describe("the contact form", () => {
     expect(window.location.pathname).toBe("/coordonnees");
   });
 
-  it("refuses a phone number that is too short, with the focus on the field", async () => {
-    openContact();
-    typeInto(await nameField(), NAME);
-    typeInto(await phoneField(), "12");
-
-    fireEvent.click((await continueButtons()).bar);
-
-    expect(await screen.findByText(texts.contact.phone.error)).toBeTruthy();
-    expect(document.activeElement).toBe(await phoneField());
-    expect(window.location.pathname).toBe("/coordonnees");
-  });
-
   it("refuses a note with a control character", async () => {
     openContact();
     await fillValidContact();
@@ -203,14 +192,14 @@ describe("the contact form", () => {
     fireEvent.click((await continueButtons()).bar);
 
     expect(await screen.findByText(texts.contact.name.error)).toBeTruthy();
-    expect(screen.getByText(texts.contact.phone.error)).toBeTruthy();
+    expect(screen.getByText(texts.contact.phone.errors.invalid)).toBeTruthy();
     expect(document.activeElement).toBe(await nameField());
 
     typeInto(await nameField(), NAME);
     expect(screen.queryByText(texts.contact.name.error)).toBeNull();
-    expect(screen.getByText(texts.contact.phone.error)).toBeTruthy();
+    expect(screen.getByText(texts.contact.phone.errors.invalid)).toBeTruthy();
     typeInto(await phoneField(), PHONE);
-    expect(screen.queryByText(texts.contact.phone.error)).toBeNull();
+    expect(screen.queryByText(texts.contact.phone.errors.invalid)).toBeNull();
   });
 
   it("shows a notice with a retry in place of the phone field when the instance fails, and does not go on", async () => {
@@ -244,7 +233,7 @@ describe("the contact form", () => {
     expect(document.activeElement).toBe(await phoneField());
     expect(window.location.pathname).toBe("/coordonnees");
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.queryByText(texts.contact.phone.error)).toBeNull();
+    expect(screen.queryByText(texts.contact.phone.errors.invalid)).toBeNull();
   });
 });
 

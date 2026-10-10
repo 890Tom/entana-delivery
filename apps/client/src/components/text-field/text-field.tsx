@@ -13,7 +13,13 @@ type FieldPrefix =
 interface TextFieldProps {
   readonly label: string;
   readonly value: string;
-  readonly onChange: (value: string) => void;
+  /** The new text, and the event for a screen that needs the caret or the kind of edit. */
+  readonly onChange: (
+    value: string,
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
+  /** The field is left. */
+  readonly onBlur?: () => void;
   /** Muted help under the field; replaced by the error while there is one. */
   readonly hint?: string;
   /** What to do to fix the value: shown with an icon, never by colour alone. */
@@ -89,6 +95,7 @@ interface ControlProps {
   readonly "aria-required": true | undefined;
   readonly "aria-invalid": true | undefined;
   readonly "aria-describedby": string | undefined;
+  readonly onBlur: (() => void) | undefined;
   readonly ref: (element: HTMLElement | null) => void;
   readonly onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
@@ -153,11 +160,12 @@ function controlPropsOf(
     "aria-required": props.isRequired === true ? true : undefined,
     "aria-invalid": props.error === undefined ? undefined : true,
     "aria-describedby": describedBy,
+    onBlur: props.onBlur,
     ref: (element) => {
       assignRef(props.ref, element);
     },
     onChange: (event) => {
-      props.onChange(event.target.value);
+      props.onChange(event.target.value, event);
     },
   };
 }

@@ -1,7 +1,6 @@
 import { MAX_CONTACT_NAME_LENGTH, MAX_CUSTOMER_NOTE_LENGTH } from "@entana/contracts";
 
 import { isValidContactName, isValidCustomerNote } from "../rules/contact-rules";
-import { isTypablePhone } from "../rules/phone-number";
 
 /** What the customer has typed so far. Each text is "" until there is something. */
 export interface ContactDraft {
@@ -20,6 +19,9 @@ const STORAGE_VERSION = 1;
 // A draft is 80 + 20 + 300 characters: anything longer is not ours, and is not even parsed.
 const MAX_STORED_LENGTH = 4096;
 const KEYS: readonly string[] = ["version", "name", "phone", "note"];
+// A shown number is digits and spaces; an older draft may hold other separators. Bounded either way.
+const MAX_STORED_PHONE_LENGTH = 20;
+const STORED_PHONE_PATTERN = /^[0-9 ().-]*$/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -27,6 +29,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 const isStorableName = (name: string): boolean =>
   name === "" || (name.length <= MAX_CONTACT_NAME_LENGTH && isValidContactName(name));
+
+const isStorablePhone = (phone: string): boolean =>
+  phone.length <= MAX_STORED_PHONE_LENGTH && STORED_PHONE_PATTERN.test(phone);
 
 const isStorableNote = (note: string): boolean =>
   note.length <= MAX_CUSTOMER_NOTE_LENGTH && note !== "" && isValidCustomerNote(note);
@@ -47,7 +52,7 @@ function toDraft(stored: Record<string, unknown>): ContactDraft | null {
   if (version !== STORAGE_VERSION || !isText(name) || !isText(phone) || note === undefined) {
     return null;
   }
-  return isStorableName(name) && isTypablePhone(phone) ? { name, phone, note } : null;
+  return isStorableName(name) && isStorablePhone(phone) ? { name, phone, note } : null;
 }
 
 /**
@@ -77,7 +82,7 @@ export function serializeContactDraft(draft: ContactDraft): string {
   return JSON.stringify({
     version: STORAGE_VERSION,
     name: isStorableName(draft.name) ? draft.name : "",
-    phone: isTypablePhone(draft.phone) ? draft.phone : "",
+    phone: isStorablePhone(draft.phone) ? draft.phone : "",
     note: isStorableNote(draft.note) ? draft.note : null,
   });
 }

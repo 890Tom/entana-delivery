@@ -34,6 +34,8 @@ export const KOBA = buildProduct({
 
 export const NAME = "Rakoto Jean";
 export const PHONE = "034 12 345 67";
+/** What the phone field shows for PHONE: the national zero is the prefix shown, not typed. */
+export const PHONE_DISPLAY = "34 12 345 67";
 export const NOTE = "Avant 15h.";
 
 interface OpenOptions {
@@ -139,4 +141,21 @@ export const typeInto = (field: HTMLElement, value: string): void => {
 export async function fillValidContact(): Promise<void> {
   typeInto(await nameField(), NAME);
   typeInto(await phoneField(), PHONE);
+}
+
+/**
+ * An edit as the browser makes it: the value and the caret are set, then an input event with its
+ * `inputType` is sent (a change alone says neither where the caret is nor what was done).
+ */
+export function editField(
+  field: HTMLInputElement,
+  value: string,
+  caret: number,
+  inputType = "insertText",
+): void {
+  // The prototype's own setter, with the field as receiver: it is not seen by the value tracking
+  // of the framework, which would otherwise drop an event that carries no change of value.
+  Reflect.set(HTMLInputElement.prototype, "value", value, field);
+  field.setSelectionRange(caret, caret);
+  fireEvent(field, new InputEvent("input", { bubbles: true, inputType }));
 }
