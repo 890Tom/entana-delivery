@@ -3,7 +3,7 @@ import { Controller, Get, Inject, Injectable, Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
 import type { PrismaClient } from "@entana/database";
 import type { AppConfig } from "../../../src/config/app-config.js";
-import { DATABASE_CLIENT } from "../../../src/database/database-client.js";
+import { DATABASE_CLIENT } from "../../../src/database/client-token/database-client.js";
 import { DatabaseModule } from "../../../src/database/database.module.js";
 
 /** Every value a route inserts or uses, so that the test can look for it in what comes out. */

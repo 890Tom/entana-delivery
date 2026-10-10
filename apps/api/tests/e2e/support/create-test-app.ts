@@ -9,7 +9,7 @@ import {
   configureApplication,
 } from "../../../src/configure-application.js";
 import { createApplication } from "../../../src/create-application.js";
-import { DATABASE_CLIENT } from "../../../src/database/database-client.js";
+import { DATABASE_CLIENT } from "../../../src/database/client-token/database-client.js";
 import { READINESS_TIMEOUT_MS } from "../../../src/health/readiness/timeout/readiness-timeout.js";
 import { DatabaseProbeModule } from "./database-probe.module.js";
 import { ProbeModule } from "./probe.module.js";

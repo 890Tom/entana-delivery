@@ -5,7 +5,7 @@ import { classifyDatabaseError } from "@entana/database";
 import type { PrismaClient } from "@entana/database";
 import { CLOCK } from "../clock/clock.js";
 import type { Clock } from "../clock/clock.js";
-import { DATABASE_CLIENT } from "../database/database-client.js";
+import { DATABASE_CLIENT } from "../database/client-token/database-client.js";
 import { insertOrder } from "./persistence/insert-order.js";
 import { matchesStoredOrder, toCreateOrderResponse } from "./rules/matches-stored-order.js";
 import type { StoredOrder } from "./rules/matches-stored-order.js";

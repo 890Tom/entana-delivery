@@ -3,7 +3,7 @@ import type { DynamicModule } from "@nestjs/common";
 import type { PrismaClient } from "@entana/database";
 import type { AppConfig } from "../../../src/config/app-config.js";
 import { DatabaseModule } from "../../../src/database/database.module.js";
-import { DATABASE_CLIENT } from "../../../src/database/database-client.js";
+import { DATABASE_CLIENT } from "../../../src/database/client-token/database-client.js";
 
 /**
  * A route that exists only in tests: it runs a real query, so that a failure of the database

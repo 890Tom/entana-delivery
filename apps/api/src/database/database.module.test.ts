@@ -4,7 +4,7 @@ import { Test } from "@nestjs/testing";
 import type { TestingModule } from "@nestjs/testing";
 import { describe, expect, it, vi } from "vitest";
 import { parseConfig } from "../config/app-config.js";
-import { DATABASE_CLIENT } from "./database-client.js";
+import { DATABASE_CLIENT } from "./client-token/database-client.js";
 import { DatabaseModule } from "./database.module.js";
 
 const fakeUrl = "postgresql://test:test@localhost:5432/test";

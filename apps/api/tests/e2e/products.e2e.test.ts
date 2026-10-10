@@ -5,7 +5,7 @@ import { productListResponseSchema, publicProductSchema } from "@entana/contract
 import request from "supertest";
 import { z } from "zod";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DATABASE_CLIENT } from "../../src/database/database-client.js";
+import { DATABASE_CLIENT } from "../../src/database/client-token/database-client.js";
 import { startAppWithClient, startRealApp } from "./support/create-test-app.js";
 import { captureLogs } from "./support/log-capture.js";
 import type { LogCapture } from "./support/log-capture.js";

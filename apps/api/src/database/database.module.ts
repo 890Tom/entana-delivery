@@ -3,7 +3,7 @@ import type { DynamicModule, OnModuleDestroy } from "@nestjs/common";
 import { createPrismaClient } from "@entana/database";
 import type { PrismaClient } from "@entana/database";
 import type { AppConfig } from "../config/app-config.js";
-import { DATABASE_CLIENT } from "./database-client.js";
+import { DATABASE_CLIENT } from "./client-token/database-client.js";
 
 // Nest only calls shutdown hooks on providers that have them: a client built by a factory has
 // none. Closing the pool lets the process exit and PostgreSQL release its connections.
