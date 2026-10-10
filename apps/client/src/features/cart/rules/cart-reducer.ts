@@ -15,7 +15,8 @@ export interface CartState {
 export type CartAction =
   | { readonly type: "increase"; readonly productId: string }
   | { readonly type: "decrease"; readonly productId: string }
-  | { readonly type: "removeUnavailable"; readonly availableIds: ReadonlySet<string> };
+  | { readonly type: "removeUnavailable"; readonly availableIds: ReadonlySet<string> }
+  | { readonly type: "clear" };
 
 export function emptyCart(lines: readonly CartLine[] = []): CartState {
   return { lines, hasRemovedUnavailable: false };
@@ -70,5 +71,7 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
       return decrease(state, action.productId);
     case "removeUnavailable":
       return removeUnavailable(state, action.availableIds);
+    case "clear":
+      return emptyCart();
   }
 }

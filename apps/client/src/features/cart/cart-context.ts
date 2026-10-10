@@ -13,6 +13,8 @@ export interface CartContextValue {
   readonly increase: (productId: string) => void;
   readonly decrease: (productId: string) => void;
   readonly removeUnavailable: (availableIds: ReadonlySet<string>) => void;
+  /** Empties the cart (the order was sent). */
+  readonly clear: () => void;
 }
 
 export const CART_CONTEXT = createContext<CartContextValue | null>(null);

@@ -71,4 +71,8 @@ describe("cartReducer", () => {
 
     expect(cartReducer(cart, { type: "removeUnavailable", availableIds: new Set([A]) })).toBe(cart);
   });
+
+  it("empties the cart whatever it held", () => {
+    expect(cartReducer(cartOf([A, 2], [B, 1]), { type: "clear" }).lines).toEqual([]);
+  });
 });

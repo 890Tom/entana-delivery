@@ -1,13 +1,35 @@
 import { MAX_ORDER_LINES } from "@entana/contracts";
 import { useEffect, useMemo, useReducer, useRef } from "react";
-import type { ReactElement, ReactNode } from "react";
+import type { Dispatch, ReactElement, ReactNode } from "react";
 
 import { CART_CONTEXT } from "./cart-context";
 import type { CartContextValue } from "./cart-context";
 import { cartReducer, emptyCart } from "./rules/cart-reducer";
+import type { CartAction } from "./rules/cart-reducer";
 import { readStoredCart, serializeCart, writeStoredCart } from "./storage/cart-storage";
 
-type CartActions = Pick<CartContextValue, "increase" | "decrease" | "removeUnavailable">;
+type CartActions = Pick<CartContextValue, "increase" | "decrease" | "removeUnavailable" | "clear">;
+
+// Stable, so that an effect depending on an action does not run again at each cart change.
+function useCartActions(dispatch: Dispatch<CartAction>): CartActions {
+  return useMemo<CartActions>(
+    () => ({
+      increase: (productId) => {
+        dispatch({ type: "increase", productId });
+      },
+      decrease: (productId) => {
+        dispatch({ type: "decrease", productId });
+      },
+      removeUnavailable: (availableIds) => {
+        dispatch({ type: "removeUnavailable", availableIds });
+      },
+      clear: () => {
+        dispatch({ type: "clear" });
+      },
+    }),
+    [dispatch],
+  );
+}
 
 /** Reads the cart once at start, and writes it after each change that alters what is stored. */
 export function CartProvider({ children }: { children: ReactNode }): ReactElement {
@@ -22,21 +44,7 @@ export function CartProvider({ children }: { children: ReactNode }): ReactElemen
     }
   }, [state.lines]);
 
-  // Stable, so that an effect depending on an action does not run again at each cart change.
-  const actions = useMemo<CartActions>(
-    () => ({
-      increase: (productId) => {
-        dispatch({ type: "increase", productId });
-      },
-      decrease: (productId) => {
-        dispatch({ type: "decrease", productId });
-      },
-      removeUnavailable: (availableIds) => {
-        dispatch({ type: "removeUnavailable", availableIds });
-      },
-    }),
-    [],
-  );
+  const actions = useCartActions(dispatch);
 
   const value = useMemo<CartContextValue>(
     () => ({
