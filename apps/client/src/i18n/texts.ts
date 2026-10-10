@@ -1,5 +1,13 @@
 import type { CatalogueErrorKind } from "../features/catalogue/api/fetch-products";
 
+/** "32, 33 ou 34": commas, and "ou" before the last item. */
+function listWithOr(items: readonly string[]): string {
+  const last = items.at(-1);
+  return items.length < 2 || last === undefined
+    ? items.join("")
+    : `${items.slice(0, -1).join(", ")} ou ${last}`;
+}
+
 // Fixed French texts, keyed as in the screen specification. Error messages depend only on the
 // kind of error, never on a server text. The title is a generic default: a deployment's own
 // wording will come from the instance configuration.
@@ -9,6 +17,8 @@ export const texts: {
     readonly retry: string;
     /** Between the label of a link and the amount it shows. */
     readonly amountSeparator: string;
+    /** Read after the label of a field that may stay empty. */
+    readonly optional: string;
   };
   readonly shell: {
     readonly genericName: string;
@@ -17,6 +27,8 @@ export const texts: {
     readonly back: string;
     /** The way back from the delivery screen to the cart. */
     readonly backToCart: string;
+    /** The way back from the contact screen to the delivery screen. */
+    readonly backToAddress: string;
     readonly steps: {
       readonly label: string;
       /** Read after the name of a step that is already behind the customer. */
@@ -70,6 +82,40 @@ export const texts: {
       readonly failed: string;
     };
   };
+  readonly contact: {
+    /** The title of the document; the page heading is `heading`. */
+    readonly title: string;
+    readonly heading: string;
+    readonly name: { readonly label: string; readonly error: string };
+    readonly phone: {
+      readonly label: string;
+      readonly hint: string;
+      readonly placeholder: string;
+      /** The country code shown before what the customer types. */
+      readonly prefix: (countryCode: string) => string;
+      readonly errors: {
+        readonly missingDigits: string;
+        /** Names what a number must start with: the prefixes come from the contract. */
+        readonly invalidPrefix: (prefixes: readonly string[]) => string;
+        readonly invalid: string;
+      };
+      /** In place of the field when the configuration, which holds the country code, fails. */
+      readonly configurationError: string;
+    };
+    readonly note: {
+      readonly label: string;
+      readonly placeholder: string;
+      readonly error: string;
+    };
+    readonly dateNotice: string;
+    readonly continue: string;
+  };
+  /** The summary of the order, shared by the screens that come after the cart. */
+  readonly orderSummary: {
+    readonly title: string;
+    readonly quantity: (quantity: number) => string;
+    readonly total: string;
+  };
   readonly cart: {
     readonly badgeLabel: (count: number) => string;
     readonly removedUnavailable: string;
@@ -108,6 +154,7 @@ export const texts: {
     loading: "Chargement…",
     retry: "Réessayer",
     amountSeparator: " · ",
+    optional: "(facultatif)",
   },
   shell: {
     // Shown instead of the shop name when the instance configuration cannot be loaded.
@@ -115,6 +162,7 @@ export const texts: {
     homeLabel: (name) => `${name} - accueil`,
     back: "Retour aux produits",
     backToCart: "Retour au panier",
+    backToAddress: "Retour à l'adresse",
     steps: {
       label: "Étapes de la commande",
       done: "(terminé)",
@@ -160,6 +208,35 @@ export const texts: {
       toggleAttribution: "Afficher les crédits de la carte",
       failed: "La carte n'a pas pu se charger. Réessayez ou utilisez votre position.",
     },
+  },
+  contact: {
+    title: "Coordonnées",
+    heading: "Vos coordonnées",
+    name: { label: "Nom", error: "Indiquez votre nom." },
+    phone: {
+      label: "Téléphone",
+      hint: "Nous vous appelons pour confirmer.",
+      placeholder: "Ex. 34 12 345 67",
+      prefix: (countryCode) => `+${countryCode}`,
+      errors: {
+        missingDigits: "Il manque des chiffres.",
+        invalidPrefix: (prefixes) => `Ce numéro ne commence pas par ${listWithOr(prefixes)}.`,
+        invalid: "Indiquez un numéro de téléphone valide.",
+      },
+      configurationError: "Nous n'avons pas pu charger la configuration.",
+    },
+    note: {
+      label: "Note pour le livreur",
+      placeholder: "Ex. appelez en arrivant",
+      error: "Retirez les caractères spéciaux de la note.",
+    },
+    dateNotice: "Notre équipe confirme la date de livraison.",
+    continue: "Vérifier la commande",
+  },
+  orderSummary: {
+    title: "Votre commande",
+    quantity: (quantity) => `× ${String(quantity)}`,
+    total: "Total",
   },
   cart: {
     badgeLabel: (count) =>

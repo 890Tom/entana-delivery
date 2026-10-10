@@ -55,3 +55,101 @@
 .error {
   color: var(--color-error);
 }
+
+.optional {
+  font: var(--font-body);
+  color: var(--color-text-muted);
+}
+
+/* Three lines: the same border and states as the single line, with a vertical padding. */
+.multiline {
+  padding-block: var(--space-4);
+  resize: vertical;
+}
+
+.multiline:focus,
+.multiline.invalid {
+  padding: calc(var(--space-4) - var(--border-width-strong) + var(--border-width));
+}
+
+/*
+ * A field with a prefix: the border, the states and the height belong to the frame, so that the
+ * prefix is inside the field. The control inside has no border of its own.
+ */
+.frame {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: var(--size-field-height);
+  padding: 0 var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border-input);
+  border-radius: var(--radius);
+}
+
+.frame:focus-within,
+.frame.invalid {
+  padding: 0 calc(var(--space-4) - var(--border-width-strong) + var(--border-width));
+}
+
+.frame:focus-within {
+  border: var(--border-width-strong) solid var(--color-border-strong);
+}
+
+.frame.invalid {
+  border: var(--border-width-strong) solid var(--color-error);
+}
+
+/* A focused field in error keeps the error border and the ring, so that the focus stays visible. */
+.frame.invalid:has(:focus-visible) {
+  outline: var(--focus-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.bare {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--size-field-height);
+  padding: 0;
+  font: var(--font-body);
+  color: var(--color-text);
+  background: none;
+  border: 0;
+}
+
+/* The frame draws the focus: its border replaces the global ring. */
+.bare:focus-visible {
+  outline: none;
+}
+
+.prefix {
+  flex: none;
+  font: var(--font-body);
+  color: var(--color-text);
+}
+
+/* The size of "+261": the field does not change when the code arrives. */
+.prefixPlaceholder {
+  flex: none;
+  width: calc(var(--font-size-body) * 3);
+  height: calc(var(--font-size-body) * var(--line-height-body));
+  background: var(--color-skeleton);
+  border-radius: var(--radius-sm);
+  animation: pulse var(--duration-pulse) var(--ease) infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: var(--opacity-skeleton-pulse);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prefixPlaceholder {
+    animation: none;
+  }
+}

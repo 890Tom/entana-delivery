@@ -101,3 +101,11 @@ export function writeStoredDraft(draft: DeliveryDraft): void {
     // Quota or private browsing: the draft goes on living in memory.
   }
 }
+
+export function clearStoredDraft(): void {
+  try {
+    window.sessionStorage.removeItem(DELIVERY_DRAFT_STORAGE_KEY);
+  } catch {
+    // Nothing more can be done: the draft is emptied in memory.
+  }
+}

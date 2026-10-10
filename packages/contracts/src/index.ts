@@ -8,6 +8,8 @@ export type { HealthResponse } from "./health/health.js";
 export { computeOrderTotal } from "./orders/total/compute-order-total.js";
 export type { OrderLineAmount } from "./orders/total/compute-order-total.js";
 export {
+  MAX_CONTACT_NAME_LENGTH,
+  MAX_CUSTOMER_NOTE_LENGTH,
   MAX_LANDMARK_LENGTH,
   MAX_ORDER_LINES,
   MAX_ORDER_LINE_QUANTITY,
@@ -19,6 +21,17 @@ export type { CreateOrderResponse } from "./orders/response/create-order-respons
 export { idempotencyKeySchema } from "./orders/request/idempotency-key.js";
 export type { IdempotencyKey } from "./orders/request/idempotency-key.js";
 export { normalizePhone } from "./orders/phone/normalize-phone.js";
+export {
+  formatNationalNumber,
+  maxNationalDigits,
+} from "./orders/phone-numbering/format-national-number.js";
+export { extractNationalDigits } from "./orders/phone-numbering/extract-national-digits.js";
+export { operatorPrefixes } from "./orders/phone-numbering/operator-prefixes.js";
+export { parsePhoneNumber } from "./orders/phone-numbering/parse-phone-number.js";
+export type {
+  PhoneParseResult,
+  PhoneRejectionReason,
+} from "./orders/phone-numbering/parse-phone-number.js";
 export {
   ORDER_CODE_ALPHABET,
   ORDER_CODE_LENGTH,

@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { computeOrderTotal, generateOrderCode, normalizePhone } from "@entana/contracts";
+import { computeOrderTotal, generateOrderCode, parsePhoneNumber } from "@entana/contracts";
 import type { CreateOrderRequest, CreateOrderResponse } from "@entana/contracts";
 import { classifyDatabaseError } from "@entana/database";
 import type { PrismaClient } from "@entana/database";
@@ -78,10 +78,13 @@ export class OrdersService {
     request: CreateOrderRequest,
     idempotencyKey: string,
   ): Promise<CreateOrderResult> {
-    const phoneE164 = normalizePhone(request.phone, this.phoneCountryCode);
-    if (phoneE164 === null) {
+    // The numbering plan of the shop's country: what is stored, and what keys the customer, the
+    // row lock and the per-phone limit, is always the canonical form.
+    const phone = parsePhoneNumber(request.phone, this.phoneCountryCode);
+    if (!phone.ok) {
       throw new InvalidPhoneError();
     }
+    const phoneE164 = phone.e164;
     // The one place where the key is normalised: a uuid is valid in both cases, and the database
     // compares text, so "ABC…" and "abc…" would be two keys. Every lookup and the stored value
     // below use this form.

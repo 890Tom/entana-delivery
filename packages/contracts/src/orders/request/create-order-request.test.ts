@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createOrderRequestSchema } from "./create-order-request.js";
+import {
+  MAX_CONTACT_NAME_LENGTH,
+  MAX_CUSTOMER_NOTE_LENGTH,
+  createOrderRequestSchema,
+} from "./create-order-request.js";
 import {
   FIRST_PRODUCT_ID,
   SECOND_PRODUCT_ID,
@@ -100,6 +104,24 @@ describe("createOrderRequestSchema", () => {
 
     it("checks the length before the pattern, so an oversized string reports only its length", () => {
       expect(issueCodes(buildRequest({ phone: "x".repeat(1_000) }))).toEqual(["too_big"]);
+    });
+  });
+
+  describe("the exported text limits", () => {
+    it("are the lengths of the contact name and of the note that the schema enforces", () => {
+      const name = (length: number): boolean =>
+        isAccepted(buildRequest({ contactName: "a".repeat(length) }));
+      const note = (length: number): boolean =>
+        isAccepted(buildRequest({ customerNote: "a".repeat(length) }));
+
+      expect([name(MAX_CONTACT_NAME_LENGTH), name(MAX_CONTACT_NAME_LENGTH + 1)]).toEqual([
+        true,
+        false,
+      ]);
+      expect([note(MAX_CUSTOMER_NOTE_LENGTH), note(MAX_CUSTOMER_NOTE_LENGTH + 1)]).toEqual([
+        true,
+        false,
+      ]);
     });
   });
 

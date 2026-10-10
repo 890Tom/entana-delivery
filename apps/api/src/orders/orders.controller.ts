@@ -34,9 +34,15 @@ import { OrdersService } from "./orders.service.js";
 
 const REPLAY_HEADER = "Idempotent-Replayed";
 
-// Obviously fake: nothing here looks like a real phone number, place or token.
+/**
+ * The phone number of the OpenAPI example: valid for the numbering plan (an operator prefix and
+ * seven digits), and obviously fake (the seven digits are zeros).
+ */
+export const EXAMPLE_PHONE = "034 00 000 00";
+
+// Obviously fake: nothing here looks like a real person, place or token.
 const EXAMPLE_REQUEST = {
-  phone: "000 00 000 00",
+  phone: EXAMPLE_PHONE,
   trackingToken: "A".repeat(43),
   contactName: "Example Customer",
   landmarkText: "Example landmark",

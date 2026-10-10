@@ -1,6 +1,8 @@
+import { parsePhoneNumber } from "@entana/contracts";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { EXAMPLE_PHONE } from "../../src/orders/orders.controller.js";
 import { startOrdersApp } from "./support/start-orders-app.js";
 import { buildTestConfig } from "./support/test-config.js";
 
@@ -50,9 +52,13 @@ describe("the OpenAPI document of POST /api/v1/orders", () => {
     },
   );
 
-  it("uses obviously fake examples", () => {
-    expect(documentText).toContain("000 00 000 00");
-    // No realistic Malagasy mobile number or coordinates of the capital.
-    expect(documentText).not.toMatch(/\+?261\s?3\d|03[2-9] ?\d\d ?\d{3} ?\d\d|-18\.\d|47\.5/);
+  it("uses obviously fake examples, and a phone number that the numbering plan accepts", () => {
+    expect(documentText).toContain(EXAMPLE_PHONE);
+    expect(parsePhoneNumber(EXAMPLE_PHONE, "261").ok).toBe(true);
+    // No realistic Malagasy mobile number or coordinates of the capital, the one fake example
+    // of the phone number set aside.
+    expect(documentText.replaceAll(EXAMPLE_PHONE, "")).not.toMatch(
+      /\+?261\s?3\d|03[2-9] ?\d\d ?\d{3} ?\d\d|-18\.\d|47\.5/,
+    );
   });
 });

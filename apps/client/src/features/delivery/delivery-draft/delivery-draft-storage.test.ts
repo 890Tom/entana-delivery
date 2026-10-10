@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   DELIVERY_DRAFT_STORAGE_KEY,
+  clearStoredDraft,
   EMPTY_DRAFT,
   parseStoredDraft,
   readStoredDraft,
@@ -79,6 +80,20 @@ describe("the stored delivery draft", () => {
     expect(sessionStorage.getItem(DELIVERY_DRAFT_STORAGE_KEY)).toBe(serializeDraft(DRAFT));
     expect(localStorage.getItem(DELIVERY_DRAFT_STORAGE_KEY)).toBeNull();
     expect(readStoredDraft()).toEqual(DRAFT);
+  });
+
+  it("is removed from the session storage when cleared, and clearing never throws", () => {
+    writeStoredDraft(DRAFT);
+
+    clearStoredDraft();
+
+    expect(sessionStorage.getItem(DELIVERY_DRAFT_STORAGE_KEY)).toBeNull();
+    vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    expect(() => {
+      clearStoredDraft();
+    }).not.toThrow();
   });
 
   it("is empty and does not throw when the storage cannot be read or written", () => {

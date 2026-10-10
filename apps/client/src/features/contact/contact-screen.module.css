@@ -1,0 +1,57 @@
+.page {
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding: var(--space-4);
+  margin-inline: auto;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  margin: 0;
+}
+
+/* Under the breakpoint the card does not exist: `display: none` also leaves it out of the
+   accessibility tree and of the tab order, so nothing is announced or focused twice. */
+.side {
+  display: none;
+}
+
+.phoneOnly {
+  display: block;
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .page {
+    padding: var(--space-6);
+  }
+
+  .columns {
+    grid-template-columns: minmax(0, 1fr) var(--size-sidebar-width);
+  }
+
+  .main {
+    max-width: var(--size-readable-max);
+  }
+
+  .side {
+    position: sticky;
+    top: calc(var(--size-header-height) + var(--space-5));
+    display: block;
+  }
+
+  .phoneOnly {
+    display: none;
+  }
+}

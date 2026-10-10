@@ -29,3 +29,14 @@
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
+
+/* In the order summary: the muted words of a row, on the card's own ground. */
+.plain {
+  padding: 0;
+  color: var(--color-text-muted);
+  background: none;
+}
+
+.plain .value {
+  font: var(--font-body);
+}

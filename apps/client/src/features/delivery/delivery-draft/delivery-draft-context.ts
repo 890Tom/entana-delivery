@@ -14,6 +14,8 @@ export interface DeliveryDraftValue {
   readonly setLandmark: (landmark: string) => void;
   /** Writes the draft to the session storage now, unless that content is already there. */
   readonly save: () => void;
+  /** Empties the draft in memory and in the storage (the order was sent). */
+  readonly clear: () => void;
 }
 
 export const DELIVERY_DRAFT_CONTEXT = createContext<DeliveryDraftValue | null>(null);

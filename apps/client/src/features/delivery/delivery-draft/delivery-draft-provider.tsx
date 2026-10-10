@@ -5,7 +5,13 @@ import type { GeoPoint } from "../map/map-adapter";
 
 import { DELIVERY_DRAFT_CONTEXT } from "./delivery-draft-context";
 import type { DeliveryDraftValue } from "./delivery-draft-context";
-import { readStoredDraft, serializeDraft, writeStoredDraft } from "./delivery-draft-storage";
+import {
+  EMPTY_DRAFT,
+  clearStoredDraft,
+  readStoredDraft,
+  serializeDraft,
+  writeStoredDraft,
+} from "./delivery-draft-storage";
 import type { DeliveryDraft } from "./delivery-draft-storage";
 
 /** Above the pages, so that the draft survives a visit to another screen, and a reload. */
@@ -32,9 +38,20 @@ export function DeliveryDraftProvider({ children }: { children: ReactNode }): Re
     save();
   }, [save]);
 
+  const clear = useMemo(
+    () => (): void => {
+      // What the storage holds is "nothing": the change below must not write the empty draft back.
+      written.current = serializeDraft(EMPTY_DRAFT);
+      clearStoredDraft();
+      setPoint(null);
+      setLandmark("");
+    },
+    [],
+  );
+
   const value = useMemo<DeliveryDraftValue>(
-    () => ({ point, landmark, setPoint, setLandmark, save }),
-    [point, landmark, save],
+    () => ({ point, landmark, setPoint, setLandmark, save, clear }),
+    [point, landmark, save, clear],
   );
   return <DELIVERY_DRAFT_CONTEXT value={value}>{children}</DELIVERY_DRAFT_CONTEXT>;
 }

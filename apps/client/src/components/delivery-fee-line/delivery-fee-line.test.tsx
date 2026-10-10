@@ -23,4 +23,15 @@ describe("DeliveryFeeLine", () => {
     expect(document.body.textContent).toContain(formatAmount(2500));
     expect(screen.queryByText(texts.delivery.fee.free)).toBeNull();
   });
+
+  it("keeps its truck in the highlighted variant, and has no icon in the plain one", () => {
+    const highlighted = render(<DeliveryFeeLine amountAr={0} />);
+    expect(highlighted.container.querySelector("svg")).not.toBeNull();
+    highlighted.unmount();
+
+    const plain = render(<DeliveryFeeLine amountAr={0} variant="plain" />);
+
+    expect(plain.container.querySelector("svg")).toBeNull();
+    expect(screen.getByText(texts.delivery.fee.free)).toBeTruthy();
+  });
 });
