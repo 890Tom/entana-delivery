@@ -1,5 +1,5 @@
 import { closeSync, openSync, readSync } from "node:fs";
-import { InvalidInstanceConfigurationError } from "./invalid-instance-configuration-error.js";
+import { InvalidInstanceConfigurationError } from "../errors/invalid-instance-configuration-error.js";
 
 const MAX_INSTANCE_FILE_BYTES = 64 * 1024;
 

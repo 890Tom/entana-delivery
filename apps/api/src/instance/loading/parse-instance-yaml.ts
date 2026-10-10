@@ -1,5 +1,5 @@
 import { parseDocument } from "yaml";
-import { InvalidInstanceConfigurationError } from "./invalid-instance-configuration-error.js";
+import { InvalidInstanceConfigurationError } from "../errors/invalid-instance-configuration-error.js";
 
 // A configuration has no reason to reuse a node: no alias at all, which also rules out an alias
 // explosion ("billion laughs").

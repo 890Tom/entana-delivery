@@ -1,4 +1,4 @@
-import { StartupError } from "../startup/startup-error.js";
+import { StartupError } from "../../startup/startup-error.js";
 
 /**
  * Thrown at startup when the instance configuration cannot be used. The message is in French (it

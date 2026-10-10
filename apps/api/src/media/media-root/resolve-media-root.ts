@@ -1,11 +1,11 @@
 import { statSync } from "node:fs";
 import { isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
-import { StartupError } from "../startup/startup-error.js";
+import { StartupError } from "../../startup/startup-error.js";
 
 // Outside production: a folder at the repository root, ignored by git. From src/media (or
 // dist/media) up to the root.
-const DEVELOPMENT_MEDIA_ROOT = fileURLToPath(new URL("../../../../media", import.meta.url));
+const DEVELOPMENT_MEDIA_ROOT = fileURLToPath(new URL("../../../../../media", import.meta.url));
 
 export class InvalidMediaRootError extends StartupError {
   constructor(problem: string) {

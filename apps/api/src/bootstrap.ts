@@ -1,7 +1,7 @@
 import { InvalidConfigurationError, parseConfig } from "./config/app-config.js";
 import { createApplication } from "./create-application.js";
-import { loadInstanceConfig } from "./instance/load-instance-config.js";
-import { resolveMediaRoot } from "./media/resolve-media-root.js";
+import { loadInstanceConfig } from "./instance/loading/load-instance-config.js";
+import { resolveMediaRoot } from "./media/media-root/resolve-media-root.js";
 import { StartupError } from "./startup/startup-error.js";
 
 export interface ErrorOutput {

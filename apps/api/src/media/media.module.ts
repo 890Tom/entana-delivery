@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
 import type { AppConfig } from "../config/app-config.js";
-import { MEDIA_ROOT } from "./media-root.token.js";
+import { MEDIA_ROOT } from "./media-root/media-root.token.js";
 import { MediaController } from "./media.controller.js";
 import { MediaService } from "./media.service.js";
-import { resolveMediaRoot } from "./resolve-media-root.js";
+import { resolveMediaRoot } from "./media-root/resolve-media-root.js";
 
 @Module({})
 export class MediaModule {
