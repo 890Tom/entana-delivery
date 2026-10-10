@@ -1,5 +1,13 @@
 import { z } from "zod";
-import { mediaFileNameSchema, phoneCountryCodeSchema, shopNameSchema } from "./instance-config.js";
+import {
+  latitudeSchema,
+  longitudeSchema,
+  mapStyleUrlSchema,
+  mediaFileNameSchema,
+  phoneCountryCodeSchema,
+  shopNameSchema,
+  zoomSchema,
+} from "./instance-config.js";
 import type { InstanceConfig } from "./instance-config.js";
 
 const BRANDING_URL_PREFIX = "/media/branding/";
@@ -22,6 +30,11 @@ export const publicInstanceSchema = z.strictObject({
   phoneCountryCode: phoneCountryCodeSchema,
   logoUrl: brandingUrlSchema,
   appIconUrl: brandingUrlSchema,
+  map: z.strictObject({
+    styleUrl: mapStyleUrlSchema,
+    center: z.strictObject({ lat: latitudeSchema, lng: longitudeSchema }),
+    zoom: zoomSchema,
+  }),
 });
 
 export type PublicInstance = z.infer<typeof publicInstanceSchema>;
@@ -39,5 +52,10 @@ export function toPublicInstance(config: InstanceConfig): PublicInstance {
     phoneCountryCode: config.phoneCountryCode,
     logoUrl: toBrandingUrl(config.branding?.logoFile),
     appIconUrl: toBrandingUrl(config.branding?.appIconFile),
+    map: {
+      styleUrl: config.map.styleUrl,
+      center: { lat: config.map.center.lat, lng: config.map.center.lng },
+      zoom: config.map.zoom,
+    },
   };
 }

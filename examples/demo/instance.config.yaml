@@ -17,3 +17,11 @@ phoneCountryCode: "261"
 # branding:
 #   logoFile: logo.png
 #   appIconFile: app-icon.png
+# Facultatif : la carte de l'écran de livraison. Sans cette section (ou sans l'un de ses champs),
+# les valeurs ci-dessous s'appliquent. Cette section est publique : une clé de carte y serait
+# visible de tout visiteur, et aucune clé secrète n'a sa place dans ce fichier.
+# styleUrl : adresse https absolue, ou chemin de la même origine (ex. /tiles/style.json).
+# map:
+#   styleUrl: https://tiles.openfreemap.org/styles/liberty
+#   center: { lat: -18.91, lng: 47.52 }  # approximatif : à ajuster par chaque boutique
+#   zoom: 12                             # de 1 à 18

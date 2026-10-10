@@ -9,10 +9,15 @@ const config: InstanceConfig = {
   timezone: "Indian/Antananarivo",
   phoneCountryCode: "261",
   branding: { logoFile: "logo.png" },
+  map: {
+    styleUrl: "https://tiles.openfreemap.org/styles/liberty",
+    center: { lat: -18.91, lng: 47.52 },
+    zoom: 12,
+  },
 };
 
 describe("toPublicInstance", () => {
-  it("exposes the shop, the locale, the currency, the phone code and media URLs only", () => {
+  it("exposes the shop, the locale, the currency, the phone code, the map and media URLs only", () => {
     const publicInstance = toPublicInstance(config);
 
     expect(publicInstanceSchema.parse(publicInstance)).toEqual({
@@ -22,6 +27,11 @@ describe("toPublicInstance", () => {
       phoneCountryCode: "261",
       logoUrl: "/media/branding/logo.png",
       appIconUrl: null,
+      map: {
+        styleUrl: "https://tiles.openfreemap.org/styles/liberty",
+        center: { lat: -18.91, lng: 47.52 },
+        zoom: 12,
+      },
     });
     expect(JSON.stringify(publicInstance)).not.toContain("Antananarivo");
   });
@@ -35,6 +45,15 @@ describe("publicInstanceSchema", () => {
       false,
     );
     expect(publicInstanceSchema.safeParse({ ...valid, timezone: "UTC" }).success).toBe(false);
+  });
+
+  it("refuses a response without the map or with an extra map key", () => {
+    const valid = toPublicInstance(config);
+
+    expect(publicInstanceSchema.safeParse({ ...valid, map: undefined }).success).toBe(false);
+    expect(
+      publicInstanceSchema.safeParse({ ...valid, map: { ...valid.map, apiKey: "x" } }).success,
+    ).toBe(false);
   });
 
   it("refuses a shop name with a formatting character", () => {
