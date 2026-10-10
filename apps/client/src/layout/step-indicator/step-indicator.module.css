@@ -1,23 +1,32 @@
-/* Web only, except where a screen asks for it (the cart, the delivery screen). */
+/* The same on every screen and at every width. */
 .nav {
-  display: none;
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
-.onMobile {
-  display: block;
+.inner {
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding: var(--space-4) var(--space-6);
+  margin: 0 auto;
 }
 
 .list {
   display: flex;
   align-items: center;
-  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
-  padding: var(--space-4) var(--space-6);
-  margin: 0 auto;
+  padding: 0;
+  margin: 0;
   list-style: none;
 }
 
-/* One step: the joining line, then the step itself. The current one keeps its own width. */
+/* "Étape 2 sur 5": the position in words, above the steps. */
+.position {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-muted);
+}
+
+/*
+ * One step: the joining line, then the step itself. Every step but the first shares the free
+ * width, so that all the joining lines are of the same length (the first has no line).
+ */
 .done,
 .current,
 .upcoming {
@@ -26,7 +35,7 @@
   align-items: center;
 }
 
-.current {
+.list > :first-child {
   flex: none;
 }
 
@@ -91,96 +100,22 @@
   border: var(--border-width-strong) solid var(--color-border-input);
 }
 
-/* The phone layout of the delivery screen. */
-.compact {
-  padding: var(--space-4);
-}
-
-.compactHead {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-}
-
-.compactDot {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: var(--size-step-dot-compact);
-  height: var(--size-step-dot-compact);
-  color: var(--color-text-on-accent);
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
-}
-
-.compactDot svg {
-  width: var(--size-icon-sm);
-  height: var(--size-icon-sm);
-}
-
-.compactName {
-  font: var(--font-body-strong);
-}
-
-.compactPosition {
-  margin-inline-start: auto;
-  color: var(--color-text-muted);
-}
-
-.segments {
-  display: flex;
-  gap: var(--space-1);
-  margin-top: var(--space-2);
-}
-
-.segments > span {
-  flex: 1 1 0;
-  height: var(--size-progress-segment);
-  border-radius: var(--radius-full);
-}
-
-.segment-done {
-  background: var(--color-surface-inverse);
-}
-
-.segment-current {
-  background: var(--color-accent);
-}
-
-.segment-upcoming {
-  background: var(--color-border);
-}
-
 /*
  * On a narrow screen the five steps cannot all show their name: the next ones keep their icon and
  * stay named for assistive technology (the same clipping as the visually hidden utility).
  */
 @media (max-width: 1023px) {
-  .list {
+  .inner {
     padding-inline: var(--space-4);
   }
 
   .joiner {
     min-width: var(--space-2);
   }
-
-  /* The compact layout replaces the five steps on a phone. */
-  .compactOnMobile .list {
-    display: none;
-  }
 }
 
 /* The one breakpoint of the design system (a media query cannot read a variable). */
 @media (min-width: 1024px) {
-  .nav {
-    display: block;
-  }
-
-  .compact {
-    display: none;
-  }
-
   /* Undoes the visually hidden utility that the narrow layout puts on the names. */
   .label {
     position: static;

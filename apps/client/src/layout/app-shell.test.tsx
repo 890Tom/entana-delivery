@@ -43,37 +43,55 @@ afterEach(() => {
 });
 
 describe("application shell", () => {
-  it("shows the shop name, the steps with the first one current, and the catalogue", async () => {
+  it("shows the shop name and the catalogue, without the steps of the order", async () => {
     stubApi(() => Promise.resolve(jsonResponse(buildInstance())));
     renderAt("/");
 
     const banner = screen.getByRole("banner");
     expect(await within(banner).findByText("Maison Démo")).toBeTruthy();
+    expect(screen.queryByRole("navigation")).toBeNull();
+    expect(await screen.findByText("Sakafo")).toBeTruthy();
+  });
+
+  it("shows the steps with the first one current on the cart", async () => {
+    stubApi(() => Promise.resolve(jsonResponse(buildInstance())));
+    renderAt("/panier");
+
     const steps = screen.getByRole("navigation", { name: texts.shell.steps.label });
     expect(within(steps).getByText(texts.shell.steps.cart).closest("[aria-current]")).toBeTruthy();
     expect(within(steps).getAllByRole("listitem")).toHaveLength(5);
     expect(steps.querySelectorAll('[aria-current="step"]')).toHaveLength(1);
-    expect(await screen.findByText("Sakafo")).toBeTruthy();
+    await screen.findByRole("heading", { level: 1 });
+  });
+
+  it("shows the position of the step on the cart", async () => {
+    stubApi(() => Promise.resolve(jsonResponse(buildInstance())));
+    renderAt("/panier");
+
+    const steps = screen.getByRole("navigation", { name: texts.shell.steps.label });
+
+    expect(within(steps).getByText(texts.shell.steps.position(1, 5))).toBeTruthy();
+    await screen.findByRole("heading", { level: 1 });
   });
 
   it("does not make the following steps links", async () => {
     stubApi(() => Promise.resolve(jsonResponse(buildInstance())));
-    renderAt("/");
+    renderAt("/panier");
 
     const steps = screen.getByRole("navigation", { name: texts.shell.steps.label });
 
     expect(within(steps).queryAllByRole("link")).toHaveLength(0);
-    await screen.findByText("Sakafo");
+    await screen.findByRole("heading", { level: 1 });
   });
 
   it("has one banner, one named navigation and one main", async () => {
     stubApi(() => Promise.resolve(jsonResponse(buildInstance())));
-    renderAt("/");
+    renderAt("/panier");
 
     expect(screen.getAllByRole("banner")).toHaveLength(1);
     expect(screen.getAllByRole("navigation")).toHaveLength(1);
     expect(screen.getAllByRole("main")).toHaveLength(1);
-    await screen.findByText("Sakafo");
+    await screen.findByRole("heading", { level: 1 });
   });
 
   it("shows the logo alone, with the shop name as its alternative text", async () => {

@@ -36,8 +36,20 @@ describe("step indicator", () => {
     expect(screen.queryAllByRole("link")).toHaveLength(0);
   });
 
-  it("says the position of the current step in the compact layout", () => {
-    render(<StepIndicator current={1} isShownOnMobile mobileLayout="compact" />);
+  it("puts the position above the steps", () => {
+    render(<StepIndicator current={1} />);
+
+    const position = screen.getByText(texts.shell.steps.position(2, 5));
+    const list = screen.getByRole("list");
+
+    expect(position.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("says the position of the current step, as step 1 of 5 by default", () => {
+    const { rerender } = render(<StepIndicator />);
+    expect(screen.getByText(texts.shell.steps.position(1, 5))).toBeTruthy();
+
+    rerender(<StepIndicator current={1} />);
 
     expect(screen.getByText(texts.shell.steps.position(2, 5))).toBeTruthy();
   });

@@ -59,61 +59,27 @@ function Step({
   );
 }
 
-/** The phone layout of the delivery screen: the current step, its position and one segment each. */
-function CompactSummary({ current }: { current: number }): ReactElement {
-  const step = STEPS[current];
-  return (
-    <div className={styles.compact}>
-      <div className={styles.compactHead}>
-        <span className={styles.compactDot} aria-hidden="true">
-          <Icon name={step?.icon ?? "bag"} />
-        </span>
-        <span className={styles.compactName}>{step?.label}</span>
-        <span className={styles.compactPosition}>
-          {texts.shell.steps.position(current + 1, STEPS.length)}
-        </span>
-      </div>
-      <div className={styles.segments} aria-hidden="true">
-        {STEPS.map(({ label }, index) => (
-          <span key={label} className={styles[`segment-${stateOf(index, current)}`]} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 interface StepIndicatorProps {
   /** The index of the current step; the steps before it are done. */
   readonly current?: number;
-  /** On a narrow screen the catalogue shows none, the cart and the delivery screen show it. */
-  readonly isShownOnMobile?: boolean;
-  /** "compact" on a phone: the current step with its position, not the five steps. */
-  readonly mobileLayout?: "full" | "compact";
 }
 
 /**
- * The five steps of the order. The following steps are plain text, never links, and so are the
- * done ones: the way back is the back button of the header.
+ * The five steps of the order, the same on every screen, with the position in words above them.
+ * The following steps are plain text, never links, and so are the done ones: the way back is the
+ * back button of the header. On a narrow screen only the current step shows its name.
  */
-export function StepIndicator({
-  current = 0,
-  isShownOnMobile = false,
-  mobileLayout = "full",
-}: StepIndicatorProps): ReactElement {
-  const isCompact = mobileLayout === "compact";
-  const classNames = [
-    styles.nav,
-    isShownOnMobile ? styles.onMobile : "",
-    isCompact ? styles.compactOnMobile : "",
-  ].join(" ");
+export function StepIndicator({ current = 0 }: StepIndicatorProps): ReactElement {
   return (
-    <nav className={classNames} aria-label={texts.shell.steps.label}>
-      <ol className={styles.list}>
-        {STEPS.map((step, index) => (
-          <Step key={step.label} index={index} current={current} step={step} />
-        ))}
-      </ol>
-      {isCompact && <CompactSummary current={current} />}
+    <nav className={styles.nav} aria-label={texts.shell.steps.label}>
+      <div className={styles.inner}>
+        <p className={styles.position}>{texts.shell.steps.position(current + 1, STEPS.length)}</p>
+        <ol className={styles.list}>
+          {STEPS.map((step, index) => (
+            <Step key={step.label} index={index} current={current} step={step} />
+          ))}
+        </ol>
+      </div>
     </nav>
   );
 }

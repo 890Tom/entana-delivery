@@ -84,6 +84,17 @@ describe("the delivery screen", () => {
     expect(within(banner).getByText(texts.shell.steps.address)).toBeTruthy();
   });
 
+  it("shows the step indicator of every screen, on the second step", async () => {
+    await renderDelivery(createFakeMapLoader());
+
+    const steps = screen.getByRole("navigation", { name: texts.shell.steps.label });
+
+    expect(within(steps).getByText(texts.shell.steps.position(2, 5))).toBeTruthy();
+    expect(steps.querySelector('[aria-current="step"]')?.textContent).toContain(
+      texts.shell.steps.address,
+    );
+  });
+
   it("asks for the map of the instance configuration", async () => {
     const fake = createFakeMapLoader();
     await renderDelivery(fake);
