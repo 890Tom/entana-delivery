@@ -15,8 +15,15 @@ interface BarContent {
   readonly amount?: BottomBarAmount;
 }
 
-/** A link to the next screen, or the button that submits the form of this screen. */
-type BottomBarProps = BarContent & ({ readonly href: string } | { readonly formId: string });
+/**
+ * A link to the next screen, or the button that submits the form of this screen. That button may
+ * be inactive (`aria-disabled`: still focusable, never `disabled`) and busy.
+ */
+type BottomBarProps = BarContent &
+  (
+    | { readonly href: string }
+    | { readonly formId: string; readonly isDisabled?: boolean; readonly isBusy?: boolean }
+  );
 
 function Label({ label, amount }: BarContent): ReactElement | string {
   if (amount?.status === "ready") {
@@ -47,7 +54,13 @@ export function BottomBar(props: BottomBarProps): ReactElement {
   return (
     <div className={styles.bar}>
       {"formId" in props ? (
-        <button type="submit" form={props.formId} className={styles.link}>
+        <button
+          type="submit"
+          form={props.formId}
+          className={styles.link}
+          aria-disabled={props.isDisabled === true ? true : undefined}
+          aria-busy={props.isBusy === true ? true : undefined}
+        >
           {content}
         </button>
       ) : (

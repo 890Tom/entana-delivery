@@ -7,7 +7,7 @@ import iconButton from "../../components/icon-button/icon-button.module.css";
 import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
 import { useInstance } from "../../features/instance/use-instance";
 import { texts } from "../../i18n/texts";
-import { CART_PATH, CONTACT_PATH, DELIVERY_PATH } from "../../routes";
+import { CART_PATH, CONTACT_PATH, DELIVERY_PATH, REVIEW_PATH } from "../../routes";
 
 import { CartBadge } from "./cart-badge";
 import styles from "./header.module.css";
@@ -75,6 +75,7 @@ function BackLink({
 function useStepHeader(): { href: string; label: string; title: string } | null {
   const [isDeliveryScreen] = useRoute(DELIVERY_PATH);
   const [isContactScreen] = useRoute(CONTACT_PATH);
+  const [isReviewScreen] = useRoute(REVIEW_PATH);
   if (isDeliveryScreen) {
     return { href: CART_PATH, label: texts.shell.backToCart, title: texts.shell.steps.address };
   }
@@ -85,12 +86,19 @@ function useStepHeader(): { href: string; label: string; title: string } | null 
       title: texts.shell.steps.contact,
     };
   }
+  if (isReviewScreen) {
+    return {
+      href: CONTACT_PATH,
+      label: texts.shell.backToContact,
+      title: texts.review.title,
+    };
+  }
   return null;
 }
 
 /**
- * The cart screen has a back link and its title, and no cart link (it is the cart). The delivery
- * and contact screens have the same on a phone, and the cart link beside the logo on the web
+ * The cart screen has a back link and its title, and no cart link (it is the cart). The delivery,
+ * contact and review screens have the same on a phone, and the cart link beside the logo on the web
  * layout. The title is plain text: the page's one heading is the one in its content.
  */
 export function Header(): ReactElement {

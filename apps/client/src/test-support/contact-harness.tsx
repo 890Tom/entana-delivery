@@ -46,6 +46,10 @@ interface OpenOptions {
   /** The raw content of the contact draft in the session storage. */
   readonly contactDraft?: string;
   readonly api?: Partial<ApiControl>;
+  /** The address the page is opened at: the contact screen by default. */
+  readonly path?: string;
+  /** What the network answers to the order request; it never answers when left out. */
+  readonly order?: (init: RequestInit | undefined) => Promise<Response>;
 }
 
 const COMPLETE_DELIVERY = {
@@ -73,11 +77,14 @@ export function openContact(options: OpenOptions = {}): {
     products: [SAKAFO, MOFO, KOBA],
     ...options.api,
   };
-  const fetchStub = vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
-    input === "/api/v1/instance"
+  const fetchStub = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    if (input === "/api/v1/orders") {
+      return options.order?.(init) ?? pendingUntilAborted(init);
+    }
+    return input === "/api/v1/instance"
       ? answer(control.instance, control.instanceData, init)
-      : answer(control.catalogue, { products: control.products }, init),
-  );
+      : answer(control.catalogue, { products: control.products }, init);
+  });
   vi.stubGlobal("fetch", fetchStub);
   sessionStorage.clear();
   localStorage.clear();
@@ -96,7 +103,7 @@ export function openContact(options: OpenOptions = {}): {
   if (options.contactDraft !== undefined) {
     sessionStorage.setItem(CONTACT_DRAFT_STORAGE_KEY, options.contactDraft);
   }
-  renderAt("/coordonnees", createFakeMapLoader());
+  renderAt(options.path ?? "/coordonnees", createFakeMapLoader());
   return { control, fetchStub };
 }
 

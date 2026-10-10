@@ -30,7 +30,9 @@
 }
 
 .action {
+  display: flex;
   flex: none;
+  align-items: center;
   min-height: var(--size-touch-min);
   padding: 0 var(--space-2);
   font: var(--font-body-strong);

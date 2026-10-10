@@ -4,7 +4,10 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import type { ReactElement, ReactNode } from "react";
 
 import { OrderSummary } from "../../components/order-summary/order-summary";
-import type { OrderSummaryContent } from "../../components/order-summary/order-summary";
+import type {
+  OrderSummaryContent,
+  OrderSummaryTitle,
+} from "../../components/order-summary/order-summary";
 import { texts } from "../../i18n/texts";
 import { readCatalogueErrorKind } from "../catalogue/api/fetch-products";
 import { useProducts } from "../catalogue/api/use-products";
@@ -57,8 +60,18 @@ function toContent(
  * The summary of the customer's cart, priced by the catalogue. The screens of the order that show
  * it put their own notice and primary button in `children`.
  */
-export function OrderSummaryCard({ children }: { children?: ReactNode }): ReactElement {
+export function OrderSummaryCard({
+  title,
+  children,
+}: {
+  title?: OrderSummaryTitle;
+  children?: ReactNode;
+}): ReactElement {
   const query = useProducts();
   const { lines } = useCart();
-  return <OrderSummary content={toContent(query, lines)}>{children}</OrderSummary>;
+  return (
+    <OrderSummary content={toContent(query, lines)} title={title}>
+      {children}
+    </OrderSummary>
+  );
 }

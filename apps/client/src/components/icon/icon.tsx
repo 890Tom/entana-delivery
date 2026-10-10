@@ -15,7 +15,9 @@ export type IconName =
   | "house"
   | "locate-fixed"
   | "crosshair"
-  | "truck";
+  | "truck"
+  | "phone"
+  | "calendar";
 
 // Inline line icons (no request, no package). Decorative: the control that holds one is named.
 // Exported for the map marker, which is drawn outside React by the map library.
@@ -53,6 +55,15 @@ export const ICON_PATHS: Readonly<Record<IconName, readonly string[]>> = {
     "M14 9h4l4 4v3h-8Z",
     "M7 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z",
     "M18 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z",
+  ],
+  phone: [
+    "M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2Z",
+  ],
+  calendar: [
+    "M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z",
+    "M16 2v4",
+    "M8 2v4",
+    "M3 10h18",
   ],
 };
 

@@ -7,11 +7,14 @@ export const DELIVERY_PATH = "/livraison";
 /** The address of the contact details screen, the one after the delivery screen. */
 export const CONTACT_PATH = "/coordonnees";
 
-/**
- * The address of the order review, the one after the contact details. Nothing is served there
- * yet: the address leads to the "not found" page until that screen exists.
- */
+/** The address of the order review, the one after the contact details. */
 export const REVIEW_PATH = "/recapitulatif";
+
+/**
+ * Where a confirmed order leads. Nothing is served there yet: the address leads to the "not
+ * found" page until the tracking screen exists.
+ */
+export const TRACKING_PATH = "/suivi";
 
 /**
  * The step of the order (0 is the first) that each screen belongs to. A screen listed here gets
@@ -22,4 +25,5 @@ export const STEP_BY_PATH: Readonly<Record<string, number>> = {
   [CART_PATH]: 0,
   [DELIVERY_PATH]: 1,
   [CONTACT_PATH]: 2,
+  [REVIEW_PATH]: 3,
 };

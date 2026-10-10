@@ -1,5 +1,8 @@
 import type { CatalogueErrorKind } from "../features/catalogue/api/fetch-products";
 
+import { reviewTexts } from "./review-texts";
+import type { ReviewTexts } from "./review-texts";
+
 /** "32, 33 ou 34": commas, and "ou" before the last item. */
 function listWithOr(items: readonly string[]): string {
   const last = items.at(-1);
@@ -29,6 +32,8 @@ export const texts: {
     readonly backToCart: string;
     /** The way back from the contact screen to the delivery screen. */
     readonly backToAddress: string;
+    /** The way back from the review screen to the contact screen. */
+    readonly backToContact: string;
     readonly steps: {
       readonly label: string;
       /** Read after the name of a step that is already behind the customer. */
@@ -110,6 +115,8 @@ export const texts: {
     readonly dateNotice: string;
     readonly continue: string;
   };
+  /** The review of the order and its sending. */
+  readonly review: ReviewTexts;
   /** The summary of the order, shared by the screens that come after the cart. */
   readonly orderSummary: {
     readonly title: string;
@@ -163,6 +170,7 @@ export const texts: {
     back: "Retour aux produits",
     backToCart: "Retour au panier",
     backToAddress: "Retour à l'adresse",
+    backToContact: "Retour aux coordonnées",
     steps: {
       label: "Étapes de la commande",
       done: "(terminé)",
@@ -233,6 +241,7 @@ export const texts: {
     dateNotice: "Notre équipe confirme la date de livraison.",
     continue: "Vérifier la commande",
   },
+  review: reviewTexts,
   orderSummary: {
     title: "Votre commande",
     quantity: (quantity) => `× ${String(quantity)}`,
