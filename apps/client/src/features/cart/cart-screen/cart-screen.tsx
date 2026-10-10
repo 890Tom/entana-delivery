@@ -5,13 +5,13 @@ import type { ReactElement, ReactNode } from "react";
 import { BottomBar } from "../../../components/bottom-bar/bottom-bar";
 import { Notice } from "../../../components/notice/notice";
 import { texts } from "../../../i18n/texts";
-import { useDocumentTitle } from "../../../layout/use-document-title";
+import { useDocumentTitle } from "../../../layout/document-title/use-document-title";
 import { DELIVERY_PATH } from "../../../routes";
 import { readCatalogueErrorKind } from "../../catalogue/api/fetch-products";
 import { useProducts } from "../../catalogue/api/use-products";
 import { useCart } from "../cart-context";
-import { toDisplayLines } from "../to-display-lines";
-import { useCartReconciliation } from "../use-cart-reconciliation";
+import { toDisplayLines } from "../rules/to-display-lines";
+import { useCartReconciliation } from "../reconciliation/use-cart-reconciliation";
 
 import { CartContent } from "./cart-content";
 import styles from "./cart-screen.module.css";

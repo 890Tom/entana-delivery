@@ -13,7 +13,7 @@ import { useProducts } from "../../catalogue/api/use-products";
 import { useCart } from "../cart-context";
 import { CartContent } from "../cart-screen/cart-content";
 import { CartSkeleton } from "../cart-screen/cart-skeleton";
-import { toDisplayLines } from "../to-display-lines";
+import { toDisplayLines } from "../rules/to-display-lines";
 
 import styles from "./cart-panel.module.css";
 

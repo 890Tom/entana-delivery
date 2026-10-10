@@ -7,7 +7,7 @@ import { Catalogue } from "./features/catalogue/catalogue";
 import { texts } from "./i18n/texts";
 import { AppShell } from "./layout/app-shell";
 import { NotFound } from "./layout/not-found/not-found";
-import { useDocumentTitle } from "./layout/use-document-title";
+import { useDocumentTitle } from "./layout/document-title/use-document-title";
 import { CART_PATH } from "./routes";
 
 function CataloguePage(): ReactElement {

@@ -1,5 +1,5 @@
 import { MAX_ORDER_LINES, MAX_ORDER_LINE_QUANTITY } from "@entana/contracts";
-import type { CartLine } from "./cart-reducer";
+import type { CartLine } from "../rules/cart-reducer";
 
 export const CART_STORAGE_KEY = "entana.cart.v1";
 const STORAGE_VERSION = 1;

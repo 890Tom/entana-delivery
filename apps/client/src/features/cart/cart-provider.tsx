@@ -4,8 +4,8 @@ import type { ReactElement, ReactNode } from "react";
 
 import { CART_CONTEXT } from "./cart-context";
 import type { CartContextValue } from "./cart-context";
-import { cartReducer, emptyCart } from "./cart-reducer";
-import { readStoredCart, serializeCart, writeStoredCart } from "./cart-storage";
+import { cartReducer, emptyCart } from "./rules/cart-reducer";
+import { readStoredCart, serializeCart, writeStoredCart } from "./storage/cart-storage";
 
 type CartActions = Pick<CartContextValue, "increase" | "decrease" | "removeUnavailable">;
 

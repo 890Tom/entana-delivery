@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-import type { CartLine } from "./cart-reducer";
+import type { CartLine } from "./rules/cart-reducer";
 
 export interface CartContextValue {
   readonly lines: readonly CartLine[];

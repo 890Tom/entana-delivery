@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 
 import { texts } from "../../../i18n/texts";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
-import layout from "../card-layout.module.css";
+import layout from "../card-layout/card-layout.module.css";
 import page from "../catalogue.module.css";
 
 import styles from "./product-grid-skeleton.module.css";

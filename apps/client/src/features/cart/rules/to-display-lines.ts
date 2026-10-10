@@ -1,7 +1,7 @@
 import type { PublicProduct } from "@entana/contracts";
 
 import type { CartLine as StoredCartLine } from "./cart-reducer";
-import type { CartDisplayLine } from "./cart-screen/cart-line";
+import type { CartDisplayLine } from "../cart-screen/cart-line";
 
 /** Joins the stored quantities to the catalogue; a product that is not on sale is left out. */
 export function toDisplayLines(

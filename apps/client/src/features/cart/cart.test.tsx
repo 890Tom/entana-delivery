@@ -10,7 +10,7 @@ import { buildProduct, buildProductId } from "../../test-support/build-product";
 import { expectNoAccessibilityViolations } from "../../test-support/expect-no-accessibility-violations";
 import { jsonResponse } from "../../test-support/stub-fetch";
 
-import { CART_STORAGE_KEY } from "./cart-storage";
+import { CART_STORAGE_KEY } from "./storage/cart-storage";
 
 const SAKAFO = buildProduct({ id: buildProductId(1), name: "Sakafo" });
 const MOFO = buildProduct({ id: buildProductId(2), name: "Mofo" });
