@@ -1,0 +1,17 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* On a phone the fixed bar holds the button: this one is not displayed, and so not reachable. */
+.desktopAction {
+  display: none;
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .desktopAction {
+    display: block;
+  }
+}

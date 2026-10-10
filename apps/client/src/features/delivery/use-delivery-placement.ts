@@ -6,7 +6,7 @@ import { locate } from "./position/locate";
 import type { LocateFailure } from "./position/locate";
 import { toDeliveryPoint } from "./rules/to-delivery-point";
 
-interface DeliveryPlacement {
+export interface DeliveryPlacement {
   readonly point: GeoPoint | null;
   /** How many points were placed: the announcement is derived from it. */
   readonly placementCount: number;
@@ -26,7 +26,10 @@ interface DeliveryPlacement {
 export function useDeliveryPlacement(): DeliveryPlacement {
   const { point, setPoint } = useDeliveryDraft();
   const [placementCount, setPlacementCount] = useState(0);
-  const [centreOn, setCentreOn] = useState<GeoPoint | null>(null);
+  // A point kept from earlier (a reload, another screen) is brought into view when the map is ready.
+  const [centreOn, setCentreOn] = useState<GeoPoint | null>(() =>
+    point === null ? null : { ...point },
+  );
   const [positionFailure, setPositionFailure] = useState<LocateFailure | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   // Counts the points placed by hand, so that a position answer can tell it came too late.

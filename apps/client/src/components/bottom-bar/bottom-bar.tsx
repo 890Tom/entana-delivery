@@ -9,14 +9,16 @@ import styles from "./bottom-bar.module.css";
 export type BottomBarAmount =
   { readonly status: "loading" } | { readonly status: "ready"; readonly text: string };
 
-interface BottomBarProps {
-  readonly href: string;
+interface BarContent {
   readonly label: string;
   /** Left out when there is no amount to show (a screen without one, or a failed catalogue). */
   readonly amount?: BottomBarAmount;
 }
 
-function Label({ label, amount }: Pick<BottomBarProps, "label" | "amount">): ReactElement | string {
+/** A link to the next screen, or the button that submits the form of this screen. */
+type BottomBarProps = BarContent & ({ readonly href: string } | { readonly formId: string });
+
+function Label({ label, amount }: BarContent): ReactElement | string {
   if (amount?.status === "ready") {
     return `${label}${texts.common.amountSeparator}${amount.text}`;
   }
@@ -36,15 +38,23 @@ function Label({ label, amount }: Pick<BottomBarProps, "label" | "amount">): Rea
 }
 
 /**
- * The bar fixed at the bottom of a mobile screen: one primary link to the next screen. It is
- * removed (not only hidden) from 1024 px, where the web layout has its side column instead.
+ * The bar fixed at the bottom of a mobile screen: one primary action, a link to the next screen
+ * or the submit button of the form of the screen (named by `formId`, the form being elsewhere).
+ * It is not displayed from 1024 px, where the web layout has its side column instead.
  */
-export function BottomBar({ href, label, amount }: BottomBarProps): ReactElement {
+export function BottomBar(props: BottomBarProps): ReactElement {
+  const content = <Label label={props.label} amount={props.amount} />;
   return (
     <div className={styles.bar}>
-      <Link href={href} className={styles.link}>
-        <Label label={label} amount={amount} />
-      </Link>
+      {"formId" in props ? (
+        <button type="submit" form={props.formId} className={styles.link}>
+          {content}
+        </button>
+      ) : (
+        <Link href={props.href} className={styles.link}>
+          {content}
+        </Link>
+      )}
     </div>
   );
 }

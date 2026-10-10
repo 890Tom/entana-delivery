@@ -1,0 +1,57 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font: var(--font-body-strong);
+}
+
+.control {
+  width: 100%;
+  min-height: var(--size-field-height);
+  padding: 0 var(--space-4);
+  font: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border-input);
+  border-radius: var(--radius);
+}
+
+/* The border takes the place of the global ring; the padding gives back the width it adds. */
+.control:focus,
+.invalid {
+  padding: 0 calc(var(--space-4) - var(--border-width-strong) + var(--border-width));
+}
+
+.control:focus {
+  border: var(--border-width-strong) solid var(--color-border-strong);
+  outline: none;
+}
+
+.invalid,
+.invalid:focus {
+  border: var(--border-width-strong) solid var(--color-error);
+}
+
+/* A focused field in error keeps the error border and the ring, so that the focus stays visible. */
+.invalid:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.hint,
+.error {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.hint {
+  color: var(--color-text-muted);
+}
+
+.error {
+  color: var(--color-error);
+}

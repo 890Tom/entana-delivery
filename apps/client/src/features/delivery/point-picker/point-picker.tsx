@@ -22,7 +22,12 @@ interface PointPickerProps {
   /** A point to bring into view: a new object each time the map must move there. */
   readonly centreOn: GeoPoint | null;
   readonly onPick: (point: GeoPoint) => void;
-  /** The rest of the side column: the position button and its messages. */
+  /**
+   * A message about the map, shown once: the layout puts it under the map on a phone, and above
+   * the side card from 1024 px. Nothing when there is none.
+   */
+  readonly notice?: ReactNode;
+  /** The rest of the side column: the position button, its messages and the form. */
   readonly children: ReactNode;
 }
 
@@ -61,6 +66,7 @@ export function PointPicker({
   point,
   centreOn,
   onPick,
+  notice,
   children,
 }: PointPickerProps): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,6 +83,7 @@ export function PointPicker({
         status={status.status}
         onRetry={config === undefined ? onRetryConfig : retry}
       />
+      {notice !== undefined && notice !== null && <div className={styles.notice}>{notice}</div>}
       <div className={styles.side}>
         <Button
           icon="crosshair"

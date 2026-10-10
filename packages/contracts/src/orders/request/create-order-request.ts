@@ -16,7 +16,8 @@ import {
 const MAX_PHONE_LENGTH = 32;
 const MAX_CONTACT_NAME_LENGTH = 80;
 const MAX_CUSTOMER_NOTE_LENGTH = 300;
-const MAX_LANDMARK_LENGTH = 200;
+// Exported: the customer app limits the landmark field to the same length.
+export const MAX_LANDMARK_LENGTH = 200;
 const TRACKING_TOKEN_LENGTH = 43;
 // Exported: the customer app stops a cart at the limits of the request it will have to send.
 export const MAX_ORDER_LINES = 30;

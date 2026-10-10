@@ -142,14 +142,14 @@ describe("the bottom bar of the catalogue", () => {
 });
 
 describe("the bottom bar of the cart screen", () => {
-  it("links to the delivery route when the cart holds an article", async () => {
+  it("links to the delivery route when the cart holds an article: the bar, and the link that replaces it from 1024 px", async () => {
     stubApi(catalogueOf);
     seedSampleCart();
     renderAt("/panier");
 
-    const link = await screen.findByRole("link", { name: "Choisir où livrer" });
+    const links = await screen.findAllByRole("link", { name: "Choisir où livrer" });
 
-    expect(link.getAttribute("href")).toBe("/livraison");
+    expect(links.map((link) => link.getAttribute("href"))).toEqual(["/livraison", "/livraison"]);
   });
 
   it("is not there when the cart is empty", async () => {

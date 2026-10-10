@@ -9,6 +9,8 @@ import {
   INSTANCE,
   TAPPED,
   TAPPED_ROUNDED,
+  continueButtons,
+  landmarkField,
   locateButton,
   placeButton,
   readyMap,
@@ -43,7 +45,9 @@ describe("the delivery screen", () => {
     seedCart();
     renderAt("/panier", createFakeMapLoader());
 
-    fireEvent.click(await screen.findByRole("link", { name: texts.cart.screen.continue }));
+    // Two links of this name on a wide window (the bar, and the one that replaces it): the first.
+    const links = await screen.findAllByRole("link", { name: texts.cart.screen.continue });
+    fireEvent.click(links[0] ?? screen.getByRole("link"));
 
     expect((await screen.findByRole("heading", { level: 1 })).textContent).toBe(
       texts.delivery.heading,
@@ -168,7 +172,7 @@ describe("the delivery screen", () => {
     });
   });
 
-  it("never writes a coordinate to the console, the address, the page or the network", async () => {
+  it("never writes a coordinate or a landmark to the console, the address, the page or the network", async () => {
     const consoleCalls = CONSOLE_METHODS.map((method) =>
       vi.spyOn(console, method).mockImplementation(() => undefined),
     );
@@ -187,6 +191,11 @@ describe("the delivery screen", () => {
     await waitFor(() => {
       expect(map.centrings).toHaveLength(1);
     });
+    fireEvent.change(landmarkField(), { target: { value: "Portail secret du voisin" } });
+    fireEvent.click(continueButtons().card);
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/coordonnees");
+    });
 
     const everythingWritten = JSON.stringify([
       consoleCalls.map((spy) => spy.mock.calls),
@@ -194,7 +203,7 @@ describe("the delivery screen", () => {
       document.body.textContent,
       vi.mocked(fetch).mock.calls,
     ]);
-    expect(everythingWritten).not.toMatch(/18\.9|47\.5/);
+    expect(everythingWritten).not.toMatch(/18\.9|47\.5|Portail secret/);
     // The only request is the instance configuration: the map is the one external call, and
     // it is made by the library, never by the application.
     expect(vi.mocked(fetch).mock.calls.map((call) => call[0])).toEqual(["/api/v1/instance"]);
