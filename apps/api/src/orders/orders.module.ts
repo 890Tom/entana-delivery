@@ -8,7 +8,7 @@ import { AddressRateLimiter } from "./rate-limit/address-rate-limiter.js";
 import { OrdersController } from "./orders.controller.js";
 import type { InstanceConfig } from "@entana/contracts";
 import { InstanceModule } from "../instance/instance.module.js";
-import { INSTANCE_CONFIG } from "../instance/instance-config.token.js";
+import { INSTANCE_CONFIG } from "../instance/config-token/instance-config.token.js";
 import { ORDER_RANDOM_BYTES, OrdersService, PHONE_COUNTRY_CODE } from "./orders.service.js";
 
 /** The order creation: the service, the route and the limit per address. */

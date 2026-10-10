@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
 import type { AppConfig } from "../config/app-config.js";
-import { INSTANCE_CONFIG } from "./instance-config.token.js";
+import { INSTANCE_CONFIG } from "./config-token/instance-config.token.js";
 import { InstanceController } from "./instance.controller.js";
 import { InstanceService } from "./instance.service.js";
-import { loadInstanceConfig } from "./load-instance-config.js";
+import { loadInstanceConfig } from "./loading/load-instance-config.js";
 
 @Module({})
 export class InstanceModule {

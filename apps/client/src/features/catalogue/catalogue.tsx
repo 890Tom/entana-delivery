@@ -5,11 +5,11 @@ import type { ReactElement } from "react";
 import { Notice } from "../../components/notice/notice";
 import { texts } from "../../i18n/texts";
 import { useCart } from "../cart/cart-context";
-import { useCartReconciliation } from "../cart/use-cart-reconciliation";
+import { useCartReconciliation } from "../cart/reconciliation/use-cart-reconciliation";
 
 import { readCatalogueErrorKind } from "./api/fetch-products";
 import { useProducts } from "./api/use-products";
-import { CatalogueBottomBar } from "./catalogue-bottom-bar";
+import { CatalogueBottomBar } from "./bottom-bar/catalogue-bottom-bar";
 import styles from "./catalogue.module.css";
 import { ProductCard } from "./product-card/product-card";
 import { ProductGridSkeleton } from "./product-grid-skeleton/product-grid-skeleton";

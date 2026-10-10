@@ -2,13 +2,13 @@ import { fileURLToPath } from "node:url";
 import { instanceConfigSchema } from "@entana/contracts";
 import type { InstanceConfig } from "@entana/contracts";
 import type { z } from "zod";
-import { InvalidInstanceConfigurationError } from "./invalid-instance-configuration-error.js";
+import { InvalidInstanceConfigurationError } from "../errors/invalid-instance-configuration-error.js";
 import { parseInstanceYaml } from "./parse-instance-yaml.js";
 import { readInstanceFile } from "./read-instance-file.js";
 
 // From src/instance (or dist/instance) up to the repository root.
 const DEMO_CONFIG_PATH = fileURLToPath(
-  new URL("../../../../examples/demo/instance.config.yaml", import.meta.url),
+  new URL("../../../../../examples/demo/instance.config.yaml", import.meta.url),
 );
 
 type Issue = z.core.$ZodIssue;

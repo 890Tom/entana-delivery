@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { toPublicInstance } from "@entana/contracts";
 import type { InstanceConfig, PublicInstance } from "@entana/contracts";
-import { INSTANCE_CONFIG } from "./instance-config.token.js";
+import { INSTANCE_CONFIG } from "./config-token/instance-config.token.js";
 
 @Injectable()
 export class InstanceService {

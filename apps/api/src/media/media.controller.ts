@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { ApiExcludeController } from "@nestjs/swagger";
 import type { Request, Response } from "express";
-import type { MediaFileInfo } from "./locate-media-file.js";
+import type { MediaFileInfo } from "./file-lookup/locate-media-file.js";
 import { MediaService } from "./media.service.js";
 
 // The files are public and change only when someone replaces one by hand.

@@ -5,7 +5,7 @@ import type { ReactElement } from "react";
 
 import { Button } from "../../../components/button/button";
 import { texts } from "../../../i18n/texts";
-import layout from "../card-layout.module.css";
+import layout from "../card-layout/card-layout.module.css";
 
 import { ProductCardAction } from "./product-card-action";
 import styles from "./product-card.module.css";

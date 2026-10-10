@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { MEDIA_ROOT } from "./media-root.token.js";
-import { locateMediaFile } from "./locate-media-file.js";
-import type { MediaFileInfo } from "./locate-media-file.js";
+import { MEDIA_ROOT } from "./media-root/media-root.token.js";
+import { locateMediaFile } from "./file-lookup/locate-media-file.js";
+import type { MediaFileInfo } from "./file-lookup/locate-media-file.js";
 
 @Injectable()
 export class MediaService {

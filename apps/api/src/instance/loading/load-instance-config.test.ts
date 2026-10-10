@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { InvalidInstanceConfigurationError } from "./invalid-instance-configuration-error.js";
+import { InvalidInstanceConfigurationError } from "../errors/invalid-instance-configuration-error.js";
 import { loadInstanceConfig } from "./load-instance-config.js";
 
 const VALID_YAML = `

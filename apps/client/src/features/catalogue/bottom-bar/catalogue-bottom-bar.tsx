@@ -3,12 +3,12 @@ import type { ProductListResponse } from "@entana/contracts";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { ReactElement } from "react";
 
-import { BottomBar } from "../../components/bottom-bar/bottom-bar";
-import type { BottomBarAmount } from "../../components/bottom-bar/bottom-bar";
-import { texts } from "../../i18n/texts";
-import { CART_PATH } from "../../routes";
-import { useCart } from "../cart/cart-context";
-import { toDisplayLines } from "../cart/to-display-lines";
+import { BottomBar } from "../../../components/bottom-bar/bottom-bar";
+import type { BottomBarAmount } from "../../../components/bottom-bar/bottom-bar";
+import { texts } from "../../../i18n/texts";
+import { CART_PATH } from "../../../routes";
+import { useCart } from "../../cart/cart-context";
+import { toDisplayLines } from "../../cart/rules/to-display-lines";
 
 function readAmount(
   query: UseQueryResult<ProductListResponse>,

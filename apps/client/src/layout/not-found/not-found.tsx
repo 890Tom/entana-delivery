@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { Link } from "wouter";
 
 import { texts } from "../../i18n/texts";
-import { useDocumentTitle } from "../use-document-title";
+import { useDocumentTitle } from "../document-title/use-document-title";
 
 import styles from "./not-found.module.css";
 
