@@ -91,6 +91,9 @@ root, ignored by git. **It holds no secret**: its public part is served to every
   which lets a shop serve its own tile style; the section is public, so it holds no secret key.
 - **Phone numbers**: the order service reads `phoneCountryCode` from this file. It replaces the
   former phone country code environment variable, which is removed: set `phoneCountryCode` instead.
+  For a country with a numbering rule in `packages/contracts` (today `261`: nine national digits, mobile
+  prefixes 32, 33, 34, 37, 38 and 39) a number outside the rule is refused with a 400 on `/phone`, and every
+  accepted number is stored as `+` and the digits.
 
 ## Media
 
