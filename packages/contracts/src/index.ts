@@ -8,6 +8,8 @@ export type { HealthResponse } from "./health/health.js";
 export { computeOrderTotal } from "./orders/total/compute-order-total.js";
 export type { OrderLineAmount } from "./orders/total/compute-order-total.js";
 export {
+  MAX_CONTACT_NAME_LENGTH,
+  MAX_CUSTOMER_NOTE_LENGTH,
   MAX_LANDMARK_LENGTH,
   MAX_ORDER_LINES,
   MAX_ORDER_LINE_QUANTITY,

@@ -14,8 +14,9 @@ import {
 // Messages are fixed texts: they never repeat the value, which can be a phone number.
 
 const MAX_PHONE_LENGTH = 32;
-const MAX_CONTACT_NAME_LENGTH = 80;
-const MAX_CUSTOMER_NOTE_LENGTH = 300;
+// Exported: the customer app limits the contact name and the note to the same lengths.
+export const MAX_CONTACT_NAME_LENGTH = 80;
+export const MAX_CUSTOMER_NOTE_LENGTH = 300;
 // Exported: the customer app limits the landmark field to the same length.
 export const MAX_LANDMARK_LENGTH = 200;
 const TRACKING_TOKEN_LENGTH = 43;

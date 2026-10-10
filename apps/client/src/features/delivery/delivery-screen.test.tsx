@@ -19,6 +19,7 @@ import {
   seedCart,
   stubApi,
 } from "../../test-support/delivery-harness";
+import { continueButtons as contactContinueButtons } from "../../test-support/contact-harness";
 import { expectNoAccessibilityViolations } from "../../test-support/expect-no-accessibility-violations";
 import { createFakeMapLoader } from "../../test-support/fake-map";
 import { restoreGeolocation, stubGeolocation } from "../../test-support/stub-geolocation";
@@ -197,16 +198,38 @@ describe("the delivery screen", () => {
       expect(window.location.pathname).toBe("/coordonnees");
     });
 
+    // The contact screen that follows: the name, the phone number and the note are personal too.
+    fireEvent.change(await screen.findByRole("textbox", { name: texts.contact.name.label }), {
+      target: { value: "Rakoto Secret" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: texts.contact.phone.label }), {
+      target: { value: "034 98 765 43" },
+    });
+    fireEvent.change(
+      screen.getByRole("textbox", { name: new RegExp(`^${texts.contact.note.label}`) }),
+      {
+        target: { value: "Chien méchant" },
+      },
+    );
+    fireEvent.click((await contactContinueButtons()).bar);
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/recapitulatif");
+    });
+
     const everythingWritten = JSON.stringify([
       consoleCalls.map((spy) => spy.mock.calls),
       window.location.href,
       document.body.textContent,
       vi.mocked(fetch).mock.calls,
     ]);
-    expect(everythingWritten).not.toMatch(/18\.9|47\.5|Portail secret/);
-    // The only request is the instance configuration: the map is the one external call, and
-    // it is made by the library, never by the application.
-    expect(vi.mocked(fetch).mock.calls.map((call) => call[0])).toEqual(["/api/v1/instance"]);
+    expect(everythingWritten).not.toMatch(
+      /18\.9|47\.5|Portail secret|Rakoto Secret|98 765 43|987654|Chien méchant/,
+    );
+    // The only requests are the instance configuration and the catalogue (the summary of the
+    // contact screen): the map is the one external call, made by the library, never by the app.
+    expect(new Set(vi.mocked(fetch).mock.calls.map((call) => call[0]))).toEqual(
+      new Set(["/api/v1/instance", "/api/v1/products"]),
+    );
   });
 
   it("has no accessibility violation, with the map as a named group", async () => {

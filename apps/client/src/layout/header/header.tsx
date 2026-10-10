@@ -7,7 +7,7 @@ import iconButton from "../../components/icon-button/icon-button.module.css";
 import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
 import { useInstance } from "../../features/instance/use-instance";
 import { texts } from "../../i18n/texts";
-import { CART_PATH, DELIVERY_PATH } from "../../routes";
+import { CART_PATH, CONTACT_PATH, DELIVERY_PATH } from "../../routes";
 
 import { CartBadge } from "./cart-badge";
 import styles from "./header.module.css";
@@ -71,30 +71,45 @@ function BackLink({
   );
 }
 
+/** The screens of the order after the cart: a phone has a back link and the title of the step. */
+function useStepHeader(): { href: string; label: string; title: string } | null {
+  const [isDeliveryScreen] = useRoute(DELIVERY_PATH);
+  const [isContactScreen] = useRoute(CONTACT_PATH);
+  if (isDeliveryScreen) {
+    return { href: CART_PATH, label: texts.shell.backToCart, title: texts.shell.steps.address };
+  }
+  if (isContactScreen) {
+    return {
+      href: DELIVERY_PATH,
+      label: texts.shell.backToAddress,
+      title: texts.shell.steps.contact,
+    };
+  }
+  return null;
+}
+
 /**
  * The cart screen has a back link and its title, and no cart link (it is the cart). The delivery
- * screen has the same on a phone, and the cart link beside the logo on the web layout. The title
- * is plain text: the page's one heading is the one in its content.
+ * and contact screens have the same on a phone, and the cart link beside the logo on the web
+ * layout. The title is plain text: the page's one heading is the one in its content.
  */
 export function Header(): ReactElement {
   const [isCartScreen] = useRoute(CART_PATH);
-  const [isDeliveryScreen] = useRoute(DELIVERY_PATH);
+  const step = useStepHeader();
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
         {isCartScreen && <BackLink href="/" label={texts.shell.back} />}
-        {isDeliveryScreen && (
-          <BackLink href={CART_PATH} label={texts.shell.backToCart} className={styles.phoneOnly} />
+        {step !== null && (
+          <BackLink href={step.href} label={step.label} className={styles.phoneOnly} />
         )}
         <HeaderBrand />
         {isCartScreen && <span className={styles.title}>{texts.cart.screen.title}</span>}
-        {isDeliveryScreen && (
-          <span className={[styles.title, styles.phoneOnly].join(" ")}>
-            {texts.shell.steps.address}
-          </span>
+        {step !== null && (
+          <span className={[styles.title, styles.phoneOnly].join(" ")}>{step.title}</span>
         )}
-        {(!isCartScreen || isDeliveryScreen) && (
-          <div className={[styles.cartSlot, isDeliveryScreen ? styles.webOnly : ""].join(" ")}>
+        {(!isCartScreen || step !== null) && (
+          <div className={[styles.cartSlot, step !== null ? styles.webOnly : ""].join(" ")}>
             <CartBadge />
           </div>
         )}
