@@ -3,10 +3,23 @@ import type { ReactElement } from "react";
 import styles from "./icon.module.css";
 
 export type IconName =
-  "arrow-left" | "plus" | "minus" | "trash" | "bag" | "map-pin" | "user" | "send" | "check";
+  | "arrow-left"
+  | "plus"
+  | "minus"
+  | "trash"
+  | "bag"
+  | "map-pin"
+  | "user"
+  | "send"
+  | "check"
+  | "house"
+  | "locate-fixed"
+  | "crosshair"
+  | "truck";
 
 // Inline line icons (no request, no package). Decorative: the control that holds one is named.
-const ICON_PATHS: Readonly<Record<IconName, readonly string[]>> = {
+// Exported for the map marker, which is drawn outside React by the map library.
+export const ICON_PATHS: Readonly<Record<IconName, readonly string[]>> = {
   "arrow-left": ["m12 19-7-7 7-7", "M19 12H5"],
   plus: ["M5 12h14", "M12 5v14"],
   minus: ["M5 12h14"],
@@ -25,6 +38,22 @@ const ICON_PATHS: Readonly<Record<IconName, readonly string[]>> = {
   send: ["m22 2-7 20-4-9-9-4Z", "M22 2 11 13"],
   check: ["M20 6 9 17l-5-5"],
   bag: ["M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z", "M3 6h18", "M16 10a4 4 0 0 1-8 0"],
+  house: ["M3 11 12 3l9 8", "M5 9.5V21h14V9.5", "M10 21v-6h4v6"],
+  "locate-fixed": [
+    "M12 5a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z",
+    "M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z",
+    "M12 2v3",
+    "M12 19v3",
+    "M2 12h3",
+    "M19 12h3",
+  ],
+  crosshair: ["M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z", "M12 1v7", "M12 16v7", "M1 12h7", "M16 12h7"],
+  truck: [
+    "M2 6h12v10H2Z",
+    "M14 9h4l4 4v3h-8Z",
+    "M7 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z",
+    "M18 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z",
+  ],
 };
 
 export function Icon({ name }: { name: IconName }): ReactElement {

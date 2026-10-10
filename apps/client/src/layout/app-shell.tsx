@@ -2,7 +2,7 @@ import type { ReactElement, ReactNode, RefObject } from "react";
 import { useEffect, useRef } from "react";
 import { useLocation, useRoute } from "wouter";
 
-import { CART_PATH } from "../routes";
+import { CART_PATH, DELIVERY_PATH } from "../routes";
 
 import { CartPanel } from "../features/cart/cart-panel/cart-panel";
 
@@ -24,15 +24,17 @@ function useFocusOnNavigation(): RefObject<HTMLElement | null> {
   return mainRef;
 }
 
-/** The permanent structure of every page: banner, steps (catalogue and cart only), one main area, and the side cart beside the catalogue. */
+/** The permanent structure of every page: banner, steps (catalogue, cart and delivery), one main area, and the side cart beside the catalogue. */
 export function AppShell({ children }: { children: ReactNode }): ReactElement {
   const mainRef = useFocusOnNavigation();
   const [isCatalogue] = useRoute("/");
   const [isCart] = useRoute(CART_PATH);
+  const [isDelivery] = useRoute(DELIVERY_PATH);
   return (
     <>
       <Header />
       {isCatalogue || isCart ? <StepIndicator isShownOnMobile={isCart} /> : null}
+      {isDelivery ? <StepIndicator current={1} isShownOnMobile mobileLayout="compact" /> : null}
       {/* The side cart is a complementary area: a sibling of main, not inside it. */}
       <div className={isCatalogue ? styles.withSidebar : undefined}>
         <main ref={mainRef} tabIndex={-1} className={styles.main}>

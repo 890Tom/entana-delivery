@@ -4,11 +4,13 @@ import { Route, Switch } from "wouter";
 import { CartScreen } from "./features/cart/cart-screen/cart-screen";
 import { CartProvider } from "./features/cart/cart-provider";
 import { Catalogue } from "./features/catalogue/catalogue";
+import { DeliveryDraftProvider } from "./features/delivery/delivery-draft/delivery-draft-provider";
+import { DeliveryScreen } from "./features/delivery/delivery-screen";
 import { texts } from "./i18n/texts";
 import { AppShell } from "./layout/app-shell";
 import { NotFound } from "./layout/not-found/not-found";
 import { useDocumentTitle } from "./layout/document-title/use-document-title";
-import { CART_PATH } from "./routes";
+import { CART_PATH, DELIVERY_PATH } from "./routes";
 
 function CataloguePage(): ReactElement {
   useDocumentTitle(texts.catalogue.title);
@@ -18,13 +20,16 @@ function CataloguePage(): ReactElement {
 export function App(): ReactElement {
   return (
     <CartProvider>
-      <AppShell>
-        <Switch>
-          <Route path="/" component={CataloguePage} />
-          <Route path={CART_PATH} component={CartScreen} />
-          <Route component={NotFound} />
-        </Switch>
-      </AppShell>
+      <DeliveryDraftProvider>
+        <AppShell>
+          <Switch>
+            <Route path="/" component={CataloguePage} />
+            <Route path={CART_PATH} component={CartScreen} />
+            <Route path={DELIVERY_PATH} component={DeliveryScreen} />
+            <Route component={NotFound} />
+          </Switch>
+        </AppShell>
+      </DeliveryDraftProvider>
     </CartProvider>
   );
 }

@@ -1,4 +1,4 @@
-/* Web only, except where a screen asks for it (the cart): the catalogue has none on mobile. */
+/* Web only, except where a screen asks for it (the cart, the delivery screen). */
 .nav {
   display: none;
   border-bottom: var(--border-width) solid var(--color-border);
@@ -17,16 +17,27 @@
   list-style: none;
 }
 
+/* One step: the joining line, then the step itself. The current one keeps its own width. */
+.done,
 .current,
 .upcoming {
   display: flex;
   flex: 1 1 auto;
-  gap: var(--space-2);
   align-items: center;
 }
 
 .current {
   flex: none;
+}
+
+.step {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.current .step {
   height: var(--size-cart-pill-height);
   padding-inline: var(--space-3) var(--space-4);
   font: var(--font-body-strong);
@@ -35,18 +46,22 @@
   box-shadow: var(--shadow-sm);
 }
 
-.upcoming {
+.upcoming .step {
   color: var(--color-text-muted);
 }
 
 /* The line that joins a step to the one before it. */
-.upcoming::before {
+.joiner {
   flex: 1 1 auto;
   min-width: var(--space-5);
   height: var(--border-width-strong);
-  margin-inline-end: var(--space-2);
-  content: "";
+  margin-inline: var(--space-2);
   background: var(--color-border);
+}
+
+.done .joiner,
+.current .joiner {
+  background: var(--color-border-strong);
 }
 
 .dot {
@@ -59,7 +74,8 @@
   border-radius: var(--radius-full);
 }
 
-.current .dot {
+.current .dot,
+.done .dot {
   color: var(--color-text-inverse);
   background: var(--color-surface-inverse);
 }
@@ -75,6 +91,67 @@
   border: var(--border-width-strong) solid var(--color-border-input);
 }
 
+/* The phone layout of the delivery screen. */
+.compact {
+  padding: var(--space-4);
+}
+
+.compactHead {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.compactDot {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-step-dot-compact);
+  height: var(--size-step-dot-compact);
+  color: var(--color-text-on-accent);
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+}
+
+.compactDot svg {
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+}
+
+.compactName {
+  font: var(--font-body-strong);
+}
+
+.compactPosition {
+  margin-inline-start: auto;
+  color: var(--color-text-muted);
+}
+
+.segments {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.segments > span {
+  flex: 1 1 0;
+  height: var(--size-progress-segment);
+  border-radius: var(--radius-full);
+}
+
+.segment-done {
+  background: var(--color-surface-inverse);
+}
+
+.segment-current {
+  background: var(--color-accent);
+}
+
+.segment-upcoming {
+  background: var(--color-border);
+}
+
 /*
  * On a narrow screen the five steps cannot all show their name: the next ones keep their icon and
  * stay named for assistive technology (the same clipping as the visually hidden utility).
@@ -84,8 +161,13 @@
     padding-inline: var(--space-4);
   }
 
-  .upcoming::before {
+  .joiner {
     min-width: var(--space-2);
+  }
+
+  /* The compact layout replaces the five steps on a phone. */
+  .compactOnMobile .list {
+    display: none;
   }
 }
 
@@ -95,8 +177,12 @@
     display: block;
   }
 
+  .compact {
+    display: none;
+  }
+
   /* Undoes the visually hidden utility that the narrow layout puts on the names. */
-  .upcoming .label {
+  .label {
     position: static;
     width: auto;
     aspect-ratio: auto;

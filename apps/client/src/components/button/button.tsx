@@ -10,13 +10,15 @@ interface ButtonProps {
   /** Names the button for assistive technology when the visible label is not enough. */
   readonly label?: string;
   readonly icon?: IconName;
+  /** "accent" is the soft gold of the owner's design for "Utiliser ma position". */
+  readonly variant?: "secondary" | "accent";
   readonly isDisabled?: boolean;
   readonly onClick: () => void;
   readonly ref?: Ref<HTMLButtonElement>;
 }
 
 /**
- * The secondary, full-width button of the design system (the only variant used so far). A disabled
+ * The full-width button of the design system, secondary or the soft accent. A disabled
  * one stays focusable (`aria-disabled`, not `disabled`): the focus is not lost when it becomes
  * disabled, and it is announced as unavailable.
  */
@@ -24,6 +26,7 @@ export function Button({
   children,
   label,
   icon,
+  variant = "secondary",
   isDisabled = false,
   onClick,
   ref,
@@ -32,7 +35,7 @@ export function Button({
     <button
       ref={ref}
       type="button"
-      className={styles.button}
+      className={[styles.button, variant === "accent" ? styles.accent : ""].join(" ")}
       aria-label={label}
       aria-disabled={isDisabled ? true : undefined}
       onClick={isDisabled ? undefined : onClick}

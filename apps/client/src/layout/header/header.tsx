@@ -7,7 +7,7 @@ import iconButton from "../../components/icon-button/icon-button.module.css";
 import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
 import { useInstance } from "../../features/instance/use-instance";
 import { texts } from "../../i18n/texts";
-import { CART_PATH } from "../../routes";
+import { CART_PATH, DELIVERY_PATH } from "../../routes";
 
 import { CartBadge } from "./cart-badge";
 import styles from "./header.module.css";
@@ -54,30 +54,47 @@ function HeaderBrand(): ReactElement {
   return <Brand name={instance.data.name} logoUrl={instance.data.logoUrl} />;
 }
 
-/** The way back from the cart screen, to the catalogue by its fixed address. */
-function BackLink(): ReactElement {
+/** A way back by a fixed address (never one taken from an input). */
+function BackLink({
+  href,
+  label,
+  className,
+}: {
+  href: string;
+  label: string;
+  className?: string;
+}): ReactElement {
   return (
-    <Link href="/" className={iconButton.button} aria-label={texts.shell.back}>
+    <Link href={href} className={[iconButton.button, className ?? ""].join(" ")} aria-label={label}>
       <Icon name="arrow-left" />
     </Link>
   );
 }
 
 /**
- * The cart screen has a back link and its title, and no cart link (it is the cart). The title is
- * plain text: the page's one heading is the one in its content.
+ * The cart screen has a back link and its title, and no cart link (it is the cart). The delivery
+ * screen has the same on a phone, and the cart link beside the logo on the web layout. The title
+ * is plain text: the page's one heading is the one in its content.
  */
 export function Header(): ReactElement {
   const [isCartScreen] = useRoute(CART_PATH);
+  const [isDeliveryScreen] = useRoute(DELIVERY_PATH);
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        {isCartScreen && <BackLink />}
+        {isCartScreen && <BackLink href="/" label={texts.shell.back} />}
+        {isDeliveryScreen && (
+          <BackLink href={CART_PATH} label={texts.shell.backToCart} className={styles.phoneOnly} />
+        )}
         <HeaderBrand />
-        {isCartScreen ? (
-          <span className={styles.title}>{texts.cart.screen.title}</span>
-        ) : (
-          <div className={styles.cartSlot}>
+        {isCartScreen && <span className={styles.title}>{texts.cart.screen.title}</span>}
+        {isDeliveryScreen && (
+          <span className={[styles.title, styles.phoneOnly].join(" ")}>
+            {texts.shell.steps.address}
+          </span>
+        )}
+        {(!isCartScreen || isDeliveryScreen) && (
+          <div className={[styles.cartSlot, isDeliveryScreen ? styles.webOnly : ""].join(" ")}>
             <CartBadge />
           </div>
         )}
