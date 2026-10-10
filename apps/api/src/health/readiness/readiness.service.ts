@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger } from "nestjs-pino";
 import type { ReadinessResponse } from "@entana/contracts";
-import { DATABASE_CLIENT } from "../../database/database-client.js";
+import { DATABASE_CLIENT } from "../../database/client-token/database-client.js";
 import { ServiceNotReadyError } from "./failure/service-not-ready-error.js";
 import { classifyReadinessFailure } from "./failure/classify-readiness-failure.js";
 import type { ReadinessFailureReason } from "./failure/classify-readiness-failure.js";

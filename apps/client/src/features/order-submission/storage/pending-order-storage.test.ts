@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildAttempt } from "../../test-support/build-order-submission";
+import { buildAttempt } from "../../../test-support/build-order-submission";
 
 import {
   PENDING_ORDER_STORAGE_ITEM,

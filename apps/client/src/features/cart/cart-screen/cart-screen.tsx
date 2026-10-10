@@ -11,7 +11,7 @@ import { useDocumentTitle } from "../../../layout/document-title/use-document-ti
 import { DELIVERY_PATH } from "../../../routes";
 import { readCatalogueErrorKind } from "../../catalogue/api/fetch-products";
 import { useProducts } from "../../catalogue/api/use-products";
-import { useCart } from "../cart-context";
+import { useCart } from "../cart-state/cart-context";
 import { toDisplayLines } from "../rules/to-display-lines";
 import { useCartReconciliation } from "../reconciliation/use-cart-reconciliation";
 

@@ -1,4 +1,4 @@
-import { DATABASE_CLIENT } from "../../src/database/database-client.js";
+import { DATABASE_CLIENT } from "../../src/database/client-token/database-client.js";
 import { InvalidDatabaseOptionsError } from "@entana/database";
 import type { PrismaClient } from "@entana/database";
 import { afterEach, describe, expect, it, vi } from "vitest";

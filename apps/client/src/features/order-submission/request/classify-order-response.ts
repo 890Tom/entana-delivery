@@ -1,12 +1,12 @@
 import { createOrderResponseSchema, problemDetailsSchema } from "@entana/contracts";
 
-import { ORDER_FIELDS } from "./order-submission-types";
+import { ORDER_FIELDS } from "../order-submission-types";
 import type {
   OrderField,
   OrderSubmissionError,
   OrderSubmissionResult,
   PlainErrorType,
-} from "./order-submission-types";
+} from "../order-submission-types";
 
 // Only what is read from an error answer: its text and its title are never looked at.
 const problemSchema = problemDetailsSchema.pick({ errors: true, productIds: true });

@@ -1,5 +1,5 @@
 import { classifyOrderResponse } from "./classify-order-response";
-import type { OrderAttempt, OrderSubmissionResult } from "./order-submission-types";
+import type { OrderAttempt, OrderSubmissionResult } from "../order-submission-types";
 
 const ORDERS_ADDRESS = "/api/v1/orders";
 const ORDER_TIMEOUT_MS = 15_000;

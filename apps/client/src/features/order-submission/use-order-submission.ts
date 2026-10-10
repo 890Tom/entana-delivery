@@ -1,6 +1,6 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 
-import { useCart } from "../cart/cart-context";
+import { useCart } from "../cart/cart-state/cart-context";
 import { useContactDraft } from "../contact/contact-draft/contact-draft-context";
 import { useDeliveryDraft } from "../delivery/delivery-draft/delivery-draft-context";
 import { useInstance } from "../instance/use-instance";

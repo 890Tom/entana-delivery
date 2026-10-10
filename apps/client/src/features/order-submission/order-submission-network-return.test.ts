@@ -5,10 +5,10 @@ import { buildCleanup, created, status } from "../../test-support/order-submissi
 import { resetOrderSubmission } from "../../test-support/reset-order-submission";
 import { jsonResponse, pendingUntilAborted, stubFetch } from "../../test-support/stub-fetch";
 
-import type { OrderDrafts } from "./build-order-request";
+import type { OrderDrafts } from "./request/build-order-request";
 import { attachOrderSubmissionHost, submitOrder } from "./order-submission";
 import type { OrderCleanup } from "./order-submission";
-import { PENDING_ORDER_STORAGE_ITEM } from "./pending-order-storage";
+import { PENDING_ORDER_STORAGE_ITEM } from "./storage/pending-order-storage";
 
 beforeEach(() => {
   resetOrderSubmission();

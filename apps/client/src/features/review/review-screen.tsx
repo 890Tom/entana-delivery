@@ -8,8 +8,8 @@ import { useProducts } from "../catalogue/api/use-products";
 import { useCartReconciliation } from "../cart/reconciliation/use-cart-reconciliation";
 import { useOrderSubmission } from "../order-submission/use-order-submission";
 
-import { ReviewContent } from "./review-content";
-import { useReviewGate } from "./use-review-gate";
+import { ReviewContent } from "./content/review-content";
+import { useReviewGate } from "./gate/use-review-gate";
 
 /**
  * The review of the order and its sending. A confirmed order leads to the tracking address,

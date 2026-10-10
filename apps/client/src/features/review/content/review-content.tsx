@@ -1,22 +1,22 @@
 import { useId, useRef } from "react";
 import type { ReactElement } from "react";
 
-import bar from "../../components/bottom-bar/bottom-bar.module.css";
-import { Notice } from "../../components/notice/notice";
-import { texts } from "../../i18n/texts";
-import { useProducts } from "../catalogue/api/use-products";
-import { useCart } from "../cart/cart-context";
-import { useContactDraft } from "../contact/contact-draft/contact-draft-context";
-import { toPhoneDisplay } from "../contact/rules/phone-input";
-import { useDeliveryDraft } from "../delivery/delivery-draft/delivery-draft-context";
-import { useInstance } from "../instance/use-instance";
-import type { OrderSubmission } from "../order-submission/use-order-submission";
-import { OrderSummaryCard } from "../order-summary/order-summary-card";
+import bar from "../../../components/bottom-bar/bottom-bar.module.css";
+import { Notice } from "../../../components/notice/notice";
+import { texts } from "../../../i18n/texts";
+import { useProducts } from "../../catalogue/api/use-products";
+import { useCart } from "../../cart/cart-state/cart-context";
+import { useContactDraft } from "../../contact/contact-draft/contact-draft-context";
+import { toPhoneDisplay } from "../../contact/rules/phone-input";
+import { useDeliveryDraft } from "../../delivery/delivery-draft/delivery-draft-context";
+import { useInstance } from "../../instance/use-instance";
+import type { OrderSubmission } from "../../order-submission/use-order-submission";
+import { OrderSummaryCard } from "../../order-summary/order-summary-card";
 
-import { DeliveryRecapCard } from "./delivery-recap/delivery-recap-card";
-import styles from "./review-screen.module.css";
+import { DeliveryRecapCard } from "../delivery-recap/delivery-recap-card";
+import styles from "../review-screen.module.css";
 import { SendControls } from "./send-controls";
-import { useReviewNotice } from "./use-review-notice";
+import { useReviewNotice } from "../notice/use-review-notice";
 
 /** The page heading (one per width, the other `display: none`) and the notice of the cart. */
 function PageHead(): ReactElement {

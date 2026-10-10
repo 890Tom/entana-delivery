@@ -11,7 +11,7 @@ import type {
 import { texts } from "../../i18n/texts";
 import { readCatalogueErrorKind } from "../catalogue/api/fetch-products";
 import { useProducts } from "../catalogue/api/use-products";
-import { useCart } from "../cart/cart-context";
+import { useCart } from "../cart/cart-state/cart-context";
 import type { CartLine } from "../cart/rules/cart-reducer";
 import { toDisplayLines } from "../cart/rules/to-display-lines";
 import { estimateDeliveryFee } from "../delivery/rules/estimate-delivery-fee";

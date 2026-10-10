@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { Route, Switch } from "wouter";
 
 import { CartScreen } from "./features/cart/cart-screen/cart-screen";
-import { CartProvider } from "./features/cart/cart-provider";
+import { CartProvider } from "./features/cart/cart-state/cart-provider";
 import { Catalogue } from "./features/catalogue/catalogue";
 import { ContactDraftProvider } from "./features/contact/contact-draft/contact-draft-provider";
 import { ContactScreen } from "./features/contact/contact-screen";

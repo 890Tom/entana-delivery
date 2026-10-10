@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { buildAttempt } from "../../test-support/build-order-submission";
-import { buildProductId } from "../../test-support/build-product";
+import { buildAttempt } from "../../../test-support/build-order-submission";
+import { buildProductId } from "../../../test-support/build-product";
 
 import { isSameRequest } from "./is-same-request";
 

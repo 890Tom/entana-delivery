@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { Link } from "wouter";
 
 import { Icon } from "../../components/icon/icon";
-import { useCart } from "../../features/cart/cart-context";
+import { useCart } from "../../features/cart/cart-state/cart-context";
 import { texts } from "../../i18n/texts";
 import { CART_PATH } from "../../routes";
 

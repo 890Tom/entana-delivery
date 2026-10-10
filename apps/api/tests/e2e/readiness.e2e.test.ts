@@ -11,7 +11,7 @@ import request from "supertest";
 import { z } from "zod";
 import type { Response } from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DATABASE_CLIENT } from "../../src/database/database-client.js";
+import { DATABASE_CLIENT } from "../../src/database/client-token/database-client.js";
 import { startAppWithReadinessTimeout } from "./support/create-test-app.js";
 import { captureLogs } from "./support/log-capture.js";
 import type { LogCapture } from "./support/log-capture.js";

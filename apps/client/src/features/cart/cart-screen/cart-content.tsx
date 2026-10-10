@@ -6,7 +6,7 @@ import { Link } from "wouter";
 import button from "../../../components/button/button.module.css";
 import { Notice } from "../../../components/notice/notice";
 import { texts } from "../../../i18n/texts";
-import { useCart } from "../cart-context";
+import { useCart } from "../cart-state/cart-context";
 
 import { CartLine } from "./cart-line";
 import type { CartDisplayLine } from "./cart-line";

@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { buildProduct } from "../../../test-support/build-product";
-import { CartProvider } from "../../cart/cart-provider";
+import { CartProvider } from "../../cart/cart-state/cart-provider";
 
 import { ProductCard } from "./product-card";
 

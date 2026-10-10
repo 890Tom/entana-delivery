@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
 
-import { BottomBar } from "../../components/bottom-bar/bottom-bar";
-import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
-import { texts } from "../../i18n/texts";
+import { BottomBar } from "../../../components/bottom-bar/bottom-bar";
+import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
+import { texts } from "../../../i18n/texts";
 
 interface SendControlsProps {
   readonly formId: string;

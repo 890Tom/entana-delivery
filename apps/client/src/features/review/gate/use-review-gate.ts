@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 
-import { useCart } from "../cart/cart-context";
-import { useContactDraft } from "../contact/contact-draft/contact-draft-context";
-import { useDeliveryDraft } from "../delivery/delivery-draft/delivery-draft-context";
-import { useInstance } from "../instance/use-instance";
-import { dismissOrderSubmission } from "../order-submission/order-submission";
-import type { OrderSubmissionState } from "../order-submission/order-submission-types";
+import { useCart } from "../../cart/cart-state/cart-context";
+import { useContactDraft } from "../../contact/contact-draft/contact-draft-context";
+import { useDeliveryDraft } from "../../delivery/delivery-draft/delivery-draft-context";
+import { useInstance } from "../../instance/use-instance";
+import { dismissOrderSubmission } from "../../order-submission/order-submission";
+import type { OrderSubmissionState } from "../../order-submission/order-submission-types";
 
-import { getReviewRedirect } from "./rules/get-review-redirect";
+import { getReviewRedirect } from "../rules/get-review-redirect";
 
 /** What the review does before showing anything. */
 export type ReviewGate =
