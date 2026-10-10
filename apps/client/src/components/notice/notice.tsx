@@ -1,12 +1,13 @@
 import type { ReactElement, ReactNode, Ref } from "react";
+import { Link } from "wouter";
 
 import { NoticeIcon } from "./notice-icons";
 import styles from "./notice.module.css";
 
-interface NoticeAction {
-  readonly label: string;
-  readonly onClick: () => void;
-}
+/** A button that does something here, or a link to another screen (a fixed address). */
+type NoticeAction =
+  | { readonly label: string; readonly onClick: () => void }
+  | { readonly label: string; readonly href: string };
 
 interface NoticeProps {
   readonly tone: "error" | "info";
@@ -23,6 +24,21 @@ const TONES = {
   error: { className: styles.error, role: "alert", icon: "circle-alert" },
   info: { className: styles.info, role: "note", icon: "info" },
 } as const;
+
+function NoticeActionControl({ action }: { action: NoticeAction }): ReactElement {
+  if ("href" in action) {
+    return (
+      <Link href={action.href} className={styles.action}>
+        {action.label}
+      </Link>
+    );
+  }
+  return (
+    <button type="button" className={styles.action} onClick={action.onClick}>
+      {action.label}
+    </button>
+  );
+}
 
 export function Notice({
   tone,
@@ -42,11 +58,7 @@ export function Notice({
     >
       <NoticeIcon name={icon} />
       <p className={styles.text}>{children}</p>
-      {action !== undefined && (
-        <button type="button" className={styles.action} onClick={action.onClick}>
-          {action.label}
-        </button>
-      )}
+      {action !== undefined && <NoticeActionControl action={action} />}
     </div>
   );
 }

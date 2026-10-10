@@ -173,7 +173,7 @@ describe("the delivery screen", () => {
     });
   });
 
-  it("never writes a coordinate or a landmark to the console, the address, the page or the network", async () => {
+  it("never writes a coordinate or a landmark to the console, the address or the network", async () => {
     const consoleCalls = CONSOLE_METHODS.map((method) =>
       vi.spyOn(console, method).mockImplementation(() => undefined),
     );
@@ -216,10 +216,11 @@ describe("the delivery screen", () => {
       expect(window.location.pathname).toBe("/recapitulatif");
     });
 
+    // Not the page text: the review that follows shows these texts to their owner, by design
+    // (the review's own test checks that nothing else carries them).
     const everythingWritten = JSON.stringify([
       consoleCalls.map((spy) => spy.mock.calls),
       window.location.href,
-      document.body.textContent,
       vi.mocked(fetch).mock.calls,
     ]);
     expect(everythingWritten).not.toMatch(

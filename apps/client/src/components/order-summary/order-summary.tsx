@@ -29,6 +29,22 @@ export type OrderSummaryContent =
       readonly totalAr: number;
     };
 
+/** One title, or one for a narrow layout and one for the web layout (only one is displayed). */
+export type OrderSummaryTitle = string | { readonly narrow: string; readonly wide: string };
+
+function SummaryTitle({ title }: { title: OrderSummaryTitle }): ReactElement | string {
+  if (typeof title === "string") {
+    return title;
+  }
+  // `display: none` at the other width: the hidden one is also out of the accessible name.
+  return (
+    <>
+      <span className={styles.narrowOnly}>{title.narrow}</span>
+      <span className={styles.wideOnly}>{title.wide}</span>
+    </>
+  );
+}
+
 // The shape of the loaded card: two lines, the delivery row and the total.
 const SKELETON_LINE_COUNT = 2;
 const SKELETON_LINES = Array.from({ length: SKELETON_LINE_COUNT }, (_unused, index) => index);
@@ -99,16 +115,18 @@ function SummaryBody({ content }: { content: OrderSummaryContent }): ReactElemen
  */
 export function OrderSummary({
   content,
+  title = texts.orderSummary.title,
   children,
 }: {
   content: OrderSummaryContent;
+  title?: OrderSummaryTitle;
   children?: ReactNode;
 }): ReactElement {
   const titleId = useId();
   return (
     <section aria-labelledby={titleId} className={styles.card}>
       <h2 id={titleId} className={styles.title}>
-        {texts.orderSummary.title}
+        <SummaryTitle title={title} />
       </h2>
       <SummaryBody content={content} />
       {children}

@@ -1,0 +1,93 @@
+.page {
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding: var(--space-4);
+  margin-inline: auto;
+}
+
+/*
+ * The visual order is made here, not by the document: the document goes title, card of the
+ * delivery (its links), payment, amounts (and the button), error, so that the keyboard reaches the
+ * links before the button at every width.
+ */
+.grid {
+  display: grid;
+  grid-template-areas:
+    "title"
+    "summary"
+    "recap"
+    "payment"
+    "error";
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  grid-area: title;
+  gap: var(--space-4);
+}
+
+.title {
+  margin: 0;
+}
+
+.recap {
+  grid-area: recap;
+}
+
+.payment {
+  grid-area: payment;
+}
+
+.summary {
+  grid-area: summary;
+}
+
+.error {
+  grid-area: error;
+}
+
+/* Hidden by `display: none`, never visually: out of the accessibility tree and of the tab order. */
+.wideOnly {
+  display: none;
+}
+
+.sendInCard {
+  display: none;
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .page {
+    padding: var(--space-6);
+  }
+
+  .grid {
+    grid-template-areas:
+      "title   summary"
+      "recap   summary"
+      "payment summary"
+      ".       error";
+    grid-template-columns: minmax(0, 1fr) var(--size-sidebar-width);
+    column-gap: var(--space-6);
+  }
+
+  .summary {
+    position: sticky;
+    top: calc(var(--size-header-height) + var(--space-5));
+  }
+
+  .narrowOnly {
+    display: none;
+  }
+
+  .wideOnly {
+    display: block;
+  }
+
+  .sendInCard {
+    display: flex;
+  }
+}

@@ -92,3 +92,18 @@
     animation: none;
   }
 }
+
+.wideOnly {
+  display: none;
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .narrowOnly {
+    display: none;
+  }
+
+  .wideOnly {
+    display: inline;
+  }
+}

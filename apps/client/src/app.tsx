@@ -8,11 +8,12 @@ import { ContactDraftProvider } from "./features/contact/contact-draft/contact-d
 import { ContactScreen } from "./features/contact/contact-screen";
 import { DeliveryDraftProvider } from "./features/delivery/delivery-draft/delivery-draft-provider";
 import { DeliveryScreen } from "./features/delivery/delivery-screen";
+import { ReviewScreen } from "./features/review/review-screen";
 import { texts } from "./i18n/texts";
 import { AppShell } from "./layout/app-shell";
 import { NotFound } from "./layout/not-found/not-found";
 import { useDocumentTitle } from "./layout/document-title/use-document-title";
-import { CART_PATH, CONTACT_PATH, DELIVERY_PATH } from "./routes";
+import { CART_PATH, CONTACT_PATH, DELIVERY_PATH, REVIEW_PATH } from "./routes";
 
 function CataloguePage(): ReactElement {
   useDocumentTitle(texts.catalogue.title);
@@ -30,6 +31,7 @@ export function App(): ReactElement {
               <Route path={CART_PATH} component={CartScreen} />
               <Route path={DELIVERY_PATH} component={DeliveryScreen} />
               <Route path={CONTACT_PATH} component={ContactScreen} />
+              <Route path={REVIEW_PATH} component={ReviewScreen} />
               <Route component={NotFound} />
             </Switch>
           </AppShell>

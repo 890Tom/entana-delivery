@@ -26,13 +26,20 @@
 }
 
 @media (hover: hover) {
-  .link:hover {
+  .link:hover:not([aria-disabled="true"]) {
     background: var(--color-ink-hover);
   }
 }
 
-.link:active {
+.link:active:not([aria-disabled="true"]) {
   transform: scale(var(--scale-pressed));
+}
+
+/* Inactive, not disabled: it keeps its size, its label and the focus, and does nothing. */
+.link[aria-disabled="true"] {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  background: var(--color-border);
 }
 
 /* The size of an amount such as "12 000 Ar": the bar does not change when the amount arrives. */
