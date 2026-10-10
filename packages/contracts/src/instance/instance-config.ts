@@ -36,6 +36,58 @@ export const phoneCountryCodeSchema = z
   .string()
   .regex(/^[1-9][0-9]{0,2}$/, "Must be 1 to 3 digits and must not start with 0.");
 
+// Default style of the public OpenFreeMap instance, as given by its quick start guide
+// (https://openfreemap.org/quick_start/): no key, no account.
+const DEFAULT_MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
+// Approximate centre of Antananarivo: to be adjusted by each shop.
+const DEFAULT_MAP_CENTER = { lat: -18.91, lng: 47.52 };
+const DEFAULT_MAP_ZOOM = 12;
+
+const MAP_STYLE_URL_MAX_LENGTH = 300;
+// A path of the same origin (a self-hosted style): one leading slash, a short safe alphabet.
+const SAME_ORIGIN_PATH = /^\/[A-Za-z0-9._~/-]{1,200}$/;
+const HIDDEN_CHARACTER = /[\s\p{Cc}]/u;
+
+function isSameOriginPath(value: string): boolean {
+  return SAME_ORIGIN_PATH.test(value) && !value.includes("//") && !value.includes("..");
+}
+
+// The address is read by the browser of every customer: https only, and no credential in it. The
+// host alphabet has no "@" or backslash, so "user:pass@host" cannot pass; a regular expression
+// because this package uses no URL parser (it has no Node or DOM types).
+const HTTPS_URL = /^https:\/\/[A-Za-z0-9][A-Za-z0-9.-]*(?::[0-9]{1,5})?(?:[/?#]\S*)?$/;
+
+/** The address of the map style: an absolute https URL or a path of the same origin. */
+export const mapStyleUrlSchema = z
+  .string()
+  .max(MAP_STYLE_URL_MAX_LENGTH)
+  .refine(
+    (value) => !HIDDEN_CHARACTER.test(value),
+    "Must not contain a space or a control character.",
+  )
+  .refine(
+    (value) => isSameOriginPath(value) || HTTPS_URL.test(value),
+    "Must be an https URL without credentials or a path of the same origin.",
+  );
+
+export const latitudeSchema = z.number().min(-90).max(90);
+export const longitudeSchema = z.number().min(-180).max(180);
+export const zoomSchema = z.number().min(1).max(18);
+
+// Every field has a default, so a configuration written before this section keeps starting.
+const mapConfigSchema = z
+  .strictObject({
+    styleUrl: mapStyleUrlSchema.default(DEFAULT_MAP_STYLE_URL),
+    center: z
+      .strictObject({
+        lat: latitudeSchema.default(DEFAULT_MAP_CENTER.lat),
+        lng: longitudeSchema.default(DEFAULT_MAP_CENTER.lng),
+      })
+      .prefault({}),
+    zoom: zoomSchema.default(DEFAULT_MAP_ZOOM),
+  })
+  .prefault({});
+
 /** The instance configuration file (instance.config.yaml). Strict: an unknown key is an error. */
 export const instanceConfigSchema = z.strictObject({
   shop: z.strictObject({ name: shopNameSchema }),
@@ -57,6 +109,7 @@ export const instanceConfigSchema = z.strictObject({
       appIconFile: mediaFileNameSchema.optional(),
     })
     .optional(),
+  map: mapConfigSchema,
 });
 
 export type InstanceConfig = z.infer<typeof instanceConfigSchema>;

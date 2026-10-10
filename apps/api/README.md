@@ -83,8 +83,12 @@ root, ignored by git. **It holds no secret**: its public part is served to every
   (never `.svg`), served later under `/media/branding/`.
 - **`GET /api/v1/instance`**: public, `Cache-Control: public, max-age=60`. Answers
   `publicInstanceSchema`: `name`, `locale`, `currency`, `phoneCountryCode`, `logoUrl`,
-  `appIconUrl`. The time zone and the file names stay on the server. The only error cases are
+  `appIconUrl`, `map`. The time zone and the file names stay on the server. The only error cases are
   those of any route: an invalid file never reaches the route, because the API did not start.
+- **`map`** (optional): `styleUrl`, `center { lat, lng }` and `zoom` of the delivery map; every
+  field has a default (the OpenFreeMap "liberty" style, Antananarivo, zoom 12), so a file without
+  the section still starts. `styleUrl` is an absolute `https` URL or a path of the same origin,
+  which lets a shop serve its own tile style; the section is public, so it holds no secret key.
 - **Phone numbers**: the order service reads `phoneCountryCode` from this file. It replaces the
   former phone country code environment variable, which is removed: set `phoneCountryCode` instead.
 

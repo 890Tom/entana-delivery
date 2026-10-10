@@ -58,6 +58,48 @@ describe("loadInstanceConfig", () => {
     });
   });
 
+  it("loads a valid map section", () => {
+    const yaml = `${VALID_YAML}map:\n  styleUrl: /tiles/style.json\n  center: { lat: -18.8, lng: 47.4 }\n  zoom: 14\n`;
+
+    expect(loadFrom(yaml).map).toEqual({
+      styleUrl: "/tiles/style.json",
+      center: { lat: -18.8, lng: 47.4 },
+      zoom: 14,
+    });
+  });
+
+  it("applies the default map when the section is absent", () => {
+    expect(loadFrom(VALID_YAML).map).toEqual({
+      styleUrl: "https://tiles.openfreemap.org/styles/liberty",
+      center: { lat: -18.91, lng: 47.52 },
+      zoom: 12,
+    });
+  });
+
+  it.each([
+    ["http", `map:\n  styleUrl: "http://${SECRET}.example.org/style"\n`, "map.styleUrl", SECRET],
+    [
+      "credentials in the address",
+      `map:\n  styleUrl: "https://user:${SECRET}@tiles.example.org/style"\n`,
+      "map.styleUrl",
+      SECRET,
+    ],
+    ["a javascript: address", `map:\n  styleUrl: "javascript:${SECRET}"\n`, "map.styleUrl", SECRET],
+    [
+      "a //host address",
+      `map:\n  styleUrl: "//${SECRET}.example.org/style"\n`,
+      "map.styleUrl",
+      SECRET,
+    ],
+    ["a latitude out of bounds", "map:\n  center: { lat: 9191 }\n", "map.center.lat", "9191"],
+    ["a zoom out of bounds", "map:\n  zoom: 9999\n", "map.zoom", "9999"],
+  ])("names the key and not the value for %s", (_label, section, key, leaked) => {
+    const message = failureOf(() => loadFrom(`${VALID_YAML}${section}`));
+
+    expect(message).toContain(`- ${key}`);
+    expect(message).not.toContain(leaked);
+  });
+
   it("uses the demo file outside production when no path is given", () => {
     const config = loadInstanceConfig({ nodeEnv: "development", path: undefined });
 
