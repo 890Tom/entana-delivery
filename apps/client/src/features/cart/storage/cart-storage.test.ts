@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { buildProductId } from "../../../test-support/build-product";
+import { buildProductId } from "../../../test-support/builders/build-product";
 
 import { CART_STORAGE_KEY, readStoredCart, writeStoredCart } from "./cart-storage";
 

@@ -1,7 +1,7 @@
 import { createOrderRequestSchema } from "@entana/contracts";
 
-import type { OrderDrafts } from "../features/order-submission/request/build-order-request";
-import type { OrderAttempt } from "../features/order-submission/order-submission-types";
+import type { OrderDrafts } from "../../features/order-submission/request/build-order-request";
+import type { OrderAttempt } from "../../features/order-submission/order-submission-types";
 
 import { buildProductId } from "./build-product";
 

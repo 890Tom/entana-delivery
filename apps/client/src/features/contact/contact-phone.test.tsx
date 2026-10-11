@@ -3,7 +3,7 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { buildInstance } from "../../test-support/build-instance";
+import { buildInstance } from "../../test-support/builders/build-instance";
 import {
   NAME,
   PHONE,
@@ -14,8 +14,8 @@ import {
   openContact,
   phoneField,
   typeInto,
-} from "../../test-support/contact-harness";
-import { expectNoAccessibilityViolations } from "../../test-support/expect-no-accessibility-violations";
+} from "../../test-support/harnesses/contact-harness";
+import { expectNoAccessibilityViolations } from "../../test-support/assertions/expect-no-accessibility-violations";
 
 afterEach(() => {
   cleanup();

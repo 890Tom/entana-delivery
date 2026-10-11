@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "../../cart/cart-state/cart-context";
 import { useContactDraft } from "../../contact/contact-draft/contact-draft-context";
 import { useDeliveryDraft } from "../../delivery/delivery-draft/delivery-draft-context";
-import { useInstance } from "../../instance/use-instance";
+import { useInstance } from "../../instance/api/use-instance";
 import { dismissOrderSubmission } from "../../order-submission/order-submission";
 import type { OrderSubmissionState } from "../../order-submission/order-submission-types";
 

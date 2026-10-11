@@ -4,13 +4,13 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createQueryClient } from "../../data-fetching/query-client";
-import { buildProduct, buildProductId } from "../../test-support/build-product";
+import { buildProduct, buildProductId } from "../../test-support/builders/build-product";
 import {
   jsonResponse,
   pendingUntilAborted,
   problemResponse,
   stubFetch,
-} from "../../test-support/stub-fetch";
+} from "../../test-support/stubs/stub-fetch";
 import { texts } from "../../i18n/texts";
 import { CartProvider } from "../cart/cart-state/cart-provider";
 

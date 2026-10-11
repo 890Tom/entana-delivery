@@ -2,12 +2,12 @@ import type { TrackingLookupRequest, TrackingResponse } from "@entana/contracts"
 import { useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 
-import { Button } from "../../components/button/button";
-import { texts } from "../../i18n/texts";
-import { TrackingView, focusVisibleTitle } from "../tracking/content/tracking-content";
+import { Button } from "../../../components/button/button";
+import { texts } from "../../../i18n/texts";
+import { TrackingView, focusVisibleTitle } from "../../tracking/content/tracking-content";
 
-import { useLookup } from "./api/use-lookup";
-import styles from "./find-order-screen.module.css";
+import { useLookup } from "../api/use-lookup";
+import styles from "../find-order-screen.module.css";
 
 /**
  * A refresh asks again with the same values, once, by hand; if it fails the last view stays,

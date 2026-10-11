@@ -4,10 +4,10 @@ import type { ReactElement } from "react";
 
 import { texts } from "../../i18n/texts";
 import { useDocumentTitle } from "../../layout/document-title/use-document-title";
-import { useNoIndex } from "../tracking/use-no-index";
+import { useNoIndex } from "../../layout/no-index/use-no-index";
 
-import { FindOrderForm } from "./find-order-form";
-import { FindOrderResult } from "./find-order-result";
+import { FindOrderForm } from "./find-order-form/find-order-form";
+import { FindOrderResult } from "./find-order-result/find-order-result";
 
 interface Found {
   readonly request: TrackingLookupRequest;

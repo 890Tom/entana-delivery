@@ -1,7 +1,7 @@
 import type { TrackingResponse } from "@entana/contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { jsonResponse, problemResponse } from "../../../test-support/stub-fetch";
+import { jsonResponse, problemResponse } from "../../../test-support/stubs/stub-fetch";
 
 import { lookupOrder } from "./request-lookup";
 

@@ -18,11 +18,11 @@ import {
   renderDelivery,
   seedCart,
   stubApi,
-} from "../../test-support/delivery-harness";
-import { continueButtons as contactContinueButtons } from "../../test-support/contact-harness";
-import { expectNoAccessibilityViolations } from "../../test-support/expect-no-accessibility-violations";
-import { createFakeMapLoader } from "../../test-support/fake-map";
-import { restoreGeolocation, stubGeolocation } from "../../test-support/stub-geolocation";
+} from "../../test-support/harnesses/delivery-harness";
+import { continueButtons as contactContinueButtons } from "../../test-support/harnesses/contact-harness";
+import { expectNoAccessibilityViolations } from "../../test-support/assertions/expect-no-accessibility-violations";
+import { createFakeMapLoader } from "../../test-support/stubs/fake-map";
+import { restoreGeolocation, stubGeolocation } from "../../test-support/stubs/stub-geolocation";
 
 import { MAP_LOADER_CONTEXT } from "./map/map-loader-context";
 

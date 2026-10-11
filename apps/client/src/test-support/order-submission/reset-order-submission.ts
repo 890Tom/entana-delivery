@@ -1,4 +1,4 @@
-import { resetOrderSubmissionState } from "../features/order-submission/order-submission";
+import { resetOrderSubmissionState } from "../../features/order-submission/order-submission";
 
 /**
  * The order submission keeps its state in the module (it must outlive a screen): a test calls

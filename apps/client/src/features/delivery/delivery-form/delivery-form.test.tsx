@@ -10,9 +10,9 @@ import {
   readyMap,
   renderAt,
   renderDelivery,
-} from "../../../test-support/delivery-harness";
-import { expectNoAccessibilityViolations } from "../../../test-support/expect-no-accessibility-violations";
-import { createFakeMapLoader } from "../../../test-support/fake-map";
+} from "../../../test-support/harnesses/delivery-harness";
+import { expectNoAccessibilityViolations } from "../../../test-support/assertions/expect-no-accessibility-violations";
+import { createFakeMapLoader } from "../../../test-support/stubs/fake-map";
 import { DELIVERY_DRAFT_STORAGE_KEY } from "../delivery-draft/delivery-draft-storage";
 
 // The CSS of the screen, read as text: jsdom applies no style sheet, so the layout rules that

@@ -5,10 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "../app";
 import { createQueryClient } from "../data-fetching/query-client";
 import { texts } from "../i18n/texts";
-import { buildInstance } from "../test-support/build-instance";
-import { buildProduct } from "../test-support/build-product";
-import { expectNoAccessibilityViolations } from "../test-support/expect-no-accessibility-violations";
-import { jsonResponse, problemResponse } from "../test-support/stub-fetch";
+import { buildInstance } from "../test-support/builders/build-instance";
+import { buildProduct } from "../test-support/builders/build-product";
+import { expectNoAccessibilityViolations } from "../test-support/assertions/expect-no-accessibility-violations";
+import { jsonResponse, problemResponse } from "../test-support/stubs/stub-fetch";
 
 const PRODUCTS = jsonResponse({ products: [buildProduct({ name: "Sakafo" })] });
 

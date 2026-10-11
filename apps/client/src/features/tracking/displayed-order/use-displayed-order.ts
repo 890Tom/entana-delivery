@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-import { TRACKING_PATH } from "../../routes";
-import { readConfirmedOrders } from "../order-submission/storage/confirmed-orders-storage";
+import { TRACKING_PATH } from "../../../routes";
+import { readConfirmedOrders } from "../../order-submission/storage/confirmed-orders-storage";
 
-import { readTrackingToken } from "./rules/read-tracking-token";
+import { readTrackingToken } from "../rules/read-tracking-token";
 
 /**
  * The order to show, and where it was found: a fragment is not yet remembered by the device. A

@@ -1,11 +1,11 @@
 import { screen, waitFor } from "@testing-library/react";
 
-import { texts } from "../i18n/texts";
-import { REVIEW_PATH } from "../routes";
+import { texts } from "../../i18n/texts";
+import { REVIEW_PATH } from "../../routes";
 
 import { NAME, openContact } from "./contact-harness";
-import { created } from "./order-submission-answers";
-import { problemResponse } from "./stub-fetch";
+import { created } from "../order-submission/order-submission-answers";
+import { problemResponse } from "../stubs/stub-fetch";
 
 /** The contact draft of a customer who has filled the contact screen. */
 export function contactDraft(note: string | null = null): string {

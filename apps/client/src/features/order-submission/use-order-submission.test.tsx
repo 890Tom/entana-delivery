@@ -5,11 +5,11 @@ import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createQueryClient } from "../../data-fetching/query-client";
-import { buildInstance } from "../../test-support/build-instance";
-import { CREATED_BODY } from "../../test-support/build-order-submission";
-import { buildProductId } from "../../test-support/build-product";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
-import { jsonResponse } from "../../test-support/stub-fetch";
+import { buildInstance } from "../../test-support/builders/build-instance";
+import { CREATED_BODY } from "../../test-support/builders/build-order-submission";
+import { buildProductId } from "../../test-support/builders/build-product";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
+import { jsonResponse } from "../../test-support/stubs/stub-fetch";
 import { CART_STORAGE_KEY } from "../cart/storage/cart-storage";
 import { CartProvider } from "../cart/cart-state/cart-provider";
 import { ContactDraftProvider } from "../contact/contact-draft/contact-draft-provider";

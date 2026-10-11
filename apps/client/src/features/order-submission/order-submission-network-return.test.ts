@@ -1,9 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildDrafts } from "../../test-support/build-order-submission";
-import { buildCleanup, created, status } from "../../test-support/order-submission-answers";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
-import { jsonResponse, pendingUntilAborted, stubFetch } from "../../test-support/stub-fetch";
+import { buildDrafts } from "../../test-support/builders/build-order-submission";
+import {
+  buildCleanup,
+  created,
+  status,
+} from "../../test-support/order-submission/order-submission-answers";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
+import { jsonResponse, pendingUntilAborted, stubFetch } from "../../test-support/stubs/stub-fetch";
 
 import type { OrderDrafts } from "./request/build-order-request";
 import { attachOrderSubmissionHost, submitOrder } from "./order-submission";

@@ -2,14 +2,14 @@ import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
 import {
   TOKEN,
   TRACKING_ADDRESS,
   inSequence,
   openTracking,
   viewAnswer,
-} from "../../test-support/tracking-harness";
+} from "../../test-support/harnesses/tracking-harness";
 
 import { TRACKING_REFRESH_INTERVAL_MS } from "./api/use-tracking";
 

@@ -2,7 +2,7 @@ import { cleanup, render } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { expectNoAccessibilityViolations } from "../test-support/expect-no-accessibility-violations";
+import { expectNoAccessibilityViolations } from "../test-support/assertions/expect-no-accessibility-violations";
 
 // Documents the pattern every component follows for text that comes from a customer or from the
 // server: put it in `{value}`, and React escapes it. This tests the pattern on a local component,

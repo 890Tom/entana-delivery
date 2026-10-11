@@ -2,10 +2,13 @@ import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { buildDrafts } from "../../test-support/build-order-submission";
-import { buildCleanup, created } from "../../test-support/order-submission-answers";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
-import { openTracking } from "../../test-support/tracking-harness";
+import { buildDrafts } from "../../test-support/builders/build-order-submission";
+import {
+  buildCleanup,
+  created,
+} from "../../test-support/order-submission/order-submission-answers";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
+import { openTracking } from "../../test-support/harnesses/tracking-harness";
 import { getOrderSubmissionState, submitOrder } from "../order-submission/order-submission";
 
 beforeEach(() => {

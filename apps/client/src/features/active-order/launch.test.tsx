@@ -2,11 +2,11 @@ import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { expectNoAccessibilityViolations } from "../../test-support/expect-no-accessibility-violations";
-import { jsonResponse } from "../../test-support/stub-fetch";
-import { OLDER_TOKEN, PRODUCT, openApplication } from "../../test-support/launch-harness";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
-import type { Answer } from "../../test-support/tracking-harness";
+import { expectNoAccessibilityViolations } from "../../test-support/assertions/expect-no-accessibility-violations";
+import { jsonResponse } from "../../test-support/stubs/stub-fetch";
+import { OLDER_TOKEN, PRODUCT, openApplication } from "../../test-support/harnesses/launch-harness";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
+import type { Answer } from "../../test-support/harnesses/tracking-harness";
 import {
   TOKEN,
   inSequence,
@@ -14,7 +14,7 @@ import {
   problemAnswer,
   sentHeaders,
   viewAnswer,
-} from "../../test-support/tracking-harness";
+} from "../../test-support/harnesses/tracking-harness";
 import { readConfirmedOrders } from "../order-submission/storage/confirmed-orders-storage";
 
 import { LAUNCH_CHECK_TIMEOUT_MS } from "./launch/launch-provider";

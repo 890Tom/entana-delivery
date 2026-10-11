@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import { restoreGeolocation, stubGeolocation } from "../../../test-support/stub-geolocation";
+import { restoreGeolocation, stubGeolocation } from "../../../test-support/stubs/stub-geolocation";
 
 import { locate } from "./locate";
 

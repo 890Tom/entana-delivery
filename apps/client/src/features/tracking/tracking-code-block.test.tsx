@@ -2,8 +2,8 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
-import { TOKEN, openTracking, storedOrders } from "../../test-support/tracking-harness";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
+import { TOKEN, openTracking, storedOrders } from "../../test-support/harnesses/tracking-harness";
 
 const STORED = [{ code: "AAAAAA", token: TOKEN }];
 const { code, link } = texts.tracking;

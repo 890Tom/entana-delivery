@@ -2,7 +2,7 @@ import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { expectNoAccessibilityViolations } from "../../test-support/expect-no-accessibility-violations";
+import { expectNoAccessibilityViolations } from "../../test-support/assertions/expect-no-accessibility-violations";
 import {
   SENT_BODY,
   codeInput,
@@ -11,14 +11,14 @@ import {
   openFindOrder,
   phoneInput,
   sentBody,
-} from "../../test-support/find-order-harness";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
+} from "../../test-support/harnesses/find-order-harness";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
 import {
   inSequence,
   networkFailure,
   problemAnswer,
   viewAnswer,
-} from "../../test-support/tracking-harness";
+} from "../../test-support/harnesses/tracking-harness";
 
 const { findOrder } = texts;
 

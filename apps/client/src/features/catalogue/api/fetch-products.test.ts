@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildProduct, buildProductId } from "../../../test-support/build-product";
+import { buildProduct, buildProductId } from "../../../test-support/builders/build-product";
 import {
   jsonResponse,
   pendingUntilAborted,
   problemResponse,
   stubFetch,
-} from "../../../test-support/stub-fetch";
+} from "../../../test-support/stubs/stub-fetch";
 
 import { CatalogueError, fetchProducts } from "./fetch-products";
 

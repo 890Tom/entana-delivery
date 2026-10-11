@@ -1,10 +1,10 @@
 import type { ReactElement } from "react";
 
-import { Notice } from "../../components/notice/notice";
-import { texts } from "../../i18n/texts";
-import { TRACKING_PATH } from "../../routes";
+import { Notice } from "../../../components/notice/notice";
+import { texts } from "../../../i18n/texts";
+import { TRACKING_PATH } from "../../../routes";
 
-import { useActiveOrder, useLatestOrder } from "./api/use-active-order";
+import { useActiveOrder, useLatestOrder } from "../api/use-active-order";
 
 /**
  * Above the products while the latest order of the device is still going on. It says nothing

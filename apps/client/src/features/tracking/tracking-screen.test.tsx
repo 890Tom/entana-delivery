@@ -2,7 +2,7 @@ import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
 import {
   OTHER_TOKEN,
   TOKEN,
@@ -14,7 +14,7 @@ import {
   sentHeaders,
   storedOrders,
   viewAnswer,
-} from "../../test-support/tracking-harness";
+} from "../../test-support/harnesses/tracking-harness";
 
 beforeEach(() => {
   resetOrderSubmission();

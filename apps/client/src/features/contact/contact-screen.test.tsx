@@ -15,9 +15,9 @@ import {
   phoneField,
   summaryCard,
   typeInto,
-} from "../../test-support/contact-harness";
-import { buildInstance } from "../../test-support/build-instance";
-import { expectNoAccessibilityViolations } from "../../test-support/expect-no-accessibility-violations";
+} from "../../test-support/harnesses/contact-harness";
+import { buildInstance } from "../../test-support/builders/build-instance";
+import { expectNoAccessibilityViolations } from "../../test-support/assertions/expect-no-accessibility-violations";
 
 import { CONTACT_DRAFT_STORAGE_KEY } from "./contact-draft/contact-draft-storage";
 

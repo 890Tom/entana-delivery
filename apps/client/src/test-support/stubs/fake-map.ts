@@ -6,7 +6,7 @@ import type {
   MapAdapter,
   MapAdapterOptions,
   MapLoader,
-} from "../features/delivery/map/map-adapter";
+} from "../../features/delivery/map/map-adapter";
 
 /** A map that records what the screen asks of it. No WebGL: the real library is not run in tests. */
 export interface FakeMap {

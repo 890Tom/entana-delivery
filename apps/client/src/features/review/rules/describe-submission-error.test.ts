@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildProduct, buildProductId } from "../../../test-support/build-product";
+import { buildProduct, buildProductId } from "../../../test-support/builders/build-product";
 import type { OrderSubmissionError } from "../../order-submission/order-submission-types";
 
 import { describeSubmissionError } from "./describe-submission-error";

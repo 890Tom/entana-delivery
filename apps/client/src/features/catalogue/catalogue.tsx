@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 
 import { Notice } from "../../components/notice/notice";
 import { texts } from "../../i18n/texts";
-import { ActiveOrderNotice } from "../active-order/active-order-notice";
+import { ActiveOrderNotice } from "../active-order/notice/active-order-notice";
 import { useLaunch } from "../active-order/launch/launch-context";
 import { useCart } from "../cart/cart-state/cart-context";
 import { useCartReconciliation } from "../cart/reconciliation/use-cart-reconciliation";

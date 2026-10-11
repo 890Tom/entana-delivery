@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { buildInstance } from "../../../test-support/build-instance";
-import { jsonResponse, problemResponse, stubFetch } from "../../../test-support/stub-fetch";
+import { buildInstance } from "../../../test-support/builders/build-instance";
+import { jsonResponse, problemResponse, stubFetch } from "../../../test-support/stubs/stub-fetch";
 
 import { InstanceError, fetchInstance } from "./fetch-instance";
 

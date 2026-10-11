@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { jsonResponse } from "../../../test-support/stub-fetch";
+import { jsonResponse } from "../../../test-support/stubs/stub-fetch";
 
 import { useLookup } from "./use-lookup";
 

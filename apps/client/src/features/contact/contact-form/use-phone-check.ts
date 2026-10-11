@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { useInstance } from "../../instance/use-instance";
+import { useInstance } from "../../instance/api/use-instance";
 import { checkPhone, toPhoneDisplay } from "../rules/phone-input";
 import type { PhoneIssue } from "../rules/phone-input";
 

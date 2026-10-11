@@ -3,7 +3,13 @@ import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { KOBA, MOFO, SAKAFO, openContact, summaryCard } from "../../test-support/contact-harness";
+import {
+  KOBA,
+  MOFO,
+  SAKAFO,
+  openContact,
+  summaryCard,
+} from "../../test-support/harnesses/contact-harness";
 import { CART_STORAGE_KEY } from "../cart/storage/cart-storage";
 
 afterEach(() => {

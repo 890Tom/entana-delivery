@@ -2,12 +2,12 @@ import type { PublicInstance } from "@entana/contracts";
 import { fireEvent, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
-import { texts } from "../i18n/texts";
+import { texts } from "../../i18n/texts";
 
-import { buildInstance } from "./build-instance";
+import { buildInstance } from "../builders/build-instance";
 import { renderAt } from "./delivery-harness";
-import { createFakeMapLoader } from "./fake-map";
-import { jsonResponse } from "./stub-fetch";
+import { createFakeMapLoader } from "../stubs/fake-map";
+import { jsonResponse } from "../stubs/stub-fetch";
 import type { Answer } from "./tracking-harness";
 
 const LOOKUP_ADDRESS = "/api/v1/tracking/lookup";

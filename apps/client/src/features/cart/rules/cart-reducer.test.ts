@@ -1,7 +1,7 @@
 import { MAX_ORDER_LINES, MAX_ORDER_LINE_QUANTITY } from "@entana/contracts";
 import { describe, expect, it } from "vitest";
 
-import { buildProductId } from "../../../test-support/build-product";
+import { buildProductId } from "../../../test-support/builders/build-product";
 
 import { cartReducer, emptyCart } from "./cart-reducer";
 import type { CartState } from "./cart-reducer";

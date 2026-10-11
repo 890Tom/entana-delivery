@@ -2,16 +2,16 @@ import type { PublicInstance, PublicProduct } from "@entana/contracts";
 import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { vi } from "vitest";
 
-import { CART_STORAGE_KEY } from "../features/cart/storage/cart-storage";
-import { CONTACT_DRAFT_STORAGE_KEY } from "../features/contact/contact-draft/contact-draft-storage";
-import { DELIVERY_DRAFT_STORAGE_KEY } from "../features/delivery/delivery-draft/delivery-draft-storage";
-import { texts } from "../i18n/texts";
+import { CART_STORAGE_KEY } from "../../features/cart/storage/cart-storage";
+import { CONTACT_DRAFT_STORAGE_KEY } from "../../features/contact/contact-draft/contact-draft-storage";
+import { DELIVERY_DRAFT_STORAGE_KEY } from "../../features/delivery/delivery-draft/delivery-draft-storage";
+import { texts } from "../../i18n/texts";
 
-import { buildInstance } from "./build-instance";
-import { buildProduct, buildProductId } from "./build-product";
+import { buildInstance } from "../builders/build-instance";
+import { buildProduct, buildProductId } from "../builders/build-product";
 import { renderAt } from "./delivery-harness";
-import { createFakeMapLoader } from "./fake-map";
-import { jsonResponse, pendingUntilAborted, problemResponse } from "./stub-fetch";
+import { createFakeMapLoader } from "../stubs/fake-map";
+import { jsonResponse, pendingUntilAborted, problemResponse } from "../stubs/stub-fetch";
 
 type Answer = "ok" | "server-error" | "pending";
 
