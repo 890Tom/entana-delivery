@@ -37,6 +37,22 @@ export function findOrderByTokenHash(
   });
 }
 
+/**
+ * The order with this public code whose customer has this phone number, in one statement (a
+ * relation filter). Nothing says which of the two did not match: no row is the only answer. The
+ * customer's trust level is neither read nor filtered, so a blocked customer reads like any other.
+ */
+export function findOrderByCodeAndPhone(
+  database: TrackingReader,
+  publicCode: string,
+  phoneE164: string,
+): Promise<StoredOrderColumns | null> {
+  return database.customerOrder.findFirst({
+    where: { publicCode, customer: { phoneE164 } },
+    select: TRACKED_ORDER_SELECT,
+  });
+}
+
 /** The sum of the quantities of the order's lines, or null for an order that has none. */
 export async function sumItemQuantities(
   database: TrackingReader,

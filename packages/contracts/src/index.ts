@@ -33,6 +33,7 @@ export type {
   PhoneParseResult,
   PhoneRejectionReason,
 } from "./orders/phone-numbering/parse-phone-number.js";
+export { normalizeOrderCode } from "./orders/code/normalize-order-code.js";
 export {
   ORDER_CODE_ALPHABET,
   ORDER_CODE_LENGTH,
@@ -64,3 +65,5 @@ export {
   isFinalStatus,
   isTrackingExpired,
 } from "./orders/tracking/tracking-rules.js";
+export { trackingLookupRequestSchema } from "./orders/tracking/tracking-lookup-request.js";
+export type { TrackingLookupRequest } from "./orders/tracking/tracking-lookup-request.js";

@@ -32,3 +32,8 @@ export const FAKE_VIEW: TrackingResponse = {
   rejectionReason: null,
   canCancel: true,
 };
+
+export const LOOKUP_PATH = "/api/v1/tracking/lookup";
+
+/** The 404 of the lookup: the same body whatever the cause. */
+export const FIXED_LOOKUP_404 = { ...FIXED_404, instance: LOOKUP_PATH } as const;

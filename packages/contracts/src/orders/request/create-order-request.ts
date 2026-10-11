@@ -62,6 +62,12 @@ export const trackingTokenSchema = z
   .length(TRACKING_TOKEN_LENGTH, { abort: true, error: "must be exactly 43 characters" })
   .regex(/^[A-Za-z0-9_-]+$/, "must only use letters, digits, hyphens and underscores");
 
+/** A phone number as typed: its shape and length only. `parsePhoneNumber` does the rest. */
+export const phoneInputSchema = boundedText(MAX_PHONE_LENGTH).regex(
+  /^[0-9+ ().-]+$/,
+  "must contain only digits, +, spaces, parentheses, dots and hyphens",
+);
+
 /**
  * The body of an order creation. Strict: a price, a total, a fee, a status, a customer id or
  * any other property the client should not choose is rejected. The server recomputes all money.
@@ -73,10 +79,7 @@ export const trackingTokenSchema = z
  * the phone number and the coordinates, which are personal data. Never log a parsed request.
  */
 export const createOrderRequestSchema = z.strictObject({
-  phone: boundedText(MAX_PHONE_LENGTH).regex(
-    /^[0-9+ ().-]+$/,
-    "must contain only digits, +, spaces, parentheses, dots and hyphens",
-  ),
+  phone: phoneInputSchema,
   trackingToken: trackingTokenSchema,
   contactName: nonBlankText(MAX_CONTACT_NAME_LENGTH)
     .refine(noControlCharacter, "must not contain a control character")

@@ -8,7 +8,12 @@ import type { LogCapture } from "../../e2e/support/log-capture.js";
 import { buildTestConfig } from "../../e2e/support/test-config.js";
 import { buildOrderRequest, generateTrackingToken } from "../../support/order-request.js";
 import { newKey } from "../../support/order-http.js";
-import { CANCEL_PATH, TRACKING_HEADER, TRACKING_PATH } from "../../support/tracking-http.js";
+import {
+  CANCEL_PATH,
+  LOOKUP_PATH,
+  TRACKING_HEADER,
+  TRACKING_PATH,
+} from "../../support/tracking-http.js";
 import { insertProduct } from "./insert-product.js";
 import {
   ManualClock,
@@ -25,6 +30,8 @@ export interface TrackingHarness {
   readonly from: () => string;
   readonly read: (token: string, address?: string) => request.Test;
   readonly cancel: (token: string, address?: string) => request.Test;
+  /** The lookup by phone number and order code, as a JSON body. */
+  readonly lookup: (body: unknown, address?: string) => request.Test;
   /** An order made by the real order service, as a customer would make it. */
   readonly placeOrder: () => Promise<{ token: string; orderCode: string }>;
   /** What the shop's own transition will write (task 6c): the status, its event, its day. */
@@ -91,6 +98,11 @@ export function useTrackingHarness(): TrackingHarness {
         .post(CANCEL_PATH)
         .set("X-Forwarded-For", address)
         .set(TRACKING_HEADER, token),
+    lookup: (body, address = from()) =>
+      request(getApp().getHttpServer())
+        .post(LOOKUP_PATH)
+        .set("X-Forwarded-For", address)
+        .send(body as object),
     placeOrder: async () => {
       const productId = await insertProduct(client, { priceAr: 5000 });
       const token = generateTrackingToken();

@@ -24,3 +24,22 @@ export function ignoreRequestBody(request: Request, _response: Response, next: N
   delete request.headers["content-type"];
   next();
 }
+
+// With or without a trailing slash: the router matches both.
+const LOOKUP_ROUTE = /^\/lookup\/?$/;
+
+/**
+ * Runs `middleware` for every tracking route except the lookup, which has a body and its own
+ * limit. Mounted on the tracking path, `request.path` is relative to it: "/lookup".
+ */
+export function exceptLookup(
+  middleware: (request: Request, response: Response, next: NextFunction) => void,
+): (request: Request, response: Response, next: NextFunction) => void {
+  return (request, response, next) => {
+    if (request.method === "POST" && LOOKUP_ROUTE.test(request.path)) {
+      next();
+      return;
+    }
+    middleware(request, response, next);
+  };
+}
