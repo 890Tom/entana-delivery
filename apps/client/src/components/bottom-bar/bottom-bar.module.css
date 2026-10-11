@@ -16,7 +16,7 @@
   justify-content: center;
   width: 100%;
   min-height: var(--size-button-height);
-  padding: 0 var(--space-5);
+  padding: var(--space-2) var(--space-5);
   font: var(--font-body-strong);
   color: var(--color-text-inverse);
   text-decoration: none;

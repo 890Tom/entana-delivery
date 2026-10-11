@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useRoute } from "wouter";
 
 import { Icon } from "../../components/icon/icon";
@@ -15,6 +15,8 @@ import {
   REVIEW_PATH,
   TRACKING_PATH,
 } from "../../routes";
+
+import { useReportedHeight } from "../use-reported-height";
 
 import { CartBadge } from "./cart-badge";
 import { FindOrderLink } from "./find-order-link";
@@ -121,8 +123,11 @@ export function Header(): ReactElement {
   // The lookup is outside the order: the logo alone, at every width.
   const [isFindOrderScreen] = useRoute(FIND_ORDER_PATH);
   const step = useStepHeader();
+  const headerRef = useRef<HTMLElement>(null);
+  // The side columns that stick under the header follow its real height.
+  useReportedHeight(headerRef, "--size-header-height");
   return (
-    <header className={styles.header}>
+    <header ref={headerRef} className={styles.header}>
       <div className={styles.inner}>
         {isCartScreen && <BackLink href="/" label={texts.shell.back} />}
         {step?.href != null && (

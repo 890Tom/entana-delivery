@@ -1,7 +1,9 @@
+import { useRef } from "react";
 import type { ReactElement } from "react";
 import { Link } from "wouter";
 
 import { texts } from "../../i18n/texts";
+import { useReportedHeight } from "../../layout/use-reported-height";
 
 import styles from "./bottom-bar.module.css";
 
@@ -51,8 +53,11 @@ function Label({ label, amount }: BarContent): ReactElement | string {
  */
 export function BottomBar(props: BottomBarProps): ReactElement {
   const content = <Label label={props.label} amount={props.amount} />;
+  const barRef = useRef<HTMLDivElement>(null);
+  // The space kept free at the end of the page is the bar's real height, not a fixed one.
+  useReportedHeight(barRef, "--size-bottom-bar");
   return (
-    <div className={styles.bar}>
+    <div ref={barRef} className={styles.bar}>
       {"formId" in props ? (
         <button
           type="submit"

@@ -3,6 +3,7 @@ import type { KeyboardEvent, ReactElement, RefObject } from "react";
 
 import { Button, ButtonLink } from "../../../components/button/button";
 import { texts } from "../../../i18n/texts";
+import { useReportedHeight } from "../../../layout/use-reported-height";
 import type { CancelFlow } from "../api/use-cancel-flow";
 import { describeVisibleActions } from "../rules/describe-tracking-actions";
 import type { TrackingActionsView } from "../rules/describe-tracking-actions";
@@ -100,11 +101,14 @@ export function TrackingActions({
   const { actions } = texts.tracking;
   const visible = describeVisibleActions(available, phone !== null, cancel?.isAsking ?? false);
   const cancelRef = useFocusBackOnClose(visible.panel);
+  const actionsRef = useRef<HTMLDivElement>(null);
+  // On a phone this is a fixed bar, whose height changes with the question that replaces buttons.
+  useReportedHeight(actionsRef, "--size-bottom-bar", visible.isAny);
   if (!visible.isAny) {
     return null;
   }
   return (
-    <div className={styles.actions}>
+    <div ref={actionsRef} className={styles.actions}>
       {visible.call && (
         <ButtonLink variant="primary" icon="phone" href={`tel:${phone ?? ""}`}>
           {actions.call}

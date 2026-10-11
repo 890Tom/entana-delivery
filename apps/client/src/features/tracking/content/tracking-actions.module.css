@@ -18,13 +18,13 @@
     box-shadow: var(--shadow-bar);
   }
 
-  /* The page is not hidden behind the bar: one more line of height is kept free. */
+  /* The page is not hidden behind the bar: its real height, reported by the component, is kept free. */
   :root:has(.actions) {
-    scroll-padding-bottom: calc(var(--size-bottom-bar) + var(--size-touch-min));
+    scroll-padding-bottom: calc(var(--size-bottom-bar) + var(--space-4));
   }
 
   :root:has(.actions) main {
-    padding-bottom: calc(var(--size-bottom-bar) + var(--size-touch-min));
+    padding-bottom: calc(var(--size-bottom-bar) + var(--space-4));
   }
 }
 

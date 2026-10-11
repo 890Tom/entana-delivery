@@ -10,7 +10,8 @@
   display: flex;
   gap: var(--space-3);
   align-items: center;
-  height: var(--size-header-height);
+  /* A minimum: the header grows with what it holds (a long title, a larger text size). */
+  min-height: var(--size-header-height);
   max-width: calc(var(--size-content-max) + 2 * var(--space-6));
   padding-inline: var(--space-4);
   margin-inline: auto;
