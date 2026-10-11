@@ -3,14 +3,14 @@ import type { NextFunction, Request, Response } from "express";
 import { CLOCK } from "../../clock/clock.js";
 import type { Clock } from "../../clock/clock.js";
 import { resolveRequestId } from "../../logging/pino-http-options.js";
-import { normalizeAddress } from "./normalize-address.js";
+import { normalizeAddress } from "../../rate-limit/normalize-address.js";
 import { AddressRateLimitedError } from "../errors/order-errors.js";
 import {
   ADDRESS_MAX_REQUESTS,
   ADDRESS_MAX_TRACKED,
   ADDRESS_WINDOW_MS,
 } from "./order-http-limits.js";
-import { SlidingWindowLimiter } from "./sliding-window-limiter.js";
+import { SlidingWindowLimiter } from "../../rate-limit/sliding-window-limiter.js";
 
 /**
  * The limit of order creations per client address. It is an Express middleware installed before
