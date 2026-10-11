@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Clock } from "../../clock/clock.js";
+import type { Clock } from "../clock/clock.js";
 import { SlidingWindowLimiter } from "./sliding-window-limiter.js";
 
 class ManualClock implements Clock {

@@ -6,7 +6,7 @@ import {
   trackingResponseSchema,
 } from "@entana/contracts";
 import type { TrackingLookupRequest, TrackingResponse } from "@entana/contracts";
-import { JsonContentTypeGuard } from "../orders/http/json-content-type.guard.js";
+import { JsonContentTypeGuard } from "../errors/request-body/json-content-type.guard.js";
 import { EXAMPLE_PHONE } from "../orders/orders.controller.js";
 import { TrackingService } from "./tracking.service.js";
 
