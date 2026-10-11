@@ -18,3 +18,11 @@ export class OrderNotCancellableError extends Error {
     this.name = "OrderNotCancellableError";
   }
 }
+
+/** A stored order always has a line: a sum of nothing is a data fault, answered by the generic 500. */
+export class TrackedOrderWithoutItemsError extends Error {
+  constructor() {
+    super("The tracked order has no item.");
+    this.name = "TrackedOrderWithoutItemsError";
+  }
+}

@@ -8,6 +8,7 @@ const VALID = {
   landmarkText: "Example landmark",
   totalAr: 12000,
   deliveryFeeAr: 2000,
+  itemCount: 3,
   createdAt: "2026-10-08T08:00:00.000Z",
   rejectionReason: null,
   canCancel: true,
@@ -32,6 +33,12 @@ describe("trackingResponseSchema", () => {
   it("refuses a property it does not define, such as a name or a coordinate", () => {
     expect(trackingResponseSchema.safeParse({ ...VALID, contactName: "x" }).success).toBe(false);
     expect(trackingResponseSchema.safeParse({ ...VALID, lat: 1 }).success).toBe(false);
+  });
+
+  it("refuses an item count that is not a positive integer", () => {
+    for (const itemCount of [0, -1, 1.5]) {
+      expect(trackingResponseSchema.safeParse({ ...VALID, itemCount }).success).toBe(false);
+    }
   });
 
   it("refuses a status outside the seven of the model", () => {

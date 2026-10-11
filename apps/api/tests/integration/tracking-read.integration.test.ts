@@ -11,6 +11,10 @@ import {
   generateTrackingToken,
 } from "../support/order-request.js";
 import { FIXED_404, TRACKING_PATH, TRACKING_RESPONSE_HEADERS } from "../support/tracking-http.js";
+import { newKey } from "../support/order-http.js";
+import { buildOrderRequest } from "../support/order-request.js";
+import { insertProduct } from "./support/insert-product.js";
+import { createOrdersService } from "./support/orders-fixtures.js";
 import { useTrackingHarness } from "./support/tracking-harness.js";
 
 const DAY_MS = 86_400_000;
@@ -33,10 +37,43 @@ describe("reading an order by its tracking token on a real PostgreSQL", () => {
         landmarkText: FAKE_LANDMARK,
         totalAr: 10000,
         deliveryFeeAr: 0,
+        itemCount: 2,
         createdAt: clock.now().toISOString(),
         rejectionReason: null,
         canCancel: true,
       });
+    });
+
+    it("answers the sum of the quantities of every line as itemCount", async () => {
+      const token = generateTrackingToken();
+      const productIds = [
+        await insertProduct(client, { priceAr: 5000 }),
+        await insertProduct(client, { priceAr: 3000 }),
+      ];
+      await createOrdersService(client, { clock }).createOrder(
+        buildOrderRequest(
+          [
+            { productId: productIds[0] ?? "", quantity: 3 },
+            { productId: productIds[1] ?? "", quantity: 4 },
+          ],
+          { trackingToken: token },
+        ),
+        newKey(),
+      );
+
+      const response = await read(token);
+
+      expect(response.body).toMatchObject({ itemCount: 7 });
+    });
+
+    it("answers the generic 500 for an order without any line, never an item count of 0", async () => {
+      const { token } = await placeOrder();
+      await client.orderItem.deleteMany({});
+
+      const response = await read(token);
+
+      expect(response.status).toBe(500);
+      expect(response.body).not.toHaveProperty("itemCount");
     });
 
     it("answers no name, phone number, coordinate, note or identifier", async () => {

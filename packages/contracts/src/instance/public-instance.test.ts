@@ -27,6 +27,7 @@ describe("toPublicInstance", () => {
       phoneCountryCode: "261",
       logoUrl: "/media/branding/logo.png",
       appIconUrl: null,
+      contactPhone: null,
       map: {
         styleUrl: "https://tiles.openfreemap.org/styles/liberty",
         center: { lat: -18.91, lng: 47.52 },
@@ -34,6 +35,14 @@ describe("toPublicInstance", () => {
       },
     });
     expect(JSON.stringify(publicInstance)).not.toContain("Antananarivo");
+  });
+});
+
+describe("toPublicInstance contact", () => {
+  it("exposes the contact phone of the file as contactPhone", () => {
+    const publicInstance = toPublicInstance({ ...config, contact: { phone: "+261341234567" } });
+
+    expect(publicInstanceSchema.parse(publicInstance).contactPhone).toBe("+261341234567");
   });
 });
 
@@ -54,6 +63,12 @@ describe("publicInstanceSchema", () => {
     expect(
       publicInstanceSchema.safeParse({ ...valid, map: { ...valid.map, apiKey: "x" } }).success,
     ).toBe(false);
+  });
+
+  it("refuses a response without contactPhone", () => {
+    const withoutContact = { ...toPublicInstance(config), contactPhone: undefined };
+
+    expect(publicInstanceSchema.safeParse(withoutContact).success).toBe(false);
   });
 
   it("refuses a shop name with a formatting character", () => {

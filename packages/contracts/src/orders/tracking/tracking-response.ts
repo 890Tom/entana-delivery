@@ -22,7 +22,8 @@ export type OrderStatus = z.infer<typeof orderStatusSchema>;
 /**
  * What the customer holding the tracking token gets. Strict and minimal: no name, no phone number,
  * no coordinates, no internal identifier, no administrator and no internal note. `deliveryDate` is
- * a plain day (YYYY-MM-DD), never an instant; `rejectionReason` is set only for a refusal.
+ * a plain day (YYYY-MM-DD), never an instant; `rejectionReason` is set only for a refusal;
+ * `itemCount` is the sum of the quantities of the order's lines (an order has at least one).
  */
 export const trackingResponseSchema = z.strictObject({
   orderCode: orderCodeSchema,
@@ -31,6 +32,7 @@ export const trackingResponseSchema = z.strictObject({
   landmarkText: z.string(),
   totalAr: z.number().int(),
   deliveryFeeAr: z.number().int(),
+  itemCount: z.number().int().positive(),
   createdAt: z.iso.datetime(),
   rejectionReason: z.string().nullable(),
   canCancel: z.boolean(),

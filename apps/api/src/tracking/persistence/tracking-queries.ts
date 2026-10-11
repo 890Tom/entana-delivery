@@ -3,7 +3,7 @@ import type { OrderStatus } from "@entana/contracts";
 import type { TrackedOrder } from "../rules/to-tracking-view.js";
 
 /** What the queries need from the client: the PrismaClient and its transaction client both fit. */
-export type TrackingReader = Pick<PrismaClient, "customerOrder" | "orderEvent">;
+export type TrackingReader = Pick<PrismaClient, "customerOrder" | "orderEvent" | "orderItem">;
 
 /** The order as read for tracking: the view's columns plus the two ids the server keeps to itself. */
 export interface StoredTrackedOrder extends TrackedOrder {
@@ -25,14 +25,28 @@ const TRACKED_ORDER_SELECT = {
   statusReason: true,
 } as const;
 
+type StoredOrderColumns = Omit<StoredTrackedOrder, "itemCount">;
+
 export function findOrderByTokenHash(
   database: TrackingReader,
   publicTokenHash: string,
-): Promise<StoredTrackedOrder | null> {
+): Promise<StoredOrderColumns | null> {
   return database.customerOrder.findUnique({
     where: { publicTokenHash },
     select: TRACKED_ORDER_SELECT,
   });
+}
+
+/** The sum of the quantities of the order's lines, or null for an order that has none. */
+export async function sumItemQuantities(
+  database: TrackingReader,
+  orderId: string,
+): Promise<number | null> {
+  const { _sum } = await database.orderItem.aggregate({
+    where: { orderId },
+    _sum: { qty: true },
+  });
+  return _sum.qty;
 }
 
 /**

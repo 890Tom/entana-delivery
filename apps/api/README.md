@@ -83,12 +83,19 @@ root, ignored by git. **It holds no secret**: its public part is served to every
   (never `.svg`), served later under `/media/branding/`.
 - **`GET /api/v1/instance`**: public, `Cache-Control: public, max-age=60`. Answers
   `publicInstanceSchema`: `name`, `locale`, `currency`, `phoneCountryCode`, `logoUrl`,
-  `appIconUrl`, `map`. The time zone and the file names stay on the server. The only error cases are
+  `appIconUrl`, `contactPhone`, `map`. The time zone and the file names stay on the server. The only error cases are
   those of any route: an invalid file never reaches the route, because the API did not start.
 - **`map`** (optional): `styleUrl`, `center { lat, lng }` and `zoom` of the delivery map; every
   field has a default (the OpenFreeMap "liberty" style, Antananarivo, zoom 12), so a file without
   the section still starts. `styleUrl` is an absolute `https` URL or a path of the same origin,
   which lets a shop serve its own tile style; the section is public, so it holds no secret key.
+- **`contact`** (optional): `contact.phone` is the shop's own number, published on purpose as
+  `contactPhone`. At startup it is checked with the same rule as customers' numbers, using the
+  file's `phoneCountryCode`; a refused number stops the API and the message names `contact.phone`,
+  never the value. The canonical form (`+261...`) is kept and served; without the section,
+  `contactPhone` is `null`. **To note**: that rule accepts Malagasy mobile numbers only, so a
+  landline number of the shop is refused. **Deployment**: the strict public schema rejects an
+  unknown key, so the client and the API are deployed together.
 - **Phone numbers**: the order service reads `phoneCountryCode` from this file. It replaces the
   former phone country code environment variable, which is removed: set `phoneCountryCode` instead.
   For a country with a numbering rule in `packages/contracts` (today `261`: nine national digits, mobile
@@ -306,7 +313,8 @@ documented in the OpenAPI page, with the header declared as an API key.
 
 The body of the `200` is `trackingResponseSchema` of `@entana/contracts`, strict:
 `orderCode`, `status`, `deliveryDate` (a day `YYYY-MM-DD` or `null`, the stored calendar date with
-no time zone conversion), `landmarkText`, `totalAr`, `deliveryFeeAr`, `createdAt`,
+no time zone conversion), `landmarkText`, `totalAr`, `deliveryFeeAr`, `itemCount` (the sum of the quantities of the order's lines, a
+positive integer), `createdAt`,
 `rejectionReason` (the shop's reason, **only** for `REJECTED`, otherwise `null`) and `canCancel`
 (computed by the server: true for `NEW` and `CONFIRMED`). It holds no name, phone number,
 coordinates, internal identifier, administrator or internal note.
@@ -317,7 +325,7 @@ coordinates, internal identifier, administrator or internal note.
 | 404    | Token absent, malformed, unknown, or the order is past its retention                     | Fixed, the same for every reason: never a 400         |
 | 409    | Cancel of an order that is `OUT_FOR_DELIVERY`, `DELIVERED`, `REJECTED` or `FAILED`       | Fixed. Nothing is changed                             |
 | 429    | More than 120 requests per address in 10 minutes (both routes together)                  | The fixed body of the order limit, `Retry-After: 600` |
-| 500    | Any unexpected error                                                                     | Generic                                               |
+| 500    | Any unexpected error, among them an order with no line (never an `itemCount` of 0)       | Generic                                               |
 | 503    | The database is unreachable                                                              | Fixed                                                 |
 
 Every answer of these routes, errors included, carries `Cache-Control: no-store`,

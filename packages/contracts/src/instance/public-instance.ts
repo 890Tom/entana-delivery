@@ -30,6 +30,8 @@ export const publicInstanceSchema = z.strictObject({
   phoneCountryCode: phoneCountryCodeSchema,
   logoUrl: brandingUrlSchema,
   appIconUrl: brandingUrlSchema,
+  /** The shop's own number, canonical ("+261..."), published on purpose; null when not set. */
+  contactPhone: z.string().nullable(),
   map: z.strictObject({
     styleUrl: mapStyleUrlSchema,
     center: z.strictObject({ lat: latitudeSchema, lng: longitudeSchema }),
@@ -52,6 +54,7 @@ export function toPublicInstance(config: InstanceConfig): PublicInstance {
     phoneCountryCode: config.phoneCountryCode,
     logoUrl: toBrandingUrl(config.branding?.logoFile),
     appIconUrl: toBrandingUrl(config.branding?.appIconFile),
+    contactPhone: config.contact?.phone ?? null,
     map: {
       styleUrl: config.map.styleUrl,
       center: { lat: config.map.center.lat, lng: config.map.center.lng },
