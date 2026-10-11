@@ -310,6 +310,7 @@ documented in the OpenAPI page, with the header declared as an API key.
 | ------------------------------ | --------------------------------------------------------------------- |
 | `GET /api/v1/tracking`         | The order: status, delivery day, totals, whether it can be cancelled  |
 | `POST /api/v1/tracking/cancel` | Cancels it while it is `NEW` or `CONFIRMED`. No body (one is ignored) |
+| `POST /api/v1/tracking/lookup` | Finds an order again with the phone number and the order code         |
 
 The body of the `200` is `trackingResponseSchema` of `@entana/contracts`, strict:
 `orderCode`, `status`, `deliveryDate` (a day `YYYY-MM-DD` or `null`, the stored calendar date with
@@ -333,6 +334,32 @@ Every answer of these routes, errors included, carries `Cache-Control: no-store`
 schema before the database is reached, and the order is found by the SHA-256 of the token (the
 token is never compared in memory). The limit has its own counters, apart from the order creation
 limit, and runs before the database and before any body is read (see `TRUST_PROXY` above).
+
+**Lookup by phone number and order code.** For a customer who lost the token: `POST
+/api/v1/tracking/lookup` with `{ "phone", "orderCode" }` (strict JSON, `application/json` only: a
+415 otherwise). It is read only: the answer is the same view with `canCancel` always `false`, no
+token is issued and none is returned. The phone number goes through `parsePhoneNumber` with the
+`phoneCountryCode` of the instance: an invalid number is a 400 with a fixed detail that does not
+repeat it. The order code may be typed in lowercase, with spaces or hyphens; it is normalised, then
+checked with the order code schema. A code that cannot exist, an unknown code, another customer's
+phone number and an order past its retention are **the same 404, with the same body**, found by
+one statement (`public_code` and the customer's phone number): nothing tells which of the two did
+not match. A blocked customer reads like any other. Neither value is logged (the access log holds
+no body).
+
+The order code is not a secret (32^6 values), so this route has two limits of its own, apart from
+the tracking limit and from each other, both in memory and per instance:
+
+| Limit                                  | Counts                                 | Answer                                                                           |
+| -------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
+| 10 requests per address in 10 minutes  | every request, before the body is read | The fixed 429 body, `Retry-After: 600`                                           |
+| 10 attempts per phone number in 1 hour | a valid number, before the database    | The same 429 body and `Retry-After: 600`, so the two limits cannot be told apart |
+
+The first follows the rules of the other address limits (IPv4-mapped addresses count as IPv4, IPv6
+per /64, at most 10 000 addresses tracked, see `TRUST_PROXY`). The second is keyed by the canonical
+E.164 number, whatever the address, which is what stops many addresses from guessing the codes of
+one customer; the number only lives in the memory of the limiter and is never logged. Each refusal
+writes one fixed line (`tracking_lookup_address_limited`, `tracking_lookup_phone_limited`).
 
 **Retention.** A finished order (`DELIVERED`, `REJECTED`, `CANCELLED`, `FAILED`) is answered like
 an unknown token once its last status change is older than `TRACKING_RETENTION_DAYS` (30, to be

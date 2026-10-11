@@ -1,10 +1,19 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { isCancellableStatus, isFinalStatus, isTrackingExpired } from "@entana/contracts";
-import type { TrackingResponse } from "@entana/contracts";
+import {
+  isCancellableStatus,
+  isFinalStatus,
+  isTrackingExpired,
+  normalizeOrderCode,
+  orderCodeSchema,
+  parsePhoneNumber,
+} from "@entana/contracts";
+import type { InstanceConfig, TrackingLookupRequest, TrackingResponse } from "@entana/contracts";
 import type { PrismaClient } from "@entana/database";
 import { CLOCK } from "../clock/clock.js";
 import type { Clock } from "../clock/clock.js";
 import { DATABASE_CLIENT } from "../database/client-token/database-client.js";
+import { INSTANCE_CONFIG } from "../instance/config-token/instance-config.token.js";
+import { InvalidPhoneError } from "../orders/errors/order-errors.js";
 import { hashTrackingToken } from "../orders/rules/hash-tracking-token.js";
 import {
   OrderNotCancellableError,
@@ -13,11 +22,13 @@ import {
 } from "./errors/tracking-errors.js";
 import {
   cancelIfStatusIs,
+  findOrderByCodeAndPhone,
   findOrderByTokenHash,
   findStatusReachedAt,
   insertCancellationEvent,
   sumItemQuantities,
 } from "./persistence/tracking-queries.js";
+import { TrackingLookupPhoneRateLimiter } from "./rate-limit/tracking-lookup-phone-rate-limiter.js";
 import type { StoredTrackedOrder, TrackingReader } from "./persistence/tracking-queries.js";
 import { CUSTOMER_CANCELLATION_REASON, toTrackingView } from "./rules/to-tracking-view.js";
 
@@ -38,11 +49,38 @@ export class TrackingService {
   constructor(
     @Inject(DATABASE_CLIENT) private readonly database: TrackingDatabase,
     @Inject(CLOCK) private readonly clock: Clock,
+    @Inject(INSTANCE_CONFIG) private readonly instance: InstanceConfig,
+    private readonly phoneLimiter: TrackingLookupPhoneRateLimiter,
   ) {}
 
   /** The view of the order the token belongs to, or TrackingNotFoundError for any other case. */
   async getTracking(token: string): Promise<TrackingResponse> {
     return toTrackingView(await this.findReadableOrder(this.database, token));
+  }
+
+  /**
+   * The view of an order found again with the customer's phone number and the order code, for a
+   * customer who lost the token. Read only: never cancellable here, no token issued. An invalid
+   * phone number is a 400; every other failure (a code that cannot exist, an unknown code, another
+   * customer's phone number, an expired order) is the same TrackingNotFoundError.
+   */
+  async lookupOrder(request: TrackingLookupRequest): Promise<TrackingResponse> {
+    const phone = parsePhoneNumber(request.phone, this.instance.phoneCountryCode);
+    if (!phone.ok) {
+      throw new InvalidPhoneError();
+    }
+    // Counted before the database is reached, for a number that can exist.
+    this.phoneLimiter.consume(phone.e164);
+    const code = orderCodeSchema.safeParse(normalizeOrderCode(request.orderCode));
+    if (!code.success) {
+      throw new TrackingNotFoundError();
+    }
+    const order = await findOrderByCodeAndPhone(this.database, code.data, phone.e164);
+    if (order === null) {
+      throw new TrackingNotFoundError();
+    }
+    const view = toTrackingView(await this.readableOrder(this.database, order));
+    return { ...view, canCancel: false };
   }
 
   /**
@@ -100,6 +138,14 @@ export class TrackingService {
     if (order === null) {
       throw new TrackingNotFoundError();
     }
+    return this.readableOrder(database, order);
+  }
+
+  /** The order with its item count, or TrackingNotFoundError when it is past its retention. */
+  private async readableOrder(
+    database: TrackingReader,
+    order: Omit<StoredTrackedOrder, "itemCount">,
+  ): Promise<StoredTrackedOrder> {
     if (isFinalStatus(order.status)) {
       // Without an event (an order that predates them) the creation date is the safest instant.
       const reachedAt =

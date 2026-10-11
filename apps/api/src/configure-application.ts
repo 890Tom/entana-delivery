@@ -7,8 +7,10 @@ import { rejectBody } from "./errors/request-body/body-rejected-error.js";
 import { AddressRateLimiter } from "./orders/rate-limit/address-rate-limiter.js";
 import { ORDER_CREATION_PATH } from "./orders/rate-limit/order-http-limits.js";
 import { TrackingAddressRateLimiter } from "./tracking/rate-limit/tracking-address-rate-limiter.js";
-import { TRACKING_PATH } from "./tracking/rate-limit/tracking-http-limits.js";
+import { TrackingLookupAddressRateLimiter } from "./tracking/rate-limit/tracking-lookup-address-rate-limiter.js";
+import { TRACKING_LOOKUP_PATH, TRACKING_PATH } from "./tracking/rate-limit/tracking-http-limits.js";
 import {
+  exceptLookup,
   ignoreRequestBody,
   setTrackingResponseHeaders,
 } from "./tracking/http/tracking-middleware.js";
@@ -52,10 +54,13 @@ export function configureApplication(app: NestExpressApplication, config: AppCon
   // Before the body parser: an address over its limit is answered without reading its body.
   app.use(ORDER_CREATION_PATH, app.get(AddressRateLimiter).middleware);
   // The tracking routes: their headers first (every answer carries them, errors included), then
-  // their own limit, then the body is set aside, all before the parser.
+  // their own limit, then the body is set aside, all before the parser. The lookup by phone number
+  // and code is the one tracking route with a body and has its own limit: the two steps above do
+  // not apply to it.
   app.use(TRACKING_PATH, setTrackingResponseHeaders);
-  app.use(TRACKING_PATH, app.get(TrackingAddressRateLimiter).middleware);
-  app.use(TRACKING_PATH, ignoreRequestBody);
+  app.use(TRACKING_LOOKUP_PATH, app.get(TrackingLookupAddressRateLimiter).middleware);
+  app.use(TRACKING_PATH, exceptLookup(app.get(TrackingAddressRateLimiter).middleware));
+  app.use(TRACKING_PATH, exceptLookup(ignoreRequestBody));
   // Replaces Nest's default parser (NEST_APPLICATION_OPTIONS) to set the size limit.
   app.useBodyParser("json", { limit: `${String(config.bodyLimitKb)}kb` });
   app.use(rejectBody);
