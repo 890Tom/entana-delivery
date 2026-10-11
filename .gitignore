@@ -29,7 +29,7 @@ pnpm-debug.log*
 # Runtime data
 postgres-data/
 uploads/
-storage/
+/storage/
 
 # Editors and OS
 .DS_Store

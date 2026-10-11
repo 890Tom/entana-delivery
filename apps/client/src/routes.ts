@@ -1,3 +1,6 @@
+/** The catalogue, the opening address of the application. */
+export const CATALOGUE_PATH = "/";
+
 /** The address of the cart screen: fixed, so that no input can ever change where a link leads. */
 export const CART_PATH = "/panier";
 
@@ -16,6 +19,13 @@ export const REVIEW_PATH = "/recapitulatif";
  * screen erases it from the address bar as soon as it has read it.
  */
 export const TRACKING_PATH = "/suivi";
+
+/**
+ * Where a customer who has lost the tracking link finds the order again with the phone number
+ * and the order code. Not a step of the order: it has no entry in `STEP_BY_PATH`. The values
+ * typed there are never part of the address.
+ */
+export const FIND_ORDER_PATH = "/retrouver";
 
 /**
  * The step of the order (0 is the first) that each screen belongs to. A screen listed here gets

@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useRoute } from "wouter";
 
 import { Icon } from "../../components/icon/icon";
@@ -7,9 +7,19 @@ import iconButton from "../../components/icon-button/icon-button.module.css";
 import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
 import { useInstance } from "../../features/instance/use-instance";
 import { texts } from "../../i18n/texts";
-import { CART_PATH, CONTACT_PATH, DELIVERY_PATH, REVIEW_PATH, TRACKING_PATH } from "../../routes";
+import {
+  CART_PATH,
+  CONTACT_PATH,
+  DELIVERY_PATH,
+  FIND_ORDER_PATH,
+  REVIEW_PATH,
+  TRACKING_PATH,
+} from "../../routes";
+
+import { useReportedHeight } from "../use-reported-height";
 
 import { CartBadge } from "./cart-badge";
+import { FindOrderLink } from "./find-order-link";
 import styles from "./header.module.css";
 
 // The size of the logo, not a loaded state: the header keeps the same height with or without it.
@@ -110,9 +120,14 @@ function useStepHeader(): { href: string | null; label: string; title: string } 
  */
 export function Header(): ReactElement {
   const [isCartScreen] = useRoute(CART_PATH);
+  // The lookup is outside the order: the logo alone, at every width.
+  const [isFindOrderScreen] = useRoute(FIND_ORDER_PATH);
   const step = useStepHeader();
+  const headerRef = useRef<HTMLElement>(null);
+  // The side columns that stick under the header follow its real height.
+  useReportedHeight(headerRef, "--size-header-height");
   return (
-    <header className={styles.header}>
+    <header ref={headerRef} className={styles.header}>
       <div className={styles.inner}>
         {isCartScreen && <BackLink href="/" label={texts.shell.back} />}
         {step?.href != null && (
@@ -123,9 +138,14 @@ export function Header(): ReactElement {
         {step !== null && (
           <span className={[styles.title, styles.phoneOnly].join(" ")}>{step.title}</span>
         )}
-        {(!isCartScreen || step !== null) && (
-          <div className={[styles.cartSlot, step !== null ? styles.webOnly : ""].join(" ")}>
-            <CartBadge />
+        {!isFindOrderScreen && (!isCartScreen || step !== null) && (
+          <div className={[styles.actions, step !== null ? styles.webOnly : ""].join(" ")}>
+            <div className={styles.slot}>
+              <FindOrderLink />
+            </div>
+            <div className={styles.slot}>
+              <CartBadge />
+            </div>
           </div>
         )}
       </div>

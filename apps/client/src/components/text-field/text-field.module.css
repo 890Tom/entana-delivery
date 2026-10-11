@@ -153,3 +153,8 @@
     animation: none;
   }
 }
+
+/* A code is shown in capitals as it is typed; the value itself is normalised by the screen. */
+.uppercase {
+  text-transform: uppercase;
+}

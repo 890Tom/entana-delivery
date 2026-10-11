@@ -1,0 +1,6 @@
+.link {
+  align-self: flex-start;
+  min-height: var(--size-touch-min);
+  font: var(--font-body-strong);
+  color: var(--color-text);
+}

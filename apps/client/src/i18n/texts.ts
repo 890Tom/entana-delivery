@@ -1,5 +1,7 @@
 import type { CatalogueErrorKind } from "../features/catalogue/api/fetch-products";
 
+import { findOrderTexts } from "./find-order-texts";
+import type { FindOrderTexts } from "./find-order-texts";
 import { reviewTexts } from "./review-texts";
 import type { ReviewTexts } from "./review-texts";
 import { trackingTexts } from "./tracking-texts";
@@ -121,6 +123,7 @@ export const texts: {
   readonly review: ReviewTexts;
   /** The tracking of an order. */
   readonly tracking: TrackingTexts;
+  readonly findOrder: FindOrderTexts;
   /** The summary of the order, shared by the screens that come after the cart. */
   readonly orderSummary: {
     readonly title: string;
@@ -149,6 +152,8 @@ export const texts: {
     readonly title: string;
     readonly empty: string;
     readonly viewCart: string;
+    /** The banner above the products while the latest order of the device is still going on. */
+    readonly activeOrder: { readonly text: string; readonly action: string };
     readonly product: {
       readonly unavailable: string;
       readonly add: string;
@@ -247,6 +252,7 @@ export const texts: {
   },
   review: reviewTexts,
   tracking: trackingTexts,
+  findOrder: findOrderTexts,
   orderSummary: {
     title: "Votre commande",
     quantity: (quantity) => `× ${String(quantity)}`,
@@ -277,6 +283,7 @@ export const texts: {
     title: "Nos produits",
     empty: "Aucun produit disponible pour le moment.",
     viewCart: "Voir le panier",
+    activeOrder: { text: "Votre commande est en cours.", action: "Suivre ma commande" },
     product: {
       unavailable: "Indisponible aujourd'hui",
       add: "Ajouter",

@@ -23,13 +23,6 @@
   color: var(--color-text-muted);
 }
 
-.link {
-  align-self: flex-start;
-  min-height: var(--size-touch-min);
-  font: var(--font-body-strong);
-  color: var(--color-text);
-}
-
 .skeleton {
   display: flex;
   flex-direction: column;

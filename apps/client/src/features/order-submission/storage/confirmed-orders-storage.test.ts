@@ -127,4 +127,3 @@ describe("reading and forgetting a confirmed order", () => {
     expect(readConfirmedOrders(NOW).map((entry) => entry.code)).toEqual(["BBBBBB"]);
   });
 });
-
