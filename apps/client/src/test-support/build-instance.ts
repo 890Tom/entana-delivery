@@ -8,6 +8,7 @@ export function buildInstance(overrides: Partial<PublicInstance> = {}): PublicIn
     phoneCountryCode: "261",
     logoUrl: null,
     appIconUrl: null,
+    contactPhone: null,
     map: {
       styleUrl: "https://tiles.openfreemap.org/styles/liberty",
       center: { lat: -18.91, lng: 47.52 },

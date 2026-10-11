@@ -6,18 +6,26 @@ import { CLOCK } from "../clock/clock.js";
 import type { Clock } from "../clock/clock.js";
 import { DATABASE_CLIENT } from "../database/client-token/database-client.js";
 import { hashTrackingToken } from "../orders/rules/hash-tracking-token.js";
-import { OrderNotCancellableError, TrackingNotFoundError } from "./errors/tracking-errors.js";
+import {
+  OrderNotCancellableError,
+  TrackedOrderWithoutItemsError,
+  TrackingNotFoundError,
+} from "./errors/tracking-errors.js";
 import {
   cancelIfStatusIs,
   findOrderByTokenHash,
   findStatusReachedAt,
   insertCancellationEvent,
+  sumItemQuantities,
 } from "./persistence/tracking-queries.js";
 import type { StoredTrackedOrder, TrackingReader } from "./persistence/tracking-queries.js";
 import { CUSTOMER_CANCELLATION_REASON, toTrackingView } from "./rules/to-tracking-view.js";
 
 /** What the service needs from the database client: the PrismaClient fits. */
-export type TrackingDatabase = Pick<PrismaClient, "$transaction" | "customerOrder" | "orderEvent">;
+export type TrackingDatabase = Pick<
+  PrismaClient,
+  "$transaction" | "customerOrder" | "orderEvent" | "orderItem"
+>;
 
 /**
  * A concurrent change by the shop can invalidate the status that was read. Statuses only move
@@ -100,6 +108,11 @@ export class TrackingService {
         throw new TrackingNotFoundError();
       }
     }
-    return order;
+    // A sum of nothing is never shown as 0: an order always has a line.
+    const itemCount = await sumItemQuantities(database, order.id);
+    if (itemCount === null) {
+      throw new TrackedOrderWithoutItemsError();
+    }
+    return { ...order, itemCount };
   }
 }

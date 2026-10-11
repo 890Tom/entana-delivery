@@ -109,6 +109,9 @@ export const instanceConfigSchema = z.strictObject({
       appIconFile: mediaFileNameSchema.optional(),
     })
     .optional(),
+  // Only the shape is checked here: the loader checks the number against the numbering rule of
+  // `phoneCountryCode` and keeps its canonical form.
+  contact: z.strictObject({ phone: z.string() }).optional(),
   map: mapConfigSchema,
 });
 

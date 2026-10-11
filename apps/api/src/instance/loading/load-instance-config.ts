@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { instanceConfigSchema } from "@entana/contracts";
+import { instanceConfigSchema, parsePhoneNumber } from "@entana/contracts";
 import type { InstanceConfig } from "@entana/contracts";
 import type { z } from "zod";
 import { InvalidInstanceConfigurationError } from "../errors/invalid-instance-configuration-error.js";
@@ -51,17 +51,34 @@ function invalidKeys(issues: readonly Issue[]): string[] {
   return [...new Set(issues.flatMap(toKeyPaths))];
 }
 
+function invalidKeysError(keys: readonly string[]): InvalidInstanceConfigurationError {
+  return new InvalidInstanceConfigurationError(
+    [
+      "Configuration de l'instance invalide. Clés à corriger :",
+      ...keys.map((key) => `  - ${key}`),
+    ].join("\n"),
+  );
+}
+
+// The number is checked against the numbering rule of the same file's country, and kept in its
+// canonical form. Only the key is named: the value never reaches a message.
+function canonicalizeContact(config: InstanceConfig): InstanceConfig {
+  if (config.contact === undefined) {
+    return config;
+  }
+  const parsed = parsePhoneNumber(config.contact.phone, config.phoneCountryCode);
+  if (!parsed.ok) {
+    throw invalidKeysError(["contact.phone"]);
+  }
+  return { ...config, contact: { phone: parsed.e164 } };
+}
+
 /** Loads and validates the instance configuration. Throws a French error that names keys only. */
 export function loadInstanceConfig(source: InstanceConfigSource): InstanceConfig {
   const document = parseInstanceYaml(readInstanceFile(resolvePath(source)));
   const result = instanceConfigSchema.safeParse(document);
   if (!result.success) {
-    throw new InvalidInstanceConfigurationError(
-      [
-        "Configuration de l'instance invalide. Clés à corriger :",
-        ...invalidKeys(result.error.issues).map((key) => `  - ${key}`),
-      ].join("\n"),
-    );
+    throw invalidKeysError(invalidKeys(result.error.issues));
   }
-  return result.data;
+  return canonicalizeContact(result.data);
 }

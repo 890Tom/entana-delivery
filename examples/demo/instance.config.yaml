@@ -25,3 +25,9 @@ phoneCountryCode: "261"
 #   styleUrl: https://tiles.openfreemap.org/styles/liberty
 #   center: { lat: -18.91, lng: 47.52 }  # approximatif : à ajuster par chaque boutique
 #   zoom: 12                             # de 1 à 18
+# Facultatif : le numéro de la boutique, publié tel quel (valeur fictive ci-dessous). Il est vérifié
+# au démarrage avec la règle des numéros de clients et l'indicatif ci-dessus, puis servi sous la
+# forme canonique (+261...). Limite : cette règle n'accepte que des mobiles malgaches (préfixes 32,
+# 33, 34, 37, 38, 39) : un numéro fixe serait refusé.
+# contact:
+#   phone: "034 00 000 00"

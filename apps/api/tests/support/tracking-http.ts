@@ -27,6 +27,7 @@ export const FAKE_VIEW: TrackingResponse = {
   landmarkText: "Example landmark",
   totalAr: 12000,
   deliveryFeeAr: 0,
+  itemCount: 2,
   createdAt: "2026-10-08T08:00:00.000Z",
   rejectionReason: null,
   canCancel: true,

@@ -15,6 +15,7 @@ export interface TrackedOrder {
   readonly landmarkText: string;
   readonly totalAr: number;
   readonly deliveryFee: number;
+  readonly itemCount: number;
   readonly createdAt: Date;
   readonly statusReason: string | null;
 }
@@ -33,6 +34,7 @@ export function toTrackingView(order: TrackedOrder): TrackingResponse {
     landmarkText: order.landmarkText,
     totalAr: order.totalAr,
     deliveryFeeAr: order.deliveryFee,
+    itemCount: order.itemCount,
     createdAt: order.createdAt.toISOString(),
     // The column also holds a cancellation or a failure reason: only a refusal is a refusal.
     rejectionReason: order.status === "REJECTED" ? order.statusReason : null,

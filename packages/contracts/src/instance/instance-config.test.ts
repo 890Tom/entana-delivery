@@ -24,6 +24,15 @@ describe("instanceConfigSchema", () => {
     expect(instanceConfigSchema.safeParse(withoutBranding).success).toBe(true);
   });
 
+  it("accepts an optional contact section with a phone, and refuses an unknown key in it", () => {
+    const withContact = { ...validConfig, contact: { phone: "034 12 345 67" } };
+
+    expect(instanceConfigSchema.safeParse(withContact).success).toBe(true);
+    expect(invalidPaths({ ...validConfig, contact: { phone: "1", email: "x" } })).toEqual([
+      "contact",
+    ]);
+  });
+
   it("refuses a blank shop name or one with a control character", () => {
     expect(invalidPaths({ ...validConfig, shop: { name: "   " } })).toEqual(["shop.name"]);
     expect(invalidPaths({ ...validConfig, shop: { name: "Bou\ntique" } })).toEqual(["shop.name"]);

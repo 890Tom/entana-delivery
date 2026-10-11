@@ -68,6 +68,21 @@ describe("loadInstanceConfig", () => {
     });
   });
 
+  it("keeps the canonical form of a valid contact phone, and none when the section is absent", () => {
+    const yaml = `${VALID_YAML}contact:\n  phone: "034 12 345 67"\n`;
+
+    expect(loadFrom(yaml).contact).toEqual({ phone: "+261341234567" });
+    expect(loadFrom(VALID_YAML).contact).toBeUndefined();
+  });
+
+  it("stops on a contact phone with an unknown operator prefix, naming the key and not the value", () => {
+    const message = failureOf(() => loadFrom(`${VALID_YAML}contact:\n  phone: "031 99 888 77"\n`));
+
+    expect(message).toContain("- contact.phone");
+    expect(message).not.toContain("99 888");
+    expect(message).not.toContain("998");
+  });
+
   it("applies the default map when the section is absent", () => {
     expect(loadFrom(VALID_YAML).map).toEqual({
       styleUrl: "https://tiles.openfreemap.org/styles/liberty",
