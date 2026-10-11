@@ -35,7 +35,11 @@ export function ContactForm({ id, form }: ContactFormProps): ReactElement {
         onChange={form.setName}
         isRequired
       />
-      <PhoneField form={form} />
+      <PhoneField
+        form={form}
+        hint={texts.contact.phone.hint}
+        placeholder={texts.contact.phone.placeholder}
+      />
       <TextField
         ref={form.noteRef}
         label={texts.contact.note.label}

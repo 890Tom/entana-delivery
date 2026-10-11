@@ -7,7 +7,14 @@ import iconButton from "../../components/icon-button/icon-button.module.css";
 import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
 import { useInstance } from "../../features/instance/use-instance";
 import { texts } from "../../i18n/texts";
-import { CART_PATH, CONTACT_PATH, DELIVERY_PATH, REVIEW_PATH, TRACKING_PATH } from "../../routes";
+import {
+  CART_PATH,
+  CONTACT_PATH,
+  DELIVERY_PATH,
+  FIND_ORDER_PATH,
+  REVIEW_PATH,
+  TRACKING_PATH,
+} from "../../routes";
 
 import { CartBadge } from "./cart-badge";
 import styles from "./header.module.css";
@@ -110,6 +117,8 @@ function useStepHeader(): { href: string | null; label: string; title: string } 
  */
 export function Header(): ReactElement {
   const [isCartScreen] = useRoute(CART_PATH);
+  // The lookup is outside the order: the logo alone, at every width.
+  const [isFindOrderScreen] = useRoute(FIND_ORDER_PATH);
   const step = useStepHeader();
   return (
     <header className={styles.header}>
@@ -123,7 +132,7 @@ export function Header(): ReactElement {
         {step !== null && (
           <span className={[styles.title, styles.phoneOnly].join(" ")}>{step.title}</span>
         )}
-        {(!isCartScreen || step !== null) && (
+        {!isFindOrderScreen && (!isCartScreen || step !== null) && (
           <div className={[styles.cartSlot, step !== null ? styles.webOnly : ""].join(" ")}>
             <CartBadge />
           </div>

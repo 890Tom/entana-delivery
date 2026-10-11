@@ -6,6 +6,7 @@ import { Notice } from "../../components/notice/notice";
 import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../i18n/texts";
 import { useDocumentTitle } from "../../layout/document-title/use-document-title";
+import { FIND_ORDER_PATH } from "../../routes";
 import {
   dismissOrderSubmission,
   getOrderSubmissionState,
@@ -59,6 +60,9 @@ function Message({ title, line }: { title: string; line?: string }): ReactElemen
       {line !== undefined && <p className={styles.messageLine}>{line}</p>}
       <Link href="/" className={styles.link}>
         {texts.tracking.viewCatalogue}
+      </Link>
+      <Link href={FIND_ORDER_PATH} className={styles.link}>
+        {texts.findOrder.entry}
       </Link>
     </div>
   );

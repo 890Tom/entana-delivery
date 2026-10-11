@@ -29,6 +29,12 @@ interface TextFieldProps {
   readonly autoComplete?: string;
   readonly maxLength?: number;
   readonly placeholder?: string;
+  /** For a code typed in capitals: the keyboard starts in capitals (the text itself is not changed). */
+  readonly autoCapitalize?: "characters";
+  /** False for a code or a name that a spell checker would underline for nothing. */
+  readonly spellCheck?: boolean;
+  /** Shows the text in capitals without changing it. */
+  readonly isUppercase?: boolean;
   /** A mandatory field: announced as such (the visible label stays the plain name). */
   readonly isRequired?: boolean;
   /** A field that may stay empty: "(facultatif)" follows its label, in words. */
@@ -92,6 +98,8 @@ interface ControlProps {
   readonly autoComplete: string | undefined;
   readonly maxLength: number | undefined;
   readonly placeholder: string | undefined;
+  readonly autoCapitalize: "characters" | undefined;
+  readonly spellCheck: boolean | undefined;
   readonly "aria-required": true | undefined;
   readonly "aria-invalid": true | undefined;
   readonly "aria-describedby": string | undefined;
@@ -107,12 +115,14 @@ interface ControlKind {
   readonly type: "text" | "tel";
   readonly inputMode: HTMLAttributes<HTMLInputElement>["inputMode"];
   readonly hasError: boolean;
+  readonly isUppercase: boolean;
 }
 
 /** The single line, the three lines, or the single line framed with its prefix. */
 function Control({ shared, kind }: { shared: ControlProps; kind: ControlKind }): ReactElement {
-  const { isMultiline, prefix, prefixId, type, inputMode, hasError } = kind;
+  const { isMultiline, prefix, prefixId, type, inputMode, hasError, isUppercase } = kind;
   const invalidClass = hasError ? styles.invalid : "";
+  const caseClass = isUppercase ? styles.uppercase : "";
   if (isMultiline) {
     return (
       <textarea
@@ -128,14 +138,19 @@ function Control({ shared, kind }: { shared: ControlProps; kind: ControlKind }):
         {...shared}
         type={type}
         inputMode={inputMode}
-        className={[styles.control, invalidClass].join(" ")}
+        className={[styles.control, invalidClass, caseClass].join(" ")}
       />
     );
   }
   return (
     <div className={[styles.frame, invalidClass].join(" ")}>
       <Prefix prefix={prefix} id={prefixId} />
-      <input {...shared} type={type} inputMode={inputMode} className={styles.bare} />
+      <input
+        {...shared}
+        type={type}
+        inputMode={inputMode}
+        className={[styles.bare, caseClass].join(" ")}
+      />
     </div>
   );
 }
@@ -157,6 +172,8 @@ function controlPropsOf(
     autoComplete: props.autoComplete,
     maxLength: props.maxLength,
     placeholder: props.placeholder,
+    autoCapitalize: props.autoCapitalize,
+    spellCheck: props.spellCheck,
     "aria-required": props.isRequired === true ? true : undefined,
     "aria-invalid": props.error === undefined ? undefined : true,
     "aria-describedby": describedBy,
@@ -204,6 +221,7 @@ export function TextField(props: TextFieldProps): ReactElement {
           type: props.type ?? "text",
           inputMode: props.inputMode,
           hasError: props.error !== undefined,
+          isUppercase: props.isUppercase === true,
         }}
       />
       <FieldMessage id={messageId} hint={props.hint} error={props.error} />

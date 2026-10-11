@@ -1,0 +1,48 @@
+.page {
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding: var(--space-4);
+  margin-inline: auto;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font: var(--font-title);
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.resultActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Under the breakpoint the button is the fixed bar's: `display: none` leaves it out of the tab order. */
+.wideOnly {
+  display: none;
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .page {
+    padding: var(--space-6);
+  }
+
+  .form {
+    max-width: var(--size-readable-max);
+    margin-inline: auto;
+  }
+
+  .wideOnly {
+    display: block;
+  }
+}

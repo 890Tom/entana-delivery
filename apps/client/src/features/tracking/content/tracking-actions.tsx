@@ -13,7 +13,8 @@ interface TrackingActionsProps {
   /** The canonical number of the shop, to call it when the order goes on. */
   readonly phone: string | null;
   readonly available: TrackingActionsView;
-  readonly cancel: CancelFlow;
+  /** Null where the order cannot be cancelled from the screen. */
+  readonly cancel: CancelFlow | null;
 }
 
 function CancelPanel({ cancel }: { cancel: CancelFlow }): ReactElement {
@@ -47,6 +48,33 @@ function CancelPanel({ cancel }: { cancel: CancelFlow }): ReactElement {
   );
 }
 
+interface CancelAreaProps {
+  readonly cancel: CancelFlow | null;
+  readonly isButtonShown: boolean;
+  readonly isPanelShown: boolean;
+  readonly buttonRef: RefObject<HTMLButtonElement | null>;
+}
+
+/** The cancel button, or its question; nothing where the screen cannot cancel the order. */
+function CancelArea({
+  cancel,
+  isButtonShown,
+  isPanelShown,
+  buttonRef,
+}: CancelAreaProps): ReactElement | null {
+  if (cancel === null) {
+    return null;
+  }
+  if (isPanelShown) {
+    return <CancelPanel cancel={cancel} />;
+  }
+  return isButtonShown ? (
+    <Button variant="ghost" ref={buttonRef} onClick={cancel.ask}>
+      {texts.tracking.actions.cancel}
+    </Button>
+  ) : null;
+}
+
 /** The focus goes back to the button that opened the question when the question is closed. */
 function useFocusBackOnClose(isAsking: boolean): RefObject<HTMLButtonElement | null> {
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -70,7 +98,7 @@ export function TrackingActions({
   cancel,
 }: TrackingActionsProps): ReactElement | null {
   const { actions } = texts.tracking;
-  const visible = describeVisibleActions(available, phone !== null, cancel.isAsking);
+  const visible = describeVisibleActions(available, phone !== null, cancel?.isAsking ?? false);
   const cancelRef = useFocusBackOnClose(visible.panel);
   if (!visible.isAny) {
     return null;
@@ -82,12 +110,12 @@ export function TrackingActions({
           {actions.call}
         </ButtonLink>
       )}
-      {visible.cancel && (
-        <Button variant="ghost" ref={cancelRef} onClick={cancel.ask}>
-          {actions.cancel}
-        </Button>
-      )}
-      {visible.panel && <CancelPanel cancel={cancel} />}
+      <CancelArea
+        cancel={cancel}
+        isButtonShown={visible.cancel}
+        isPanelShown={visible.panel}
+        buttonRef={cancelRef}
+      />
       {visible.reorder && (
         <ButtonLink variant="primary" href="/">
           {actions.reorder}

@@ -10,6 +10,21 @@ import type { PhoneIssue } from "../rules/phone-input";
 
 import type { ContactFormState } from "./use-contact-form";
 
+/** What the field needs of a form: the contact form and the order lookup both provide it. */
+export type PhoneFieldState = Pick<
+  ContactFormState,
+  | "phone"
+  | "setPhone"
+  | "countryCode"
+  | "phoneRef"
+  | "noticeRef"
+  | "isConfigurationFailed"
+  | "retryConfiguration"
+  | "isPhoneInvalid"
+  | "phoneIssue"
+  | "onPhoneBlur"
+>;
+
 // What is kept of a text typed before the country code is known: the same bound as the contract's.
 const MAX_UNPARSED_LENGTH = 64;
 
@@ -54,7 +69,7 @@ type ChangeHandler = (
  * Any edit (typing, paste, autofill, deletion) ends here: the field holds only digits and the
  * spaces of the grouping, and the caret stays after the same digit.
  */
-function usePhoneChange(form: ContactFormState): ChangeHandler {
+function usePhoneChange(form: PhoneFieldState): ChangeHandler {
   const requestCaret = useCaretRequest(form.phoneRef);
   const { countryCode } = form;
   return (raw, event) => {
@@ -75,34 +90,47 @@ function usePhoneChange(form: ContactFormState): ChangeHandler {
   };
 }
 
+interface PhoneFieldProps {
+  readonly form: PhoneFieldState;
+  /** Help under the field: each screen says its own, or nothing. */
+  readonly hint?: string;
+  readonly placeholder?: string;
+  /** A refusal that comes from elsewhere (the server) and replaces the one of the local check. */
+  readonly error?: string;
+}
+
+function ConfigurationNotice({ form }: { form: PhoneFieldState }): ReactElement {
+  return (
+    <Notice
+      tone="error"
+      ref={form.noticeRef}
+      tabIndex={-1}
+      action={{ label: texts.common.retry, onClick: form.retryConfiguration }}
+    >
+      {texts.contact.phone.configurationError}
+    </Notice>
+  );
+}
+
 /**
  * The phone number: the national part is typed and always shown grouped, the country code of the
  * instance is shown before it. Without the code there is no rule to apply: a loading slot, then a
  * notice that can retry. The code is never guessed.
  */
-export function PhoneField({ form }: { form: ContactFormState }): ReactElement {
+export function PhoneField({ form, hint, placeholder, error }: PhoneFieldProps): ReactElement {
   const handleChange = usePhoneChange(form);
   const { countryCode } = form;
   if (form.isConfigurationFailed) {
-    return (
-      <Notice
-        tone="error"
-        ref={form.noticeRef}
-        tabIndex={-1}
-        action={{ label: texts.common.retry, onClick: form.retryConfiguration }}
-      >
-        {texts.contact.phone.configurationError}
-      </Notice>
-    );
+    return <ConfigurationNotice form={form} />;
   }
   const shownIssue = form.isPhoneInvalid ? form.phoneIssue : null;
   return (
     <TextField
       ref={form.phoneRef}
       label={texts.contact.phone.label}
-      hint={texts.contact.phone.hint}
-      error={shownIssue === null ? undefined : errorText(shownIssue, countryCode)}
-      placeholder={texts.contact.phone.placeholder}
+      hint={hint}
+      error={shownIssue === null ? error : errorText(shownIssue, countryCode)}
+      placeholder={placeholder}
       prefix={
         countryCode === undefined
           ? { status: "loading" }

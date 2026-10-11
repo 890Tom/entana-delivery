@@ -18,6 +18,13 @@ export const REVIEW_PATH = "/recapitulatif";
 export const TRACKING_PATH = "/suivi";
 
 /**
+ * Where a customer who has lost the tracking link finds the order again with the phone number
+ * and the order code. Not a step of the order: it has no entry in `STEP_BY_PATH`. The values
+ * typed there are never part of the address.
+ */
+export const FIND_ORDER_PATH = "/retrouver";
+
+/**
  * The step of the order (0 is the first) that each screen belongs to. A screen listed here gets
  * the same step indicator as the others: a new screen of the order is added to this table. The
  * catalogue is not listed: choosing products is not a step of the order, and has no indicator.

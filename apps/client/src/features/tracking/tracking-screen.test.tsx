@@ -120,6 +120,9 @@ describe("an order that cannot be read", () => {
     });
 
     expect(await screen.findByText(texts.tracking.notFound.title)).toBeTruthy();
+    expect(screen.getByRole("link", { name: texts.findOrder.entry }).getAttribute("href")).toBe(
+      "/retrouver",
+    );
     await waitFor(() => {
       expect(storedOrders()).toEqual([]);
     });

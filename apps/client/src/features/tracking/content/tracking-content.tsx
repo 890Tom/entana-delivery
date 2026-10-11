@@ -1,6 +1,6 @@
 import type { TrackingResponse } from "@entana/contracts";
 import { useEffect, useRef, useState } from "react";
-import type { ReactElement, RefObject } from "react";
+import type { ReactElement, ReactNode, RefObject } from "react";
 
 import { Notice } from "../../../components/notice/notice";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
@@ -9,6 +9,7 @@ import { useInstance } from "../../instance/use-instance";
 import { useCancelFlow } from "../api/use-cancel-flow";
 import type { CancelFlow } from "../api/use-cancel-flow";
 import { describeTrackingActions } from "../rules/describe-tracking-actions";
+import type { TrackingActionsView } from "../rules/describe-tracking-actions";
 import { describeTrackingStatus } from "../rules/describe-tracking-status";
 import type { DeliveryDay, StatusView } from "../rules/describe-tracking-status";
 import { formatDeliveryDate, formatDeliveryDateTitle } from "../rules/format-delivery-date";
@@ -86,13 +87,15 @@ function StatusHead({
 interface FailureNoticesProps {
   readonly isStale: boolean;
   readonly onRetry: () => void;
-  readonly cancel: CancelFlow;
+  /** Null where the order cannot be cancelled from the screen (the lookup by phone number). */
+  readonly cancel: CancelFlow | null;
 }
 
 /** What went wrong without making the order unreadable: a stale view, a refused cancellation. */
 function FailureNotices({ isStale, onRetry, cancel }: FailureNoticesProps): ReactElement | null {
   const { cancelErrors, refreshFailed } = texts.tracking;
-  if (!isStale && cancel.failure === null) {
+  const failure = cancel?.failure ?? null;
+  if (!isStale && failure === null) {
     return null;
   }
   return (
@@ -102,17 +105,17 @@ function FailureNotices({ isStale, onRetry, cancel }: FailureNoticesProps): Reac
           {refreshFailed}
         </Notice>
       )}
-      {cancel.failure !== null && (
+      {cancel !== null && failure !== null && (
         <Notice
           tone="error"
           // A refused cancellation is final: only a failure of the network is tried again.
           action={
-            cancel.failure === "failed"
+            failure === "failed"
               ? { label: texts.common.retry, onClick: cancel.confirm }
               : undefined
           }
         >
-          {cancelErrors[cancel.failure]}
+          {cancelErrors[failure]}
         </Notice>
       )}
     </div>
@@ -120,7 +123,7 @@ function FailureNotices({ isStale, onRetry, cancel }: FailureNoticesProps): Reac
 }
 
 /** The title shown at this width: the other one is `display: none` and cannot take the focus. */
-function focusVisibleTitle(head: HTMLElement | null): void {
+export function focusVisibleTitle(head: HTMLElement | null): void {
   const titles = head?.querySelectorAll("h1") ?? [];
   [...titles].find((title) => getComputedStyle(title).display !== "none")?.focus();
 }
@@ -142,12 +145,37 @@ function useFocusTitleWhenCancelled(
   }, [isCancelled, headRef]);
 }
 
-interface TrackingContentProps {
+/** What the view shows of the order, and what the customer may do with it. */
+function useTrackingViewModel(
+  view: TrackingResponse,
+  isCancellable: boolean,
+): {
+  readonly status: StatusView;
+  readonly phone: string | null;
+  readonly available: TrackingActionsView;
+} {
+  const instance = useInstance();
+  const status = describeTrackingStatus(view.status, toDeliveryDay(view.deliveryDate));
+  const phone = toDialablePhone(instance.data?.contactPhone);
+  const available = describeTrackingActions(
+    view.status,
+    isCancellable && view.canCancel,
+    phone !== null,
+  );
+  return { status, phone, available };
+}
+
+interface TrackingViewProps {
   readonly view: TrackingResponse;
-  readonly token: string;
   /** True when the last refresh failed: the view shown is the last one that was read. */
   readonly isStale: boolean;
   readonly onRetry: () => void;
+  /** The cancellation of the order, or null when the screen cannot cancel it. */
+  readonly cancel: CancelFlow | null;
+  /** The order code and how to keep it: left out where the customer already typed it. */
+  readonly codeBlock?: ReactNode;
+  /** What follows the card: the actions on the link, or those of the lookup. */
+  readonly extras?: ReactNode;
 }
 
 /**
@@ -155,19 +183,17 @@ interface TrackingContentProps {
  * keyboard: the title, the steps, the code, then the card and its actions. The grid makes the
  * look of each width.
  */
-export function TrackingContent({
+export function TrackingView({
   view,
-  token,
   isStale,
   onRetry,
-}: TrackingContentProps): ReactElement {
-  const instance = useInstance();
+  cancel,
+  codeBlock,
+  extras,
+}: TrackingViewProps): ReactElement {
   const headRef = useRef<HTMLDivElement>(null);
-  const cancel = useCancelFlow(token);
-  useFocusTitleWhenCancelled(cancel.isDone, view.status, headRef);
-  const status = describeTrackingStatus(view.status, toDeliveryDay(view.deliveryDate));
-  const phone = toDialablePhone(instance.data?.contactPhone);
-  const available = describeTrackingActions(view.status, view.canCancel, phone !== null);
+  useFocusTitleWhenCancelled(cancel?.isDone ?? false, view.status, headRef);
+  const { status, phone, available } = useTrackingViewModel(view, cancel !== null);
   return (
     <div className={styles.grid}>
       <StatusHead status={status} reason={view.rejectionReason} headRef={headRef} />
@@ -177,9 +203,7 @@ export function TrackingContent({
           <OrderTimeline steps={status.steps} />
         </div>
       )}
-      <div className={styles.code}>
-        <OrderCodeBlock code={view.orderCode} shopName={instance.data?.name ?? null} />
-      </div>
+      {codeBlock !== undefined && <div className={styles.code}>{codeBlock}</div>}
       <div className={styles.side}>
         <OrderDetailsCard
           day={status.card}
@@ -189,9 +213,37 @@ export function TrackingContent({
         >
           <TrackingActions phone={phone} available={available} cancel={cancel} />
         </OrderDetailsCard>
-        <LinkActions token={token} />
+        {extras}
       </div>
       <StatusAnnouncer status={view.status} heading={status.heading} />
     </div>
+  );
+}
+
+interface TrackingContentProps {
+  readonly view: TrackingResponse;
+  readonly token: string;
+  readonly isStale: boolean;
+  readonly onRetry: () => void;
+}
+
+/** The order of a tracking link: its code, the cancellation, and the link actions. */
+export function TrackingContent({
+  view,
+  token,
+  isStale,
+  onRetry,
+}: TrackingContentProps): ReactElement {
+  const instance = useInstance();
+  const cancel = useCancelFlow(token);
+  return (
+    <TrackingView
+      view={view}
+      isStale={isStale}
+      onRetry={onRetry}
+      cancel={cancel}
+      codeBlock={<OrderCodeBlock code={view.orderCode} shopName={instance.data?.name ?? null} />}
+      extras={<LinkActions token={token} />}
+    />
   );
 }

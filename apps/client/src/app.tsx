@@ -8,13 +8,21 @@ import { ContactDraftProvider } from "./features/contact/contact-draft/contact-d
 import { ContactScreen } from "./features/contact/contact-screen";
 import { DeliveryDraftProvider } from "./features/delivery/delivery-draft/delivery-draft-provider";
 import { DeliveryScreen } from "./features/delivery/delivery-screen";
+import { FindOrderScreen } from "./features/find-order/find-order-screen";
 import { ReviewScreen } from "./features/review/review-screen";
 import { TrackingScreen } from "./features/tracking/tracking-screen";
 import { texts } from "./i18n/texts";
 import { AppShell } from "./layout/app-shell";
 import { NotFound } from "./layout/not-found/not-found";
 import { useDocumentTitle } from "./layout/document-title/use-document-title";
-import { CART_PATH, CONTACT_PATH, DELIVERY_PATH, REVIEW_PATH, TRACKING_PATH } from "./routes";
+import {
+  CART_PATH,
+  CONTACT_PATH,
+  DELIVERY_PATH,
+  FIND_ORDER_PATH,
+  REVIEW_PATH,
+  TRACKING_PATH,
+} from "./routes";
 
 function CataloguePage(): ReactElement {
   useDocumentTitle(texts.catalogue.title);
@@ -34,6 +42,7 @@ export function App(): ReactElement {
               <Route path={CONTACT_PATH} component={ContactScreen} />
               <Route path={REVIEW_PATH} component={ReviewScreen} />
               <Route path={TRACKING_PATH} component={TrackingScreen} />
+              <Route path={FIND_ORDER_PATH} component={FindOrderScreen} />
               <Route component={NotFound} />
             </Switch>
           </AppShell>
