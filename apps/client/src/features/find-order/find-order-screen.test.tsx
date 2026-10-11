@@ -58,6 +58,8 @@ describe("the form", () => {
     const logo = await screen.findByRole("link", { name: texts.shell.homeLabel("Maison Démo") });
     expect(logo.getAttribute("href")).toBe("/");
     expect(screen.queryByRole("link", { name: texts.cart.badgeLabel(0) })).toBeNull();
+    // Nor the way to this screen itself: the customer is there already.
+    expect(screen.queryByRole("link", { name: findOrder.entry })).toBeNull();
     expect(screen.queryByRole("link", { name: texts.shell.back })).toBeNull();
     expect(within(screen.getByRole("banner")).queryByText(findOrder.title)).toBeNull();
   });
@@ -170,7 +172,10 @@ describe("the order found", () => {
     expect(screen.queryByRole("button", { name: texts.tracking.link.forget })).toBeNull();
     expect(screen.queryByText(texts.tracking.thanks)).toBeNull();
     expect(localStorage).toHaveLength(0);
-    expect(sessionStorage).toHaveLength(0);
+    // The only thing the application writes by itself: the mark of the session's opening.
+    expect(Object.keys(sessionStorage).filter((key) => key !== "entana.launch-handled.v1")).toEqual(
+      [],
+    );
     expect(window.location.pathname + window.location.search + window.location.hash).toBe(
       "/retrouver",
     );

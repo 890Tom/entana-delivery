@@ -8,6 +8,7 @@ import { ContactDraftProvider } from "./features/contact/contact-draft/contact-d
 import { ContactScreen } from "./features/contact/contact-screen";
 import { DeliveryDraftProvider } from "./features/delivery/delivery-draft/delivery-draft-provider";
 import { DeliveryScreen } from "./features/delivery/delivery-screen";
+import { LaunchProvider } from "./features/active-order/launch/launch-provider";
 import { FindOrderScreen } from "./features/find-order/find-order-screen";
 import { ReviewScreen } from "./features/review/review-screen";
 import { TrackingScreen } from "./features/tracking/tracking-screen";
@@ -34,18 +35,20 @@ export function App(): ReactElement {
     <CartProvider>
       <DeliveryDraftProvider>
         <ContactDraftProvider>
-          <AppShell>
-            <Switch>
-              <Route path="/" component={CataloguePage} />
-              <Route path={CART_PATH} component={CartScreen} />
-              <Route path={DELIVERY_PATH} component={DeliveryScreen} />
-              <Route path={CONTACT_PATH} component={ContactScreen} />
-              <Route path={REVIEW_PATH} component={ReviewScreen} />
-              <Route path={TRACKING_PATH} component={TrackingScreen} />
-              <Route path={FIND_ORDER_PATH} component={FindOrderScreen} />
-              <Route component={NotFound} />
-            </Switch>
-          </AppShell>
+          <LaunchProvider>
+            <AppShell>
+              <Switch>
+                <Route path="/" component={CataloguePage} />
+                <Route path={CART_PATH} component={CartScreen} />
+                <Route path={DELIVERY_PATH} component={DeliveryScreen} />
+                <Route path={CONTACT_PATH} component={ContactScreen} />
+                <Route path={REVIEW_PATH} component={ReviewScreen} />
+                <Route path={TRACKING_PATH} component={TrackingScreen} />
+                <Route path={FIND_ORDER_PATH} component={FindOrderScreen} />
+                <Route component={NotFound} />
+              </Switch>
+            </AppShell>
+          </LaunchProvider>
         </ContactDraftProvider>
       </DeliveryDraftProvider>
     </CartProvider>

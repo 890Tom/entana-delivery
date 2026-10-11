@@ -4,6 +4,8 @@ import type { ReactElement } from "react";
 
 import { Notice } from "../../components/notice/notice";
 import { texts } from "../../i18n/texts";
+import { ActiveOrderNotice } from "../active-order/active-order-notice";
+import { useLaunch } from "../active-order/launch/launch-context";
 import { useCart } from "../cart/cart-state/cart-context";
 import { useCartReconciliation } from "../cart/reconciliation/use-cart-reconciliation";
 
@@ -14,8 +16,14 @@ import styles from "./catalogue.module.css";
 import { ProductCard } from "./product-card/product-card";
 import { ProductGridSkeleton } from "./product-grid-skeleton/product-grid-skeleton";
 
-function CatalogueBody({ query }: { query: UseQueryResult<ProductListResponse> }): ReactElement {
-  if (query.isPending) {
+interface CatalogueBodyProps {
+  readonly query: UseQueryResult<ProductListResponse>;
+  /** The opening of the application is being checked: the loading state stays. */
+  readonly isHeld: boolean;
+}
+
+function CatalogueBody({ query, isHeld }: CatalogueBodyProps): ReactElement {
+  if (query.isPending || isHeld) {
     return <ProductGridSkeleton />;
   }
   if (query.isError) {
@@ -49,6 +57,7 @@ function CatalogueBody({ query }: { query: UseQueryResult<ProductListResponse> }
 
 export function Catalogue(): ReactElement {
   const query = useProducts();
+  const { isHolding } = useLaunch();
 
   const { hasRemovedUnavailable } = useCart();
   useCartReconciliation(query.data?.products);
@@ -57,8 +66,9 @@ export function Catalogue(): ReactElement {
     <div className={styles.page}>
       <div className={styles.content}>
         <h1 className={styles.title}>{texts.catalogue.title}</h1>
+        <ActiveOrderNotice />
         {hasRemovedUnavailable && <Notice tone="info">{texts.cart.removedUnavailable}</Notice>}
-        <CatalogueBody query={query} />
+        <CatalogueBody query={query} isHeld={isHolding} />
       </div>
       <CatalogueBottomBar query={query} />
     </div>
