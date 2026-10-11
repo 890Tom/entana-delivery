@@ -6,6 +6,12 @@ import type { AppConfig } from "./config/app-config.js";
 import { rejectBody } from "./errors/request-body/body-rejected-error.js";
 import { AddressRateLimiter } from "./orders/rate-limit/address-rate-limiter.js";
 import { ORDER_CREATION_PATH } from "./orders/rate-limit/order-http-limits.js";
+import { TrackingAddressRateLimiter } from "./tracking/rate-limit/tracking-address-rate-limiter.js";
+import { TRACKING_PATH } from "./tracking/rate-limit/tracking-http-limits.js";
+import {
+  ignoreRequestBody,
+  setTrackingResponseHeaders,
+} from "./tracking/http/tracking-middleware.js";
 import { rejectPrototypeKey } from "./errors/request-body/reject-prototype-key.js";
 import { setupSwagger } from "./docs/setup-swagger.js";
 import { ProblemDetailsFilter } from "./errors/problem-details/problem-details.filter.js";
@@ -45,6 +51,11 @@ export function configureApplication(app: NestExpressApplication, config: AppCon
   app.enableCors({ origin: [...config.corsOrigins], maxAge: CORS_PREFLIGHT_MAX_AGE_SECONDS });
   // Before the body parser: an address over its limit is answered without reading its body.
   app.use(ORDER_CREATION_PATH, app.get(AddressRateLimiter).middleware);
+  // The tracking routes: their headers first (every answer carries them, errors included), then
+  // their own limit, then the body is set aside, all before the parser.
+  app.use(TRACKING_PATH, setTrackingResponseHeaders);
+  app.use(TRACKING_PATH, app.get(TrackingAddressRateLimiter).middleware);
+  app.use(TRACKING_PATH, ignoreRequestBody);
   // Replaces Nest's default parser (NEST_APPLICATION_OPTIONS) to set the size limit.
   app.useBodyParser("json", { limit: `${String(config.bodyLimitKb)}kb` });
   app.use(rejectBody);

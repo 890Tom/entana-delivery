@@ -11,6 +11,10 @@ import {
   UnavailableProductsError,
   UnsupportedContentTypeError,
 } from "../errors/order-errors.js";
+import {
+  OrderNotCancellableError,
+  TrackingNotFoundError,
+} from "../../tracking/errors/tracking-errors.js";
 import { RATE_LIMIT_RETRY_AFTER_SECONDS } from "../rate-limit/order-http-limits.js";
 
 /** What the HTTP layer answers for a typed error of the order creation. */
@@ -59,6 +63,9 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
   [OrderTooLargeError, { status: 422, detail: "The order total is too large." }],
   [OrderRateLimitedError, TOO_MANY_REQUESTS],
   [AddressRateLimitedError, TOO_MANY_REQUESTS],
+  // The tracking routes: one text for every token that is not valid.
+  [TrackingNotFoundError, { status: 404, detail: "The requested resource was not found." }],
+  [OrderNotCancellableError, { status: 409, detail: "This order can no longer be cancelled." }],
   [
     UnsupportedContentTypeError,
     { status: 415, detail: "The content type of the request is not supported." },

@@ -8,6 +8,7 @@ import { HealthModule } from "./health/health.module.js";
 import { InstanceModule } from "./instance/instance.module.js";
 import { MediaModule } from "./media/media.module.js";
 import { OrdersModule } from "./orders/orders.module.js";
+import { TrackingModule } from "./tracking/tracking.module.js";
 import { createLoggingModule } from "./logging/create-logging-module.js";
 
 @Module({})
@@ -23,6 +24,7 @@ export class AppModule {
         InstanceModule.register(config),
         MediaModule.register(config),
         OrdersModule.register(config),
+        TrackingModule.register(config),
       ],
       providers: [NotFoundFallback],
     };

@@ -179,8 +179,8 @@ starts with `node dist/main.js`.
 One JSON object per line on stdout (pino). Each request gets an id, returned in the
 `X-Request-Id` header. An incoming `X-Request-Id` is reused only if it is 8 to 64 letters, digits,
 `-` or `_`; otherwise a UUID is generated. The access log holds the method, the status, the
-response time and the route **template** (`/api/v1/orders/track/:token`), never the real path, the
-query string, the headers or the client address. `Authorization`, `Cookie` and `Set-Cookie` are
+response time and the route **template** (`/api/v1/tracking/cancel`), never the real path, the
+query string, the headers or the client address. `Authorization`, `Cookie`, `X-Api-Key`, `X-Tracking-Token` and `Set-Cookie` are
 also redacted wherever they would be logged. An unexpected error is logged with its type and
 stack frames but never its message, which could hold personal data.
 
@@ -291,6 +291,58 @@ an IPv6 address counts by its /64 prefix. The address is never logged.
 - The `409`, `403` and `422` answers say whether a key is in use, a customer is blocked, or a
   product id is unusable: they are the only status codes beyond the above that reveal anything.
 
+## Suivi (order tracking)
+
+A customer who holds the tracking token of an order reads it and cancels it. Public, no account.
+The token is the 43-character secret the client generated for the order (see "Order endpoint"). It
+travels **only in the `X-Tracking-Token` header**: never in the path, never in the query string
+(parameters are ignored), and the header is redacted wherever it would be logged. Both routes are
+documented in the OpenAPI page, with the header declared as an API key.
+
+| Route                          | Does                                                                  |
+| ------------------------------ | --------------------------------------------------------------------- |
+| `GET /api/v1/tracking`         | The order: status, delivery day, totals, whether it can be cancelled  |
+| `POST /api/v1/tracking/cancel` | Cancels it while it is `NEW` or `CONFIRMED`. No body (one is ignored) |
+
+The body of the `200` is `trackingResponseSchema` of `@entana/contracts`, strict:
+`orderCode`, `status`, `deliveryDate` (a day `YYYY-MM-DD` or `null`, the stored calendar date with
+no time zone conversion), `landmarkText`, `totalAr`, `deliveryFeeAr`, `createdAt`,
+`rejectionReason` (the shop's reason, **only** for `REJECTED`, otherwise `null`) and `canCancel`
+(computed by the server: true for `NEW` and `CONFIRMED`). It holds no name, phone number,
+coordinates, internal identifier, administrator or internal note.
+
+| Status | When                                                                                     | Body                                                  |
+| ------ | ---------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| 200    | The order; for a cancel, the order after it (or already cancelled, with no second event) | The view above                                        |
+| 404    | Token absent, malformed, unknown, or the order is past its retention                     | Fixed, the same for every reason: never a 400         |
+| 409    | Cancel of an order that is `OUT_FOR_DELIVERY`, `DELIVERED`, `REJECTED` or `FAILED`       | Fixed. Nothing is changed                             |
+| 429    | More than 120 requests per address in 10 minutes (both routes together)                  | The fixed body of the order limit, `Retry-After: 600` |
+| 500    | Any unexpected error                                                                     | Generic                                               |
+| 503    | The database is unreachable                                                              | Fixed                                                 |
+
+Every answer of these routes, errors included, carries `Cache-Control: no-store`,
+`X-Robots-Tag: noindex` and `Referrer-Policy: no-referrer`. The token is validated with the shared
+schema before the database is reached, and the order is found by the SHA-256 of the token (the
+token is never compared in memory). The limit has its own counters, apart from the order creation
+limit, and runs before the database and before any body is read (see `TRUST_PROXY` above).
+
+**Retention.** A finished order (`DELIVERED`, `REJECTED`, `CANCELLED`, `FAILED`) is answered like
+an unknown token once its last status change is older than `TRACKING_RETENTION_DAYS` (30, to be
+confirmed with the shop). The instant is the last `STATUS_CHANGED` event to the current status
+(the order has no such column); an order without one falls back to its creation date.
+
+**Cancellation.** One conditional `UPDATE ... WHERE id = ? AND status = <status read>` and the
+`order_event` (from the old status to `CANCELLED`, actor `CUSTOMER`, empty payload) in one
+transaction. A status changed by the shop in between matches no row: the order is read again, so a
+decision of the shop is never overwritten, and ten simultaneous cancels write one event. The
+reason stored is the fixed text "Annulée par le client." (the schema requires one); it is never
+shown as a refusal.
+
+**Deployment.** The tracking _page_ of the front end is a static HTML page served by the
+production web server, not by this API. That server must add the same three headers to it
+(`Cache-Control: no-store`, `X-Robots-Tag: noindex`, `Referrer-Policy: no-referrer`), because the
+page URL holds nothing secret but the page and its requests are about one order.
+
 ## Database errors
 
 A database failure that reaches the error filter is answered with a fixed status and a fixed
@@ -353,9 +405,3 @@ leaves its empty `test_<hex>` database: list it with `\l test_*` in `psql` and r
 
 Tests need the compiled `@entana/contracts` and `@entana/database` (Turborepo builds them first
 when you run the commands from the root).
-
-## Known follow-ups
-
-- `instance` of an error is the raw request path (see "Errors"). When the tracking route is added,
-  its task must build `instance` from the route template when a route matched, and include an e2e
-  test proving that a distinctive fake token in the path appears in no body, header or log.
