@@ -58,12 +58,20 @@
   border-left: var(--border-width) solid var(--color-border);
 }
 
-/* The place of the cart button, at its size on each layout. */
-.cartSlot {
+/* The controls on the right of the header: find an order, then the cart. */
+.actions {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+/* The place of one control, at its size on each layout. */
+.slot {
   flex: none;
   width: var(--size-touch-min);
   height: var(--size-cart-pill-height);
-  margin-inline-start: auto;
 }
 
 @keyframes pulse {
@@ -98,10 +106,10 @@
   }
 
   .inner .webOnly {
-    display: block;
+    display: flex;
   }
 
-  .cartSlot {
+  .slot {
     height: var(--size-touch-min);
   }
 }

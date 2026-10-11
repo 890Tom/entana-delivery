@@ -17,6 +17,7 @@ import {
 } from "../../routes";
 
 import { CartBadge } from "./cart-badge";
+import { FindOrderLink } from "./find-order-link";
 import styles from "./header.module.css";
 
 // The size of the logo, not a loaded state: the header keeps the same height with or without it.
@@ -133,8 +134,13 @@ export function Header(): ReactElement {
           <span className={[styles.title, styles.phoneOnly].join(" ")}>{step.title}</span>
         )}
         {!isFindOrderScreen && (!isCartScreen || step !== null) && (
-          <div className={[styles.cartSlot, step !== null ? styles.webOnly : ""].join(" ")}>
-            <CartBadge />
+          <div className={[styles.actions, step !== null ? styles.webOnly : ""].join(" ")}>
+            <div className={styles.slot}>
+              <FindOrderLink />
+            </div>
+            <div className={styles.slot}>
+              <CartBadge />
+            </div>
           </div>
         )}
       </div>
