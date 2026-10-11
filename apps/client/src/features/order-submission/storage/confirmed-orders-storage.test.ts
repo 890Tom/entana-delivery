@@ -4,6 +4,8 @@ import {
   CONFIRMED_ORDERS_STORAGE_KEY,
   CONFIRMED_ORDER_RETENTION_DAYS,
   addConfirmedOrder,
+  readConfirmedOrders,
+  removeConfirmedOrder,
   removeExpiredConfirmedOrders,
 } from "./confirmed-orders-storage";
 
@@ -99,3 +101,30 @@ describe("the confirmed orders", () => {
     }).not.toThrow();
   });
 });
+
+describe("reading and forgetting a confirmed order", () => {
+  it("reads the orders that are not expired, the most recent first", () => {
+    addConfirmedOrder(order("AAAAAA", "2026-09-01T08:30:00.000Z"), NOW - 60 * DAY);
+    addConfirmedOrder(order("BBBBBB", "2026-10-09T08:30:00.000Z"), NOW);
+
+    expect(readConfirmedOrders(NOW).map((entry) => entry.code)).toEqual(["BBBBBB"]);
+  });
+
+  it("moves an order opened again by its link instead of repeating it", () => {
+    addConfirmedOrder({ ...order("AAAAAA"), token: "C".repeat(43) }, NOW);
+    addConfirmedOrder(order("BBBBBB"), NOW);
+    addConfirmedOrder({ ...order("AAAAAA"), token: "C".repeat(43) }, NOW);
+
+    expect(readConfirmedOrders(NOW).map((entry) => entry.code)).toEqual(["AAAAAA", "BBBBBB"]);
+  });
+
+  it("forgets one order by its token", () => {
+    addConfirmedOrder({ ...order("AAAAAA"), token: "C".repeat(43) }, NOW);
+    addConfirmedOrder(order("BBBBBB"), NOW);
+
+    removeConfirmedOrder("C".repeat(43));
+
+    expect(readConfirmedOrders(NOW).map((entry) => entry.code)).toEqual(["BBBBBB"]);
+  });
+});
+

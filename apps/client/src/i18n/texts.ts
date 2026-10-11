@@ -2,6 +2,8 @@ import type { CatalogueErrorKind } from "../features/catalogue/api/fetch-product
 
 import { reviewTexts } from "./review-texts";
 import type { ReviewTexts } from "./review-texts";
+import { trackingTexts } from "./tracking-texts";
+import type { TrackingTexts } from "./tracking-texts";
 
 /** "32, 33 ou 34": commas, and "ou" before the last item. */
 function listWithOr(items: readonly string[]): string {
@@ -117,6 +119,8 @@ export const texts: {
   };
   /** The review of the order and its sending. */
   readonly review: ReviewTexts;
+  /** The tracking of an order. */
+  readonly tracking: TrackingTexts;
   /** The summary of the order, shared by the screens that come after the cart. */
   readonly orderSummary: {
     readonly title: string;
@@ -242,6 +246,7 @@ export const texts: {
     continue: "Vérifier la commande",
   },
   review: reviewTexts,
+  tracking: trackingTexts,
   orderSummary: {
     title: "Votre commande",
     quantity: (quantity) => `× ${String(quantity)}`,

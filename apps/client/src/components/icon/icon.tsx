@@ -17,7 +17,9 @@ export type IconName =
   | "crosshair"
   | "truck"
   | "phone"
-  | "calendar";
+  | "calendar"
+  | "inbox"
+  | "calendar-check";
 
 // Inline line icons (no request, no package). Decorative: the control that holds one is named.
 // Exported for the map marker, which is drawn outside React by the map library.
@@ -65,12 +67,21 @@ export const ICON_PATHS: Readonly<Record<IconName, readonly string[]>> = {
     "M8 2v4",
     "M3 10h18",
   ],
+  inbox: ["M22 12h-6l-2 3h-4l-2-3H2", "M5.5 5h13l3.5 7v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6Z"],
+  "calendar-check": [
+    "M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z",
+    "M16 2v4",
+    "M8 2v4",
+    "M3 10h18",
+    "m9 16 2 2 4-4",
+  ],
 };
 
-export function Icon({ name }: { name: IconName }): ReactElement {
+/** "small" is the size of an icon inside a step dot. */
+export function Icon({ name, size }: { name: IconName; size?: "small" }): ReactElement {
   return (
     <svg
-      className={styles.icon}
+      className={size === "small" ? [styles.icon, styles.small].join(" ") : styles.icon}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

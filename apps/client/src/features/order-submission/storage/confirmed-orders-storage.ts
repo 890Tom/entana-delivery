@@ -76,10 +76,29 @@ function writeOrders(orders: readonly ConfirmedOrder[]): void {
 const isFresh = (order: ConfirmedOrder, nowMs: number): boolean =>
   nowMs - Date.parse(order.createdAt) <= CONFIRMED_ORDER_RETENTION_DAYS * DAY_MS;
 
-/** Puts the order first, and keeps the ten most recent that are not expired. */
+/**
+ * Puts the order first, and keeps the ten most recent that are not expired. An order that is
+ * already there (a tracking link opened again) is moved, not repeated.
+ */
 export function addConfirmedOrder(order: ConfirmedOrder, nowMs: number): void {
-  const kept = readOrders().filter((entry) => isFresh(entry, nowMs));
+  const isSameOrder = (entry: ConfirmedOrder): boolean =>
+    entry.token === order.token && entry.code === order.code;
+  const kept = readOrders().filter((entry) => isFresh(entry, nowMs) && !isSameOrder(entry));
   writeOrders([order, ...kept].slice(0, MAX_ORDERS));
+}
+
+/** The orders this device remembers that are not expired, the most recent first. */
+export function readConfirmedOrders(nowMs: number): readonly ConfirmedOrder[] {
+  return readOrders().filter((entry) => isFresh(entry, nowMs));
+}
+
+/** Forgets one order: the customer asked for it, or the server no longer knows it. */
+export function removeConfirmedOrder(token: string): void {
+  const orders = readOrders();
+  const kept = orders.filter((entry) => entry.token !== token);
+  if (kept.length !== orders.length) {
+    writeOrders(kept);
+  }
 }
 
 export function removeExpiredConfirmedOrders(nowMs: number): void {

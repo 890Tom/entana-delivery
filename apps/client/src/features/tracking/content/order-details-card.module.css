@@ -1,0 +1,47 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+/* The day block is for the web layout: a phone has the day in its page title. */
+.day {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.dayValue {
+  font: var(--font-title);
+  overflow-wrap: anywhere;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.landmark {
+  font: var(--font-body-strong);
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .day {
+    display: flex;
+  }
+}

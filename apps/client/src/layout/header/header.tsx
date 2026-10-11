@@ -7,7 +7,7 @@ import iconButton from "../../components/icon-button/icon-button.module.css";
 import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
 import { useInstance } from "../../features/instance/use-instance";
 import { texts } from "../../i18n/texts";
-import { CART_PATH, CONTACT_PATH, DELIVERY_PATH, REVIEW_PATH } from "../../routes";
+import { CART_PATH, CONTACT_PATH, DELIVERY_PATH, REVIEW_PATH, TRACKING_PATH } from "../../routes";
 
 import { CartBadge } from "./cart-badge";
 import styles from "./header.module.css";
@@ -71,11 +71,18 @@ function BackLink({
   );
 }
 
-/** The screens of the order after the cart: a phone has a back link and the title of the step. */
-function useStepHeader(): { href: string; label: string; title: string } | null {
+/**
+ * The screens of the order after the cart: a phone has a back link and the title of the step. The
+ * tracking has no way back (the order is done) and only its title.
+ */
+function useStepHeader(): { href: string | null; label: string; title: string } | null {
   const [isDeliveryScreen] = useRoute(DELIVERY_PATH);
   const [isContactScreen] = useRoute(CONTACT_PATH);
   const [isReviewScreen] = useRoute(REVIEW_PATH);
+  const [isTrackingScreen] = useRoute(TRACKING_PATH);
+  if (isTrackingScreen) {
+    return { href: null, label: "", title: texts.tracking.title };
+  }
   if (isDeliveryScreen) {
     return { href: CART_PATH, label: texts.shell.backToCart, title: texts.shell.steps.address };
   }
@@ -108,7 +115,7 @@ export function Header(): ReactElement {
     <header className={styles.header}>
       <div className={styles.inner}>
         {isCartScreen && <BackLink href="/" label={texts.shell.back} />}
-        {step !== null && (
+        {step?.href != null && (
           <BackLink href={step.href} label={step.label} className={styles.phoneOnly} />
         )}
         <HeaderBrand />

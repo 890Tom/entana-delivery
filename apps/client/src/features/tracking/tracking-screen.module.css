@@ -1,0 +1,79 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding: var(--space-4);
+  margin-inline: auto;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.messageTitle {
+  margin: 0;
+  font: var(--font-title);
+}
+
+.messageLine {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.link {
+  align-self: flex-start;
+  min-height: var(--size-touch-min);
+  font: var(--font-body-strong);
+  color: var(--color-text);
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.block,
+.blockTitle,
+.blockTall {
+  height: var(--space-5);
+  background: var(--color-skeleton);
+  border-radius: var(--radius-sm);
+  animation: pulse var(--duration-pulse) var(--ease) infinite alternate;
+}
+
+.blockTitle {
+  width: 60%;
+}
+
+.blockTall {
+  height: calc(var(--space-7) * 3);
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: var(--opacity-skeleton-pulse);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block,
+  .blockTitle,
+  .blockTall {
+    animation: none;
+  }
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .page {
+    padding: var(--space-6);
+  }
+}

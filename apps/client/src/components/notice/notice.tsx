@@ -10,7 +10,7 @@ type NoticeAction =
   | { readonly label: string; readonly href: string };
 
 interface NoticeProps {
-  readonly tone: "error" | "info";
+  readonly tone: "error" | "info" | "success";
   readonly children: ReactNode;
   readonly action?: NoticeAction;
   /** False when another notice on the page already announces the same thing (no live role). */
@@ -23,6 +23,7 @@ interface NoticeProps {
 const TONES = {
   error: { className: styles.error, role: "alert", icon: "circle-alert" },
   info: { className: styles.info, role: "note", icon: "info" },
+  success: { className: styles.success, role: "status", icon: "check" },
 } as const;
 
 function NoticeActionControl({ action }: { action: NoticeAction }): ReactElement {
