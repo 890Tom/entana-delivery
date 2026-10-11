@@ -65,6 +65,24 @@ function answer(kind: Answer, body: unknown, init: RequestInit | undefined): Pro
   return Promise.resolve(kind === "ok" ? jsonResponse(body) : problemResponse(500));
 }
 
+/** The network boundary: the order, the tracking that follows it, the instance, the catalogue. */
+function stubNetwork(control: ApiControl, order: OpenOptions["order"]): ReturnType<typeof vi.fn> {
+  const fetchStub = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    if (input === "/api/v1/orders") {
+      return order?.(init) ?? pendingUntilAborted(init);
+    }
+    // The tracking screen that a confirmed order leads to: it is not what these tests look at.
+    if (input === "/api/v1/tracking") {
+      return pendingUntilAborted(init);
+    }
+    return input === "/api/v1/instance"
+      ? answer(control.instance, control.instanceData, init)
+      : answer(control.catalogue, { products: control.products }, init);
+  });
+  vi.stubGlobal("fetch", fetchStub);
+  return fetchStub;
+}
+
 /** Stubs the network (the boundary), fills the storages and shows the contact screen. */
 export function openContact(options: OpenOptions = {}): {
   readonly control: ApiControl;
@@ -77,15 +95,7 @@ export function openContact(options: OpenOptions = {}): {
     products: [SAKAFO, MOFO, KOBA],
     ...options.api,
   };
-  const fetchStub = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
-    if (input === "/api/v1/orders") {
-      return options.order?.(init) ?? pendingUntilAborted(init);
-    }
-    return input === "/api/v1/instance"
-      ? answer(control.instance, control.instanceData, init)
-      : answer(control.catalogue, { products: control.products }, init);
-  });
-  vi.stubGlobal("fetch", fetchStub);
+  const fetchStub = stubNetwork(control, options.order);
   sessionStorage.clear();
   localStorage.clear();
   const lines = options.lines ?? [[SAKAFO.id, 1]];

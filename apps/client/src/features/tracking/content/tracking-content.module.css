@@ -1,0 +1,95 @@
+/*
+ * The visual order is made here, not by the document: the document goes title, notices, steps,
+ * code, then the card with its actions, so that the keyboard reads the content before the
+ * actions at every width.
+ */
+.grid {
+  display: grid;
+  grid-template-areas:
+    "head"
+    "notices"
+    "steps"
+    "code"
+    "side";
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  grid-area: head;
+  gap: var(--space-1);
+}
+
+.notices {
+  display: flex;
+  flex-direction: column;
+  grid-area: notices;
+  gap: var(--space-2);
+}
+
+.code {
+  grid-area: code;
+}
+
+.steps {
+  grid-area: steps;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  grid-area: side;
+  gap: var(--space-5);
+}
+
+.title {
+  margin: 0;
+  font: var(--font-title);
+  overflow-wrap: anywhere;
+}
+
+.line,
+.reason {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.reason {
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+/* Hidden by `display: none`, never visually: out of the accessibility tree and of the tab order. */
+.wideOnly {
+  display: none;
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-areas:
+      "head    side"
+      "notices side"
+      "steps   side"
+      "code    side";
+    grid-template-columns: minmax(0, 1fr) var(--size-sidebar-width);
+    column-gap: var(--space-6);
+    grid-template-rows: auto auto auto 1fr;
+  }
+
+  .side {
+    position: sticky;
+    top: calc(var(--size-header-height) + var(--space-5));
+  }
+
+  .narrowOnly {
+    display: none;
+  }
+
+  .wideOnly {
+    display: block;
+  }
+}

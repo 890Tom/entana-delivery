@@ -45,3 +45,33 @@
   border-color: var(--color-border);
   box-shadow: var(--shadow-none);
 }
+
+/* Links look like the button: no underline. */
+a.button {
+  text-decoration: none;
+}
+
+.primary {
+  color: var(--color-text-inverse);
+  background: var(--color-surface-inverse);
+  border-color: var(--color-surface-inverse);
+}
+
+@media (hover: hover) {
+  .primary:hover:not([aria-disabled="true"]) {
+    background: var(--color-ink-hover);
+  }
+}
+
+/* A bold text with no border, no fill and no shadow: the secondary action of a screen. */
+.ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.danger {
+  color: var(--color-text-on-error);
+  background: var(--color-error);
+  border-color: var(--color-error);
+}

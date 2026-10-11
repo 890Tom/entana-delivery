@@ -143,7 +143,9 @@ describe("the end of a confirmed order", () => {
     await waitFor(() => {
       expect(window.location.pathname).toBe("/suivi");
     });
-    expect(getOrderSubmissionState().status).toBe("confirmed");
+    // The tracking screen dismisses the confirmation as it opens: that it still showed the thanks
+    // is the proof that the review had not dismissed it before.
+    expect(await screen.findByText(texts.tracking.thanks)).toBeTruthy();
   });
 
   it("goes to the tracking address when the order is confirmed and the cart is empty", async () => {
@@ -155,7 +157,9 @@ describe("the end of a confirmed order", () => {
     await waitFor(() => {
       expect(window.location.pathname).toBe("/suivi");
     });
-    expect(getOrderSubmissionState().status).toBe("confirmed");
+    // The tracking screen dismisses the confirmation as it opens: that it still showed the thanks
+    // is the proof that the review had not dismissed it before.
+    expect(await screen.findByText(texts.tracking.thanks)).toBeTruthy();
   });
 
   it("forgets the old confirmation when a new order has begun, then applies the guards", async () => {

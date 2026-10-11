@@ -18,6 +18,12 @@
   background: var(--color-surface-muted);
 }
 
+/* The thanks after a send: the accent of the design, ink text, and the check. */
+.success {
+  color: var(--color-text-on-accent);
+  background: var(--color-accent);
+}
+
 .icon {
   flex: none;
   width: var(--size-icon-md);

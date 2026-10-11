@@ -11,8 +11,9 @@ export const CONTACT_PATH = "/coordonnees";
 export const REVIEW_PATH = "/recapitulatif";
 
 /**
- * Where a confirmed order leads. Nothing is served there yet: the address leads to the "not
- * found" page until the tracking screen exists.
+ * The tracking screen, where a confirmed order leads. A link to an order is this address with the
+ * tracking token in the fragment (`#token`): a fragment is never sent to the server, and the
+ * screen erases it from the address bar as soon as it has read it.
  */
 export const TRACKING_PATH = "/suivi";
 
@@ -26,4 +27,5 @@ export const STEP_BY_PATH: Readonly<Record<string, number>> = {
   [DELIVERY_PATH]: 1,
   [CONTACT_PATH]: 2,
   [REVIEW_PATH]: 3,
+  [TRACKING_PATH]: 4,
 };

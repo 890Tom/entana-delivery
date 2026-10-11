@@ -1,0 +1,58 @@
+/*
+ * One element for both layouts: the foot of the card on the web layout, and the bar fixed at the
+ * bottom of a phone, with the same tokens as the bar of the other screens (safe area included).
+ */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+@media (max-width: 1023px) {
+  .actions {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: var(--layer-bar);
+    padding: var(--space-3) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    background: var(--color-surface);
+    box-shadow: var(--shadow-bar);
+  }
+
+  /* The page is not hidden behind the bar: one more line of height is kept free. */
+  :root:has(.actions) {
+    scroll-padding-bottom: calc(var(--size-bottom-bar) + var(--size-touch-min));
+  }
+
+  :root:has(.actions) main {
+    padding-bottom: calc(var(--size-bottom-bar) + var(--size-touch-min));
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--border-width-strong) solid var(--color-error);
+  border-radius: var(--radius);
+}
+
+.panelTitle {
+  margin: 0;
+  font: var(--font-body-strong);
+  color: var(--color-error);
+}
+
+.panelTitle:focus {
+  outline: var(--focus-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.panelText {
+  margin: 0;
+}
+
+.panelButtons {
+  display: flex;
+  gap: var(--space-2);
+}
