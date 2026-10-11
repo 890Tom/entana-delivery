@@ -2,13 +2,13 @@ import type { PublicInstance, TrackingResponse } from "@entana/contracts";
 import { screen } from "@testing-library/react";
 import { vi } from "vitest";
 
-import { CONFIRMED_ORDERS_STORAGE_KEY } from "../features/order-submission/storage/confirmed-orders-storage";
-import { texts } from "../i18n/texts";
+import { CONFIRMED_ORDERS_STORAGE_KEY } from "../../features/order-submission/storage/confirmed-orders-storage";
+import { texts } from "../../i18n/texts";
 
-import { buildInstance } from "./build-instance";
+import { buildInstance } from "../builders/build-instance";
 import { renderAt } from "./delivery-harness";
-import { createFakeMapLoader } from "./fake-map";
-import { jsonResponse, problemResponse } from "./stub-fetch";
+import { createFakeMapLoader } from "../stubs/fake-map";
+import { jsonResponse, problemResponse } from "../stubs/stub-fetch";
 
 export const TOKEN = "A".repeat(43);
 export const OTHER_TOKEN = "B".repeat(43);

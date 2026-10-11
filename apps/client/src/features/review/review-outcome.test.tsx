@@ -2,11 +2,11 @@ import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { buildDrafts } from "../../test-support/build-order-submission";
-import { NOTE, SAKAFO } from "../../test-support/contact-harness";
-import { expectNoAccessibilityViolations } from "../../test-support/expect-no-accessibility-violations";
-import { buildCleanup } from "../../test-support/order-submission-answers";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
+import { buildDrafts } from "../../test-support/builders/build-order-submission";
+import { NOTE, SAKAFO } from "../../test-support/harnesses/contact-harness";
+import { expectNoAccessibilityViolations } from "../../test-support/assertions/expect-no-accessibility-violations";
+import { buildCleanup } from "../../test-support/order-submission/order-submission-answers";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
 import {
   contactDraft,
   createdAnswer,
@@ -15,8 +15,8 @@ import {
   orderCalls,
   problemAnswer,
   readySendButtons,
-} from "../../test-support/review-harness";
-import { jsonResponse } from "../../test-support/stub-fetch";
+} from "../../test-support/harnesses/review-harness";
+import { jsonResponse } from "../../test-support/stubs/stub-fetch";
 import { getOrderSubmissionState, submitOrder } from "../order-submission/order-submission";
 
 /** The first answer, then the second one for every request after it. */

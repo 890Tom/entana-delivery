@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { CLOCK } from "../../clock/clock.js";
 import type { Clock } from "../../clock/clock.js";
 import { AddressRateLimitedError } from "../../orders/errors/order-errors.js";
-import { SlidingWindowLimiter } from "../../orders/rate-limit/sliding-window-limiter.js";
+import { SlidingWindowLimiter } from "../../rate-limit/sliding-window-limiter.js";
 import {
   TRACKING_LOOKUP_PHONE_MAX_ATTEMPTS,
   TRACKING_LOOKUP_PHONE_WINDOW_MS,

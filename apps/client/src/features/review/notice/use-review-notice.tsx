@@ -4,7 +4,7 @@ import type { ReactElement, RefObject } from "react";
 import { Notice } from "../../../components/notice/notice";
 import { texts } from "../../../i18n/texts";
 import { useProducts } from "../../catalogue/api/use-products";
-import { useInstance } from "../../instance/use-instance";
+import { useInstance } from "../../instance/api/use-instance";
 import { isReplayable } from "../../order-submission/order-submission-types";
 import type { OrderSubmission } from "../../order-submission/use-order-submission";
 

@@ -2,14 +2,14 @@ import type { TrackingLookupRequest, TrackingResponse } from "@entana/contracts"
 import { useEffect, useId, useRef } from "react";
 import type { ReactElement, RefObject, SubmitEvent } from "react";
 
-import { BottomBar } from "../../components/bottom-bar/bottom-bar";
-import bar from "../../components/bottom-bar/bottom-bar.module.css";
-import { Notice } from "../../components/notice/notice";
-import { TextField } from "../../components/text-field/text-field";
-import { texts } from "../../i18n/texts";
-import { PhoneField } from "../contact/contact-form/phone-field";
+import { BottomBar } from "../../../components/bottom-bar/bottom-bar";
+import bar from "../../../components/bottom-bar/bottom-bar.module.css";
+import { Notice } from "../../../components/notice/notice";
+import { TextField } from "../../../components/text-field/text-field";
+import { texts } from "../../../i18n/texts";
+import { PhoneField } from "../../contact/contact-form/phone-field";
 
-import styles from "./find-order-screen.module.css";
+import styles from "../find-order-screen.module.css";
 import { useLookupForm } from "./use-lookup-form";
 import type { LookupFormState } from "./use-lookup-form";
 

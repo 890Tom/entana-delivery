@@ -2,7 +2,7 @@ import type { PublicInstance } from "@entana/contracts";
 import { useQuery } from "@tanstack/react-query";
 import type { UseQueryResult } from "@tanstack/react-query";
 
-import { fetchInstance } from "./api/fetch-instance";
+import { fetchInstance } from "./fetch-instance";
 
 /** The configuration does not change while the app is open: it is asked for once, at start. */
 export function useInstance(): UseQueryResult<PublicInstance> {

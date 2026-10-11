@@ -10,7 +10,7 @@ import { texts } from "../../i18n/texts";
 import { useDocumentTitle } from "../../layout/document-title/use-document-title";
 import { CART_PATH } from "../../routes";
 import { useCart } from "../cart/cart-state/cart-context";
-import { useInstance } from "../instance/use-instance";
+import { useInstance } from "../instance/api/use-instance";
 
 import { DeliveryForm } from "./delivery-form/delivery-form";
 import { useDeliveryForm } from "./delivery-form/use-delivery-form";

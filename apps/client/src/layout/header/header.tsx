@@ -5,7 +5,7 @@ import { Link, useRoute } from "wouter";
 import { Icon } from "../../components/icon/icon";
 import iconButton from "../../components/icon-button/icon-button.module.css";
 import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
-import { useInstance } from "../../features/instance/use-instance";
+import { useInstance } from "../../features/instance/api/use-instance";
 import { texts } from "../../i18n/texts";
 import {
   CART_PATH,
@@ -16,7 +16,7 @@ import {
   TRACKING_PATH,
 } from "../../routes";
 
-import { useReportedHeight } from "../use-reported-height";
+import { useReportedHeight } from "../reported-height/use-reported-height";
 
 import { CartBadge } from "./cart-badge";
 import { FindOrderLink } from "./find-order-link";

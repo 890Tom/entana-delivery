@@ -5,7 +5,7 @@ import type { ReactElement, ReactNode, RefObject } from "react";
 import { Notice } from "../../../components/notice/notice";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
-import { useInstance } from "../../instance/use-instance";
+import { useInstance } from "../../instance/api/use-instance";
 import { useCancelFlow } from "../api/use-cancel-flow";
 import type { CancelFlow } from "../api/use-cancel-flow";
 import { describeTrackingActions } from "../rules/describe-tracking-actions";

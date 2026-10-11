@@ -1,14 +1,14 @@
 import { vi } from "vitest";
 
-import { LAUNCH_FLAG_STORAGE_ITEM } from "../features/active-order/storage/launch-flag";
-import { CART_STORAGE_KEY } from "../features/cart/storage/cart-storage";
-import { CONFIRMED_ORDERS_STORAGE_KEY } from "../features/order-submission/storage/confirmed-orders-storage";
+import { LAUNCH_FLAG_STORAGE_ITEM } from "../../features/active-order/storage/launch-flag";
+import { CART_STORAGE_KEY } from "../../features/cart/storage/cart-storage";
+import { CONFIRMED_ORDERS_STORAGE_KEY } from "../../features/order-submission/storage/confirmed-orders-storage";
 
-import { buildInstance } from "./build-instance";
-import { buildProduct, buildProductId } from "./build-product";
+import { buildInstance } from "../builders/build-instance";
+import { buildProduct, buildProductId } from "../builders/build-product";
 import { renderAt } from "./delivery-harness";
-import { createFakeMapLoader } from "./fake-map";
-import { jsonResponse } from "./stub-fetch";
+import { createFakeMapLoader } from "../stubs/fake-map";
+import { jsonResponse } from "../stubs/stub-fetch";
 import { TOKEN, TRACKING_ADDRESS, viewAnswer } from "./tracking-harness";
 import type { Answer } from "./tracking-harness";
 

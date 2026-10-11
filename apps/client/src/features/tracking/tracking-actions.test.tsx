@@ -2,8 +2,8 @@ import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
-import { TOKEN, openTracking, viewAnswer } from "../../test-support/tracking-harness";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
+import { TOKEN, openTracking, viewAnswer } from "../../test-support/harnesses/tracking-harness";
 
 const STORED = [{ code: "AAAAAA", token: TOKEN }];
 const PHONE = "+261341234567";

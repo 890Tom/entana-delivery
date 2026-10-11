@@ -1,7 +1,7 @@
 import { createOrderRequestSchema } from "@entana/contracts";
 import { describe, expect, it } from "vitest";
 
-import { buildDrafts } from "../../../test-support/build-order-submission";
+import { buildDrafts } from "../../../test-support/builders/build-order-submission";
 
 import { buildOrderRequest } from "./build-order-request";
 

@@ -1,8 +1,8 @@
 import { vi } from "vitest";
 import type { Mock } from "vitest";
 
-import { CREATED_BODY } from "./build-order-submission";
-import { jsonResponse } from "./stub-fetch";
+import { CREATED_BODY } from "../builders/build-order-submission";
+import { jsonResponse } from "../stubs/stub-fetch";
 
 /** A 201 as the API answers it. */
 export const created = (): Response => jsonResponse(CREATED_BODY, 201);

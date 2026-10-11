@@ -8,9 +8,9 @@ import {
   locateButton,
   readyMap,
   renderDelivery,
-} from "../../test-support/delivery-harness";
-import { createFakeMapLoader } from "../../test-support/fake-map";
-import { restoreGeolocation, stubGeolocation } from "../../test-support/stub-geolocation";
+} from "../../test-support/harnesses/delivery-harness";
+import { createFakeMapLoader } from "../../test-support/stubs/fake-map";
+import { restoreGeolocation, stubGeolocation } from "../../test-support/stubs/stub-geolocation";
 
 beforeEach(() => {
   localStorage.clear();

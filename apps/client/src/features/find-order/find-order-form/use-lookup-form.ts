@@ -2,11 +2,11 @@ import type { TrackingLookupRequest, TrackingResponse } from "@entana/contracts"
 import { useRef, useState } from "react";
 import type { RefObject } from "react";
 
-import type { PhoneFieldState } from "../contact/contact-form/phone-field";
-import { usePhoneCheck } from "../contact/contact-form/use-phone-check";
+import type { PhoneFieldState } from "../../contact/contact-form/phone-field";
+import { usePhoneCheck } from "../../contact/contact-form/use-phone-check";
 
-import { useLookup } from "./api/use-lookup";
-import { readOrderCode, toLookupRequest } from "./rules/read-lookup-form";
+import { useLookup } from "../api/use-lookup";
+import { readOrderCode, toLookupRequest } from "../rules/read-lookup-form";
 
 /** What the lookup answered that is not an order: shown under the fields, in words. */
 type Problem = "invalid_phone" | "not_found" | "rate_limited" | "failure";

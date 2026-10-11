@@ -3,7 +3,7 @@ import type { KeyboardEvent, ReactElement, RefObject } from "react";
 
 import { Button, ButtonLink } from "../../../components/button/button";
 import { texts } from "../../../i18n/texts";
-import { useReportedHeight } from "../../../layout/use-reported-height";
+import { useReportedHeight } from "../../../layout/reported-height/use-reported-height";
 import type { CancelFlow } from "../api/use-cancel-flow";
 import { describeVisibleActions } from "../rules/describe-tracking-actions";
 import type { TrackingActionsView } from "../rules/describe-tracking-actions";

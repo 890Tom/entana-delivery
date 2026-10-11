@@ -6,10 +6,10 @@ import { App } from "../../../app";
 import { createQueryClient } from "../../../data-fetching/query-client";
 import { texts } from "../../../i18n/texts";
 import { DELIVERY_PATH } from "../../../routes";
-import { buildInstance } from "../../../test-support/build-instance";
-import { buildProduct, buildProductId } from "../../../test-support/build-product";
-import { expectNoAccessibilityViolations } from "../../../test-support/expect-no-accessibility-violations";
-import { jsonResponse, problemResponse } from "../../../test-support/stub-fetch";
+import { buildInstance } from "../../../test-support/builders/build-instance";
+import { buildProduct, buildProductId } from "../../../test-support/builders/build-product";
+import { expectNoAccessibilityViolations } from "../../../test-support/assertions/expect-no-accessibility-violations";
+import { jsonResponse, problemResponse } from "../../../test-support/stubs/stub-fetch";
 import { CART_STORAGE_KEY } from "../storage/cart-storage";
 
 const SAKAFO = buildProduct({ id: buildProductId(1), name: "Sakafo", priceAr: 4500 });

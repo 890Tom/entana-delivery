@@ -2,16 +2,16 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { expect, vi } from "vitest";
 
-import { App } from "../app";
-import { createQueryClient } from "../data-fetching/query-client";
-import { CART_STORAGE_KEY } from "../features/cart/storage/cart-storage";
-import { MAP_LOADER_CONTEXT } from "../features/delivery/map/map-loader-context";
-import { texts } from "../i18n/texts";
+import { App } from "../../app";
+import { createQueryClient } from "../../data-fetching/query-client";
+import { CART_STORAGE_KEY } from "../../features/cart/storage/cart-storage";
+import { MAP_LOADER_CONTEXT } from "../../features/delivery/map/map-loader-context";
+import { texts } from "../../i18n/texts";
 
-import { buildInstance } from "./build-instance";
-import { buildProduct, buildProductId } from "./build-product";
-import type { FakeMap, FakeMapLoader } from "./fake-map";
-import { jsonResponse } from "./stub-fetch";
+import { buildInstance } from "../builders/build-instance";
+import { buildProduct, buildProductId } from "../builders/build-product";
+import type { FakeMap, FakeMapLoader } from "../stubs/fake-map";
+import { jsonResponse } from "../stubs/stub-fetch";
 
 export const INSTANCE = buildInstance({
   map: {

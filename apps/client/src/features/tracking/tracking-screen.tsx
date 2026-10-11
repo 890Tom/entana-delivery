@@ -20,11 +20,11 @@ import { TrackingNotFoundError } from "./api/request-tracking";
 import { useTracking } from "./api/use-tracking";
 import { TrackingContent } from "./content/tracking-content";
 import styles from "./tracking-screen.module.css";
-import { useDisplayedOrder } from "./use-displayed-order";
-import type { DisplayedOrder } from "./use-displayed-order";
+import { useDisplayedOrder } from "./displayed-order/use-displayed-order";
+import type { DisplayedOrder } from "./displayed-order/use-displayed-order";
 
 type TokenOrder = Exclude<DisplayedOrder, { origin: "invalid" }>;
-import { useNoIndex } from "./use-no-index";
+import { useNoIndex } from "../../layout/no-index/use-no-index";
 
 /**
  * The thanks after a send, once: it is decided when the screen opens, from the state of the

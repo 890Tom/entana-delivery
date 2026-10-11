@@ -24,7 +24,7 @@ import {
 import type { CreateOrderRequest, CreateOrderResponse } from "@entana/contracts";
 import type { Response } from "express";
 import { CREATE_ORDER_BODY_SCHEMA } from "./http/order-openapi.js";
-import { JsonContentTypeGuard } from "./http/json-content-type.guard.js";
+import { JsonContentTypeGuard } from "../errors/request-body/json-content-type.guard.js";
 import {
   IDEMPOTENCY_KEY_HEADER,
   idempotencyKeyHeader,

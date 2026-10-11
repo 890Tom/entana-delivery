@@ -4,8 +4,8 @@ import { CLOCK } from "../../clock/clock.js";
 import type { Clock } from "../../clock/clock.js";
 import { resolveRequestId } from "../../logging/pino-http-options.js";
 import { AddressRateLimitedError } from "../../orders/errors/order-errors.js";
-import { normalizeAddress } from "../../orders/rate-limit/normalize-address.js";
-import { SlidingWindowLimiter } from "../../orders/rate-limit/sliding-window-limiter.js";
+import { normalizeAddress } from "../../rate-limit/normalize-address.js";
+import { SlidingWindowLimiter } from "../../rate-limit/sliding-window-limiter.js";
 import {
   TRACKING_LOOKUP_MAX_REQUESTS,
   TRACKING_LOOKUP_WINDOW_MS,

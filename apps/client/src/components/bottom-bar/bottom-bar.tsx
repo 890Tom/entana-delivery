@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { Link } from "wouter";
 
 import { texts } from "../../i18n/texts";
-import { useReportedHeight } from "../../layout/use-reported-height";
+import { useReportedHeight } from "../../layout/reported-height/use-reported-height";
 
 import styles from "./bottom-bar.module.css";
 

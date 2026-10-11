@@ -14,7 +14,7 @@ import {
   phoneField,
   reopenContact,
   typeInto,
-} from "../../../test-support/contact-harness";
+} from "../../../test-support/harnesses/contact-harness";
 
 afterEach(() => {
   cleanup();

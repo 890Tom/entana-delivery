@@ -3,8 +3,8 @@ import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../i18n/texts";
-import { MOFO, NAME, NOTE, SAKAFO } from "../../test-support/contact-harness";
-import { resetOrderSubmission } from "../../test-support/reset-order-submission";
+import { MOFO, NAME, NOTE, SAKAFO } from "../../test-support/harnesses/contact-harness";
+import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
 import {
   amountsCard,
   contactDraft,
@@ -13,7 +13,7 @@ import {
   orderCalls,
   readySendButtons,
   sendButtons,
-} from "../../test-support/review-harness";
+} from "../../test-support/harnesses/review-harness";
 
 /** A text matcher that ignores which kind of space (the no-break one of amounts) is used. */
 const hasText =
