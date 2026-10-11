@@ -57,7 +57,7 @@ const locationSchema = z.strictObject({
 
 // 32 random bytes in base64url without padding: 43 characters. The pattern comes after the length
 // check, and the message never repeats the value, which is a secret.
-const trackingTokenSchema = z
+export const trackingTokenSchema = z
   .string()
   .length(TRACKING_TOKEN_LENGTH, { abort: true, error: "must be exactly 43 characters" })
   .regex(/^[A-Za-z0-9_-]+$/, "must only use letters, digits, hyphens and underscores");

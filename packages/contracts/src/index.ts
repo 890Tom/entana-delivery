@@ -14,6 +14,7 @@ export {
   MAX_ORDER_LINES,
   MAX_ORDER_LINE_QUANTITY,
   createOrderRequestSchema,
+  trackingTokenSchema,
 } from "./orders/request/create-order-request.js";
 export type { CreateOrderRequest } from "./orders/request/create-order-request.js";
 export { createOrderResponseSchema } from "./orders/response/create-order-response.js";
@@ -53,3 +54,13 @@ export { instanceConfigSchema, mediaFileNameSchema } from "./instance/instance-c
 export type { InstanceConfig } from "./instance/instance-config.js";
 export { publicInstanceSchema, toPublicInstance } from "./instance/public-instance.js";
 export type { PublicInstance } from "./instance/public-instance.js";
+export {
+  TRACKING_TOKEN_HEADER,
+  trackingResponseSchema,
+} from "./orders/tracking/tracking-response.js";
+export type { OrderStatus, TrackingResponse } from "./orders/tracking/tracking-response.js";
+export {
+  isCancellableStatus,
+  isFinalStatus,
+  isTrackingExpired,
+} from "./orders/tracking/tracking-rules.js";

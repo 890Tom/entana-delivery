@@ -8,9 +8,9 @@ const MAX_INSTANCE_LENGTH = 200;
 const SAFE_PATH = /^\/(?!\/)(?:[A-Za-z0-9/\-_.~]|%[0-9A-Fa-f]{2})*$/;
 const PARTIAL_PERCENT_SEQUENCE_AT_END = /%[0-9A-Fa-f]?$/;
 
-// Follow-up: the raw path is shown only because no route has a sensitive parameter yet. Once one
-// does (the tracking link), `instance` must come from the route template when a route matched
-// (/api/v1/orders/track/:token) and from the raw path only when none did.
+// The raw path is shown because no route carries a secret in its path: the tracking token travels
+// in a header (X-Tracking-Token). A route that ever puts a secret in its path must make `instance`
+// come from its route template instead.
 
 /**
  * The `instance` of a problem: the path of the request URL. The rule: cut at the first "?" or

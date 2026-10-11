@@ -11,6 +11,7 @@ export const REDACTED_HEADER_PATHS = [
   "req.headers.authorization",
   "req.headers.cookie",
   'req.headers["x-api-key"]',
+  'req.headers["x-tracking-token"]',
   'res.headers["set-cookie"]',
 ] as const;
 
@@ -33,8 +34,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-// The route template ("/api/v1/orders/track/:token"), never the real path: a tracking token
-// travels in the path and must not reach the logs. Express knows the template only once the
+// The route template, never the real path: a path parameter must not reach the logs. Express knows the template only once the
 // handler matched, so this is read when the response is finished (see customProps below).
 // A catch-all template (Nest's handler of unknown routes) says nothing about the request.
 function readRoute(request: unknown): string {

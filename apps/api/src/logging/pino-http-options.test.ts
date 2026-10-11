@@ -73,6 +73,7 @@ describe("redaction", () => {
           authorization: "Bearer token-123",
           cookie: "session=abc",
           "x-api-key": "key-456",
+          "x-tracking-token": "tracking-789",
           accept: "application/json",
         },
       },
@@ -80,7 +81,7 @@ describe("redaction", () => {
     });
 
     const output = lines().join("");
-    for (const secret of ["token-123", "session=abc", "key-456", "session=def"]) {
+    for (const secret of ["token-123", "session=abc", "key-456", "tracking-789", "session=def"]) {
       expect(output).not.toContain(secret);
     }
     expect(output).toContain("application/json");
