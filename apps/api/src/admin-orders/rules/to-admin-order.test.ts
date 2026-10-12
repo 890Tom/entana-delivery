@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toAdminOrderDetail } from "./to-admin-order.js";
+import { toAdminOrderDetail, toAdminOrderListItem } from "./to-admin-order.js";
 import type { StoredAdminOrder } from "./to-admin-order.js";
 
 const STORED: StoredAdminOrder = {
@@ -34,5 +34,17 @@ describe("toAdminOrderDetail", () => {
     const detail = toAdminOrderDetail({ ...STORED, status: "CANCELLED" });
 
     expect(detail.rejectionReason).toBeNull();
+  });
+});
+
+describe("toAdminOrderListItem", () => {
+  const row = { ...STORED, customerId: "0199f5b0-0000-7000-8000-000000000001" };
+
+  it("names the customer as the order does and tells a first order by its id", () => {
+    const first = toAdminOrderListItem(row, new Set([STORED.id]));
+    const next = toAdminOrderListItem(row, new Set(["0199f5b0-0000-7000-8000-000000000002"]));
+
+    expect([first.customerName, first.isNewCustomer]).toEqual(["Fake Person", true]);
+    expect(next.isNewCustomer).toBe(false);
   });
 });

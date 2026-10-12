@@ -1,7 +1,12 @@
-import type { AdminOrderDetail, AdminOrderSummary, OrderStatus } from "@entana/contracts";
+import type {
+  AdminOrderDetail,
+  AdminOrderListItem,
+  AdminOrderSummary,
+  OrderStatus,
+} from "@entana/contracts";
 
 /** What a row of the list is made from. */
-export interface StoredOrderSummary {
+interface StoredOrderSummary {
   readonly id: string;
   readonly publicCode: string;
   readonly status: OrderStatus;
@@ -12,6 +17,11 @@ export interface StoredOrderSummary {
   readonly totalAr: number;
   readonly customer: { readonly phoneE164: string };
   readonly items: readonly { readonly qty: number }[];
+}
+
+/** A row of the list: the customer's id is read to find out whether it is a first order. */
+export interface StoredOrderListItem extends StoredOrderSummary {
+  readonly customerId: string;
 }
 
 type EventView = AdminOrderDetail["events"][number];
@@ -43,7 +53,7 @@ export interface StoredAdminOrder extends StoredOrderSummary {
 const toDay = (date: Date | null): string | null =>
   date === null ? null : date.toISOString().slice(0, 10);
 
-export function toAdminOrderSummary(order: StoredOrderSummary): AdminOrderSummary {
+function toAdminOrderSummary(order: StoredOrderSummary): AdminOrderSummary {
   return {
     id: order.id,
     publicCode: order.publicCode,
@@ -55,6 +65,17 @@ export function toAdminOrderSummary(order: StoredOrderSummary): AdminOrderSummar
     landmarkText: order.landmarkText,
     totalAr: order.totalAr,
     itemCount: order.items.reduce((total, item) => total + item.qty, 0),
+  };
+}
+
+export function toAdminOrderListItem(
+  order: StoredOrderListItem,
+  firstOrderIds: ReadonlySet<string>,
+): AdminOrderListItem {
+  return {
+    ...toAdminOrderSummary(order),
+    customerName: order.contactName,
+    isNewCustomer: firstOrderIds.has(order.id),
   };
 }
 

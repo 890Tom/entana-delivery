@@ -10,11 +10,17 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { adminOrderListQuerySchema, statusTransitionRequestSchema } from "@entana/contracts";
+import {
+  adminOrderListQuerySchema,
+  adminOrderSummaryQuerySchema,
+  statusTransitionRequestSchema,
+} from "@entana/contracts";
 import type {
   AdminOrderDetail,
   AdminOrderListQuery,
   AdminOrderListResponse,
+  AdminOrderSummaryQuery,
+  AdminOrderSummaryResponse,
   AdminProfile,
   StatusTransitionRequest,
 } from "@entana/contracts";
@@ -25,6 +31,7 @@ import {
   documentChangeStatus,
   documentGetOrder,
   documentListOrders,
+  documentOrdersSummary,
 } from "./http/admin-orders-openapi.js";
 
 // Errors carry it too (the problem filter sets it): this is for the answers of success.
@@ -42,6 +49,16 @@ export class AdminOrdersController {
     @Query({ schema: adminOrderListQuerySchema }) query: AdminOrderListQuery,
   ): Promise<AdminOrderListResponse> {
     return this.orders.listOrders(query);
+  }
+
+  // Declared before `:id`, which would take "summary" for an order id.
+  @Get("summary")
+  @Header("Cache-Control", NO_STORE)
+  @documentOrdersSummary()
+  summary(
+    @Query({ schema: adminOrderSummaryQuerySchema }) query: AdminOrderSummaryQuery,
+  ): Promise<AdminOrderSummaryResponse> {
+    return this.orders.getSummary(query);
   }
 
   @Get(":id")

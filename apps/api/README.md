@@ -250,18 +250,45 @@ this script to log in.
 
 ### Orders (administration)
 
-Three routes under `/api/v1/admin/orders`, closed by the guard above (`401` without a session). Every
+Four routes under `/api/v1/admin/orders`, closed by the guard above (`401` without a session). Every
 answer carries `Cache-Control: no-store`. OpenAPI tag `admin`, security scheme `adminSession`.
 
 | Route                                       | Does                                                    |
 | ------------------------------------------- | ------------------------------------------------------- |
 | `GET /api/v1/admin/orders`                  | One page of orders, newest first                        |
+| `GET /api/v1/admin/orders/summary`          | The counters of the list screen                         |
 | `GET /api/v1/admin/orders/:id`              | One order with its lines and its history                |
 | `POST /api/v1/admin/orders/:id/transitions` | Moves the order one step; `200` with the updated detail |
 
-**List.** `status` (one status), `limit` (25 by default, 100 at most), `cursor` (the `nextCursor` of
-the previous page). Any other parameter, a value out of range or a cursor this API did not issue is
-a `400` that never repeats the value.
+**List.** Parameters, all optional:
+
+| Parameter | Meaning                                                                                                                            |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `status`  | One status or a comma separated list (`REJECTED,CANCELLED,FAILED`). Each value is checked, a repeated one counts once              |
+| `date`    | `YYYY-MM-DD`, a day of the instance time zone: the orders received that day **or** to be delivered that day                        |
+| `q`       | 2 to 50 characters once trimmed. Without a digit: the name typed on the order. Digits only: a part of the phone number (see below) |
+| `limit`   | 25 by default, 100 at most                                                                                                         |
+| `cursor`  | The `nextCursor` of the previous page                                                                                              |
+
+Any other parameter, a value out of range or a cursor this API did not issue is a `400` that never
+repeats the value; `q` is never logged.
+
+The search `q`: a text with a letter and only letters, spaces, `-` and `'` searches `contactName`
+("contains", case ignored). A text of digits, `+`, spaces, `-` and `.` searches the phone number
+("contains" on the E.164 number): the national zero is dropped (`034 12 345 67` and `+261341234567`
+find the same number) and at least 3 digits are needed. Anything else (a letter with a digit, `%`,
+`_`) is a `400`. **Limit:** there is no `unaccent` (no PostgreSQL extension), so accents count:
+`rene` does not find `René`.
+
+Each item is the row of the detail without the lines, plus `customerName` (the name typed for this
+order, `contactName`) and `isNewCustomer` (true when no older order of the same customer exists,
+whatever its status, the filters and the page). The answer adds `totalCount`: every order of the
+filters, whatever the cursor and the limit.
+
+**Summary.** `GET /api/v1/admin/orders/summary?since=<order id>` answers `toProcessCount` (orders
+`NEW`), `todayCount` (orders received today in the instance time zone, any status) and, only when
+`since` is given, `newSince`: `count` of the orders `NEW` newer than `since` (ids are uuidv7) and
+`latest` (`id`, `publicCode`, `customerName`, or `null`). A `since` that is not a uuid is a `400`.
 
 **Detail.** The row, plus lines, delivery fee, note, position, `rejectionReason` (a refusal only)
 and the events with their actor. The hash of the tracking token is never in an answer. A malformed
