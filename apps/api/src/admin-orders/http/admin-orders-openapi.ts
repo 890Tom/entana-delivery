@@ -12,6 +12,7 @@ import {
   adminOrderDetailSchema,
   MAX_STATUS_REASON_LENGTH,
   adminOrderListResponseSchema,
+  adminOrderSummaryResponseSchema,
   problemDetailsSchema,
 } from "@entana/contracts";
 import { ADMIN_SECURITY_SCHEME } from "../../admin-auth/http/admin-openapi.js";
@@ -73,12 +74,38 @@ export const documentListOrders = (): MethodDecorator =>
       summary: "List the orders, newest first",
       description:
         "Cursor pagination: pass `nextCursor` of a page as `cursor` to read the next one. " +
-        "`status` keeps one status. `limit` is 25 by default, 100 at most.",
+        "`status` keeps the statuses of a comma separated list. `date` (YYYY-MM-DD, a day of the " +
+        "instance time zone) keeps the orders received that day or to be delivered that day. " +
+        "`q` (2 to 50 characters) searches the name typed on the order (letters, spaces, `-` and " +
+        "`'`, case ignored, accents not) or, when it is only digits, a part of the phone number " +
+        "(3 digits at least). `totalCount` counts the orders of the filters, whatever the cursor. " +
+        "`limit` is 25 by default, 100 at most.",
       operationId: "listAdminOrders",
     }),
     ApiOkResponse({
       description: "One page of orders.",
       standardSchema: adminOrderListResponseSchema,
+    }),
+    documentProblems([
+      [400, "Invalid query. Lists the invalid parameters only, never their values."],
+      UNAUTHENTICATED,
+      ...COMMON,
+    ]),
+  );
+
+export const documentOrdersSummary = (): MethodDecorator =>
+  applyDecorators(
+    ApiSecurity(ADMIN_SECURITY_SCHEME),
+    ApiOperation({
+      summary: "Count the orders to process and the orders received today",
+      description:
+        "`since` (the id of the newest order already seen) adds `newSince`: the orders NEW " +
+        "after it, and the latest of them. Without `since`, `newSince` is absent.",
+      operationId: "getAdminOrdersSummary",
+    }),
+    ApiOkResponse({
+      description: "The counters.",
+      standardSchema: adminOrderSummaryResponseSchema,
     }),
     documentProblems([
       [400, "Invalid query. Lists the invalid parameters only, never their values."],

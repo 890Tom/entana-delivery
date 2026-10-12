@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ORDER_STATUSES } from "../tracking/tracking-response.js";
 import { orderCodeSchema } from "../code/order-code.js";
 import { decodeOrderCursor } from "./admin-order-cursor.js";
+import { orderSearchSchema } from "./admin-order-search.js";
 
 export const DEFAULT_ADMIN_ORDER_LIMIT = 25;
 export const MAX_ADMIN_ORDER_LIMIT = 100;
@@ -24,8 +25,20 @@ export const adminOrderSummarySchema = z.strictObject({
 
 export type AdminOrderSummary = z.infer<typeof adminOrderSummarySchema>;
 
+/** A row of the list: the summary and what the list adds to it. The detail does not have these. */
+export const adminOrderListItemSchema = adminOrderSummarySchema.extend({
+  /** The name typed for this order, which is not always the name the customer used before. */
+  customerName: z.string(),
+  /** True when no order of the same customer is older than this one. */
+  isNewCustomer: z.boolean(),
+});
+
+export type AdminOrderListItem = z.infer<typeof adminOrderListItemSchema>;
+
 export const adminOrderListResponseSchema = z.strictObject({
-  items: z.array(adminOrderSummarySchema),
+  items: z.array(adminOrderListItemSchema),
+  /** Every order that matches the filters, whatever the cursor and the limit. */
+  totalCount: z.number().int().nonnegative(),
   /** The cursor of the next page, or null on the last one. */
   nextCursor: z.string().nullable(),
 });
@@ -37,6 +50,13 @@ const limitSchema = z
   .regex(/^[0-9]{1,3}$/)
   .transform(Number)
   .pipe(z.number().int().min(1).max(MAX_ADMIN_ORDER_LIMIT));
+
+// "REJECTED,CANCELLED": every value is checked, a repeated one counts once.
+const statusListSchema = z
+  .string()
+  .transform((list) => list.split(","))
+  .pipe(z.array(statusSchema))
+  .transform((statuses) => [...new Set(statuses)]);
 
 // The output is the order id the cursor stands for: a text this API did not issue is refused.
 const cursorSchema = z.string().transform((cursor, context) => {
@@ -50,7 +70,10 @@ const cursorSchema = z.string().transform((cursor, context) => {
 
 /** The query string of the list: nothing else is accepted. */
 export const adminOrderListQuerySchema = z.strictObject({
-  status: statusSchema.optional(),
+  status: statusListSchema.optional(),
+  /** Orders received that day or to be delivered that day (a day of the instance time zone). */
+  date: z.iso.date().optional(),
+  q: orderSearchSchema.optional(),
   limit: limitSchema.default(DEFAULT_ADMIN_ORDER_LIMIT),
   cursor: cursorSchema.optional(),
 });

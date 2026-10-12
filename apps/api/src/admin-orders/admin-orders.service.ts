@@ -4,6 +4,7 @@ import {
   DELIVERY_FAILED_REASON,
   SHOP_CANCELLATION_REASON,
   canTransition,
+  dayBoundsInTimeZone,
   dayInTimeZone,
   encodeOrderCursor,
   isDeliveryDateInWindow,
@@ -12,6 +13,8 @@ import type {
   AdminOrderDetail,
   AdminOrderListQuery,
   AdminOrderListResponse,
+  AdminOrderSummaryQuery,
+  AdminOrderSummaryResponse,
   InstanceConfig,
   StatusTransitionRequest,
 } from "@entana/contracts";
@@ -28,14 +31,19 @@ import {
 } from "./errors/admin-order-errors.js";
 import {
   changeStatusIfStatusIs,
+  countOrders,
+  countOrdersReceivedBetween,
+  countOrdersToProcess,
+  findFirstOrderIds,
+  findNewOrdersSince,
   findOrderDetail,
   findOrderPage,
   findOrderStatus,
   requireOrderDetail,
   insertStatusChangedEvent,
 } from "./persistence/admin-order-queries.js";
-import type { StatusChange } from "./persistence/admin-order-queries.js";
-import { toAdminOrderDetail, toAdminOrderSummary } from "./rules/to-admin-order.js";
+import type { OrderFilter, StatusChange } from "./persistence/admin-order-queries.js";
+import { toAdminOrderDetail, toAdminOrderListItem } from "./rules/to-admin-order.js";
 
 /** What the service needs from the database client: the PrismaClient fits. */
 export type AdminOrderClient = Pick<PrismaClient, "$transaction" | "customerOrder" | "orderEvent">;
@@ -59,17 +67,62 @@ export class AdminOrdersService {
   ) {}
 
   async listOrders(query: AdminOrderListQuery): Promise<AdminOrderListResponse> {
-    const rows = await findOrderPage(this.database, {
-      ...(query.status === undefined ? {} : { status: query.status }),
-      ...(query.cursor === undefined ? {} : { before: query.cursor }),
-      limit: query.limit,
-    });
+    const filter = this.toFilter(query);
+    const [rows, totalCount] = await Promise.all([
+      findOrderPage(this.database, {
+        ...filter,
+        ...(query.cursor === undefined ? {} : { before: query.cursor }),
+        limit: query.limit,
+      }),
+      countOrders(this.database, filter),
+    ]);
     const page = rows.slice(0, query.limit);
     const last = page.at(-1);
+    const firstOrderIds = await findFirstOrderIds(
+      this.database,
+      page.map((order) => order.customerId),
+    );
     return {
-      items: page.map(toAdminOrderSummary),
+      items: page.map((order) => toAdminOrderListItem(order, firstOrderIds)),
+      totalCount,
       nextCursor:
         rows.length > query.limit && last !== undefined ? encodeOrderCursor(last.id) : null,
+    };
+  }
+
+  /** What the list screen shows above the rows, and what it polls to learn of new orders. */
+  async getSummary(query: AdminOrderSummaryQuery): Promise<AdminOrderSummaryResponse> {
+    const today = dayInTimeZone(this.clock.now(), this.instance.timezone);
+    const { start, end } = dayBoundsInTimeZone(today, this.instance.timezone);
+    const [toProcessCount, todayCount] = await Promise.all([
+      countOrdersToProcess(this.database),
+      countOrdersReceivedBetween(this.database, start, end),
+    ]);
+    if (query.since === undefined) {
+      return { toProcessCount, todayCount };
+    }
+    const { count, latest } = await findNewOrdersSince(this.database, query.since);
+    return {
+      toProcessCount,
+      todayCount,
+      newSince: {
+        count,
+        latest:
+          latest === null
+            ? null
+            : { id: latest.id, publicCode: latest.publicCode, customerName: latest.contactName },
+      },
+    };
+  }
+
+  private toFilter(query: AdminOrderListQuery): OrderFilter {
+    const { status, date, q } = query;
+    return {
+      ...(status === undefined ? {} : { statuses: status }),
+      ...(date === undefined
+        ? {}
+        : { day: { ...dayBoundsInTimeZone(date, this.instance.timezone), date } }),
+      ...(q === undefined ? {} : { search: q }),
     };
   }
 

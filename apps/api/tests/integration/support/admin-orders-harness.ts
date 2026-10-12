@@ -6,6 +6,7 @@ import { startOrdersApp } from "../../e2e/support/start-orders-app.js";
 import { ADMIN_TEST_ORIGIN, buildTestConfig } from "../../e2e/support/test-config.js";
 import { newKey } from "../../support/order-http.js";
 import {
+  FAKE_CONTACT_NAME,
   FAKE_PHONE_INPUT,
   buildOrderRequest,
   generateTrackingToken,
@@ -37,7 +38,11 @@ export interface AdminOrdersHarness {
   readonly get: (path: string, cookie?: string | null) => request.Test;
   readonly post: (path: string, body: unknown, cookie?: string | null) => request.Test;
   /** A phone number per call keeps a customer under the limit of recent orders. */
-  readonly placeOrder: (quantity?: number, phone?: string) => Promise<PlacedOrder>;
+  readonly placeOrder: (
+    quantity?: number,
+    phone?: string,
+    contactName?: string,
+  ) => Promise<PlacedOrder>;
   readonly setStatus: (orderId: string, status: "CONFIRMED" | "OUT_FOR_DELIVERY") => Promise<void>;
   readonly tracking: (token: string) => request.Test;
 }
@@ -132,11 +137,15 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
           .send(body as object),
         sent,
       ),
-    placeOrder: async (quantity = 2, phone = FAKE_PHONE_INPUT) => {
+    placeOrder: async (quantity = 2, phone = FAKE_PHONE_INPUT, contactName = FAKE_CONTACT_NAME) => {
       const productId = await insertProduct(client, { priceAr: 5000 });
       const token = generateTrackingToken();
       const { response } = await createOrdersService(client, { clock }).createOrder(
-        buildOrderRequest([{ productId, quantity }], { trackingToken: token, phone }),
+        buildOrderRequest([{ productId, quantity }], {
+          trackingToken: token,
+          phone,
+          contactName,
+        }),
         newKey(),
       );
       const stored = await client.customerOrder.findUniqueOrThrow({

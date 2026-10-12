@@ -1,6 +1,6 @@
-import type { OrderStatus } from "@entana/contracts";
+import type { OrderSearch, OrderStatus } from "@entana/contracts";
 import type { PrismaClient } from "@entana/database";
-import type { StoredAdminOrder, StoredOrderSummary } from "../rules/to-admin-order.js";
+import type { StoredAdminOrder, StoredOrderListItem } from "../rules/to-admin-order.js";
 
 /** What the queries need from the client: the PrismaClient and its transaction client both fit. */
 export type AdminOrderDatabase = Pick<PrismaClient, "customerOrder" | "orderEvent">;
@@ -19,6 +19,37 @@ const SUMMARY_SELECT = {
   items: { select: { qty: true } },
 } as const;
 
+const LIST_SELECT = { ...SUMMARY_SELECT, customerId: true } as const;
+
+type OrderWhere = NonNullable<Parameters<AdminOrderDatabase["customerOrder"]["count"]>[0]>["where"];
+
+/** The filters of the list, all optional. The cursor is not one: a count ignores it. */
+export interface OrderFilter {
+  readonly statuses?: readonly OrderStatus[];
+  /** The instants a day of the instance time zone starts and ends (excluded), and that day. */
+  readonly day?: { readonly start: Date; readonly end: Date; readonly date: string };
+  readonly search?: OrderSearch;
+}
+
+function buildWhere(filter: OrderFilter): OrderWhere {
+  const { statuses, day, search } = filter;
+  return {
+    ...(statuses === undefined ? {} : { status: { in: [...statuses] } }),
+    ...(day === undefined
+      ? {}
+      : {
+          OR: [
+            { createdAt: { gte: day.start, lt: day.end } },
+            { deliveryDate: new Date(day.date) },
+          ],
+        }),
+    ...(search?.kind === "name"
+      ? { contactName: { contains: search.text, mode: "insensitive" as const } }
+      : {}),
+    ...(search?.kind === "phone" ? { customer: { phoneE164: { contains: search.digits } } } : {}),
+  };
+}
+
 /**
  * One page, newest first: `limit + 1` rows are read so that the caller knows whether another page
  * follows. The id is a uuidv7, so ordering by it is ordering by creation, and "older than the
@@ -26,17 +57,71 @@ const SUMMARY_SELECT = {
  */
 export function findOrderPage(
   database: AdminOrderDatabase,
-  filter: { status?: OrderStatus; before?: string; limit: number },
-): Promise<StoredOrderSummary[]> {
+  filter: OrderFilter & { before?: string; limit: number },
+): Promise<StoredOrderListItem[]> {
   return database.customerOrder.findMany({
     where: {
-      ...(filter.status === undefined ? {} : { status: filter.status }),
+      ...buildWhere(filter),
       ...(filter.before === undefined ? {} : { id: { lt: filter.before } }),
     },
     orderBy: { id: "desc" },
     take: filter.limit + 1,
-    select: SUMMARY_SELECT,
+    select: LIST_SELECT,
   });
+}
+
+export function countOrders(database: AdminOrderDatabase, filter: OrderFilter): Promise<number> {
+  return database.customerOrder.count({ where: buildWhere(filter) });
+}
+
+/**
+ * The oldest order of each of these customers, among all their orders (refused ones included,
+ * whatever the filters and the page): an order is a first order when its id is that one.
+ */
+export async function findFirstOrderIds(
+  database: AdminOrderDatabase,
+  customerIds: readonly string[],
+): Promise<ReadonlySet<string>> {
+  // PostgreSQL has no min() on a uuid: the oldest id comes from an ordering and a DISTINCT ON.
+  const firsts = await database.customerOrder.findMany({
+    where: { customerId: { in: [...customerIds] } },
+    distinct: ["customerId"],
+    orderBy: [{ customerId: "asc" }, { id: "asc" }],
+    select: { id: true },
+  });
+  return new Set(firsts.map((first) => first.id));
+}
+
+export function countOrdersToProcess(database: AdminOrderDatabase): Promise<number> {
+  return database.customerOrder.count({ where: { status: "NEW" } });
+}
+
+export function countOrdersReceivedBetween(
+  database: AdminOrderDatabase,
+  start: Date,
+  end: Date,
+): Promise<number> {
+  return database.customerOrder.count({ where: { createdAt: { gte: start, lt: end } } });
+}
+
+/** The orders NEW that came after an order (ids are uuidv7: later is greater), newest first. */
+export async function findNewOrdersSince(
+  database: AdminOrderDatabase,
+  since: string,
+): Promise<{
+  readonly count: number;
+  readonly latest: { id: string; publicCode: string; contactName: string } | null;
+}> {
+  const where = { status: "NEW" as const, id: { gt: since } };
+  const [count, latest] = await Promise.all([
+    database.customerOrder.count({ where }),
+    database.customerOrder.findFirst({
+      where,
+      orderBy: { id: "desc" },
+      select: { id: true, publicCode: true, contactName: true },
+    }),
+  ]);
+  return { count, latest };
 }
 
 const DETAIL_SELECT = {

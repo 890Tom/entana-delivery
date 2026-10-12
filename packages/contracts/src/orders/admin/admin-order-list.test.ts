@@ -23,7 +23,7 @@ describe("adminOrderListQuerySchema", () => {
     const query = { status: "NEW", limit: "100", cursor: encodeOrderCursor(ORDER_ID) };
 
     expect(adminOrderListQuerySchema.parse(query)).toEqual({
-      status: "NEW",
+      status: ["NEW"],
       limit: 100,
       cursor: ORDER_ID,
     });
