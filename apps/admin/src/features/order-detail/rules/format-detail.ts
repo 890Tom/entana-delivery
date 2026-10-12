@@ -1,6 +1,6 @@
 import { dayInTimeZone } from "@entana/contracts";
 
-import { INSTANCE_TIME_ZONE, formatTime, todayInShop } from "../../orders/rules/format-order";
+import { INSTANCE_TIME_ZONE, formatTime, todayInShop } from "../../../order-display/format-order";
 
 import { addDays } from "./delivery-days";
 

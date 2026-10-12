@@ -1,6 +1,6 @@
 import { dayInTimeZone } from "@entana/contracts";
 
-import { INSTANCE_TIME_ZONE } from "../../orders/rules/format-order";
+import { INSTANCE_TIME_ZONE } from "../../../order-display/format-order";
 
 const MS_PER_DAY = 86_400_000;
 

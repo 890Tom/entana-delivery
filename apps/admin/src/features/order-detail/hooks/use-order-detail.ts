@@ -1,7 +1,7 @@
 import type { AdminOrderDetail } from "@entana/contracts";
 import { useQuery } from "@tanstack/react-query";
 
-import { AdminRequestError } from "../../session/api/admin-request-error";
+import { AdminRequestError } from "../../../data-fetching/admin-request-error";
 import { ORDERS_KEY } from "../../orders/hooks/use-order-pages";
 import { fetchOrderDetail } from "../api/order-detail-calls";
 

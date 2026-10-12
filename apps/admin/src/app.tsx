@@ -6,8 +6,8 @@ import { Route, Switch, useLocation } from "wouter";
 import { createQueryClient } from "./data-fetching/query-client";
 import { LoginRoute } from "./features/session/guard/login-route";
 import { ProtectedArea } from "./features/session/guard/protected-area";
-import { SESSION_NOTICE_CONTEXT } from "./features/session/session-notice";
-import { useDocumentTitle } from "./layout/document-title";
+import { SESSION_NOTICE_CONTEXT } from "./features/session/notice/session-notice";
+import { useDocumentTitle } from "./layout/document-title/document-title";
 import { LOGIN_PATH } from "./routes";
 
 function Routes(): ReactElement {

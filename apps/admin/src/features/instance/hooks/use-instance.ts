@@ -3,8 +3,8 @@ import type { PublicInstance } from "@entana/contracts";
 import { useQuery } from "@tanstack/react-query";
 import type { UseQueryResult } from "@tanstack/react-query";
 
-import { fetchAdmin } from "../../data-fetching/fetch-admin";
-import { AdminRequestError } from "../session/api/admin-request-error";
+import { fetchAdmin } from "../../../data-fetching/fetch-admin";
+import { AdminRequestError } from "../../../data-fetching/admin-request-error";
 
 /** The name and the logo of the shop: public, and unchanged while the page is open. */
 export function useInstance(): UseQueryResult<PublicInstance> {

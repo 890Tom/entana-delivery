@@ -2,9 +2,9 @@ import type { AdminOrderDetail } from "@entana/contracts";
 import type { ReactElement } from "react";
 
 import { texts } from "../../../i18n/texts";
-import { useInstance } from "../../instance/use-instance";
-import { OrderIcon } from "../../orders/components/order-icons";
-import { formatPhone } from "../../orders/rules/format-order";
+import { useInstance } from "../../instance/hooks/use-instance";
+import { OrderIcon } from "../../../order-display/order-icons";
+import { formatPhone } from "../../../order-display/format-order";
 
 import card from "./card.module.css";
 import styles from "./customer-card.module.css";

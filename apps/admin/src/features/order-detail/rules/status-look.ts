@@ -1,6 +1,6 @@
 import type { OrderStatus } from "@entana/contracts";
 
-import type { OrderIconName } from "../../orders/components/order-icons";
+import type { OrderIconName } from "../../../order-display/order-icons";
 import { texts } from "../../../i18n/texts";
 
 export interface StatusLook {

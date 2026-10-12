@@ -1,4 +1,4 @@
-import type { AdminFailure } from "../../../data-fetching/fetch-admin";
+import type { AdminFailure } from "./fetch-admin";
 
 /** Carries only a kind: no response text, no status, no URL can leak through it. */
 export class AdminRequestError extends Error {

@@ -1,7 +1,7 @@
 import type { ReactElement, Ref } from "react";
 
-import { OrderIcon } from "../../orders/components/order-icons";
-import type { OrderIconName } from "../../orders/components/order-icons";
+import { OrderIcon } from "../../../order-display/order-icons";
+import type { OrderIconName } from "../../../order-display/order-icons";
 
 import styles from "./detail-button.module.css";
 

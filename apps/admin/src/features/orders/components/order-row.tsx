@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { texts } from "../../../i18n/texts";
 import { Link } from "wouter";
 import { orderPath } from "../../../routes";
-import { formatAmount, formatPhone, formatTime } from "../rules/format-order";
+import { formatAmount, formatPhone, formatTime } from "../../../order-display/format-order";
 import { nextStatus } from "../rules/selection";
 
 import { ActionButton, ActionLink } from "./action-button";

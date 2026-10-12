@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import type { AdminFailure } from "../../../data-fetching/fetch-admin";
-import { AdminRequestError } from "../../session/api/admin-request-error";
+import { AdminRequestError } from "../../../data-fetching/admin-request-error";
 import { fetchOrderList } from "../api/orders-calls";
 import type { OrderListRequest } from "../api/orders-calls";
 import { countPages } from "../rules/page-count";

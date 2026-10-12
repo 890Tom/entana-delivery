@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../../i18n/texts";
-import { formatAmount } from "../../orders/rules/format-order";
+import { formatAmount } from "../../../order-display/format-order";
 import { expectNoAccessibilityViolations } from "../../../test-support/assertions/expect-no-accessibility-violations";
 import {
   buildDetail,

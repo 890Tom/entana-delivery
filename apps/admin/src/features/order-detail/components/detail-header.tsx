@@ -4,7 +4,7 @@ import { Link } from "wouter";
 
 import { texts } from "../../../i18n/texts";
 import { ORDERS_PATH } from "../../../routes";
-import { OrderIcon } from "../../orders/components/order-icons";
+import { OrderIcon } from "../../../order-display/order-icons";
 import { describeInstant } from "../rules/format-detail";
 
 import styles from "./detail-header.module.css";

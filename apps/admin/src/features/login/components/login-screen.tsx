@@ -1,17 +1,17 @@
 import type { ReactElement } from "react";
 import { useId } from "react";
 
-import { Button } from "../../components/button/button";
-import { Notice } from "../../components/notice/notice";
-import { ShopLogo } from "../../components/shop-logo/shop-logo";
-import { TextField } from "../../components/text-field/text-field";
-import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
-import { texts } from "../../i18n/texts";
-import { useSessionNotice } from "../session/session-notice";
+import { Button } from "../../../components/button/button";
+import { Notice } from "../../../components/notice/notice";
+import { ShopLogo } from "../../../components/shop-logo/shop-logo";
+import { TextField } from "../../../components/text-field/text-field";
+import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
+import { texts } from "../../../i18n/texts";
+import { useSessionNotice } from "../../session/notice/session-notice";
 
 import styles from "./login-screen.module.css";
-import { useLoginForm } from "./use-login-form";
-import type { LoginForm, LoginNotice } from "./use-login-form";
+import { useLoginForm } from "../hooks/use-login-form";
+import type { LoginForm, LoginNotice } from "../hooks/use-login-form";
 
 const NOTICE_TEXTS: Readonly<Record<LoginNotice, string>> = {
   wrong_credentials: texts.login.wrongCredentials,

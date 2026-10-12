@@ -2,8 +2,8 @@ import type { ReactElement } from "react";
 import { Link } from "wouter";
 
 import styles from "./action-button.module.css";
-import { OrderIcon } from "./order-icons";
-import type { OrderIconName } from "./order-icons";
+import { OrderIcon } from "../../../order-display/order-icons";
+import type { OrderIconName } from "../../../order-display/order-icons";
 
 type Variant = "primary" | "secondary" | "quiet";
 

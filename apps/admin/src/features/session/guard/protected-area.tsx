@@ -16,7 +16,7 @@ import {
 import { CatalogueScreen } from "../../catalogue/components/catalogue-screen";
 import { OrderDetailScreen } from "../../order-detail/components/order-detail-screen";
 import { OrdersScreen } from "../../orders/components/orders-screen";
-import { useSession } from "../api/use-session";
+import { useSession } from "../hooks/use-session";
 
 import styles from "./protected-area.module.css";
 

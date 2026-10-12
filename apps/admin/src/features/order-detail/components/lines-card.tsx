@@ -2,7 +2,7 @@ import type { AdminOrderDetail } from "@entana/contracts";
 import type { ReactElement } from "react";
 
 import { texts } from "../../../i18n/texts";
-import { formatAmount } from "../../orders/rules/format-order";
+import { formatAmount } from "../../../order-display/format-order";
 
 import card from "./card.module.css";
 import styles from "./lines-card.module.css";
