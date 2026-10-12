@@ -1,0 +1,25 @@
+.banner {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-highlight-soft);
+  border: var(--border-width-strong) solid var(--color-highlight-strong);
+  border-radius: var(--radius);
+}
+
+.text {
+  flex: 1;
+  margin: 0;
+}
+
+.show {
+  min-height: var(--size-touch-min);
+  padding: 0 var(--space-2);
+  font: var(--font-body-strong);
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}

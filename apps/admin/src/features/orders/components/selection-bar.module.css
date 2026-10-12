@@ -1,0 +1,16 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-muted);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.count {
+  flex: 1;
+  margin: 0;
+  font: var(--font-body-strong);
+}

@@ -8,6 +8,7 @@
  *   text, text-muted, text-inverse, text-disabled, text-on-accent, text-on-error
  *   border, border-strong, border-input
  *   accent, accent-soft, accent-strong
+ *   highlight, highlight-soft, highlight-strong (proposed, to confirm)
  *   error, skeleton, focus-ring, ink-hover
  *
  * An "on" token is the text colour used on top of its fill: text-on-accent on accent,
@@ -27,6 +28,10 @@
   --color-accent-800: #1e40af;
   --color-ink-hover: #333;
   --color-error: #c62828;
+  /* Proposed, to confirm (read on the owner's orders capture): the warm tone of the shop. */
+  --color-highlight-300: #c9a54e;
+  --color-highlight-100: #f6ecd5;
+  --color-highlight-700: #7a5a14;
 
   /* Colours: roles */
   --color-surface: var(--color-white);
@@ -44,6 +49,10 @@
   --color-accent: var(--color-accent-500);
   --color-accent-soft: var(--color-accent-100);
   --color-accent-strong: var(--color-accent-800);
+  /* Proposed, to confirm: the pressed chip, the count pill, the banner and the cards to handle. */
+  --color-highlight: var(--color-highlight-300);
+  --color-highlight-soft: var(--color-highlight-100);
+  --color-highlight-strong: var(--color-highlight-700);
   --color-skeleton: var(--color-neutral-200);
   --color-focus-ring: var(--color-ink);
 
@@ -118,6 +127,9 @@
   --size-icon-xl: 32px;
   --size-stepper-count: 28px;
   --size-logo-height: 34px;
+  /* Proposed, to confirm (read on the orders capture): a table checkbox, a count pill. */
+  --size-checkbox: 20px;
+  --size-count-pill: 24px;
   /* Proposed, to confirm (read on the owner's login capture): the sign-in card and its logo. */
   --size-auth-card-max: 400px;
   --size-auth-logo: 56px;

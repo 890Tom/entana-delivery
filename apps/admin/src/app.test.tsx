@@ -68,14 +68,14 @@ afterEach(() => {
 });
 
 describe("the sign-in", () => {
-  it("signs in and arrives on the home page, which the back button cannot return from", async () => {
+  it("signs in and arrives on the orders, which the back button cannot return from", async () => {
     const api = await openLogin(() => jsonResponse(PROFILE));
     const before = window.history.length;
 
     fillAndSubmit("  Gerante@Example.MG ", PASSWORD);
 
-    await screen.findByText(texts.home.welcome(PROFILE.displayName));
-    expect(window.location.pathname).toBe("/");
+    await screen.findByRole("heading", { name: texts.orders.title });
+    expect(window.location.pathname).toBe("/commandes");
     expect(window.history.length).toBe(before);
     expect(api.calls(ROUTES.login)).toHaveLength(1);
     expect(api.calls(ROUTES.login)[0]?.body).toBe(
@@ -119,7 +119,7 @@ describe("the sign-in", () => {
     fireEvent.change(passwordInput(), { target: { value: "a corrected password" } });
     fireEvent.click(screen.getByRole("button", { name: texts.common.retry }));
 
-    await screen.findByText(texts.home.welcome(PROFILE.displayName));
+    await screen.findByRole("heading", { name: texts.orders.title });
     expect(api.calls(ROUTES.login)[1]?.body).toBe(
       JSON.stringify({ email: "gerante@example.mg", password: "a corrected password" }),
     );
@@ -164,7 +164,7 @@ describe("the sign-in", () => {
 
     expect(api.calls(ROUTES.login)).toHaveLength(1);
     release(jsonResponse(PROFILE));
-    await screen.findByText(texts.home.welcome(PROFILE.displayName));
+    await screen.findByRole("heading", { name: texts.orders.title });
   });
 
   it("shows the logo of the shop, and its name when the logo cannot be loaded", async () => {
@@ -216,7 +216,7 @@ describe("the sign-in", () => {
     await openLogin(() => jsonResponse(PROFILE));
 
     fillAndSubmit("gerante@example.mg", PASSWORD);
-    await screen.findByText(texts.home.welcome(PROFILE.displayName));
+    await screen.findByRole("heading", { name: texts.orders.title });
 
     expect(setItem).not.toHaveBeenCalled();
     expect([localStorage.length, sessionStorage.length, document.cookie]).toEqual([0, 0, ""]);
@@ -239,11 +239,11 @@ describe("the guard", () => {
     expect(window.location.search).toBe("");
   });
 
-  it("sends a signed-in person from the sign-in to the home page", async () => {
+  it("sends a signed-in person from the sign-in to the orders, replacing the history", async () => {
     openAt("/connexion", { [ROUTES.me]: signedIn });
 
-    await screen.findByRole("heading", { name: texts.home.title });
-    expect(window.location.pathname).toBe("/");
+    await screen.findByRole("heading", { name: texts.orders.title });
+    expect(window.location.pathname).toBe("/commandes");
   });
 
   it("shows not found, inside the page, to a signed-in person on an unknown address", async () => {
@@ -265,13 +265,13 @@ describe("the guard", () => {
     expect((await screen.findByRole("alert")).textContent).toContain(texts.login.failure);
     fireEvent.click(screen.getByRole("button", { name: texts.common.retry }));
 
-    await screen.findByText(texts.home.welcome(PROFILE.displayName));
-    expect(window.location.pathname).toBe("/");
+    await screen.findByRole("heading", { name: texts.orders.title });
+    expect(window.location.pathname).toBe("/commandes");
   });
 
   it("sends the person back to the sign-in, with the message, when the session ends elsewhere", async () => {
     const api = openAt("/", { [ROUTES.me]: signedIn });
-    await screen.findByText(texts.home.welcome(PROFILE.displayName));
+    await screen.findByRole("heading", { name: texts.orders.title });
 
     api.answer(ROUTES.me, signedOut);
     window.dispatchEvent(new Event("visibilitychange"));
@@ -282,17 +282,17 @@ describe("the guard", () => {
   });
 });
 
-describe("the home page", () => {
+describe("the orders page", () => {
   it("has no accessibility violation", async () => {
     openAt("/", { [ROUTES.me]: signedIn });
-    await screen.findByText(texts.home.welcome(PROFILE.displayName));
+    await screen.findByRole("heading", { name: texts.orders.title });
 
     await expectNoAccessibilityViolations(document.body);
   });
 
   it("signs out, forgets the profile and leaves for the sign-in", async () => {
     const api = openAt("/", { [ROUTES.me]: signedIn, [ROUTES.logout]: () => jsonResponse({}) });
-    await screen.findByText(texts.home.welcome(PROFILE.displayName));
+    await screen.findByRole("heading", { name: texts.orders.title });
     const meBefore = api.calls(ROUTES.me).length;
     api.answer(ROUTES.me, signedOut);
 
@@ -307,12 +307,12 @@ describe("the home page", () => {
 
   it("stays on the page, with a notice, when the sign-out fails", async () => {
     openAt("/", { [ROUTES.me]: signedIn, [ROUTES.logout]: () => problemResponse(500) });
-    await screen.findByText(texts.home.welcome(PROFILE.displayName));
+    await screen.findByRole("heading", { name: texts.orders.title });
 
     fireEvent.click(screen.getByRole("button", { name: texts.home.logout }));
 
     expect((await screen.findByRole("alert")).textContent).toContain(texts.home.logoutFailed);
-    expect(window.location.pathname).toBe("/");
+    expect(window.location.pathname).toBe("/commandes");
     expect(
       screen.getByRole("button", { name: texts.home.logout }).hasAttribute("aria-disabled"),
     ).toBe(false);
