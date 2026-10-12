@@ -149,6 +149,7 @@ Run it with literal values:
 docker run -d --name entana-api -p 3000:3000 \
   -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3000 \
   -e DATABASE_URL=postgresql://user:password@host:5432/database \
+  -e ADMIN_ALLOWED_ORIGINS=https://admin.example.mg \
   entana-api
 ```
 
