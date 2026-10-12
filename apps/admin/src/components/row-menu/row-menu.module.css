@@ -1,0 +1,55 @@
+.root {
+  position: relative;
+  display: inline-block;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-touch-min);
+  min-height: var(--size-touch-min);
+  padding: 0;
+  color: var(--color-text);
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+}
+
+/* A white panel with a border and a shadow, aligned to the right edge of the button. */
+.menu {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-end: 0;
+  z-index: var(--layer-bar);
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  padding: var(--space-1);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.item {
+  min-height: var(--size-touch-min);
+  padding: 0 var(--space-3);
+  font: var(--font-body);
+  color: var(--color-text);
+  text-align: start;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--color-surface-muted);
+}
+
+.danger {
+  color: var(--color-error);
+}

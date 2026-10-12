@@ -32,6 +32,19 @@ describe("fetchAdmin", () => {
     expect(result).toEqual({ kind: "ok", data: PROFILE });
   });
 
+  it.each(["PUT", "PATCH"] as const)("sends a %s with its JSON body", async (method) => {
+    let sent: RequestInit | undefined;
+    stubFetch((init) => {
+      sent = init;
+      return Promise.resolve(jsonResponse(PROFILE));
+    });
+
+    await fetchAdmin({ path: "/x", method, body: { a: 1 } }, adminProfileSchema);
+
+    expect(sent?.method).toBe(method);
+    expect(sent?.body).toBe(JSON.stringify({ a: 1 }));
+  });
+
   it.each([
     [401, "unauthorized"],
     [429, "rate_limited"],

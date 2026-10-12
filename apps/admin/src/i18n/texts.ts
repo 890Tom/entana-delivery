@@ -206,6 +206,85 @@ export const texts = {
       bySystem: "par le système",
     },
   },
+  catalogue: {
+    title: "Catalogue",
+    // 0 and 1 are singular, as in French.
+    productCount: (count: number): string => `${String(count)} produit${count >= 2 ? "s" : ""}`,
+    unavailableCount: (count: number): string =>
+      `${String(count)} indisponible${count >= 2 ? "s" : ""}`,
+    retiredCount: (count: number): string => `${String(count)} retiré${count >= 2 ? "s" : ""}`,
+    loading: "Chargement du catalogue…",
+    loadFailed: "Le catalogue n'a pas pu être chargé. Vérifiez la connexion.",
+    tabsLabel: "Filtrer les produits",
+    tabs: {
+      all: "Tous",
+      available: "Disponibles",
+      unavailable: "Indisponibles",
+      retired: "Retirés",
+    },
+    searchLabel: "Rechercher un produit",
+    searchPlaceholder: "Rechercher un produit",
+    tableLabel: "Produits du catalogue",
+    columns: {
+      handle: "Déplacer",
+      photo: "Photo",
+      product: "Produit",
+      price: "Prix",
+      availability: "Disponible aujourd'hui",
+      actions: "Actions",
+    },
+    help: "Glissez les lignes pour changer l'ordre d'affichage (au clavier : poignée puis flèches haut et bas). Un produit reste indisponible jusqu'à ce que vous le réactiviez.",
+    row: {
+      handle: (name: string, position: number, total: number): string =>
+        `Déplacer ${name}, position ${String(position)} sur ${String(total)}`,
+      photoAlt: "Photo à venir",
+      switchLabel: (name: string): string => `Disponible aujourd'hui : ${name}`,
+      available: "Disponible",
+      unavailable: "Indisponible",
+      unavailableSince: (days: number): string => {
+        if (days === 0) {
+          return "Indisponible depuis aujourd'hui";
+        }
+        return days === 1
+          ? "Indisponible depuis hier"
+          : `Indisponible depuis ${String(days)} jours`;
+      },
+      retired: "Retiré",
+      menu: (name: string): string => `Actions pour ${name}`,
+      retire: "Retirer",
+      restore: "Restaurer",
+    },
+    dialog: {
+      title: (name: string): string => `Retirer ${name} du catalogue ?`,
+      body: "Il ne sera plus visible par les clients. Les commandes passées ne changent pas.",
+      cancel: "Annuler",
+      confirm: "Retirer",
+    },
+    notices: {
+      changeFailed: "Le changement n'a pas pu être enregistré. Réessayez.",
+      retiredMeanwhile: "Ce produit a été retiré. La liste a été mise à jour.",
+      orderFailed: "L'ordre n'a pas pu être enregistré. La liste a été mise à jour.",
+      retired: (name: string): string => `${name} est retiré du catalogue.`,
+      restored: (name: string): string => `${name} est restauré (indisponible).`,
+    },
+    empty: {
+      noProduct: "Aucun produit pour le moment.",
+      emptyList: "Aucun produit dans cette liste.",
+      noMatch: (term: string): string => `Aucun produit ne correspond à « ${term} ».`,
+      clearSearch: "Effacer la recherche",
+    },
+    drag: {
+      instructions:
+        "Pour déplacer ce produit, appuyez sur Espace, puis sur les flèches haut et bas, et enfin sur Espace pour le déposer. Échap annule.",
+      picked: (name: string, position: number, total: number): string =>
+        `${name} saisi, position ${String(position)} sur ${String(total)}.`,
+      moved: (name: string, position: number, total: number): string =>
+        `${name} déplacé en position ${String(position)} sur ${String(total)}.`,
+      dropped: (name: string, position: number, total: number): string =>
+        `${name} déposé en position ${String(position)} sur ${String(total)}.`,
+      cancelled: "Déplacement annulé.",
+    },
+  },
   notFound: {
     title: "Page introuvable",
     message: "Cette page n'existe pas.",

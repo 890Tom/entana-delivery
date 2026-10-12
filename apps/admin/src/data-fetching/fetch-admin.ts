@@ -23,7 +23,7 @@ export type AdminFailure = Exclude<AdminResult<never>, { kind: "ok" }>;
 interface AdminRequest {
   /** A fixed address of the API, never built from an input. */
   readonly path: string;
-  readonly method?: "GET" | "POST";
+  readonly method?: "GET" | "POST" | "PUT" | "PATCH";
   /** Serialised as JSON. Never log it: it may hold a password. */
   readonly body?: unknown;
   readonly signal?: AbortSignal | undefined;

@@ -14,3 +14,6 @@ export const ORDER_PATH_PATTERN = `${ORDERS_PATH}/:id`;
 export function orderPath(orderId: string): string {
   return `${ORDERS_PATH}/${encodeURIComponent(orderId)}`;
 }
+
+/** The catalogue of products, the second section of the administration. */
+export const CATALOGUE_PATH = "/catalogue";
