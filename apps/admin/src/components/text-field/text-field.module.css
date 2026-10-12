@@ -1,0 +1,83 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font: var(--font-body-strong);
+}
+
+/*
+ * The border, the states and the height belong to the frame, so that the action ("Afficher")
+ * is inside the field. The control inside has no border of its own.
+ */
+.frame {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: var(--size-field-height);
+  padding: 0 var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border-input);
+  border-radius: var(--radius);
+}
+
+/* The border takes the place of the global ring; the padding gives back the width it adds. */
+.frame:focus-within,
+.invalid {
+  padding: 0 calc(var(--space-4) - var(--border-width-strong) + var(--border-width));
+}
+
+.frame:focus-within {
+  border: var(--border-width-strong) solid var(--color-border-strong);
+}
+
+.invalid,
+.invalid:focus-within {
+  border: var(--border-width-strong) solid var(--color-error);
+}
+
+/* A focused field in error keeps the error border and the ring, so that the focus stays visible. */
+.invalid:has(.control:focus-visible) {
+  outline: var(--focus-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.control {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--size-field-height);
+  padding: 0;
+  font: var(--font-body);
+  color: var(--color-text);
+  background: none;
+  border: 0;
+}
+
+/* The frame draws the focus: its border replaces the global ring. */
+.control:focus-visible {
+  outline: none;
+}
+
+.action {
+  flex: none;
+  display: flex;
+  align-items: center;
+  min-height: var(--size-touch-min);
+  padding: 0 var(--space-2);
+  font: var(--font-body-strong);
+  color: var(--color-text);
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+}
+
+.error {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-error);
+}

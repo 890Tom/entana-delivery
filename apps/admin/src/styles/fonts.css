@@ -1,0 +1,16 @@
+/* Self-hosted: the files are in public/fonts with their licence. No external request. */
+@font-face {
+  font-family: "Figtree";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/figtree-regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Figtree";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/figtree-semibold.ttf") format("truetype");
+}

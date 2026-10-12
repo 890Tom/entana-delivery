@@ -1,0 +1,6 @@
+{
+  // Solution file: the browser code and the Node configuration files are separate projects, so
+  // Node globals never reach src/. ESLint and editors find the project that owns each file here.
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+}

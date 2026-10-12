@@ -30,7 +30,7 @@ process prints the names of the invalid variables (never their values) and exits
 | `PORT`                  | `3000`                                                    | Port to listen on.                                                                |
 | `LOG_LEVEL`             | `info`                                                    | `fatal`, `error`, `warn`, `info`, `debug`, `trace` or `silent`.                   |
 | `CORS_ORIGINS`          | empty                                                     | Allowed browser origins, comma separated. Empty: none.                            |
-| `ADMIN_ALLOWED_ORIGINS` | required in production; `http://localhost:5173` otherwise | Browser origins that may send a change under `/api/v1/admin`. See Administration. |
+| `ADMIN_ALLOWED_ORIGINS` | required in production; `http://localhost:5174` otherwise | Browser origins that may send a change under `/api/v1/admin`. See Administration. |
 | `ADMIN_COOKIE_SECURE`   | `true` in production, `false` otherwise                   | `Secure` flag (and `__Host-` prefix) of the session cookie.                       |
 | `TRUST_PROXY`           | `false`                                                   | Number of reverse proxies in front of the API. See below.                         |
 | `BODY_LIMIT_KB`         | `100`                                                     | Largest JSON request body, in kilobytes.                                          |

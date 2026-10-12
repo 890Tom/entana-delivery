@@ -1,0 +1,5 @@
+.failure {
+  max-width: var(--size-readable-max);
+  padding: var(--space-5) var(--space-4);
+  margin-inline: auto;
+}

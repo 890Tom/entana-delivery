@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Always present, with no script: the administration is never indexed. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Administration</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Last in the page so that it wins the cascade; deployment-specific, never bundled. -->
+    <link rel="stylesheet" href="/theme.local.css" />
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -26,7 +26,7 @@ const DEFAULT_EXPORT = {
 
 const RESTRICTED_SYNTAX = [DEFAULT_EXPORT, DYNAMIC_DATABASE_IMPORT];
 
-// HTML injection in the front end (apps/client). Layers: these selectors and
+// HTML injection in the front ends (apps/client, apps/admin). Layers: these selectors and
 // `no-restricted-properties` catch the literal, visible forms. untrusted-text.test.tsx only
 // documents the safe pattern (React escapes `{value}`); it does not test real components, so
 // each component that shows customer or server text needs its own test. A strict
@@ -152,7 +152,7 @@ export default defineConfig(
   // React components are functions named in PascalCase. Only the front end's .tsx files may do
   // this: a component is a function declaration, so a PascalCase variable is still refused.
   {
-    files: ["apps/client/**/*.tsx"],
+    files: ["apps/{client,admin}/**/*.tsx"],
     rules: {
       "@typescript-eslint/naming-convention": [
         "error",
@@ -202,7 +202,7 @@ export default defineConfig(
   // `max-lines-per-function` exemption below applies to them.
   // `no-restricted-syntax` replaces the global list, so the shared entries are spread again.
   {
-    files: ["apps/client/**/*.tsx"],
+    files: ["apps/{client,admin}/**/*.tsx"],
     plugins: { "react-hooks": reactHooks },
     rules: {
       "react-hooks/rules-of-hooks": "error",
@@ -210,7 +210,7 @@ export default defineConfig(
     },
   },
   {
-    files: ["apps/client/**/*.{ts,tsx}"],
+    files: ["apps/{client,admin}/**/*.{ts,tsx}"],
     rules: {
       "no-eval": "error",
       "no-implied-eval": "error",

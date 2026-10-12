@@ -55,8 +55,9 @@ const databaseUrlSchema = z
   .regex(/^[^\s\p{Cc}]+$/u, "Must not contain whitespace or control characters.");
 
 // The browser origin of the administration when none is configured, outside production only: the
-// Vite development server. In production the variable is required (see the transform below).
-const DEVELOPMENT_ADMIN_ORIGINS: readonly string[] = ["http://localhost:5173"];
+// Vite development server of the administration (port 5174), reached as `localhost`. In
+// production the variable is required (see the transform below).
+const DEVELOPMENT_ADMIN_ORIGINS: readonly string[] = ["http://localhost:5174"];
 
 const configSchema = z
   .object({

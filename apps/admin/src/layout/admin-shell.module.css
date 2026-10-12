@@ -1,0 +1,19 @@
+/* Focus is moved here by code after sign-in; this is not a control to operate. */
+.main:focus-visible {
+  outline: none;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding: var(--space-4);
+  margin-inline: auto;
+}
+
+@media (min-width: 1024px) {
+  .main {
+    padding: var(--space-6);
+  }
+}
