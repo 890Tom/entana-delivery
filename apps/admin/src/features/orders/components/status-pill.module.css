@@ -1,0 +1,27 @@
+.pill {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-height: var(--size-badge-height);
+  padding: 0 var(--space-3);
+  font: var(--font-body);
+  white-space: nowrap;
+  border: var(--border-width-strong) solid transparent;
+  border-radius: var(--radius-full);
+}
+
+.outlined {
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+}
+
+.dark {
+  color: var(--color-text-inverse);
+  background: var(--color-surface-inverse);
+}
+
+.light {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}

@@ -12,6 +12,8 @@ export type AdminResult<T> =
   | { readonly kind: "unauthorized" }
   | { readonly kind: "rate_limited" }
   | { readonly kind: "invalid" }
+  /** The thing changed in between (a status that moved): the caller reloads and says so. */
+  | { readonly kind: "conflict" }
   | { readonly kind: "failure" };
 
 export type AdminFailure = Exclude<AdminResult<never>, { kind: "ok" }>;
@@ -30,6 +32,7 @@ const UNAUTHORIZED = 401;
 const TOO_MANY_REQUESTS = 429;
 const BAD_REQUEST = 400;
 const UNPROCESSABLE = 422;
+const CONFLICT = 409;
 
 function toFailure(status: number): AdminFailure {
   switch (status) {
@@ -40,6 +43,8 @@ function toFailure(status: number): AdminFailure {
     case BAD_REQUEST:
     case UNPROCESSABLE:
       return { kind: "invalid" };
+    case CONFLICT:
+      return { kind: "conflict" };
     default:
       return { kind: "failure" };
   }

@@ -6,8 +6,8 @@ import { texts } from "../../../i18n/texts";
 import { AdminShell } from "../../../layout/admin-shell";
 import { AuthSkeleton } from "../../../layout/auth-skeleton/auth-skeleton";
 import { NotFound } from "../../../layout/not-found/not-found";
-import { HOME_PATH, LOGIN_PATH } from "../../../routes";
-import { HomeScreen } from "../../home/home-screen";
+import { HOME_PATH, LOGIN_PATH, ORDERS_PATH } from "../../../routes";
+import { OrdersScreen } from "../../orders/components/orders-screen";
 import { useSession } from "../api/use-session";
 
 import styles from "./protected-area.module.css";
@@ -38,8 +38,9 @@ export function ProtectedArea(): ReactElement {
         <AdminShell>
           <Switch>
             <Route path={HOME_PATH}>
-              <HomeScreen profile={session.profile} />
+              <Redirect to={ORDERS_PATH} replace />
             </Route>
+            <Route path={ORDERS_PATH} component={OrdersScreen} />
             <Route component={NotFound} />
           </Switch>
         </AdminShell>

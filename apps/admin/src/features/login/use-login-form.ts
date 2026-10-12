@@ -23,6 +23,8 @@ const NOTICE_BY_KIND = {
   unauthorized: "wrong_credentials",
   rate_limited: "rate_limited",
   invalid: "failure",
+  // The login has no state that can change in between: any other answer is a failure.
+  conflict: "failure",
   failure: "failure",
 } as const;
 
