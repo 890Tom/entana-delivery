@@ -1,8 +1,8 @@
 import type { AdminProfile } from "@entana/contracts";
 import { useQuery } from "@tanstack/react-query";
 
-import { AdminRequestError } from "./admin-request-error";
-import { fetchProfile } from "./session-calls";
+import { AdminRequestError } from "../../../data-fetching/admin-request-error";
+import { fetchProfile } from "../api/session-calls";
 
 /** The one cache entry of the signed-in profile. */
 export const SESSION_KEY = ["admin", "session"] as const;

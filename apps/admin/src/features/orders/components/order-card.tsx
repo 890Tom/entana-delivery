@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 
 import { texts } from "../../../i18n/texts";
 import { orderPath } from "../../../routes";
-import { formatAmount, formatPhone, formatTime } from "../rules/format-order";
+import { formatAmount, formatPhone, formatTime } from "../../../order-display/format-order";
 
 import { ActionLink } from "./action-button";
 import styles from "./order-card.module.css";

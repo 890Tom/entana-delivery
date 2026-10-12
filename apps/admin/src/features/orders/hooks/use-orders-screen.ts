@@ -1,11 +1,11 @@
 import type { AdminOrderListItem } from "@entana/contracts";
 import { useEffect, useMemo, useState } from "react";
 
-import { useInstance } from "../../instance/use-instance";
+import { useInstance } from "../../instance/hooks/use-instance";
 import type { OrderListRequest } from "../api/orders-calls";
 import { buildDateOptions } from "../rules/date-options";
 import type { DateOption } from "../rules/date-options";
-import { todayInShop } from "../rules/format-order";
+import { todayInShop } from "../../../order-display/format-order";
 import { DEFAULT_TAB, tableStatuses } from "../rules/order-tabs";
 import type { OrderTab } from "../rules/order-tabs";
 import { pruneSelection, selectAllRows, toggleRow } from "../rules/selection";

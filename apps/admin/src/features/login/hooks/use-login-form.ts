@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import type { RefObject, SyntheticEvent } from "react";
 import { useLocation } from "wouter";
 
-import { HOME_PATH } from "../../routes";
-import { postLogin } from "../session/api/session-calls";
-import { SESSION_KEY } from "../session/api/use-session";
-import { useSessionNotice } from "../session/session-notice";
+import { HOME_PATH } from "../../../routes";
+import { postLogin } from "../../session/api/session-calls";
+import { SESSION_KEY } from "../../session/hooks/use-session";
+import { useSessionNotice } from "../../session/notice/session-notice";
 
-import { readLoginForm } from "./rules/read-login-form";
-import type { IdentifierProblem, PasswordProblem } from "./rules/read-login-form";
+import { readLoginForm } from "../rules/read-login-form";
+import type { IdentifierProblem, PasswordProblem } from "../rules/read-login-form";
 
 export type LoginNotice = "wrong_credentials" | "rate_limited" | "failure";
 

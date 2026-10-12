@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { texts } from "../../../i18n/texts";
 import type { NewOrders } from "../hooks/use-new-orders";
 
-import { OrderIcon } from "./order-icons";
+import { OrderIcon } from "../../../order-display/order-icons";
 import styles from "./new-orders-banner.module.css";
 
 type Banner = NonNullable<NewOrders["banner"]>;

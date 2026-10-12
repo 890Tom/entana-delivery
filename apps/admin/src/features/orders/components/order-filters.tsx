@@ -3,11 +3,11 @@ import type { ReactElement } from "react";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
 import type { DateOption } from "../rules/date-options";
-import { formatDay } from "../rules/format-order";
+import { formatDay } from "../../../order-display/format-order";
 import { ORDER_TABS } from "../rules/order-tabs";
 import type { OrderTab } from "../rules/order-tabs";
 
-import { OrderIcon } from "./order-icons";
+import { OrderIcon } from "../../../order-display/order-icons";
 import styles from "./order-filters.module.css";
 
 interface OrderFiltersProps {

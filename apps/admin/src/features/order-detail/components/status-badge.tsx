@@ -2,8 +2,8 @@ import type { AdminOrderDetail } from "@entana/contracts";
 import type { ReactElement } from "react";
 
 import { texts } from "../../../i18n/texts";
-import { OrderIcon } from "../../orders/components/order-icons";
-import { formatDay } from "../../orders/rules/format-order";
+import { OrderIcon } from "../../../order-display/order-icons";
+import { formatDay } from "../../../order-display/format-order";
 import { STATUS_LOOKS } from "../rules/status-look";
 
 import styles from "./status-badge.module.css";

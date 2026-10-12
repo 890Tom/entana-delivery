@@ -2,10 +2,10 @@ import type { AdminOrderListItem, OrderStatus } from "@entana/contracts";
 import type { ReactElement } from "react";
 
 import { texts } from "../../../i18n/texts";
-import { formatDay } from "../rules/format-order";
+import { formatDay } from "../../../order-display/format-order";
 
-import { OrderIcon } from "./order-icons";
-import type { OrderIconName } from "./order-icons";
+import { OrderIcon } from "../../../order-display/order-icons";
+import type { OrderIconName } from "../../../order-display/order-icons";
 import styles from "./status-pill.module.css";
 
 interface Look {

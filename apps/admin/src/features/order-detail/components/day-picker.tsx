@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
-import { formatDay } from "../../orders/rules/format-order";
+import { formatDay } from "../../../order-display/format-order";
 import { buildQuickDays, deliveryWindow } from "../rules/delivery-days";
 import type { ChosenDay, DaySelection, QuickDayKey } from "../rules/delivery-days";
 

@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { texts } from "../../../i18n/texts";
 import { expectNoAccessibilityViolations } from "../../../test-support/assertions/expect-no-accessibility-violations";
 import { jsonResponse, networkFailure, ROUTES } from "../../../test-support/stubs/stub-api";
-import { todayInShop } from "../rules/format-order";
+import { todayInShop } from "../../../order-display/format-order";
 import {
   answerLists,
   buildOrder,

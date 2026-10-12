@@ -4,10 +4,10 @@ import { useParams } from "wouter";
 
 import { Notice } from "../../../components/notice/notice";
 import { texts } from "../../../i18n/texts";
-import { useNow } from "../hooks/use-now";
+import { useNow } from "../../../clock/use-now";
 import { useOrderDetail } from "../hooks/use-order-detail";
 import { useStatusChange } from "../hooks/use-status-change";
-import { todayInShop } from "../../orders/rules/format-order";
+import { todayInShop } from "../../../order-display/format-order";
 
 import { AddressCard } from "./address-card";
 import { CustomerCard } from "./customer-card";

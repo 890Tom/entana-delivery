@@ -4,7 +4,7 @@ import type { AdminLoginRequest, AdminProfile } from "@entana/contracts";
 import { fetchAdmin, sendAdminAction } from "../../../data-fetching/fetch-admin";
 import type { AdminResult } from "../../../data-fetching/fetch-admin";
 
-import { AdminRequestError } from "./admin-request-error";
+import { AdminRequestError } from "../../../data-fetching/admin-request-error";
 
 const ME_PATH = "/api/v1/admin/auth/me";
 const LOGIN_API_PATH = "/api/v1/admin/auth/login";

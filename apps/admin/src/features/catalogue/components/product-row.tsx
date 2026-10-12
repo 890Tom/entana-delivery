@@ -9,7 +9,7 @@ import type { RowMenuItem } from "../../../components/row-menu/row-menu";
 import { Switch } from "../../../components/switch/switch";
 import { texts } from "../../../i18n/texts";
 import { ModalDialog } from "../../order-detail/components/modal-dialog";
-import { formatAmount } from "../../orders/rules/format-order";
+import { formatAmount } from "../../../order-display/format-order";
 import { daysUnavailable } from "../rules/unavailable-since";
 
 import { CatalogueIcon } from "./catalogue-icons";

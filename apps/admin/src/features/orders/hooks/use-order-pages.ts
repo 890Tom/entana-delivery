@@ -2,7 +2,7 @@ import type { AdminOrderListItem } from "@entana/contracts";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import type { AdminFailure } from "../../../data-fetching/fetch-admin";
-import { AdminRequestError } from "../../session/api/admin-request-error";
+import { AdminRequestError } from "../../../data-fetching/admin-request-error";
 import { fetchOrderList } from "../api/orders-calls";
 import type { OrderListRequest } from "../api/orders-calls";
 
