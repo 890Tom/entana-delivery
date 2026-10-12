@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 
 import { Notice } from "../../../components/notice/notice";
 import { texts } from "../../../i18n/texts";
-import type { OrderPages } from "../hooks/use-order-pages";
+import type { OrderTablePage } from "../hooks/use-order-table-page";
 import { useOrdersScreen } from "../hooks/use-orders-screen";
 import type { OrdersScreenModel } from "../hooks/use-orders-screen";
 import { canSelectAll, hasToProcessSection } from "../rules/order-tabs";
@@ -56,7 +56,7 @@ function OtherOrders({
   table,
 }: {
   model: OrdersScreenModel;
-  table: OrderPages;
+  table: OrderTablePage;
 }): ReactElement {
   return (
     <OrdersTable

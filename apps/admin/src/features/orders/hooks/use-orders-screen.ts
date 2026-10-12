@@ -18,6 +18,8 @@ import { useOrderActions } from "./use-order-actions";
 import type { OrderActions } from "./use-order-actions";
 import { useOrderPages } from "./use-order-pages";
 import type { OrderPages } from "./use-order-pages";
+import { useOrderTablePage } from "./use-order-table-page";
+import type { OrderTablePage } from "./use-order-table-page";
 
 const SEARCH_DELAY_MS = 300;
 const MIN_SEARCH_LENGTH = 2;
@@ -33,7 +35,7 @@ export interface OrdersScreenModel {
   readonly countryCode: string | null;
   readonly toProcess: OrderPages;
   /** Null in the tab À traiter, which has no table. */
-  readonly table: OrderPages | null;
+  readonly table: OrderTablePage | null;
   readonly newOrders: NewOrders;
   readonly actions: OrderActions;
   readonly selection: Selection | null;
@@ -70,7 +72,7 @@ function useFilters(today: string): Filters & {
 /** The cards ask for NEW, three a page, never for a day; the table asks for the tab's statuses. */
 function useLists(filters: Filters): {
   toProcess: OrderPages;
-  table: OrderPages | null;
+  table: OrderTablePage | null;
   rows: readonly AdminOrderListItem[];
 } {
   const { tab, date, q } = filters;
@@ -86,7 +88,7 @@ function useLists(filters: Filters): {
   }, [tab, date, q]);
   const hasTable = tableStatuses(tab) !== null;
   const toProcess = useOrderPages(toProcessRequest, true);
-  const table = useOrderPages(tableRequest, hasTable);
+  const table = useOrderTablePage(tableRequest, hasTable);
   const rows = useMemo(() => (hasTable ? table.items : []), [hasTable, table.items]);
   return { toProcess, table: hasTable ? table : null, rows };
 }

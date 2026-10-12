@@ -1,16 +1,16 @@
 import type { ReactElement } from "react";
 
 import { texts } from "../../../i18n/texts";
-import type { OrderPages } from "../hooks/use-order-pages";
+import type { OrderTablePage } from "../hooks/use-order-table-page";
 import { isRowSelectable } from "../rules/selection";
 import type { Selection } from "../rules/selection";
 
-import { LoadMoreButton } from "./load-more-button";
 import { OrderRow } from "./order-row";
 import styles from "./orders-table.module.css";
+import { Pagination } from "./pagination";
 
 interface OrdersTableProps {
-  readonly pages: OrderPages;
+  readonly pages: OrderTablePage;
   readonly countryCode: string | null;
   readonly selection: Selection | null;
   readonly canSelectAll: boolean;
@@ -79,7 +79,7 @@ function TableBody(props: OrdersTableProps): ReactElement {
   );
 }
 
-/** The other orders: a real table, and a button for the next page. */
+/** The other orders: a real table, one page at a time. */
 export function OrdersTable(props: OrdersTableProps): ReactElement {
   const { pages, selection } = props;
   const isEmpty = pages.items.length === 0;
@@ -103,13 +103,7 @@ export function OrdersTable(props: OrdersTableProps): ReactElement {
           </table>
         </div>
       )}
-      {pages.hasNextPage && (
-        <LoadMoreButton
-          label={texts.orders.showMoreOthers}
-          isLoading={pages.isFetchingNextPage}
-          onClick={pages.showMore}
-        />
-      )}
+      {pages.pageCount > 1 && <Pagination page={pages} />}
     </section>
   );
 }

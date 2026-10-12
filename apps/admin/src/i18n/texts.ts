@@ -66,7 +66,13 @@ export const texts = {
     process: "Traiter",
     processLabel: (code: string): string => `Traiter la commande #${code}`,
     showMore: (count: number): string => `Afficher ${String(count)} de plus`,
-    showMoreOthers: "Afficher plus",
+    pagination: {
+      label: "Pages des commandes",
+      previous: "Précédent",
+      next: "Suivant",
+      page: (current: number, count: number): string =>
+        `Page ${String(current)} sur ${String(count)}`,
+    },
     remaining: (count: number): string =>
       count === 1 ? "1 autre à traiter" : `${String(count)} autres à traiter`,
     columns: {
