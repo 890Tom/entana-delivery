@@ -191,3 +191,31 @@ describe("SlidingWindowLimiter", () => {
     expect(limiter.size).toBe(1);
   });
 });
+
+describe("SlidingWindowLimiter.isKeyLimited", () => {
+  it("reports a limited key without recording anything", () => {
+    const { limiter } = build();
+    hitTimes(limiter, "a", 3);
+
+    expect(limiter.isKeyLimited("a")).toBe(true);
+    expect(limiter.isKeyLimited("a")).toBe(true);
+  });
+
+  it("is false for a key under its limit or never seen, and does not use a hit", () => {
+    const { limiter } = build();
+    hitTimes(limiter, "a", 2);
+
+    expect(limiter.isKeyLimited("a")).toBe(false);
+    expect(limiter.isKeyLimited("never-seen")).toBe(false);
+    expect(limiter.hit("a")).toBe(true);
+  });
+
+  it("is false again once the hits have left the window", () => {
+    const { limiter, clock } = build();
+    hitTimes(limiter, "a", 3);
+
+    clock.advance(WINDOW_MS);
+
+    expect(limiter.isKeyLimited("a")).toBe(false);
+  });
+});

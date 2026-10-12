@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { bootstrap } from "./bootstrap.js";
 
-const DEMO_ENV = { NODE_ENV: "production", DATABASE_URL: "postgresql://t:t@localhost:5432/t" };
+const DEMO_ENV = {
+  NODE_ENV: "production",
+  DATABASE_URL: "postgresql://t:t@localhost:5432/t",
+  ADMIN_ALLOWED_ORIGINS: "https://admin.example.mg",
+};
 
 async function run(env: Record<string, string>): Promise<{ code: number; output: string }> {
   let output = "";

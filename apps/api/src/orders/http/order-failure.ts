@@ -2,6 +2,10 @@ import { STATUS_CODES } from "node:http";
 import { GENERIC_PROBLEM_TYPE, VALIDATION_PROBLEM_TYPE } from "@entana/contracts";
 import type { FieldError, ProblemDetails } from "@entana/contracts";
 import {
+  AdminOriginRefusedError,
+  AdminUnauthenticatedError,
+} from "../../admin-auth/errors/admin-auth-errors.js";
+import {
   AddressRateLimitedError,
   CustomerBlockedError,
   IdempotencyConflictError,
@@ -66,6 +70,9 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
   // The tracking routes: one text for every token that is not valid.
   [TrackingNotFoundError, { status: 404, detail: "The requested resource was not found." }],
   [OrderNotCancellableError, { status: 409, detail: "This order can no longer be cancelled." }],
+  // The administration: one text for every cause of a refused login or session.
+  [AdminUnauthenticatedError, { status: 401, detail: "Authentication is required." }],
+  [AdminOriginRefusedError, { status: 403, detail: "This action is not allowed." }],
   [
     UnsupportedContentTypeError,
     { status: 415, detail: "The content type of the request is not supported." },

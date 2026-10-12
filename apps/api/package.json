@@ -14,11 +14,13 @@
     "test:coverage:integration": "COVERAGE_PART=1 vitest run --config vitest.integration.config.ts --reporter=default --reporter=blob --outputFile.blob=.vitest-reports/blobs/integration.json --coverage --coverage.reportsDirectory=.vitest-reports/coverage-integration",
     "test:coverage:merge": "vitest run --merge-reports=.vitest-reports/blobs --coverage",
     "test:e2e": "vitest run tests/e2e",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "admin:upsert": "node --env-file-if-exists=../../.env dist/cli/admin-upsert.js"
   },
   "dependencies": {
     "@entana/contracts": "workspace:*",
     "@entana/database": "workspace:*",
+    "@entana/password-hash": "workspace:*",
     "@nestjs/common": "12.1.2",
     "@nestjs/core": "12.1.2",
     "@nestjs/platform-express": "12.1.2",

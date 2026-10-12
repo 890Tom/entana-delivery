@@ -18,5 +18,6 @@
 | [0014](0014-database-error-handling.md)                                  | Database error handling                                                                         | accepted |
 | [0015](0015-password-hash-in-its-own-package.md)                         | Password hashing in its own package                                                             | accepted |
 | [0016](0016-public-product-catalogue.md)                                 | Public product catalogue                                                                        | accepted |
+| [0017](0017-admin-sessions-in-database-with-an-opaque-cookie.md)         | Administration sessions: opaque token in a cookie, session rows in the database                 | accepted |
 
 Planned records: PostGIS left out (setup in ADR 0006), delivery axes made of places, idempotent orders and offline mode, simplified order statuses, VPS hosting with OpenFreeMap tiles, hashed tracking token. Use [`0000-template.md`](0000-template.md).

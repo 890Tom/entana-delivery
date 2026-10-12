@@ -50,6 +50,8 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       # Empty means no cross-origin browser is allowed.
       CORS_ORIGINS: ${CORS_ORIGINS:-}
+      # Required by the API in production: the origins of the administration, same form as above.
+      ADMIN_ALLOWED_ORIGINS: ${ADMIN_ALLOWED_ORIGINS:-}
     volumes:
       # The media (logo, icon, product photos): back it up with the database, and note that
       # `docker compose down -v` deletes it.

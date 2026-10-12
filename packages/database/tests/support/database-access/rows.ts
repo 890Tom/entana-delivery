@@ -1,4 +1,4 @@
-import { randomInt, randomUUID } from "node:crypto";
+import { randomBytes, randomInt, randomUUID } from "node:crypto";
 import type { Client } from "pg";
 
 // Each helper inserts a valid row, so a test only states what it changes.
@@ -140,6 +140,19 @@ export function insertStaffUser(db: Client, overrides: Overrides = {}): Promise<
     role: "ADMIN",
     password_hash: "not-a-real-hash",
     active: true,
+    ...overrides,
+  });
+}
+
+// A valid session of a new admin account. Dates are given by the test when they matter.
+export async function insertAdminSession(db: Client, overrides: Overrides = {}): Promise<string> {
+  const staffUserId = overrides.staff_user_id ?? (await insertStaffUser(db));
+  return insertAndReturnId(db, "admin_session", {
+    token_hash: randomBytes(32).toString("hex"),
+    staff_user_id: staffUserId,
+    created_at: new Date("2026-10-12T08:00:00.000Z"),
+    expires_at: new Date("2026-10-19T08:00:00.000Z"),
+    last_seen_at: new Date("2026-10-12T08:00:00.000Z"),
     ...overrides,
   });
 }

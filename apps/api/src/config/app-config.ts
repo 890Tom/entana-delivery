@@ -54,6 +54,10 @@ const databaseUrlSchema = z
   .string()
   .regex(/^[^\s\p{Cc}]+$/u, "Must not contain whitespace or control characters.");
 
+// The browser origin of the administration when none is configured, outside production only: the
+// Vite development server. In production the variable is required (see the transform below).
+const DEVELOPMENT_ADMIN_ORIGINS: readonly string[] = ["http://localhost:5173"];
+
 const configSchema = z
   .object({
     // Production when unset: a deployment that forgets the variable must not expose the API
@@ -65,6 +69,13 @@ const configSchema = z
     PORT: z.coerce.number().int().min(1).max(65535).default(3000),
     LOG_LEVEL: z.enum(LOG_LEVELS).default("info"),
     CORS_ORIGINS: corsOriginsSchema,
+    // Origins that may send a request that changes something under /api/v1/admin: the same form
+    // as CORS_ORIGINS, but a separate list. It is not a CORS setting: the administration is called
+    // from its own origin through a proxy, and cookies never cross origins.
+    ADMIN_ALLOWED_ORIGINS: corsOriginsSchema,
+    // Secure on the session cookie (and the __Host- prefix). On unless NODE_ENV says otherwise;
+    // only local development over plain HTTP turns it off.
+    ADMIN_COOKIE_SECURE: z.stringbool().optional(),
     TRUST_PROXY: trustProxySchema,
     BODY_LIMIT_KB: z.coerce.number().int().min(1).max(10240).default(100),
     SWAGGER_ENABLED: z.stringbool().optional(),
@@ -75,20 +86,37 @@ const configSchema = z
     // Absolute path of the media folder (branding/ and products/). Required in production.
     MEDIA_ROOT: z.string().optional(),
   })
-  .transform((env) => ({
-    nodeEnv: env.NODE_ENV,
-    host: env.HOST,
-    port: env.PORT,
-    logLevel: env.LOG_LEVEL,
-    corsOrigins: env.CORS_ORIGINS,
-    trustProxy: env.TRUST_PROXY,
-    bodyLimitKb: env.BODY_LIMIT_KB,
-    // The API documentation is off in production unless it is asked for.
-    isSwaggerEnabled: env.SWAGGER_ENABLED ?? env.NODE_ENV !== "production",
-    databaseUrl: env.DATABASE_URL,
-    instanceConfigPath: env.INSTANCE_CONFIG_PATH,
-    mediaRoot: env.MEDIA_ROOT,
-  }));
+  .transform((env, context) => {
+    const isProduction = env.NODE_ENV === "production";
+    if (isProduction && env.ADMIN_ALLOWED_ORIGINS.length === 0) {
+      context.issues.push({
+        code: "custom",
+        message: "Required in production: the origins of the administration, separated by commas.",
+        input: undefined,
+        path: ["ADMIN_ALLOWED_ORIGINS"],
+      });
+      return z.NEVER;
+    }
+    return {
+      nodeEnv: env.NODE_ENV,
+      host: env.HOST,
+      port: env.PORT,
+      logLevel: env.LOG_LEVEL,
+      corsOrigins: env.CORS_ORIGINS,
+      adminAllowedOrigins:
+        env.ADMIN_ALLOWED_ORIGINS.length > 0
+          ? env.ADMIN_ALLOWED_ORIGINS
+          : DEVELOPMENT_ADMIN_ORIGINS,
+      isAdminCookieSecure: env.ADMIN_COOKIE_SECURE ?? isProduction,
+      trustProxy: env.TRUST_PROXY,
+      bodyLimitKb: env.BODY_LIMIT_KB,
+      // The API documentation is off in production unless it is asked for.
+      isSwaggerEnabled: env.SWAGGER_ENABLED ?? !isProduction,
+      databaseUrl: env.DATABASE_URL,
+      instanceConfigPath: env.INSTANCE_CONFIG_PATH,
+      mediaRoot: env.MEDIA_ROOT,
+    };
+  });
 
 export type AppConfig = Readonly<z.output<typeof configSchema>>;
 

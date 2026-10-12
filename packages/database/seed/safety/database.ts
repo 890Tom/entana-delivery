@@ -11,6 +11,7 @@ const SEEDED_TABLES = [
   "place",
   "delivery_axis",
   "axis_place",
+  "admin_session",
   "staff_user",
   "audit_log",
   "reseller",

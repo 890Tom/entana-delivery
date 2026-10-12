@@ -6,5 +6,7 @@ export const coverageSettings = {
   include: ["src/**/*.ts"],
   // main.ts only reads process.env and starts listening: the tests boot the application
   // through createApplication instead.
-  exclude: ["src/**/*.test.ts", "src/main.ts"],
+  // src/cli/admin-upsert.ts is the same kind of file: it reads the terminal and the environment and
+  // calls the tested modules next to it.
+  exclude: ["src/**/*.test.ts", "src/main.ts", "src/cli/admin-upsert.ts"],
 };

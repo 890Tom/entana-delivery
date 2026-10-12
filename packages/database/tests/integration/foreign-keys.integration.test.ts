@@ -5,7 +5,12 @@ import {
   SQLSTATE,
   useRollbackTransaction,
 } from "../support/database-access/database.js";
-import { insertOrderItem, insertProduct } from "../support/database-access/rows.js";
+import {
+  insertAdminSession,
+  insertOrderItem,
+  insertProduct,
+  insertStaffUser,
+} from "../support/database-access/rows.js";
 
 describe("referential integrity", () => {
   const db = useRollbackTransaction();
@@ -28,5 +33,16 @@ describe("referential integrity", () => {
     const result = await db().query('DELETE FROM "product" WHERE "id" = $1', [productId]);
 
     expect(result.rowCount).toBe(1);
+  });
+
+  it("refuses to delete a staff account that a session still references", async () => {
+    const staffUserId = await insertStaffUser(db());
+    await insertAdminSession(db(), { staff_user_id: staffUserId });
+
+    await assertThrowawayDatabase(db());
+    await expectViolation(db().query('DELETE FROM "staff_user" WHERE "id" = $1', [staffUserId]), {
+      code: SQLSTATE.restrictViolation,
+      constraint: "admin_session_staff_user_id_fkey",
+    });
   });
 });

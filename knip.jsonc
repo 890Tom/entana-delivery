@@ -6,8 +6,10 @@
     "apps/api": {
       // Started by `node dist/main.js` (the compiled output), so it is not found through a script.
       // The signal fixture is run by a child Vitest that signal-cleanup.integration.test.ts spawns.
+      // The admin:upsert script is started by `node dist/cli/admin-upsert.js`, for the same reason.
       "entry": [
         "src/main.ts",
+        "src/cli/admin-upsert.ts",
         "vitest.signal-fixture.config.ts",
         "tests/signal-fixture/*.fixture.ts",
       ],

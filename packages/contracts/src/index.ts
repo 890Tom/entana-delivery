@@ -67,3 +67,23 @@ export {
 } from "./orders/tracking/tracking-rules.js";
 export { trackingLookupRequestSchema } from "./orders/tracking/tracking-lookup-request.js";
 export type { TrackingLookupRequest } from "./orders/tracking/tracking-lookup-request.js";
+export {
+  ADMIN_PASSWORD_MAX_LENGTH,
+  ADMIN_PASSWORD_MIN_LENGTH,
+  adminEmailSchema,
+  adminLoginRequestSchema,
+  normalizeEmail,
+  validateAdminPassword,
+} from "./admin/admin-credentials.js";
+export type { AdminLoginRequest, PasswordValidation } from "./admin/admin-credentials.js";
+export { adminProfileSchema } from "./admin/admin-profile.js";
+export type { AdminProfile } from "./admin/admin-profile.js";
+export {
+  ADMIN_SESSION_IDLE_TIMEOUT_MS,
+  ADMIN_SESSION_LIFETIME_MS,
+  ADMIN_SESSION_TOUCH_INTERVAL_MS,
+  computeSessionExpiry,
+  evaluateAdminSession,
+  shouldRecordSessionActivity,
+} from "./admin/admin-session-rules.js";
+export type { AdminSessionDates, AdminSessionState } from "./admin/admin-session-rules.js";
