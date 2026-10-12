@@ -2,6 +2,10 @@ import { STATUS_CODES } from "node:http";
 import { GENERIC_PROBLEM_TYPE, VALIDATION_PROBLEM_TYPE } from "@entana/contracts";
 import type { FieldError, ProblemDetails } from "@entana/contracts";
 import {
+  AdminOrderNotFoundError,
+  OrderTransitionRefusedError,
+} from "../../admin-orders/errors/admin-order-errors.js";
+import {
   AdminOriginRefusedError,
   AdminUnauthenticatedError,
 } from "../../admin-auth/errors/admin-auth-errors.js";
@@ -73,6 +77,9 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
   // The administration: one text for every cause of a refused login or session.
   [AdminUnauthenticatedError, { status: 401, detail: "Authentication is required." }],
   [AdminOriginRefusedError, { status: 403, detail: "This action is not allowed." }],
+  // The orders of the administration: an unknown and a malformed id answer alike.
+  [AdminOrderNotFoundError, { status: 404, detail: "The requested resource was not found." }],
+  [OrderTransitionRefusedError, { status: 409, detail: "The order cannot move to this status." }],
   [
     UnsupportedContentTypeError,
     { status: 415, detail: "The content type of the request is not supported." },

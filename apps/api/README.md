@@ -248,6 +248,42 @@ or hash. Changing a password or disabling an account also revokes its sessions. 
 on a disabled account enables it again. A seeded demo admin has no e-mail: create the account with
 this script to log in.
 
+### Orders (administration)
+
+Three routes under `/api/v1/admin/orders`, closed by the guard above (`401` without a session). Every
+answer carries `Cache-Control: no-store`. OpenAPI tag `admin`, security scheme `adminSession`.
+
+| Route                                       | Does                                                    |
+| ------------------------------------------- | ------------------------------------------------------- |
+| `GET /api/v1/admin/orders`                  | One page of orders, newest first                        |
+| `GET /api/v1/admin/orders/:id`              | One order with its lines and its history                |
+| `POST /api/v1/admin/orders/:id/transitions` | Moves the order one step; `200` with the updated detail |
+
+**List.** `status` (one status), `limit` (25 by default, 100 at most), `cursor` (the `nextCursor` of
+the previous page). Any other parameter, a value out of range or a cursor this API did not issue is
+a `400` that never repeats the value.
+
+**Detail.** The row, plus lines, delivery fee, note, position, `rejectionReason` (a refusal only)
+and the events with their actor. The hash of the tracking token is never in an answer. A malformed
+id and an unknown id get the same `404`.
+
+**Transitions.** The body is a strict union on `to`:
+
+| From               | To                 | Body                                                  |
+| ------------------ | ------------------ | ----------------------------------------------------- |
+| `NEW`              | `CONFIRMED`        | `{ "to": "CONFIRMED", "deliveryDate": "YYYY-MM-DD" }` |
+| `NEW`              | `REJECTED`         | `{ "to": "REJECTED", "reason"?: string }`             |
+| `CONFIRMED`        | `CANCELLED`        | `{ "to": "CANCELLED", "reason"?: string }`            |
+| `CONFIRMED`        | `OUT_FOR_DELIVERY` | `{ "to": "OUT_FOR_DELIVERY" }`                        |
+| `OUT_FOR_DELIVERY` | `DELIVERED`        | `{ "to": "DELIVERED" }`                               |
+| `OUT_FOR_DELIVERY` | `FAILED`           | `{ "to": "FAILED" }`                                  |
+
+`reason` is 300 characters at most. `deliveryDate` goes from today to 60 days ahead, today read in
+the instance time zone. Without a reason the stored text is "Aucun motif précisé." (refusal),
+"Annulée par la boutique." (cancellation) or "Livraison non aboutie." (failed delivery): the column
+is required by a CHECK constraint. Any other move, an order already in that status and an order
+changed in between (a customer's cancellation included) get the same `409`.
+
 ## Logs
 
 One JSON object per line on stdout (pino). Each request gets an id, returned in the
