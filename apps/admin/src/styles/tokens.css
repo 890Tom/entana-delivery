@@ -9,6 +9,7 @@
  *   border, border-strong, border-input
  *   accent, accent-soft, accent-strong
  *   highlight, highlight-soft, highlight-strong (proposed, to confirm)
+ *   success-soft, success-strong, error-soft (proposed, to confirm: the status pills)
  *   error, skeleton, focus-ring, ink-hover
  *
  * An "on" token is the text colour used on top of its fill: text-on-accent on accent,
@@ -32,6 +33,10 @@
   --color-highlight-300: #c9a54e;
   --color-highlight-100: #f6ecd5;
   --color-highlight-700: #7a5a14;
+  /* Proposed, to confirm (requested for the status pills of the orders table). */
+  --color-success-100: #dcfce7;
+  --color-success-800: #166534;
+  --color-error-100: #fde8e8;
 
   /* Colours: roles */
   --color-surface: var(--color-white);
@@ -53,6 +58,10 @@
   --color-highlight: var(--color-highlight-300);
   --color-highlight-soft: var(--color-highlight-100);
   --color-highlight-strong: var(--color-highlight-700);
+  /* Proposed, to confirm: delivered (green), cancelled (red). Text and border on the soft fill. */
+  --color-success-soft: var(--color-success-100);
+  --color-success-strong: var(--color-success-800);
+  --color-error-soft: var(--color-error-100);
   --color-skeleton: var(--color-neutral-200);
   --color-focus-ring: var(--color-ink);
 

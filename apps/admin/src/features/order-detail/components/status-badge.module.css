@@ -17,11 +17,6 @@
   border-color: var(--color-highlight);
 }
 
-.outlined {
-  color: var(--color-text);
-  border-color: var(--color-border-strong);
-}
-
 .dark {
   color: var(--color-text-inverse);
   background: var(--color-surface-inverse);
@@ -31,4 +26,23 @@
   color: var(--color-text);
   background: var(--color-surface);
   border-color: var(--color-border);
+}
+
+/* The same colours as the status pill of the orders table (to confirm). */
+.confirmed {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-strong);
+}
+
+.success {
+  color: var(--color-success-strong);
+  background: var(--color-success-soft);
+  border-color: var(--color-success-strong);
+}
+
+.danger {
+  color: var(--color-error);
+  background: var(--color-error-soft);
+  border-color: var(--color-error);
 }
