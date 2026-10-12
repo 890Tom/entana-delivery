@@ -128,3 +128,16 @@ export type {
 } from "./orders/admin/admin-order-summary.js";
 export { adminOrderDetailSchema } from "./orders/admin/admin-order-detail.js";
 export type { AdminOrderDetail } from "./orders/admin/admin-order-detail.js";
+export {
+  adminProductListResponseSchema,
+  adminProductSchema,
+  availabilityRequestSchema,
+  productOrderRequestSchema,
+} from "./admin/catalogue/admin-product.js";
+export type {
+  AdminProduct,
+  AdminProductListResponse,
+  AvailabilityRequest,
+  ProductOrderRequest,
+} from "./admin/catalogue/admin-product.js";
+export { isCompleteProductOrder } from "./admin/catalogue/product-order.js";

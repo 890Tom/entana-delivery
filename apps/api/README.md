@@ -311,6 +311,41 @@ the instance time zone. Without a reason the stored text is "Aucun motif précis
 is required by a CHECK constraint. Any other move, an order already in that status and an order
 changed in between (a customer's cancellation included) get the same `409`.
 
+### Catalogue (administration)
+
+Five routes under `/api/v1/admin/products`, closed by the guard above (`401` without a session).
+Every answer carries `Cache-Control: no-store`. No rate limiting. OpenAPI tag `admin`.
+
+| Route                                           | Does                                                              |
+| ----------------------------------------------- | ----------------------------------------------------------------- |
+| `GET /api/v1/admin/products`                    | Every product, retired ones included, by `position` then `id`     |
+| `PATCH /api/v1/admin/products/:id/availability` | Body `{ "available": boolean }` (strict): `200` with the product  |
+| `POST /api/v1/admin/products/:id/retire`        | No body: the product leaves the catalogue; `200` with the product |
+| `POST /api/v1/admin/products/:id/restore`       | No body: active again, unavailable, last; `200` with the product  |
+| `PUT /api/v1/admin/products/order`              | Body `{ "ids": uuid[] }` (strict): `200` with the whole list      |
+
+A product is `{ id, name, sku, priceAr, available, availabilityChangedAt, retired, position }`.
+`retired` is the negation of the `active` column: a retired product is out of the public catalogue
+(`GET /api/v1/products`, which follows `position`) and cannot be ordered (the `422` of the order
+creation, as for an unknown product). The orders that hold it are untouched, and a row is never
+deleted. The public catalogue is cached for 30 seconds: a change shows up within that delay.
+
+- **Availability.** Sets `available` and `availabilityChangedAt` (now). The same value as the
+  current one is a `200` that changes nothing and writes no audit entry. A retired product is a `409`.
+- **Retire / restore.** Already retired (or already active): `200`, nothing changes, no audit
+  entry. Restoring sets `available = false`, `availabilityChangedAt = now` and `position` after the
+  last product. A product with no photo cannot be visible (`ck_product_photo_when_active`): `409`.
+- **Order.** `ids` must be exactly the products that are not retired, each once; otherwise `409`
+  and nothing is written. Positions `0` to `n-1` are written in one transaction. Retired products
+  keep their position. The order is not audited.
+- **Errors.** An unknown and a malformed id get the same `404` with a fixed detail. A body that is
+  not valid or holds another field is a `400`.
+- **Audit.** A real change of availability, a retirement and a restoration write one `audit_log`
+  row in the same transaction: `actor_id` is the admin of the session, `entity = "product"`,
+  `action` is `product.availability_changed`, `product.retired` or `product.restored`, and `diff`
+  holds the before and after of the flag (`{ "available": { "from": true, "to": false } }`). No
+  name, price or personal data.
+
 ## Logs
 
 One JSON object per line on stdout (pino). Each request gets an id, returned in the

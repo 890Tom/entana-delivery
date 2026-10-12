@@ -3,6 +3,7 @@ import type { DynamicModule } from "@nestjs/common";
 import type { DestinationStream } from "pino";
 import type { AppConfig } from "./config/app-config.js";
 import { AdminAuthModule } from "./admin-auth/admin-auth.module.js";
+import { AdminCatalogueModule } from "./admin-catalogue/admin-catalogue.module.js";
 import { AdminOrdersModule } from "./admin-orders/admin-orders.module.js";
 import { CatalogModule } from "./catalog/catalog.module.js";
 import { NotFoundFallback } from "./errors/problem-details/not-found-fallback.js";
@@ -29,6 +30,7 @@ export class AppModule {
         TrackingModule.register(config),
         AdminAuthModule.register(config),
         AdminOrdersModule.register(config),
+        AdminCatalogueModule.register(config),
       ],
       providers: [NotFoundFallback],
     };

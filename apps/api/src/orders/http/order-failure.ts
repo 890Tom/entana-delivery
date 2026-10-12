@@ -2,6 +2,12 @@ import { STATUS_CODES } from "node:http";
 import { GENERIC_PROBLEM_TYPE, VALIDATION_PROBLEM_TYPE } from "@entana/contracts";
 import type { FieldError, ProblemDetails } from "@entana/contracts";
 import {
+  AdminProductNotFoundError,
+  ProductOrderMismatchError,
+  ProductRetiredError,
+  ProductWithoutPhotoError,
+} from "../../admin-catalogue/errors/admin-catalogue-errors.js";
+import {
   AdminOrderNotFoundError,
   OrderTransitionRefusedError,
 } from "../../admin-orders/errors/admin-order-errors.js";
@@ -80,6 +86,17 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
   // The orders of the administration: an unknown and a malformed id answer alike.
   [AdminOrderNotFoundError, { status: 404, detail: "The requested resource was not found." }],
   [OrderTransitionRefusedError, { status: 409, detail: "The order cannot move to this status." }],
+  // The catalogue of the administration: an unknown and a malformed id answer alike.
+  [AdminProductNotFoundError, { status: 404, detail: "The requested resource was not found." }],
+  [ProductRetiredError, { status: 409, detail: "The product is retired." }],
+  [
+    ProductWithoutPhotoError,
+    { status: 409, detail: "The product has no photo and cannot be restored." },
+  ],
+  [
+    ProductOrderMismatchError,
+    { status: 409, detail: "The list is not the set of the products that are not retired." },
+  ],
   [
     UnsupportedContentTypeError,
     { status: 415, detail: "The content type of the request is not supported." },
