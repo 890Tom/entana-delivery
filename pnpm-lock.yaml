@@ -226,6 +226,9 @@ importers:
       '@entana/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@entana/password-hash':
+        specifier: workspace:*
+        version: link:../../packages/password-hash
       '@nestjs/common':
         specifier: 12.1.2
         version: 12.1.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0)

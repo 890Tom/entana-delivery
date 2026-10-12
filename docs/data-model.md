@@ -1,6 +1,6 @@
 # Data model
 
-This document is the reference for the database schema. It describes 12 tables, grouped by domain. Money is an integer number of ariary (no decimals). Timestamps are `timestamptz` stored in UTC. The delivery date is a plain day (`date`), interpreted in the `Indian/Antananarivo` time zone by the application. Identifiers are UUIDs. Rows are never deleted: products, axes, places and resellers are deactivated or archived, so history stays intact. Foreign keys use `ON DELETE RESTRICT`.
+This document is the reference for the database schema. It describes 13 tables, grouped by domain. Money is an integer number of ariary (no decimals). Timestamps are `timestamptz` stored in UTC. The delivery date is a plain day (`date`), interpreted in the `Indian/Antananarivo` time zone by the application. Identifiers are UUIDs. Rows are never deleted (except the sessions of the administration, see `admin_session`): products, axes, places and resellers are deactivated or archived, so history stays intact. Foreign keys use `ON DELETE RESTRICT`.
 
 ## Orders
 
@@ -128,13 +128,30 @@ Primary key `(axis_id, place_id)`. A place can belong to several axes.
 |---|---|---|
 | id | uuid | primary key |
 | name | text | |
-| username | text | unique, used to log in |
+| username | text | unique; the accounts made by the `admin:upsert` script copy their e-mail here |
+| email | text, nullable | unique, used to log in to the administration; null for a driver. `ck_staff_user_email_form`: `CHECK (email IS NULL OR (email = lower(btrim(email)) AND char_length(email) BETWEEN 3 AND 254 AND email LIKE '%_@_%'))` |
 | phone | text, nullable | |
 | role | enum `ADMIN`, `DRIVER` | |
 | password_hash | text | |
 | failed_login_count | integer | default 0, `ck_staff_user_failed_login_count_not_negative`: `CHECK (failed_login_count >= 0)` |
 | locked_until | timestamptz, nullable | set after 5 failed logins (15 minutes) |
 | active | boolean | |
+| created_at, updated_at | timestamptz | default now |
+
+Only an account with role `ADMIN`, `active` and an `email` can log in to the administration. `failed_login_count` and `locked_until` are not used by that login: its limits are kept in memory (ADR 0017).
+
+### `admin_session`
+| Column | Type | Rules |
+|---|---|---|
+| id | uuid | primary key |
+| token_hash | text | unique, SHA-256 of the session token as 64 lowercase hexadecimal characters, `ck_admin_session_token_hash_form`: `CHECK (token_hash ~ '^[0-9a-f]{64}$')`; the token itself is never stored |
+| staff_user_id | uuid | foreign key to `staff_user`, indexed |
+| created_at | timestamptz | default now |
+| expires_at | timestamptz | indexed; absolute end, 7 days after creation; `ck_admin_session_expires_after_creation`: `CHECK (expires_at > created_at)` |
+| last_seen_at | timestamptz | default now; written at most once a minute; `ck_admin_session_last_seen_not_before_creation`: `CHECK (last_seen_at >= created_at)` |
+| revoked_at | timestamptz, nullable | set by the logout; `ck_admin_session_revoked_not_before_creation`: `CHECK (revoked_at IS NULL OR revoked_at >= created_at)` |
+
+A session is usable while it is not revoked, before `expires_at`, and seen less than 12 hours ago (pure rule `evaluateAdminSession` in `contracts`). A session is not business data: the sessions that are expired, idle or revoked are deleted at each successful login, with no scheduled task.
 
 ### `audit_log`
 | Column | Type | Rules |

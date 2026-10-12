@@ -23,19 +23,21 @@ Environment variables, validated at startup by `src/config/app-config.ts`. If on
 process prints the names of the invalid variables (never their values) and exits with code 1.
 `pnpm dev` and `pnpm start` read the `.env` file at the repository root.
 
-| Variable               | Default                      | Meaning                                                                     |
-| ---------------------- | ---------------------------- | --------------------------------------------------------------------------- |
-| `NODE_ENV`             | `production`                 | `development`, `test` or `production`. Readable logs only in development.   |
-| `HOST`                 | `0.0.0.0`                    | Interface to listen on. See below.                                          |
-| `PORT`                 | `3000`                       | Port to listen on.                                                          |
-| `LOG_LEVEL`            | `info`                       | `fatal`, `error`, `warn`, `info`, `debug`, `trace` or `silent`.             |
-| `CORS_ORIGINS`         | empty                        | Allowed browser origins, comma separated. Empty: none.                      |
-| `TRUST_PROXY`          | `false`                      | Number of reverse proxies in front of the API. See below.                   |
-| `BODY_LIMIT_KB`        | `100`                        | Largest JSON request body, in kilobytes.                                    |
-| `SWAGGER_ENABLED`      | `development` or `test` only | Serves `/api/docs`.                                                         |
-| `DATABASE_URL`         | required                     | PostgreSQL URL. No whitespace or control character. See below.              |
-| `MEDIA_ROOT`           | `./media` outside production | Absolute path of the media folder. Required in production. See Media.       |
-| `INSTANCE_CONFIG_PATH` | demo file outside production | Path of the instance configuration file. Required in production. See below. |
+| Variable                | Default                                                   | Meaning                                                                           |
+| ----------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `NODE_ENV`              | `production`                                              | `development`, `test` or `production`. Readable logs only in development.         |
+| `HOST`                  | `0.0.0.0`                                                 | Interface to listen on. See below.                                                |
+| `PORT`                  | `3000`                                                    | Port to listen on.                                                                |
+| `LOG_LEVEL`             | `info`                                                    | `fatal`, `error`, `warn`, `info`, `debug`, `trace` or `silent`.                   |
+| `CORS_ORIGINS`          | empty                                                     | Allowed browser origins, comma separated. Empty: none.                            |
+| `ADMIN_ALLOWED_ORIGINS` | required in production; `http://localhost:5173` otherwise | Browser origins that may send a change under `/api/v1/admin`. See Administration. |
+| `ADMIN_COOKIE_SECURE`   | `true` in production, `false` otherwise                   | `Secure` flag (and `__Host-` prefix) of the session cookie.                       |
+| `TRUST_PROXY`           | `false`                                                   | Number of reverse proxies in front of the API. See below.                         |
+| `BODY_LIMIT_KB`         | `100`                                                     | Largest JSON request body, in kilobytes.                                          |
+| `SWAGGER_ENABLED`       | `development` or `test` only                              | Serves `/api/docs`.                                                               |
+| `DATABASE_URL`          | required                                                  | PostgreSQL URL. No whitespace or control character. See below.                    |
+| `MEDIA_ROOT`            | `./media` outside production                              | Absolute path of the media folder. Required in production. See Media.             |
+| `INSTANCE_CONFIG_PATH`  | demo file outside production                              | Path of the instance configuration file. Required in production. See below.       |
 
 **`NODE_ENV`** defaults to `production`, so that a deployment that forgets it exposes nothing it
 should not (no API documentation, strict security headers, JSON logs). `.env.example` sets
@@ -171,7 +173,8 @@ Compose reads the whole file, so the `.env` file must set `POSTGRES_USER`, `POST
 and `POSTGRES_DB` even to start only the API (copy `.env.example`). It sets `NODE_ENV`, `HOST` and
 `PORT` itself and reads three optional variables from the shell or `.env`: `API_PORT` (port
 published on the host, default `3000`), `LOG_LEVEL` (default `info`) and `CORS_ORIGINS` (default
-empty: no cross-origin browser is allowed).
+empty: no cross-origin browser is allowed). The API refuses to start in production without
+`ADMIN_ALLOWED_ORIGINS` (the origins of the administration, see Administration): set it in `.env`.
 
 **Health check.** Every 30 seconds (3 seconds timeout, 10 seconds start period, 3 retries) Node
 requests `http://127.0.0.1:$PORT/api/v1/health` and fails if the answer is not successful or takes
@@ -180,6 +183,69 @@ more than 2 seconds. The image has no `curl`, so Node performs the request.
 **Variables set by the image:** `NODE_ENV=production`, `HOST=0.0.0.0` and `PORT=3000`. Every
 other variable of the table above keeps its default. The process runs as the `node` user and
 starts with `node dist/main.js`.
+
+## Administration
+
+The people of the shop log in to the administration. Everything under `/api/v1/admin/*` is closed
+by default: a global guard (`AdminAuthGuard`) decides on the **path** of the request, so a route
+added to the area later is closed without anyone having to remember it. A route is open only when
+it is marked `@adminPublic()`: the login, and the logout (it answers `200` with or without a
+session, so that repeating it is harmless). ADR 0017 records the decisions.
+
+| Route                            | Does                                                                          |
+| -------------------------------- | ----------------------------------------------------------------------------- |
+| `POST /api/v1/admin/auth/login`  | `{ email, password }`: `200` with `{ id, email, displayName }` and the cookie |
+| `POST /api/v1/admin/auth/logout` | Revokes the session, clears the cookie. Always `200`                          |
+| `GET /api/v1/admin/auth/me`      | The signed-in admin, or `401`                                                 |
+
+**Who can log in.** A `staff_user` with `role = ADMIN`, `active = true` and an e-mail. A driver, a
+disabled account, an unknown e-mail and a wrong password all get the **same `401`** (same status,
+same body, no cookie), and the password is verified against a hash of the same cost when the
+account does not exist, so the response time does not tell the cases apart.
+
+**The cookie.** Name `__Host-admin_session` (`admin_session` when `ADMIN_COOKIE_SECURE` is off, for
+local development over plain HTTP), `HttpOnly; SameSite=Strict; Path=/; Max-Age=604800`, `Secure`
+when enabled, no `Domain`. The token is 32 random bytes (CSPRNG) in base64url. Only its SHA-256 is
+stored (`admin_session.token_hash`); the token is never in a body, a log or the database.
+
+**Durations.** A session ends 7 days after the login whatever its use, and after 12 hours without
+a request. `last_seen_at` is written at most once a minute. Every login opens a new session (a
+token is never reused) and deletes, in the same transaction, the sessions that are expired, idle or
+revoked: there is no scheduled task.
+
+**Requests that change something.** On a method other than `GET`, `HEAD` or `OPTIONS` under
+`/api/v1/admin`, an `Origin` header that is present must be one of `ADMIN_ALLOWED_ORIGINS`
+(otherwise `403`). A request with **no** `Origin` that carries the session cookie is refused as
+well. The administration is called through a reverse proxy on its own origin (the Vite proxy in
+development): **CORS is not configured for it and cookies never cross origins.**
+
+**Limits** (in memory, per instance, same mechanism and memory bound as the tracking limits):
+10 attempts per address in 10 minutes (every attempt counts), and 10 **failed** logins per account
+(the normalised e-mail) in 15 minutes. Both answer `429` with `Retry-After: 600` and the same body.
+The logs hold only a fixed line, never an address or an e-mail. **Risk to know:** the limit per
+account is keyed by the e-mail, so anyone who knows an admin's e-mail can lock that account for
+15 minutes by sending wrong passwords (the right password is refused too while it is locked). It is
+the price of stopping a guess spread over many addresses; the address limit cannot do that.
+
+**Passwords.** 12 to 128 characters, no rule of composition. The policy applies when a password is
+set (the script below). The login only requires a string of 1 to 128 characters, so a wrong short
+password gets the same `401` as any other wrong password.
+
+**Accounts: the `admin:upsert` script.** Creates an admin or changes its password, and disables an
+account. It needs the compiled API (`pnpm build`) and `DATABASE_URL` (read from the root `.env`).
+
+```sh
+pnpm --filter @entana/api admin:upsert ana@example.mg --name "Ana"
+pnpm --filter @entana/api admin:upsert ana@example.mg --disable
+# In the image: docker exec -it <container> node dist/cli/admin-upsert.js ana@example.mg
+```
+
+The password is typed twice on the terminal, hidden: it is never an argument, an environment
+variable or in the shell history, and the script refuses to run without a terminal. The output is
+one fixed line (`Account created.`, `Password updated.`, `Account disabled.`): no e-mail, password
+or hash. Changing a password or disabling an account also revokes its sessions. Setting a password
+on a disabled account enables it again. A seeded demo admin has no e-mail: create the account with
+this script to log in.
 
 ## Logs
 

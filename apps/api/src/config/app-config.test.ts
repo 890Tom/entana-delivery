@@ -4,9 +4,16 @@ import type { AppConfig } from "./app-config.js";
 
 const validDatabaseUrl = "postgresql://test:test@localhost:5432/test";
 
-// DATABASE_URL is required: every test that is not about it starts from a valid one.
+const adminOrigin = "https://admin.example.mg";
+
+// DATABASE_URL is required, and so are the admin origins in production (the default environment):
+// every test that is not about them starts from valid ones.
 function parse(env: Record<string, string>): AppConfig {
-  return parseConfig({ DATABASE_URL: validDatabaseUrl, ...env });
+  return parseConfig({
+    DATABASE_URL: validDatabaseUrl,
+    ADMIN_ALLOWED_ORIGINS: adminOrigin,
+    ...env,
+  });
 }
 
 function expectInvalidEnv(env: Record<string, string>): InvalidConfigurationError {
@@ -23,7 +30,11 @@ function expectInvalidEnv(env: Record<string, string>): InvalidConfigurationErro
 }
 
 function expectInvalid(env: Record<string, string>): InvalidConfigurationError {
-  return expectInvalidEnv({ DATABASE_URL: validDatabaseUrl, ...env });
+  return expectInvalidEnv({
+    DATABASE_URL: validDatabaseUrl,
+    ADMIN_ALLOWED_ORIGINS: adminOrigin,
+    ...env,
+  });
 }
 
 describe("parseConfig", () => {
@@ -36,6 +47,8 @@ describe("parseConfig", () => {
       port: 3000,
       logLevel: "info",
       corsOrigins: [],
+      adminAllowedOrigins: [adminOrigin],
+      isAdminCookieSecure: true,
       trustProxy: false,
       bodyLimitKb: 100,
       isSwaggerEnabled: false,
@@ -52,6 +65,8 @@ describe("parseConfig", () => {
       PORT: "8080",
       LOG_LEVEL: "warn",
       CORS_ORIGINS: "https://shop.example.mg, https://admin.example.mg",
+      ADMIN_ALLOWED_ORIGINS: "https://admin.example.mg, https://backoffice.example.mg",
+      ADMIN_COOKIE_SECURE: "false",
       TRUST_PROXY: "1",
       BODY_LIMIT_KB: "20",
       SWAGGER_ENABLED: "true",
@@ -65,6 +80,8 @@ describe("parseConfig", () => {
       port: 8080,
       logLevel: "warn",
       corsOrigins: ["https://shop.example.mg", "https://admin.example.mg"],
+      adminAllowedOrigins: ["https://admin.example.mg", "https://backoffice.example.mg"],
+      isAdminCookieSecure: false,
       trustProxy: 1,
       bodyLimitKb: 20,
       isSwaggerEnabled: true,
@@ -98,7 +115,7 @@ describe("parseConfig", () => {
 
     it("is returned unchanged", () => {
       const url = `postgresql://entana:${password}@localhost:5433/entana?schema=public`;
-      expect(parseConfig({ DATABASE_URL: url }).databaseUrl).toBe(url);
+      expect(parse({ DATABASE_URL: url }).databaseUrl).toBe(url);
     });
 
     it.each([
@@ -122,6 +139,32 @@ describe("parseConfig", () => {
       expect(error.issues[0]).toMatch(/^DATABASE_URL: /);
       expect(error.message).not.toContain(password);
       expect(JSON.stringify(error.issues)).not.toContain(password);
+    });
+  });
+
+  describe("administration", () => {
+    it("requires the allowed origins in production, and names the variable", () => {
+      const error = expectInvalidEnv({ DATABASE_URL: validDatabaseUrl, NODE_ENV: "production" });
+      expect(error.issues).toEqual([expect.stringMatching(/^ADMIN_ALLOWED_ORIGINS: /)]);
+    });
+
+    it.each(["development", "test"])("defaults to the Vite server when NODE_ENV is %s", (env) => {
+      const config = parseConfig({ DATABASE_URL: validDatabaseUrl, NODE_ENV: env });
+      expect(config.adminAllowedOrigins).toEqual(["http://localhost:5173"]);
+    });
+
+    it("refuses an origin with a path or a wildcard", () => {
+      expect(
+        expectInvalid({ ADMIN_ALLOWED_ORIGINS: "https://admin.example.mg/app" }).issues,
+      ).toEqual([expect.stringMatching(/^ADMIN_ALLOWED_ORIGINS: /)]);
+    });
+
+    it("makes the cookie Secure in production and not in development, unless it is set", () => {
+      expect(parse({}).isAdminCookieSecure).toBe(true);
+      expect(parse({ NODE_ENV: "development" }).isAdminCookieSecure).toBe(false);
+      expect(
+        parse({ NODE_ENV: "development", ADMIN_COOKIE_SECURE: "true" }).isAdminCookieSecure,
+      ).toBe(true);
     });
   });
 

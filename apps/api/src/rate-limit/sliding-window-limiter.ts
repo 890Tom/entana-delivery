@@ -58,6 +58,19 @@ export class SlidingWindowLimiter {
     return true;
   }
 
+  /**
+   * True when `key` is limited now, without recording anything: for a limit that counts only some
+   * outcomes (the failed logins), so that the check comes before the work and the count after it.
+   */
+  isKeyLimited(key: string): boolean {
+    const entry = this.entries.get(key);
+    if (entry === undefined) {
+      return false;
+    }
+    this.dropExpiredHits(entry, this.clock.now().getTime());
+    return this.isLimited(entry);
+  }
+
   private isLimited(entry: Entry): boolean {
     return entry.hits.length >= this.options.maxHits;
   }

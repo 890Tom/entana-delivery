@@ -17,17 +17,19 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/api/package.json apps/api/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/database/package.json packages/database/
+COPY packages/password-hash/package.json packages/password-hash/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --store-dir /pnpm/store --filter "@entana/api..."
 
 COPY tsconfig.base.json ./
 COPY packages/contracts packages/contracts
 COPY packages/database packages/database
+COPY packages/password-hash packages/password-hash
 COPY apps/api apps/api
 # The database package compiles the generated Prisma client, so generation comes first. It needs
 # no database connection (prisma.config.ts falls back to a placeholder URL).
 RUN pnpm --filter @entana/database db:generate
-# "..." builds the packages the API depends on (contracts, database) before the API itself.
+# "..." builds the packages the API depends on (contracts, database, password-hash) before the API itself.
 RUN pnpm --filter "@entana/api..." build
 
 # Self-contained folder: compiled API, production dependencies, and the built workspace packages.
@@ -36,6 +38,10 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 # The deploy copies whole workspace packages. The database package keeps only what Node loads
 # (package.json and dist, which holds the generated client): no sources, seed, tests or migrations.
 RUN find /prod/api/node_modules/@entana/database/ -mindepth 1 -maxdepth 1 \
+        ! -name package.json ! -name dist -exec rm -r {} +
+
+# Same for the password hashing package: the login and the admin:upsert script load its dist.
+RUN find /prod/api/node_modules/@entana/password-hash/ -mindepth 1 -maxdepth 1 \
         ! -name package.json ! -name dist -exec rm -r {} +
 
 FROM node:24.21.0-trixie-slim AS runtime

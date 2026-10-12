@@ -95,6 +95,7 @@ describe("buildPinoHttpOptions", () => {
       buildPinoHttpOptions(
         parseConfig({
           DATABASE_URL: fakeDatabaseUrl,
+          ADMIN_ALLOWED_ORIGINS: "https://admin.example.mg",
           LOG_LEVEL: "warn",
         }),
       ).level,
@@ -116,6 +117,7 @@ describe("buildPinoHttpOptions", () => {
       buildPinoHttpOptions(
         parseConfig({
           DATABASE_URL: fakeDatabaseUrl,
+          ADMIN_ALLOWED_ORIGINS: "https://admin.example.mg",
           NODE_ENV: "production",
         }),
       ).transport,
@@ -132,7 +134,12 @@ describe("buildPinoHttpOptions", () => {
 });
 
 describe("what an access log line contains", () => {
-  const options = buildPinoHttpOptions(parseConfig({ DATABASE_URL: fakeDatabaseUrl }));
+  const options = buildPinoHttpOptions(
+    parseConfig({
+      DATABASE_URL: fakeDatabaseUrl,
+      ADMIN_ALLOWED_ORIGINS: "https://admin.example.mg",
+    }),
+  );
 
   function buildRoute(request: Record<string, unknown>, isFinished: boolean): unknown {
     const incoming = Object.assign(new IncomingMessage(new Socket()), request);

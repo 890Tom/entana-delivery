@@ -7,6 +7,7 @@ import {
   useRollbackTransaction,
 } from "../support/database-access/database.js";
 import {
+  insertAdminSession,
   insertCustomer,
   insertOrder,
   insertOrderEvent,
@@ -67,6 +68,23 @@ const uniqueKeyCases: UniqueKeyCase[] = [
     insertTwiceWithTheSameValue: async (db) => {
       await insertStaffUser(db, { username: "same-user" });
       await insertStaffUser(db, { username: "same-user" });
+    },
+  },
+  {
+    name: "the e-mail of a staff member",
+    constraint: "staff_user_email_key",
+    insertTwiceWithTheSameValue: async (db) => {
+      await insertStaffUser(db, { email: "same@example.mg" });
+      await insertStaffUser(db, { email: "same@example.mg" });
+    },
+  },
+  {
+    name: "the token hash of an admin session",
+    constraint: "admin_session_token_hash_key",
+    insertTwiceWithTheSameValue: async (db) => {
+      const hash = "a".repeat(64);
+      await insertAdminSession(db, { token_hash: hash });
+      await insertAdminSession(db, { token_hash: hash });
     },
   },
   {

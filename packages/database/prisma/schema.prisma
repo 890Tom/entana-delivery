@@ -244,8 +244,12 @@ model AxisPlace {
 model StaffUser {
   id               String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   name             String
-  // Used to log in.
+  // Kept from the first model of the table. Accounts created by the admin:upsert script copy
+  // their e-mail here, so that the column stays unique and filled.
   username         String    @unique
+  // Used to log in to the administration. Null for a driver. Always normalised (trimmed, lower
+  // case): the CHECK constraint ck_staff_user_email_form refuses anything else.
+  email            String?   @unique
   phone            String?
   role             StaffRole
   passwordHash     String    @map("password_hash")
@@ -253,11 +257,35 @@ model StaffUser {
   // Set after 5 failed logins (15 minutes).
   lockedUntil      DateTime? @map("locked_until") @db.Timestamptz(3)
   active           Boolean
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  deliveries CustomerOrder[]
-  auditLogs  AuditLog[]
+  deliveries    CustomerOrder[]
+  auditLogs     AuditLog[]
+  adminSessions AdminSession[]
 
   @@map("staff_user")
+}
+
+// A login of the administration. Unusable rows are deleted when someone logs in (see
+// docs/data-model.md): a session is not business data.
+model AdminSession {
+  id          String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  // SHA-256 of the session token. The token itself is never stored.
+  tokenHash   String    @unique @map("token_hash")
+  staffUserId String    @map("staff_user_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  // Absolute end of the session (7 days after creation).
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(3)
+  // Written at most once a minute. A session unused for 12 hours is over.
+  lastSeenAt  DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  revokedAt   DateTime? @map("revoked_at") @db.Timestamptz(3)
+
+  staffUser StaffUser @relation(fields: [staffUserId], references: [id], onDelete: Restrict)
+
+  @@index([staffUserId])
+  @@index([expiresAt])
+  @@map("admin_session")
 }
 
 // Only actions outside orders. Everything about an order goes to order_event.

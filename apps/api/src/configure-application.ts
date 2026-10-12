@@ -3,6 +3,10 @@ import type { NestExpressApplication } from "@nestjs/platform-express";
 import helmet from "helmet";
 import { Logger } from "nestjs-pino";
 import type { AppConfig } from "./config/app-config.js";
+import { AdminLoginAddressRateLimiter } from "./admin-auth/rate-limit/admin-login-address-rate-limiter.js";
+import { ADMIN_LOGIN_PATH, ADMIN_PATH } from "./admin-auth/http/admin-http-limits.js";
+import { createAdminOriginMiddleware } from "./admin-auth/http/admin-origin.middleware.js";
+import { sessionCookieSettings } from "./admin-auth/http/session-cookie.js";
 import { rejectBody } from "./errors/request-body/body-rejected-error.js";
 import { AddressRateLimiter } from "./orders/rate-limit/address-rate-limiter.js";
 import { ORDER_CREATION_PATH } from "./orders/rate-limit/order-http-limits.js";
@@ -61,6 +65,16 @@ export function configureApplication(app: NestExpressApplication, config: AppCon
   app.use(TRACKING_LOOKUP_PATH, app.get(TrackingLookupAddressRateLimiter).middleware);
   app.use(TRACKING_PATH, exceptLookup(app.get(TrackingAddressRateLimiter).middleware));
   app.use(TRACKING_PATH, exceptLookup(ignoreRequestBody));
+  // The administration: the login has its own limit, then every change must come from an allowed
+  // origin. Both answer before the body is read.
+  app.use(ADMIN_LOGIN_PATH, app.get(AdminLoginAddressRateLimiter).middleware);
+  app.use(
+    ADMIN_PATH,
+    createAdminOriginMiddleware({
+      allowedOrigins: config.adminAllowedOrigins,
+      cookie: sessionCookieSettings(config.isAdminCookieSecure),
+    }),
+  );
   // Replaces Nest's default parser (NEST_APPLICATION_OPTIONS) to set the size limit.
   app.useBodyParser("json", { limit: `${String(config.bodyLimitKb)}kb` });
   app.use(rejectBody);
@@ -80,6 +94,6 @@ export function configureApplication(app: NestExpressApplication, config: AppCon
   app.enableShutdownHooks();
 
   if (config.isSwaggerEnabled) {
-    setupSwagger(app);
+    setupSwagger(app, config);
   }
 }

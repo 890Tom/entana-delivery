@@ -1,4 +1,5 @@
-import type { Client } from "pg";
+import { adminConstraintCases } from "./admin-check-constraint-cases.js";
+import type { ConstraintCase } from "./constraint-case.js";
 import {
   insertCustomer,
   insertOrder,
@@ -10,19 +11,6 @@ import {
   insertShopSetting,
   insertStaffUser,
 } from "../support/database-access/rows.js";
-
-interface Scenario {
-  name: string;
-  run: (db: Client) => Promise<unknown>;
-}
-
-// Each case changes one thing from a valid row, so the constraint under test is the only
-// one that can reject it.
-export interface ConstraintCase {
-  constraint: string;
-  accepted: Scenario[];
-  rejected: Scenario[];
-}
 
 const A_DAY = "2026-10-10";
 
@@ -286,4 +274,5 @@ export const constraintCases: ConstraintCase[] = [
       },
     ],
   },
+  ...adminConstraintCases,
 ];
