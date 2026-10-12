@@ -20,11 +20,11 @@ const t = texts.orders.status;
 // cancelled or failed order has no icon of its own in the sources (to confirm).
 const LOOKS: Readonly<Record<OrderStatus, Look>> = {
   NEW: { label: texts.orders.tabs.toProcess, className: styles.light, icon: null },
-  CONFIRMED: { label: t.confirmed, className: styles.outlined, icon: "calendar" },
+  CONFIRMED: { label: t.confirmed, className: styles.confirmed, icon: "calendar" },
   OUT_FOR_DELIVERY: { label: t.outForDelivery, className: styles.dark, icon: "truck" },
-  DELIVERED: { label: t.delivered, className: styles.light, icon: "check" },
+  DELIVERED: { label: t.delivered, className: styles.success, icon: "check" },
   REJECTED: { label: t.rejected, className: styles.light, icon: null },
-  CANCELLED: { label: t.cancelled, className: styles.light, icon: null },
+  CANCELLED: { label: t.cancelled, className: styles.danger, icon: null },
   FAILED: { label: t.failed, className: styles.light, icon: null },
 };
 

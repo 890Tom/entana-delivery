@@ -1,0 +1,23 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: minmax(var(--size-thumbnail), auto) minmax(0, 1fr) auto;
+  gap: var(--space-4);
+}
+
+.time,
+.actor {
+  color: var(--color-text-muted);
+}
+
+.actor {
+  text-align: end;
+}

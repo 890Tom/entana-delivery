@@ -1,0 +1,7 @@
+.decision {
+  gap: var(--space-4);
+}
+
+.line {
+  margin: 0;
+}

@@ -1,0 +1,45 @@
+.veil {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-header);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  /* The dark veil: the ink of the shop at half opacity (to confirm). */
+  background: color-mix(in srgb, var(--color-surface-inverse) 50%, transparent);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--size-readable-max);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-float);
+}
+
+.card:focus-visible {
+  outline: none;
+}
+
+.title {
+  margin: 0;
+  font: var(--font-title);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}

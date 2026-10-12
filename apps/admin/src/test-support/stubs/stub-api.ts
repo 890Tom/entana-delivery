@@ -17,8 +17,14 @@ export const transitionRoute = (
 ): `POST /api/v1/admin/orders/${string}/transitions` =>
   `POST /api/v1/admin/orders/${orderId}/transitions`;
 
+/** The detail of one order. */
+export const detailRoute = (orderId: string): `GET /api/v1/admin/orders/${string}` =>
+  `GET /api/v1/admin/orders/${orderId}`;
+
 export type Route =
-  (typeof ROUTES)[keyof typeof ROUTES] | `POST /api/v1/admin/orders/${string}/transitions`;
+  | (typeof ROUTES)[keyof typeof ROUTES]
+  | `POST /api/v1/admin/orders/${string}/transitions`
+  | `GET /api/v1/admin/orders/${string}`;
 /** The second argument is the address of the call, query string included. */
 export type Handler = (
   init: RequestInit | undefined,

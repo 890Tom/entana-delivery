@@ -7,7 +7,10 @@ export const HOME_PATH = "/";
 /** The orders list, the first screen of the administration. */
 export const ORDERS_PATH = "/commandes";
 
-/** The sheet of one order (not built yet: the address leads to the not found page). */
+/** The pattern of the sheet of one order. */
+export const ORDER_PATH_PATTERN = `${ORDERS_PATH}/:id`;
+
+/** The address of the sheet of one order. */
 export function orderPath(orderId: string): string {
   return `${ORDERS_PATH}/${encodeURIComponent(orderId)}`;
 }

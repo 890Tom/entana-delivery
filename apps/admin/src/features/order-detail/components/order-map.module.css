@@ -1,0 +1,31 @@
+.frame {
+  position: relative;
+  height: var(--size-map-height);
+  overflow: hidden;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-sm);
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.skeleton {
+  position: absolute;
+  inset: 0;
+  background: var(--color-skeleton);
+  opacity: var(--opacity-skeleton-pulse);
+}
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: var(--space-3);
+}
+
+.fallback > * {
+  flex: 1;
+}

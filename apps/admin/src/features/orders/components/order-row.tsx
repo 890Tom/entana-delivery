@@ -74,15 +74,17 @@ export function OrderRow(props: OrderRowProps): ReactElement {
         <Link href={orderPath(order.id)} className={styles.code}>
           #{order.publicCode}
         </Link>
-        <span className={styles.muted}>{formatTime(order.createdAt)}</span>
+        <span className={[styles.line, styles.muted].join(" ")}>{formatTime(order.createdAt)}</span>
       </td>
       <td>
-        <span>{order.customerName}</span>
-        <span className={styles.muted}>{phone}</span>
+        <span className={styles.line}>{order.customerName}</span>
+        <span className={[styles.line, styles.muted].join(" ")}>{phone}</span>
       </td>
       <td className={styles.numeric}>
-        <span>{formatAmount(order.totalAr)}</span>
-        <span className={styles.muted}>{texts.orders.articles(order.itemCount)}</span>
+        <span className={styles.line}>{formatAmount(order.totalAr)}</span>
+        <span className={[styles.line, styles.muted].join(" ")}>
+          {texts.orders.articles(order.itemCount)}
+        </span>
       </td>
       <td>
         <StatusPill order={order} />

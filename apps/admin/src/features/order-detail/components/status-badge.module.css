@@ -1,0 +1,48 @@
+.pill {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-height: var(--size-badge-height);
+  padding: 0 var(--space-3);
+  font: var(--font-body);
+  white-space: nowrap;
+  border: var(--border-width-strong) solid transparent;
+  border-radius: var(--radius-full);
+}
+
+/* The gold pill of an order to handle, read on the capture (to confirm). */
+.toProcess {
+  color: var(--color-text);
+  background: var(--color-highlight);
+  border-color: var(--color-highlight);
+}
+
+.dark {
+  color: var(--color-text-inverse);
+  background: var(--color-surface-inverse);
+}
+
+.light {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+/* The same colours as the status pill of the orders table (to confirm). */
+.confirmed {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-strong);
+}
+
+.success {
+  color: var(--color-success-strong);
+  background: var(--color-success-soft);
+  border-color: var(--color-success-strong);
+}
+
+.danger {
+  color: var(--color-error);
+  background: var(--color-error-soft);
+  border-color: var(--color-error);
+}

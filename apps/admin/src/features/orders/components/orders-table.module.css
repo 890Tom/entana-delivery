@@ -37,7 +37,8 @@
   border-top: var(--border-width) solid var(--color-border);
 }
 
-.table td > span {
+/* A line of text in a cell. Not every span of a cell: the status pill is one, and it is flex. */
+.line {
   display: block;
 }
 
