@@ -37,6 +37,8 @@ export interface AdminOrdersHarness {
   readonly adminId: string;
   readonly get: (path: string, cookie?: string | null) => request.Test;
   readonly post: (path: string, body: unknown, cookie?: string | null) => request.Test;
+  readonly put: (path: string, body: unknown, cookie?: string | null) => request.Test;
+  readonly patch: (path: string, body: unknown, cookie?: string | null) => request.Test;
   /** A phone number per call keeps a customer under the limit of recent orders. */
   readonly placeOrder: (
     quantity?: number,
@@ -68,6 +70,7 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
   };
   const clean = async (): Promise<void> => {
     await resetOrderData(client);
+    await client.auditLog.deleteMany();
     await client.adminSession.deleteMany();
     await client.staffUser.deleteMany({ where: { email: { not: null } } });
   };
@@ -117,6 +120,21 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
     return value === null ? test : test.set("Cookie", value);
   };
 
+  const sendWithBody = (
+    method: "post" | "put" | "patch",
+    path: string,
+    body: unknown,
+    sent: string | null | undefined,
+  ): request.Test =>
+    withCookie(
+      request(getApp().getHttpServer())
+        [method](path)
+        .set("X-Forwarded-For", nextAddress())
+        .set("Origin", ADMIN_TEST_ORIGIN)
+        .send(body as object),
+      sent,
+    );
+
   return {
     client,
     clock,
@@ -128,15 +146,9 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
         request(getApp().getHttpServer()).get(path).set("X-Forwarded-For", nextAddress()),
         sent,
       ),
-    post: (path, body, sent) =>
-      withCookie(
-        request(getApp().getHttpServer())
-          .post(path)
-          .set("X-Forwarded-For", nextAddress())
-          .set("Origin", ADMIN_TEST_ORIGIN)
-          .send(body as object),
-        sent,
-      ),
+    post: (path, body, sent) => sendWithBody("post", path, body, sent),
+    put: (path, body, sent) => sendWithBody("put", path, body, sent),
+    patch: (path, body, sent) => sendWithBody("patch", path, body, sent),
     placeOrder: async (quantity = 2, phone = FAKE_PHONE_INPUT, contactName = FAKE_CONTACT_NAME) => {
       const productId = await insertProduct(client, { priceAr: 5000 });
       const token = generateTrackingToken();

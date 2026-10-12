@@ -331,8 +331,12 @@ describe("GET /api/v1/products, without a database", () => {
       const contractKeys = Object.keys(publicProductSchema.shape).sort();
       expect(Object.keys(schema.properties).sort()).toEqual(contractKeys);
       expect([...schema.required].sort()).toEqual(contractKeys);
-      // The whole generated document, every route and every example: the word appears nowhere.
-      expect(JSON.stringify(document)).not.toContain("sku");
+      // Every route and every example of the public API: the word appears nowhere. The routes of the
+      // administration show the sku on purpose.
+      const publicPaths = Object.entries(openApiSchema.parse(document).paths).filter(
+        ([path]) => !path.startsWith("/api/v1/admin/"),
+      );
+      expect(JSON.stringify(publicPaths)).not.toContain("sku");
     });
   });
 });

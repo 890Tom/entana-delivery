@@ -165,6 +165,8 @@ A session is usable while it is not revoked, before `expires_at`, and seen less 
 
 Only actions outside orders (catalogue, axes and places, resellers, settings, accounts, logins). Everything about an order goes to `order_event`.
 
+Written so far: `product.availability_changed`, `product.retired` and `product.restored` (`entity = "product"`, `diff` holds the before and after of the flag: `available` or `active`).
+
 ### `reseller`
 | Column | Type | Rules |
 |---|---|---|
