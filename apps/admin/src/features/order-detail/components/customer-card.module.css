@@ -1,0 +1,33 @@
+.label {
+  font: var(--font-body);
+  color: var(--color-text-muted);
+}
+
+.name,
+.phone {
+  margin: 0;
+}
+
+.name {
+  font: var(--font-title);
+}
+
+.contact {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.call {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: var(--size-touch-min);
+  padding: 0 var(--space-4);
+  font: var(--font-body-strong);
+  color: var(--color-text);
+  text-decoration: none;
+  border: var(--border-width-strong) solid var(--color-border-strong);
+  border-radius: var(--radius);
+}

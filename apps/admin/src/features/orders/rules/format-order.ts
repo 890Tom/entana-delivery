@@ -4,7 +4,7 @@ import { dayInTimeZone, formatNationalNumber } from "@entana/contracts";
  * The time zone of the shop. The public configuration does not publish it (it stays on the
  * server), so the administration reads times in the zone of the only deployment there is today.
  */
-const INSTANCE_TIME_ZONE = "Indian/Antananarivo";
+export const INSTANCE_TIME_ZONE = "Indian/Antananarivo";
 
 const NO_BREAK_SPACE = " ";
 const THOUSANDS_GROUP = /\B(?=(\d{3})+(?!\d))/g;

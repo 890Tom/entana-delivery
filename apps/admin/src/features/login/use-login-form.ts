@@ -24,6 +24,7 @@ const NOTICE_BY_KIND = {
   rate_limited: "rate_limited",
   invalid: "failure",
   // The login has no state that can change in between: any other answer is a failure.
+  not_found: "failure",
   conflict: "failure",
   failure: "failure",
 } as const;

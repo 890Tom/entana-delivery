@@ -1,0 +1,9 @@
+.label {
+  font: var(--font-body);
+  color: var(--color-text-muted);
+}
+
+.landmark {
+  margin: 0;
+  font: var(--font-body-strong);
+}

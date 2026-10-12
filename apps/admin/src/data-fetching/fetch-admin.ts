@@ -12,6 +12,8 @@ export type AdminResult<T> =
   | { readonly kind: "unauthorized" }
   | { readonly kind: "rate_limited" }
   | { readonly kind: "invalid" }
+  /** The thing asked for does not exist (an order id the server does not know). */
+  | { readonly kind: "not_found" }
   /** The thing changed in between (a status that moved): the caller reloads and says so. */
   | { readonly kind: "conflict" }
   | { readonly kind: "failure" };
@@ -32,6 +34,7 @@ const UNAUTHORIZED = 401;
 const TOO_MANY_REQUESTS = 429;
 const BAD_REQUEST = 400;
 const UNPROCESSABLE = 422;
+const NOT_FOUND = 404;
 const CONFLICT = 409;
 
 function toFailure(status: number): AdminFailure {
@@ -43,6 +46,8 @@ function toFailure(status: number): AdminFailure {
     case BAD_REQUEST:
     case UNPROCESSABLE:
       return { kind: "invalid" };
+    case NOT_FOUND:
+      return { kind: "not_found" };
     case CONFLICT:
       return { kind: "conflict" };
     default:

@@ -1,0 +1,21 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  margin: 0;
+  font: var(--font-body-strong);
+}
+
+.muted {
+  margin: 0;
+  color: var(--color-text-muted);
+}

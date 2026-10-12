@@ -1,0 +1,82 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: var(--size-touch-min);
+  padding: var(--space-3);
+  cursor: pointer;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border-input);
+  border-radius: var(--radius);
+}
+
+.checked {
+  background: var(--color-highlight-soft);
+  border: var(--border-width-strong) solid var(--color-highlight-strong);
+  /* The border grows by one pixel: the padding gives it back, so that nothing moves. */
+  padding: calc(var(--space-3) - var(--border-width-strong) + var(--border-width));
+}
+
+.option:has(:focus-visible) {
+  outline: var(--focus-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.label {
+  font: var(--font-body-strong);
+}
+
+.subLabel {
+  color: var(--color-text-muted);
+}
+
+.date {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dateLabel {
+  font: var(--font-body-strong);
+}
+
+.dateControl {
+  min-height: var(--size-field-height);
+  padding: 0 var(--space-4);
+  font: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border-input);
+  border-radius: var(--radius);
+}
+
+.dateControl[aria-invalid="true"] {
+  border: var(--border-width-strong) solid var(--color-error);
+}
+
+.error {
+  margin: 0;
+  color: var(--color-error);
+}

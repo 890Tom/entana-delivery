@@ -1,0 +1,67 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.message {
+  margin: 0;
+}
+
+/* Under 900 px (provisional: the sheet has no mobile design yet): one column, in reading order. */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.decision {
+  order: 0;
+}
+
+.lines {
+  order: 1;
+}
+
+.customer {
+  order: 2;
+}
+
+.address {
+  order: 3;
+}
+
+.history {
+  order: 4;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) var(--size-sidebar-width);
+    grid-template-areas:
+      "lines lines decision"
+      "customer address decision"
+      "history history decision";
+    align-items: start;
+  }
+
+  .decision {
+    grid-area: decision;
+  }
+
+  .lines {
+    grid-area: lines;
+  }
+
+  .customer {
+    grid-area: customer;
+  }
+
+  .address {
+    grid-area: address;
+  }
+
+  .history {
+    grid-area: history;
+  }
+}
