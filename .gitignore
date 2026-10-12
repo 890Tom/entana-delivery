@@ -9,6 +9,7 @@ coverage/
 
 # Private theme of a deployment (real design values), served next to the app
 apps/client/public/theme.local.css
+apps/admin/public/theme.local.css
 
 # Environment and secrets (keep the example only)
 .env

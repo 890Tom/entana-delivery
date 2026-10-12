@@ -1,0 +1,73 @@
+.page {
+  display: grid;
+  min-height: 100dvh;
+  padding: var(--space-5) var(--space-4);
+  place-items: center;
+  background: var(--color-surface-muted);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  align-items: center;
+  width: 100%;
+  max-width: var(--size-auth-card-max);
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+.logo,
+.title,
+.field,
+.button {
+  display: block;
+  background: var(--color-skeleton);
+  border-radius: var(--radius-sm);
+  animation: pulse var(--duration-pulse) var(--ease) infinite alternate;
+}
+
+.logo {
+  width: calc(var(--size-auth-logo) * 1.6);
+  height: var(--size-auth-logo);
+}
+
+.title {
+  width: 50%;
+  height: calc(var(--font-size-title) * var(--line-height-title));
+}
+
+.field,
+.button {
+  width: 100%;
+}
+
+.field {
+  height: var(--size-field-height);
+}
+
+.button {
+  height: var(--size-button-height);
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: var(--opacity-skeleton-pulse);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo,
+  .title,
+  .field,
+  .button {
+    animation: none;
+  }
+}

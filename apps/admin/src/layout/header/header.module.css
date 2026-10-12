@@ -1,0 +1,60 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--layer-header);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-header);
+}
+
+.inner {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  /* A minimum: the header grows with what it holds (a long name, a larger text size). */
+  min-height: var(--size-header-height);
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding-inline: var(--space-4);
+  margin-inline: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: var(--size-touch-min);
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+/* A quiet text action: no border, no fill, muted until it is pointed at. */
+.logout {
+  flex: none;
+  min-height: var(--size-touch-min);
+  padding: 0 var(--space-2);
+  font: var(--font-body);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+}
+
+@media (hover: hover) {
+  .logout:hover:not([aria-disabled="true"]) {
+    color: var(--color-text);
+    text-decoration: underline;
+  }
+}
+
+.logout[aria-disabled="true"] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+@media (min-width: 1024px) {
+  .inner {
+    padding-inline: var(--space-6);
+  }
+}

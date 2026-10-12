@@ -1,0 +1,41 @@
+.logo {
+  display: block;
+  width: auto;
+  max-width: 100%;
+}
+
+.auth {
+  height: var(--size-auth-logo);
+}
+
+.header {
+  height: var(--size-logo-height);
+}
+
+.name {
+  font: var(--font-title);
+}
+
+.skeleton {
+  display: block;
+  aspect-ratio: 8 / 5;
+  background: var(--color-skeleton);
+  border-radius: var(--radius-sm);
+  animation: pulse var(--duration-pulse) var(--ease) infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: var(--opacity-skeleton-pulse);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

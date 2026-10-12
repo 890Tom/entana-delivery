@@ -1,0 +1,50 @@
+.notice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--size-touch-min);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+}
+
+/* The error is red, and always has its icon and its message: colour never carries it alone. */
+.error {
+  color: var(--color-text-on-error);
+  background: var(--color-error);
+}
+
+.info {
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+}
+
+.icon {
+  flex: none;
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+}
+
+.text {
+  flex: 1;
+  margin: 0;
+}
+
+.action {
+  display: flex;
+  flex: none;
+  align-items: center;
+  min-height: var(--size-touch-min);
+  padding: 0 var(--space-2);
+  font: var(--font-body-strong);
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+/* Focused by a script after a refused action: the global focus ring is shown on it. */
+.notice:focus {
+  outline: var(--focus-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-offset);
+}

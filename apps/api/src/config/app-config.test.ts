@@ -148,10 +148,13 @@ describe("parseConfig", () => {
       expect(error.issues).toEqual([expect.stringMatching(/^ADMIN_ALLOWED_ORIGINS: /)]);
     });
 
-    it.each(["development", "test"])("defaults to the Vite server when NODE_ENV is %s", (env) => {
-      const config = parseConfig({ DATABASE_URL: validDatabaseUrl, NODE_ENV: env });
-      expect(config.adminAllowedOrigins).toEqual(["http://localhost:5173"]);
-    });
+    it.each(["development", "test"])(
+      "defaults to the Vite server of the administration when NODE_ENV is %s",
+      (env) => {
+        const config = parseConfig({ DATABASE_URL: validDatabaseUrl, NODE_ENV: env });
+        expect(config.adminAllowedOrigins).toEqual(["http://localhost:5174"]);
+      },
+    );
 
     it("refuses an origin with a path or a wildcard", () => {
       expect(
