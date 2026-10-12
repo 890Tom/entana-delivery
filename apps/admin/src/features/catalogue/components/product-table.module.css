@@ -1,0 +1,36 @@
+.frame {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.head {
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+.head th {
+  padding: var(--space-3);
+  font: var(--font-body-strong);
+  text-align: start;
+}
+
+.head .numeric {
+  text-align: end;
+}
+
+/* The header of a block layout is read by assistive technology only. */
+@media (width < 900px) {
+  .head {
+    position: absolute;
+    width: 1px;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}

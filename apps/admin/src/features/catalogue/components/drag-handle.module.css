@@ -1,0 +1,21 @@
+.handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-touch-min);
+  min-height: var(--size-touch-min);
+  padding: 0;
+  color: var(--color-text-muted);
+  cursor: grab;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  /* The page must not scroll when a finger drags the handle. */
+  touch-action: none;
+}
+
+/* Disabled: visible at 40 %, and the pointer says so. */
+.handle[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.4;
+}

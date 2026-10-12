@@ -9,7 +9,16 @@ export const ROUTES = {
   logout: "POST /api/v1/admin/auth/logout",
   orders: "GET /api/v1/admin/orders",
   summary: "GET /api/v1/admin/orders/summary",
+  products: "GET /api/v1/admin/products",
+  productOrder: "PUT /api/v1/admin/products/order",
 } as const;
+
+/** One change of one product of the catalogue: a PATCH of availability, a retire or a restore. */
+export const productRoute = (
+  productId: string,
+  action: "availability" | "retire" | "restore",
+): `${"PATCH" | "POST"} /api/v1/admin/products/${string}/${typeof action}` =>
+  `${action === "availability" ? "PATCH" : "POST"} /api/v1/admin/products/${productId}/${action}`;
 
 /** The transition of one order: the route of a call is its method and its path, no query. */
 export const transitionRoute = (
@@ -24,7 +33,8 @@ export const detailRoute = (orderId: string): `GET /api/v1/admin/orders/${string
 export type Route =
   | (typeof ROUTES)[keyof typeof ROUTES]
   | `POST /api/v1/admin/orders/${string}/transitions`
-  | `GET /api/v1/admin/orders/${string}`;
+  | `GET /api/v1/admin/orders/${string}`
+  | ReturnType<typeof productRoute>;
 /** The second argument is the address of the call, query string included. */
 export type Handler = (
   init: RequestInit | undefined,

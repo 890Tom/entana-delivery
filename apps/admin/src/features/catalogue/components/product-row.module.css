@@ -1,0 +1,108 @@
+.row {
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.row > td {
+  padding: var(--space-2) var(--space-3);
+  vertical-align: middle;
+}
+
+/* Unavailable or retired: a tinted row and a muted name. */
+.dimmed {
+  background: var(--color-surface-muted);
+}
+
+.dimmed .name {
+  color: var(--color-text-muted);
+}
+
+.dimmed .thumb {
+  opacity: var(--opacity-sold-out);
+}
+
+.dragging {
+  position: relative;
+  z-index: var(--layer-bar);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  opacity: 0.9;
+}
+
+.thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-row-thumbnail);
+  height: var(--size-row-thumbnail);
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.name,
+.sku {
+  display: block;
+}
+
+.name {
+  font: var(--font-body-strong);
+}
+
+.sku {
+  color: var(--color-text-muted);
+}
+
+.priceCell {
+  text-align: end;
+  white-space: nowrap;
+}
+
+.availability {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.menuCell {
+  text-align: end;
+}
+
+/* Below 900 px (provisional): each row is a block, the switch on a line of its own. */
+@media (width < 900px) {
+  .row {
+    display: grid;
+    grid-template-areas:
+      "handle thumb product menu"
+      "handle thumb price menu"
+      ". availability availability availability";
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+  }
+
+  .handleCell {
+    grid-area: handle;
+  }
+
+  .thumbCell {
+    grid-area: thumb;
+  }
+
+  .productCell {
+    grid-area: product;
+  }
+
+  .priceCell {
+    grid-area: price;
+    text-align: start;
+  }
+
+  .availabilityCell {
+    grid-area: availability;
+  }
+
+  .menuCell {
+    grid-area: menu;
+    align-self: start;
+  }
+}

@@ -139,6 +139,9 @@
   /* Proposed, to confirm (read on the orders capture): a table checkbox, a count pill. */
   --size-checkbox: 20px;
   --size-count-pill: 24px;
+  /* The knob of a switch, and the thumbnail of a product row: to confirm with the owner. */
+  --size-switch-knob: 24px;
+  --size-row-thumbnail: 48px;
   /* Proposed, to confirm (read on the owner's login capture): the sign-in card and its logo. */
   --size-auth-card-max: 400px;
   --size-auth-logo: 56px;

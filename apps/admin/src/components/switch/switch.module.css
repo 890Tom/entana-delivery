@@ -1,0 +1,47 @@
+.switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-touch-min);
+  min-height: var(--size-touch-min);
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-full);
+}
+
+/* The track is 2.5 times the knob: the state is also told by the knob's side, not by colour. */
+.track {
+  display: flex;
+  align-items: center;
+  width: calc(var(--size-switch-knob) * 2 + var(--space-2));
+  height: calc(var(--size-switch-knob) + var(--space-2));
+  padding: var(--space-1);
+  background: var(--color-surface);
+  border: var(--border-width-strong) solid var(--color-border-input);
+  border-radius: var(--radius-full);
+}
+
+.thumb {
+  width: var(--size-switch-knob);
+  height: var(--size-switch-knob);
+  background: var(--color-text-muted);
+  border-radius: var(--radius-full);
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+.switch[aria-checked="true"] .track {
+  background: var(--color-highlight);
+  border-color: var(--color-highlight-strong);
+}
+
+.switch[aria-checked="true"] .thumb {
+  background: var(--color-surface-inverse);
+  transform: translateX(var(--size-switch-knob));
+}
+
+.switch[aria-disabled="true"] {
+  cursor: progress;
+  opacity: var(--opacity-sold-out);
+}
