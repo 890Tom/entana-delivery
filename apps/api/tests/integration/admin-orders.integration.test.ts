@@ -137,6 +137,7 @@ describe("the administration of orders on a real PostgreSQL", () => {
       ["NEW", { to: "REJECTED", reason: "Out of stock." }, "REJECTED", "Out of stock."],
       ["CONFIRMED", { to: "OUT_FOR_DELIVERY" }, "OUT_FOR_DELIVERY", null],
       ["NEW", { to: "REJECTED" }, "REJECTED", DEFAULT_REJECTION],
+      ["CONFIRMED", { to: "REJECTED" }, "REJECTED", DEFAULT_REJECTION],
       ["CONFIRMED", { to: "CANCELLED" }, "CANCELLED", SHOP_CANCELLATION],
       ["OUT_FOR_DELIVERY", { to: "DELIVERED" }, "DELIVERED", null],
       ["OUT_FOR_DELIVERY", { to: "FAILED" }, "FAILED", DELIVERY_FAILED],

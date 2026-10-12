@@ -135,7 +135,7 @@ export const documentChangeStatus = (): MethodDecorator =>
       summary: "Move an order to its next status",
       description:
         "Allowed: NEW to CONFIRMED (with `deliveryDate`, today to 60 days ahead) or REJECTED, " +
-        "CONFIRMED to OUT_FOR_DELIVERY or CANCELLED, OUT_FOR_DELIVERY to DELIVERED or FAILED. " +
+        "CONFIRMED to OUT_FOR_DELIVERY, REJECTED or CANCELLED, OUT_FOR_DELIVERY to DELIVERED or FAILED. " +
         "`reason` is optional for REJECTED and CANCELLED. The same 409 answers a forbidden move, an order " +
         "already in that status and an order changed in between (a cancellation included).",
       operationId: "changeAdminOrderStatus",

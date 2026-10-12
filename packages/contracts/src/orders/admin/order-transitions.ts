@@ -1,10 +1,11 @@
 import type { OrderStatus } from "../tracking/tracking-response.js";
 
 // The only moves the shop can make, one step at a time. Statuses that are not keys of a move are
-// final for the shop. A confirmed order is cancelled, never refused: a refusal answers a request.
+// final for the shop. A confirmed order can still be refused by the shop (owner's decision,
+// 6c-3: the admin sheet offers "Refuser…" on it), or cancelled.
 const ALLOWED_TRANSITIONS: Readonly<Record<OrderStatus, readonly OrderStatus[]>> = {
   NEW: ["CONFIRMED", "REJECTED"],
-  CONFIRMED: ["OUT_FOR_DELIVERY", "CANCELLED"],
+  CONFIRMED: ["OUT_FOR_DELIVERY", "REJECTED", "CANCELLED"],
   OUT_FOR_DELIVERY: ["DELIVERED", "FAILED"],
   DELIVERED: [],
   REJECTED: [],
