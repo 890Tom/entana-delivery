@@ -70,6 +70,13 @@ export function Button({
 interface ButtonLinkProps extends ButtonLook {
   /** A fixed address of the application, or a `tel:` link: never taken from an input. */
   readonly href: string;
+  /** Names the link for assistive technology when the visible label is not enough. */
+  readonly label?: string;
+  /**
+   * An address outside the application: opened in a new tab, which gets no access to this page
+   * (no opener, no referrer).
+   */
+  readonly isExternal?: boolean;
 }
 
 /** A link with the look of a button: a telephone link, or a link to another screen. */
@@ -78,6 +85,8 @@ export function ButtonLink({
   icon,
   variant = "secondary",
   href,
+  label,
+  isExternal = false,
 }: ButtonLinkProps): ReactElement {
   const content = (
     <>
@@ -85,12 +94,25 @@ export function ButtonLink({
       {children}
     </>
   );
+  if (isExternal) {
+    return (
+      <a
+        href={href}
+        className={toClassName(variant)}
+        aria-label={label}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {content}
+      </a>
+    );
+  }
   return href.startsWith("tel:") ? (
-    <a href={href} className={toClassName(variant)}>
+    <a href={href} className={toClassName(variant)} aria-label={label}>
       {content}
     </a>
   ) : (
-    <Link href={href} className={toClassName(variant)}>
+    <Link href={href} className={toClassName(variant)} aria-label={label}>
       {content}
     </Link>
   );

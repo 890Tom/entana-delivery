@@ -28,6 +28,13 @@ export const TRACKING_PATH = "/suivi";
 export const FIND_ORDER_PATH = "/retrouver";
 
 /**
+ * Where the customer finds the resellers on a map and in a list. Outside the order: it has no
+ * entry in `STEP_BY_PATH`. What the customer types or the position of the device are never part
+ * of the address.
+ */
+export const RESELLERS_PATH = "/ou-nous-trouver";
+
+/**
  * The step of the order (0 is the first) that each screen belongs to. A screen listed here gets
  * the same step indicator as the others: a new screen of the order is added to this table. The
  * catalogue is not listed: choosing products is not a step of the order, and has no indicator.

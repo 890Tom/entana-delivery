@@ -1,0 +1,29 @@
+.row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: var(--size-touch-min);
+  padding: var(--space-3) var(--space-4);
+  font: var(--font-body);
+  color: var(--color-text);
+  text-decoration: none;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.row:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.label {
+  flex: 1;
+}
+
+/* The web layout has the link in the header: the row is for a phone. The one breakpoint. */
+@media (min-width: 1024px) {
+  .row {
+    display: none;
+  }
+}

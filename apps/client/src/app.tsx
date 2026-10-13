@@ -10,6 +10,7 @@ import { DeliveryDraftProvider } from "./features/delivery/delivery-draft/delive
 import { DeliveryScreen } from "./features/delivery/delivery-screen";
 import { LaunchProvider } from "./features/active-order/launch/launch-provider";
 import { FindOrderScreen } from "./features/find-order/find-order-screen";
+import { ResellersScreen } from "./features/resellers/resellers-screen";
 import { ReviewScreen } from "./features/review/review-screen";
 import { TrackingScreen } from "./features/tracking/tracking-screen";
 import { texts } from "./i18n/texts";
@@ -21,6 +22,7 @@ import {
   CONTACT_PATH,
   DELIVERY_PATH,
   FIND_ORDER_PATH,
+  RESELLERS_PATH,
   REVIEW_PATH,
   TRACKING_PATH,
 } from "./routes";
@@ -45,6 +47,7 @@ export function App(): ReactElement {
                 <Route path={REVIEW_PATH} component={ReviewScreen} />
                 <Route path={TRACKING_PATH} component={TrackingScreen} />
                 <Route path={FIND_ORDER_PATH} component={FindOrderScreen} />
+                <Route path={RESELLERS_PATH} component={ResellersScreen} />
                 <Route component={NotFound} />
               </Switch>
             </AppShell>
