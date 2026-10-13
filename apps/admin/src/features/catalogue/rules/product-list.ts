@@ -29,3 +29,13 @@ export function replaceProduct(
     .map((current) => (current.id === product.id ? product : current))
     .sort(byPosition);
 }
+
+/** The list with the product replaced, or added when the list does not hold it yet. */
+export function upsertProduct(
+  products: readonly AdminProduct[],
+  product: AdminProduct,
+): readonly AdminProduct[] {
+  return products.some((current) => current.id === product.id)
+    ? replaceProduct(products, product)
+    : [...products, product].sort(byPosition);
+}

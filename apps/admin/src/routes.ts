@@ -17,3 +17,14 @@ export function orderPath(orderId: string): string {
 
 /** The catalogue of products, the second section of the administration. */
 export const CATALOGUE_PATH = "/catalogue";
+
+/** The form of a new product. */
+export const CATALOGUE_NEW_PATH = `${CATALOGUE_PATH}/nouveau`;
+
+/** The pattern of the form of one product. */
+export const CATALOGUE_PRODUCT_PATTERN = `${CATALOGUE_PATH}/:id`;
+
+/** The address of the form of one product. */
+export function catalogueProductPath(productId: string): string {
+  return `${CATALOGUE_PATH}/${encodeURIComponent(productId)}`;
+}

@@ -9,9 +9,14 @@ export const INSTANCE_TIME_ZONE = "Indian/Antananarivo";
 const NO_BREAK_SPACE = " ";
 const THOUSANDS_GROUP = /\B(?=(\d{3})+(?!\d))/g;
 
+/** "8 500" from "8500": groups the digits of a number by three with no-break spaces. */
+export function groupThousands(digits: string): string {
+  return digits.replace(THOUSANDS_GROUP, NO_BREAK_SPACE);
+}
+
 /** "8 500 Ar": the space is a no-break one, so that an amount never wraps in the middle. */
 export function formatAmount(amountAr: number): string {
-  return `${String(amountAr).replace(THOUSANDS_GROUP, NO_BREAK_SPACE)}${NO_BREAK_SPACE}Ar`;
+  return `${groupThousands(String(amountAr))}${NO_BREAK_SPACE}Ar`;
 }
 
 /** "10 h 12": the hour and the minutes of an instant, in the time zone of the shop. */

@@ -106,3 +106,11 @@
     align-self: start;
   }
 }
+
+/* The photo fills the square of the thumbnail, cropped from the centre as the server stores it. */
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}

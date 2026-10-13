@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-export interface CatalogueNotice {
-  readonly tone: "info" | "error";
-  readonly text: string;
-}
+import { useCatalogueFlash } from "../notice/catalogue-flash";
+import type { CatalogueNotice } from "../notice/catalogue-notice";
+
+export type { CatalogueNotice } from "../notice/catalogue-notice";
 
 export interface NoticeState {
   readonly notice: CatalogueNotice | null;
@@ -15,10 +15,19 @@ const INFO_DURATION_MS = 6000;
 
 /**
  * The one message of the screen. An information goes away by itself after 6 seconds; an error
- * stays until the next action. Both go away at the next action.
+ * stays until the next action. Both go away at the next action. A message left by the previous
+ * screen is taken on arrival.
  */
 export function useCatalogueNotice(): NoticeState {
   const [notice, setNotice] = useState<CatalogueNotice | null>(null);
+  const flash = useCatalogueFlash();
+  // What the previous screen left (a product created, a photo that failed) is shown on arrival.
+  useEffect(() => {
+    const left = flash.take();
+    if (left !== null) {
+      setNotice(left);
+    }
+  }, [flash]);
   useEffect(() => {
     if (notice?.tone !== "info") {
       return undefined;

@@ -1,0 +1,52 @@
+.action {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-button-height);
+  padding: 0 var(--space-5);
+  font: var(--font-body-strong);
+  text-decoration: none;
+  cursor: pointer;
+  border: var(--border-width-strong) solid transparent;
+  border-radius: var(--radius);
+}
+
+.primary {
+  color: var(--color-text-inverse);
+  background: var(--color-surface-inverse);
+}
+
+.secondary {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+}
+
+.ghost {
+  color: var(--color-text);
+  background: none;
+}
+
+/* The red ghost is not defined by the design system (to confirm): the red of errors, no fill. */
+.dangerGhost {
+  color: var(--color-error);
+  background: none;
+}
+
+.action[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--opacity-sold-out);
+}
+
+@media (hover: hover) {
+  .primary:hover:not([aria-disabled="true"]) {
+    background: var(--color-ink-hover);
+  }
+
+  .secondary:hover:not([aria-disabled="true"]),
+  .ghost:hover:not([aria-disabled="true"]),
+  .dangerGhost:hover:not([aria-disabled="true"]) {
+    background: var(--color-surface-muted);
+  }
+}

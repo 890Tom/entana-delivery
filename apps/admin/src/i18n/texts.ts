@@ -1,3 +1,5 @@
+import { catalogueFormTexts } from "./catalogue-form-texts";
+
 // Fixed French texts. No text ever comes from the server: every message depends on the kind of
 // answer only, so that a response cannot put words in the interface.
 export const texts = {
@@ -233,6 +235,7 @@ export const texts = {
       availability: "Disponible aujourd'hui",
       actions: "Actions",
     },
+    addProduct: "Ajouter un produit",
     help: "Glissez les lignes pour changer l'ordre d'affichage (au clavier : poignée puis flèches haut et bas). Un produit reste indisponible jusqu'à ce que vous le réactiviez.",
     row: {
       handle: (name: string, position: number, total: number): string =>
@@ -251,6 +254,7 @@ export const texts = {
       },
       retired: "Retiré",
       menu: (name: string): string => `Actions pour ${name}`,
+      edit: "Modifier",
       retire: "Retirer",
       restore: "Restaurer",
     },
@@ -285,6 +289,7 @@ export const texts = {
       cancelled: "Déplacement annulé.",
     },
   },
+  catalogueForm: catalogueFormTexts,
   notFound: {
     title: "Page introuvable",
     message: "Cette page n'existe pas.",

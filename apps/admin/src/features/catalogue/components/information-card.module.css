@@ -1,0 +1,28 @@
+.card {
+  gap: var(--space-4);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.summary {
+  margin: 0;
+  font: var(--font-body-strong);
+  color: var(--color-error);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* The retirement sits apart, at the end of the line. */
+.retire {
+  margin-inline-start: auto;
+}
