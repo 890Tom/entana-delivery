@@ -1,0 +1,32 @@
+/* A taller frame than the read-only map of an order: the position is placed on it. */
+.frame {
+  position: relative;
+  height: var(--size-map-height-large);
+  overflow: hidden;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-sm);
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.skeleton {
+  position: absolute;
+  inset: 0;
+  background: var(--color-skeleton);
+  opacity: var(--opacity-skeleton-pulse);
+}
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  padding: var(--space-3);
+}
+
+.fallback > * {
+  flex: 1;
+}

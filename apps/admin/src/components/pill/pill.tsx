@@ -3,8 +3,11 @@ import type { ReactElement, ReactNode } from "react";
 import styles from "./pill.module.css";
 
 interface PillProps {
-  /** "highlight": a state to notice (gold). "neutral": a state that is over (grey). */
-  readonly tone: "highlight" | "neutral";
+  /**
+   * "highlight": a state to notice (gold). "neutral": a state that is over (grey). "error": a
+   * state that blocks (red outline, no fill: as on the owner's resellers capture, to confirm).
+   */
+  readonly tone: "highlight" | "neutral" | "error";
   readonly icon?: ReactNode;
   readonly children: ReactNode;
 }

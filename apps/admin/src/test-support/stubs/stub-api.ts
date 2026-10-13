@@ -12,7 +12,16 @@ export const ROUTES = {
   products: "GET /api/v1/admin/products",
   productOrder: "PUT /api/v1/admin/products/order",
   createProduct: "POST /api/v1/admin/products",
+  resellers: "GET /api/v1/admin/resellers",
+  createReseller: "POST /api/v1/admin/resellers",
 } as const;
+
+/** The change, the verification and the deletion of one reseller. */
+export const resellerRoute = (
+  resellerId: string,
+  method: "PATCH" | "POST" | "DELETE",
+): `${"PATCH" | "POST" | "DELETE"} /api/v1/admin/resellers/${string}` =>
+  `${method} /api/v1/admin/resellers/${resellerId}${method === "POST" ? "/verify" : ""}`;
 
 /** The change of the fields of one product (and of its `retired`). */
 export const productChangeRoute = (productId: string): `PATCH /api/v1/admin/products/${string}` =>
@@ -46,7 +55,8 @@ export type Route =
   | `GET /api/v1/admin/orders/${string}`
   | ReturnType<typeof productRoute>
   | ReturnType<typeof productChangeRoute>
-  | ReturnType<typeof productPhotoRoute>;
+  | ReturnType<typeof productPhotoRoute>
+  | ReturnType<typeof resellerRoute>;
 /** The second argument is the address of the call, query string included. */
 export type Handler = (
   init: RequestInit | undefined,

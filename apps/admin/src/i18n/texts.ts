@@ -1,4 +1,5 @@
 import { catalogueFormTexts } from "./catalogue-form-texts";
+import { resellersTexts } from "./resellers-texts";
 
 // Fixed French texts. No text ever comes from the server: every message depends on the kind of
 // answer only, so that a response cannot put words in the interface.
@@ -290,6 +291,7 @@ export const texts = {
     },
   },
   catalogueForm: catalogueFormTexts,
+  resellers: resellersTexts,
   notFound: {
     title: "Page introuvable",
     message: "Cette page n'existe pas.",

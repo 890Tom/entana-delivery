@@ -1,4 +1,8 @@
-import { PRODUCT_PROBLEM_TYPES, problemDetailsSchema } from "@entana/contracts";
+import {
+  PRODUCT_PROBLEM_TYPES,
+  problemDetailsSchema,
+  RESELLER_PROBLEM_TYPES,
+} from "@entana/contracts";
 
 /** The part of a Zod schema that a request needs: the shared schemas of `contracts` fit it. */
 interface ResponseSchema<T> {
@@ -6,10 +10,11 @@ interface ResponseSchema<T> {
 }
 
 /**
- * A problem of the product form that the answer names. Only the types the contracts know are
- * reported, as a key of our own: no text of the answer ever reaches the interface.
+ * A problem of the product form or of the resellers that the answer names. Only the types the
+ * contracts know are reported, as a key of our own: no text of the answer ever reaches the
+ * interface. The screen that sent the request knows which family the key belongs to.
  */
-type AdminProblem = keyof typeof PRODUCT_PROBLEM_TYPES;
+type AdminProblem = keyof typeof PRODUCT_PROBLEM_TYPES | keyof typeof RESELLER_PROBLEM_TYPES;
 
 interface Failed<Kind extends string> {
   readonly kind: Kind;
@@ -37,7 +42,7 @@ export type AdminFailure = Exclude<AdminResult<never>, { kind: "ok" }>;
 interface AdminRequest {
   /** A fixed address of the API, never built from an input. */
   readonly path: string;
-  readonly method?: "GET" | "POST" | "PUT" | "PATCH";
+  readonly method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   /** Serialised as JSON, a `FormData` as it is. Never log it: it may hold a password. */
   readonly body?: unknown;
   readonly signal?: AbortSignal | undefined;
@@ -74,7 +79,10 @@ function toFailure(status: number, problem: AdminProblem | undefined): AdminFail
   return problem === undefined ? { kind } : { kind, problem };
 }
 
-const KNOWN_PROBLEMS = Object.entries(PRODUCT_PROBLEM_TYPES) as readonly [AdminProblem, string][];
+const KNOWN_PROBLEMS = [
+  ...Object.entries(PRODUCT_PROBLEM_TYPES),
+  ...Object.entries(RESELLER_PROBLEM_TYPES),
+] as readonly [AdminProblem, string][];
 
 /** The known problem an error body names, by its `type`; nothing else of the body is read. */
 function knownProblemOf(body: unknown): AdminProblem | undefined {
@@ -184,7 +192,7 @@ export async function fetchAdmin<T>(
   return parsed.success ? { kind: "ok", data: parsed.data } : { kind: "failure" };
 }
 
-/** Calls an action whose answer has no body that matters (the logout). */
+/** Calls an action whose answer has no body that matters (the logout, a deletion). */
 export async function sendAdminAction(request: AdminRequest): Promise<AdminResult<null>> {
   const answer = await exchange(request, false);
   if (answer === null) {

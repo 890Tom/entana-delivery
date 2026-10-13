@@ -14,6 +14,9 @@ import {
   LOGIN_PATH,
   ORDER_PATH_PATTERN,
   ORDERS_PATH,
+  RESELLER_PATTERN,
+  RESELLERS_NEW_PATH,
+  RESELLERS_PATH,
 } from "../../../routes";
 import { CatalogueScreen } from "../../catalogue/components/catalogue-screen";
 import {
@@ -23,6 +26,11 @@ import {
 import { CatalogueFlashProvider } from "../../catalogue/notice/catalogue-flash";
 import { OrderDetailScreen } from "../../order-detail/components/order-detail-screen";
 import { OrdersScreen } from "../../orders/components/orders-screen";
+import {
+  EditResellerScreen,
+  NewResellerScreen,
+} from "../../resellers/components/reseller-form-screen";
+import { ResellersScreen } from "../../resellers/components/resellers-screen";
 import { useSession } from "../hooks/use-session";
 
 import styles from "./protected-area.module.css";
@@ -61,6 +69,9 @@ export function ProtectedArea(): ReactElement {
               <Route path={CATALOGUE_PATH} component={CatalogueScreen} />
               <Route path={CATALOGUE_NEW_PATH} component={NewProductScreen} />
               <Route path={CATALOGUE_PRODUCT_PATTERN} component={EditProductScreen} />
+              <Route path={RESELLERS_PATH} component={ResellersScreen} />
+              <Route path={RESELLERS_NEW_PATH} component={NewResellerScreen} />
+              <Route path={RESELLER_PATTERN} component={EditResellerScreen} />
               <Route component={NotFound} />
             </Switch>
           </AdminShell>
