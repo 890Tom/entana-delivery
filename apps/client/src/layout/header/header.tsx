@@ -5,13 +5,16 @@ import { Link, useRoute } from "wouter";
 import { Icon } from "../../components/icon/icon";
 import iconButton from "../../components/icon-button/icon-button.module.css";
 import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
+import { ResellersLink } from "../../features/resellers/entry/resellers-link";
 import { useInstance } from "../../features/instance/api/use-instance";
 import { texts } from "../../i18n/texts";
 import {
   CART_PATH,
+  CATALOGUE_PATH,
   CONTACT_PATH,
   DELIVERY_PATH,
   FIND_ORDER_PATH,
+  RESELLERS_PATH,
   REVIEW_PATH,
   TRACKING_PATH,
 } from "../../routes";
@@ -90,6 +93,10 @@ function useStepHeader(): { href: string | null; label: string; title: string } 
   const [isContactScreen] = useRoute(CONTACT_PATH);
   const [isReviewScreen] = useRoute(REVIEW_PATH);
   const [isTrackingScreen] = useRoute(TRACKING_PATH);
+  const [isResellersScreen] = useRoute(RESELLERS_PATH);
+  if (isResellersScreen) {
+    return { href: CATALOGUE_PATH, label: texts.shell.back, title: texts.resellers.title };
+  }
   if (isTrackingScreen) {
     return { href: null, label: "", title: texts.tracking.title };
   }
@@ -140,6 +147,9 @@ export function Header(): ReactElement {
         )}
         {!isFindOrderScreen && (!isCartScreen || step !== null) && (
           <div className={[styles.actions, step !== null ? styles.webOnly : ""].join(" ")}>
+            <div className={styles.webLink}>
+              <ResellersLink />
+            </div>
             <div className={styles.slot}>
               <FindOrderLink />
             </div>

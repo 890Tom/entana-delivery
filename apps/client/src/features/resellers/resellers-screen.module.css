@@ -1,0 +1,42 @@
+/*
+ * The list comes first in the page (so that the keyboard reaches it before the map on the web
+ * layout), and the areas put the map on top on a phone.
+ */
+.page {
+  display: grid;
+  grid-template-areas:
+    "map"
+    "panel";
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.panel {
+  grid-area: panel;
+}
+
+.map {
+  grid-area: map;
+  display: grid;
+  height: var(--size-map-height-compact);
+}
+
+/* The one breakpoint of the design system (a media query cannot read a variable). */
+@media (min-width: 1024px) {
+  .page {
+    grid-template-areas: "panel map";
+    grid-template-columns: var(--size-list-width) minmax(0, 1fr);
+    height: calc(100vh - var(--size-header-height));
+    min-height: var(--size-map-height-large);
+  }
+
+  /* The list scrolls on its own beside the map. */
+  .panel {
+    min-height: 0;
+    overflow-y: auto;
+    border-right: var(--border-width) solid var(--color-border);
+  }
+
+  .map {
+    height: auto;
+  }
+}

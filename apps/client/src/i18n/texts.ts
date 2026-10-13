@@ -2,6 +2,8 @@ import type { CatalogueErrorKind } from "../features/catalogue/api/fetch-product
 
 import { findOrderTexts } from "./find-order-texts";
 import type { FindOrderTexts } from "./find-order-texts";
+import { resellersTexts } from "./resellers-texts";
+import type { ResellersTexts } from "./resellers-texts";
 import { reviewTexts } from "./review-texts";
 import type { ReviewTexts } from "./review-texts";
 import { trackingTexts } from "./tracking-texts";
@@ -124,6 +126,8 @@ export const texts: {
   /** The tracking of an order. */
   readonly tracking: TrackingTexts;
   readonly findOrder: FindOrderTexts;
+  /** The screen "Où nous trouver": the resellers on a map and in a list. */
+  readonly resellers: ResellersTexts;
   /** The summary of the order, shared by the screens that come after the cart. */
   readonly orderSummary: {
     readonly title: string;
@@ -253,6 +257,7 @@ export const texts: {
   review: reviewTexts,
   tracking: trackingTexts,
   findOrder: findOrderTexts,
+  resellers: resellersTexts,
   orderSummary: {
     title: "Votre commande",
     quantity: (quantity) => `× ${String(quantity)}`,

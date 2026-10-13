@@ -7,6 +7,7 @@ import { texts } from "../../i18n/texts";
 import { ActiveOrderNotice } from "../active-order/notice/active-order-notice";
 import { useLaunch } from "../active-order/launch/launch-context";
 import { useCart } from "../cart/cart-state/cart-context";
+import { ResellersEntryRow } from "../resellers/entry/resellers-entry-row";
 import { useCartReconciliation } from "../cart/reconciliation/use-cart-reconciliation";
 
 import { readCatalogueErrorKind } from "./api/fetch-products";
@@ -65,6 +66,7 @@ export function Catalogue(): ReactElement {
   return (
     <div className={styles.page}>
       <div className={styles.content}>
+        <ResellersEntryRow />
         <h1 className={styles.title}>{texts.catalogue.title}</h1>
         <ActiveOrderNotice />
         {hasRemovedUnavailable && <Notice tone="info">{texts.cart.removedUnavailable}</Notice>}

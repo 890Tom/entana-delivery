@@ -124,6 +124,15 @@
   --size-map-pin: 40px;
   --size-map-pin-tail-half: 6px;
   --size-map-pin-tail-height: 10px;
+  /* Proposed, to confirm: the screen of the resellers (values from its screen sheet). */
+  --size-map-height-compact: 220px;
+  --size-list-width: 420px;
+  --size-map-marker: 36px;
+  --size-map-marker-selected: 44px;
+  --size-map-marker-icon: 18px;
+  --size-map-marker-icon-selected: 22px;
+  --size-map-user: 20px;
+  --size-shop-tile: 28px;
   /* The mobile bottom bar: padding above, button, padding below and the phone's safe area. */
   --size-bottom-bar: calc(
     var(--space-3) + var(--size-button-height) + var(--space-4) + env(safe-area-inset-bottom, 0px)

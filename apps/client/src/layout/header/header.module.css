@@ -91,6 +91,11 @@
   }
 }
 
+/* The link to the resellers has its place in the header on the web layout only. */
+.webLink {
+  display: none;
+}
+
 /* The delivery screen: back and title on a phone only, the cart link on the web layout only. */
 .inner .webOnly {
   display: none;
@@ -107,6 +112,10 @@
   }
 
   .inner .webOnly {
+    display: flex;
+  }
+
+  .webLink {
     display: flex;
   }
 

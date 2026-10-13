@@ -1,0 +1,21 @@
+.link {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: var(--size-touch-min);
+  padding-inline: var(--space-2);
+  font: var(--font-body);
+  color: var(--color-text);
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+}
+
+.link:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.link[aria-current="page"] {
+  font: var(--font-body-strong);
+}
