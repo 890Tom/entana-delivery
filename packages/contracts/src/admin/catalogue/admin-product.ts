@@ -12,6 +12,11 @@ export const adminProductSchema = z.strictObject({
   available: z.boolean(),
   availabilityChangedAt: z.iso.datetime(),
   retired: z.boolean(),
+  description: z.string().nullable(),
+  // Null until the photo is sent.
+  image: z.strictObject({ url: z.string() }).nullable(),
+  // Kept before the photo exists: it is sent first.
+  imageAlt: z.string().nullable(),
   position: z.number().int().nonnegative(),
 });
 

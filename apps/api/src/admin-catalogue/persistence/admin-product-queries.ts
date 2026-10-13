@@ -4,12 +4,15 @@ import type { StoredAdminProduct } from "../rules/to-admin-product.js";
 /** What the queries need from the client: the PrismaClient and its transaction client both fit. */
 export type AdminProductDatabase = Pick<PrismaClient, "product" | "auditLog">;
 
-// An explicit allow-list: the description and the photo are not part of the administration here.
+// An explicit allow-list of the columns the form reads and shows.
 const PRODUCT_SELECT = {
   id: true,
   name: true,
   sku: true,
   priceAr: true,
+  description: true,
+  imageKey: true,
+  imageAlt: true,
   available: true,
   availabilityChangedAt: true,
   active: true,
@@ -68,23 +71,6 @@ export async function retireIfActive(database: AdminProductDatabase, id: string)
   return count === 1;
 }
 
-/** True when the product was retired and has its photo (the CHECK would refuse the row). */
-export async function restoreIfPossible(
-  database: AdminProductDatabase,
-  change: { id: string; position: number; now: Date },
-): Promise<boolean> {
-  const { count } = await database.product.updateMany({
-    where: { id: change.id, active: false, imageKey: { not: null }, imageAlt: { not: null } },
-    data: {
-      active: true,
-      available: false,
-      availabilityChangedAt: change.now,
-      position: change.position,
-    },
-  });
-  return count === 1;
-}
-
 export async function setPosition(
   database: AdminProductDatabase,
   id: string,
@@ -93,12 +79,69 @@ export async function setPosition(
   await database.product.update({ where: { id }, data: { position }, select: { id: true } });
 }
 
+/** What an audit entry may hold: flags, prices and field names, never a name or personal data. */
+type AuditValue = boolean | number | readonly string[] | Readonly<Record<string, boolean | number>>;
+
 export interface ProductAudit {
   readonly actorId: string;
-  readonly action: "product.availability_changed" | "product.retired" | "product.restored";
+  readonly action:
+    | "product.created"
+    | "product.updated"
+    | "product.availability_changed"
+    | "product.retired"
+    | "product.restored"
+    | "product.photo_replaced";
   readonly productId: string;
-  /** Before and after of the changed flag: never a name, a price or personal data. */
-  readonly diff: Readonly<Record<string, { readonly from: boolean; readonly to: boolean }>>;
+  readonly diff: Readonly<Record<string, AuditValue>>;
+}
+
+export interface NewProduct {
+  readonly name: string;
+  readonly sku: string;
+  readonly priceAr: number;
+  readonly description: string | null;
+  readonly imageAlt: string | null;
+  readonly available: boolean;
+  readonly active: boolean;
+  readonly position: number;
+  readonly availabilityChangedAt: Date;
+}
+
+export function insertProduct(
+  database: AdminProductDatabase,
+  product: NewProduct,
+): Promise<StoredAdminProduct> {
+  return database.product.create({ data: product, select: PRODUCT_SELECT });
+}
+
+/** The columns to write: Prisma ignores the keys that are undefined. */
+export interface ProductWrite {
+  readonly name?: string;
+  readonly sku?: string;
+  readonly priceAr?: number;
+  readonly description?: string | null;
+  readonly imageAlt?: string | null;
+  readonly imageKey?: string;
+  readonly available?: boolean;
+  readonly active?: boolean;
+  readonly position?: number;
+  readonly availabilityChangedAt?: Date;
+}
+
+export function updateProduct(
+  database: AdminProductDatabase,
+  id: string,
+  data: ProductWrite,
+): Promise<StoredAdminProduct> {
+  return database.product.update({ where: { id }, data, select: PRODUCT_SELECT });
+}
+
+/** How many products point at this file: a demo file can be shared. */
+export function countProductsWithImageKey(
+  database: AdminProductDatabase,
+  imageKey: string,
+): Promise<number> {
+  return database.product.count({ where: { imageKey } });
 }
 
 export async function insertProductAudit(

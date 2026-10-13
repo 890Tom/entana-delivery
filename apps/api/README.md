@@ -107,15 +107,19 @@ root, ignored by git. **It holds no secret**: its public part is served to every
 ## Media
 
 The API serves, read-only, the files of a media folder: `GET` and `HEAD /media/branding/<file>`
-and `/media/products/<file>` (no `/api` prefix, no version). No listing, no hidden file, no upload.
+and `/media/products/<file>` (no `/api` prefix, no version). No listing, no hidden file, and no
+upload on this route (the photos are sent through the administration, see Catalogue).
 Only `.png`, `.webp` and `.jpg` are served (never `.svg`), with the content type of the extension,
 `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'` and
-`Cache-Control: public, max-age=3600`. A name that does not match
+`Cache-Control: public, max-age=3600` (`public, max-age=31536000, immutable` for a file named
+`<uuid>.webp` under `products/`: an uploaded photo gets a new name at every replacement, whereas a
+file placed by hand can be replaced under its name). A name that does not match
 `^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`, a missing file and a symbolic link all answer `404`; the name
 is checked before the disk is read.
 
-Product photos are dropped by hand in the products media folder, with the `.png`, `.webp` or `.jpg`
-extension (`.jpeg` is refused: rename it to `.jpg`). The name of the file is the product's image key.
+Product photos are sent through `PUT /api/v1/admin/products/:id/photo` (see Catalogue), which writes
+`products/<random>.webp`. A file dropped by hand with the `.png`, `.webp` or `.jpg` extension
+(`.jpeg` is refused: rename it to `.jpg`) still works. The name of the file is the product's image key.
 A product whose key is not such a name makes the catalogue answer the generic `500`.
 
 - **`MEDIA_ROOT`**: absolute path of the folder, holding `branding/` and `products/`. In
@@ -313,38 +317,72 @@ changed in between (a customer's cancellation included) get the same `409`.
 
 ### Catalogue (administration)
 
-Five routes under `/api/v1/admin/products`, closed by the guard above (`401` without a session).
+Eight routes under `/api/v1/admin/products`, closed by the guard above (`401` without a session).
 Every answer carries `Cache-Control: no-store`. No rate limiting. OpenAPI tag `admin`.
 
-| Route                                           | Does                                                              |
-| ----------------------------------------------- | ----------------------------------------------------------------- |
-| `GET /api/v1/admin/products`                    | Every product, retired ones included, by `position` then `id`     |
-| `PATCH /api/v1/admin/products/:id/availability` | Body `{ "available": boolean }` (strict): `200` with the product  |
-| `POST /api/v1/admin/products/:id/retire`        | No body: the product leaves the catalogue; `200` with the product |
-| `POST /api/v1/admin/products/:id/restore`       | No body: active again, unavailable, last; `200` with the product  |
-| `PUT /api/v1/admin/products/order`              | Body `{ "ids": uuid[] }` (strict): `200` with the whole list      |
+| Route                                           | Does                                                                |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| `GET /api/v1/admin/products`                    | Every product, retired ones included, by `position` then `id`       |
+| `POST /api/v1/admin/products`                   | Creates a product at the end of the list: `201` with the product    |
+| `PATCH /api/v1/admin/products/:id`              | Partial change (at least one field, strict): `200` with the product |
+| `PUT /api/v1/admin/products/:id/photo`          | Multipart, one file `photo`: `200` with the product                 |
+| `PATCH /api/v1/admin/products/:id/availability` | Body `{ "available": boolean }` (strict): `200` with the product    |
+| `POST /api/v1/admin/products/:id/retire`        | No body: the product leaves the catalogue; `200` with the product   |
+| `POST /api/v1/admin/products/:id/restore`       | No body: active again, unavailable, last; `200` with the product    |
+| `PUT /api/v1/admin/products/order`              | Body `{ "ids": uuid[] }` (strict): `200` with the whole list        |
 
-A product is `{ id, name, sku, priceAr, available, availabilityChangedAt, retired, position }`.
-`retired` is the negation of the `active` column: a retired product is out of the public catalogue
-(`GET /api/v1/products`, which follows `position`) and cannot be ordered (the `422` of the order
-creation, as for an unknown product). The orders that hold it are untouched, and a row is never
-deleted. The public catalogue is cached for 30 seconds: a change shows up within that delay.
+A product is `{ id, name, sku, priceAr, available, availabilityChangedAt, retired, description,
+image, imageAlt, position }`. `image` is `{ url }` or `null` (until the photo is sent). `imageAlt` is the
+alternative text or `null`, filled even before the photo exists (it is sent first). `retired` is the negation
+of the `active` column: a retired product is out of the public catalogue (`GET /api/v1/products`,
+which follows `position`) and cannot be ordered (the `422` of the order creation, as for an unknown
+product). The orders that hold it are untouched, and a row is never deleted. The public catalogue is
+cached for 30 seconds: a change shows up within that delay.
 
+- **Fields.** `name` 1 to 60, `priceAr` integer 1 to 1 000 000, `sku` trimmed and upper-cased,
+  `^[A-Z0-9][A-Z0-9-]{1,19}$`, unique (`409`, problem type `urn:entana:problem:sku_taken`),
+  `description` 0 to 120 (empty clears it, `null` in the answer), `imageAlt` 1 to 150, `available`
+  and `retired` (update only). The creation default is `available: true`.
+- **Creation.** A product is always created retired: `retired` is not a field of the creation (`400`
+  if sent). The way to publish is: `POST` with `imageAlt`, `PUT` the photo, then `PATCH { "retired": false }`.
+- **Update.** One transaction; only the values that differ are written, and nothing at all (no
+  audit entry) when none does. `available` can change on a retired product.
+  `retired: false` on a retired product restores it: `available = false`, `availabilityChangedAt =
+now`, last position, unless `available` is in the same request.
+- **Publication rule.** A request that leaves the product visible (`retired: false`, the
+  restoration route included) needs a photo and its alternative text: otherwise `422`, problem type
+  `urn:entana:problem:product_not_publishable`, fixed detail.
+- **Photo.** JPEG, PNG or WebP recognised by content (not by name or announced type), at most 10 MB
+  and 40 megapixels. The EXIF rotation is applied, then every metadata is dropped; a transparent PNG
+  is flattened on white; the short side must be at least 800 px; the image is cropped to a centred
+  square of at most 1000 px (never enlarged) and encoded as WebP, quality 85, lowered by 4 down to
+  65 to fit 150 KB (the file is kept at 65 even if heavier). The file is written as
+  `products/<random>.webp`, the row is updated, and the previous file is removed after the commit,
+  best effort, unless another product still uses it. The product must already have its
+  `imageAlt`. The route has no JSON guard; its body limit is its own (10 MB), and no text field is
+  accepted next to `photo` (`400`, as for a malformed multipart body).
+- **Photo errors** (fixed details, problem `type` in `urn:entana:problem:`): `422 photo_too_small`,
+  `415 photo_invalid` (not a recognised format, or not multipart), `413 photo_too_large`,
+  `422 photo_invalid` (corrupt, or over 40 megapixels), `422 photo_alt_required`.
 - **Availability.** Sets `available` and `availabilityChangedAt` (now). The same value as the
   current one is a `200` that changes nothing and writes no audit entry. A retired product is a `409`.
 - **Retire / restore.** Already retired (or already active): `200`, nothing changes, no audit
   entry. Restoring sets `available = false`, `availabilityChangedAt = now` and `position` after the
-  last product. A product with no photo cannot be visible (`ck_product_photo_when_active`): `409`.
+  last product. A product with no photo or no alternative text cannot be visible
+  (`ck_product_photo_when_active`): `422 product_not_publishable`, as for the update.
 - **Order.** `ids` must be exactly the products that are not retired, each once; otherwise `409`
   and nothing is written. Positions `0` to `n-1` are written in one transaction. Retired products
   keep their position. The order is not audited.
 - **Errors.** An unknown and a malformed id get the same `404` with a fixed detail. A body that is
   not valid or holds another field is a `400`.
-- **Audit.** A real change of availability, a retirement and a restoration write one `audit_log`
-  row in the same transaction: `actor_id` is the admin of the session, `entity = "product"`,
-  `action` is `product.availability_changed`, `product.retired` or `product.restored`, and `diff`
-  holds the before and after of the flag (`{ "available": { "from": true, "to": false } }`). No
-  name, price or personal data.
+- **Audit.** Each real change writes one `audit_log` row in the same transaction: `actor_id` is the
+  admin of the session, `entity = "product"`. `product.created` (`diff`: `available`, `retired`),
+  `product.updated` (`diff`: `fields`, the names of the changed fields among `name`, `sku`,
+  `priceAr`, `description`, `imageAlt`; and `priceAr: { from, to }` when the price changed),
+  `product.availability_changed` (`available: { from, to }`, also written by a restoration that
+  really changes it), `product.retired`, `product.restored` (`active: { from, to }`) and
+  `product.photo_replaced` (`hadPhoto`). No name, description or personal data. The name of the
+  uploaded file is never read, kept or logged.
 
 ## Logs
 

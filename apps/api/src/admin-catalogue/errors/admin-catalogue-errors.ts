@@ -17,11 +17,59 @@ export class ProductRetiredError extends Error {
   }
 }
 
-/** Only a product with a photo can be visible (ck_product_photo_when_active). */
-export class ProductWithoutPhotoError extends Error {
+/** Only a product with a photo and its alternative text can be visible (ck_product_photo_when_active). */
+export class ProductNotPublishableError extends Error {
   constructor() {
-    super("The product has no photo and cannot be restored.");
-    this.name = "ProductWithoutPhotoError";
+    super("The product needs a photo and its alternative text to be visible.");
+    this.name = "ProductNotPublishableError";
+  }
+}
+
+/** Another product already has this sku. */
+export class SkuTakenError extends Error {
+  constructor() {
+    super("The sku is already used by another product.");
+    this.name = "SkuTakenError";
+  }
+}
+
+/** A photo needs its alternative text: it is sent (POST or PATCH) before the photo. */
+export class PhotoAltRequiredError extends Error {
+  constructor() {
+    super("The product has no alternative text for its photo.");
+    this.name = "PhotoAltRequiredError";
+  }
+}
+
+/** The short side of the photo is under the minimum. */
+export class PhotoTooSmallError extends Error {
+  constructor() {
+    super("The photo is too small.");
+    this.name = "PhotoTooSmallError";
+  }
+}
+
+/** The content is not a JPEG, a PNG or a WebP, whatever the name or the announced type say. */
+export class PhotoFormatNotRecognizedError extends Error {
+  constructor() {
+    super("The photo is not a JPEG, PNG or WebP image.");
+    this.name = "PhotoFormatNotRecognizedError";
+  }
+}
+
+/** A recognised format that cannot be decoded, or that holds more pixels than allowed. */
+export class PhotoCorruptError extends Error {
+  constructor() {
+    super("The photo cannot be read.");
+    this.name = "PhotoCorruptError";
+  }
+}
+
+/** The file is over the size limit of the upload. */
+export class PhotoTooLargeError extends Error {
+  constructor() {
+    super("The photo is too large.");
+    this.name = "PhotoTooLargeError";
   }
 }
 

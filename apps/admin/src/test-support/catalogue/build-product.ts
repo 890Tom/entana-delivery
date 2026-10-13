@@ -10,6 +10,9 @@ export function buildProduct(index: number, overrides: Partial<AdminProduct> = {
     available: true,
     availabilityChangedAt: "2026-10-01T08:00:00.000Z",
     retired: false,
+    description: null,
+    image: null,
+    imageAlt: null,
     position: index,
     ...overrides,
   };

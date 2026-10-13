@@ -20,5 +20,6 @@
 | [0016](0016-public-product-catalogue.md)                                 | Public product catalogue                                                                        | accepted |
 | [0017](0017-admin-sessions-in-database-with-an-opaque-cookie.md)         | Administration sessions: opaque token in a cookie, session rows in the database                 | accepted |
 | [0018](0018-separate-admin-application-with-minimal-copy-of-ui.md)       | A separate administration application, with a minimal copy of the interface primitives          | accepted |
+| [0019](0019-product-photos-processed-with-sharp.md)                      | Product photos: uploaded through the administration and processed with sharp                    | accepted |
 
 Planned records: PostGIS left out (setup in ADR 0006), delivery axes made of places, idempotent orders and offline mode, simplified order statuses, VPS hosting with OpenFreeMap tiles, hashed tracking token. Use [`0000-template.md`](0000-template.md).

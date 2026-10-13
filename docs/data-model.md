@@ -82,13 +82,13 @@ Written in the same transaction as the change it records. Index on `(order_id, c
 | id | uuid | primary key |
 | sku | text | unique; reconciliation key with an external stock system |
 | name | text | |
-| description | text, nullable | |
+| description | text, nullable | the short description (0 to 120 characters, validated by the API; empty means null) |
 | price_ar | integer | > 0 (`ck_product_price_positive`) |
 | active | boolean | visible in the catalogue |
 | available | boolean | set manually, never reset automatically |
 | availability_changed_at | timestamptz | |
 | position | integer | display order |
-| image_key | text, nullable | required to make the product visible; the name of the photo file in the products media folder (png, webp or jpg, no path), turned into `/media/products/<key>` by the API |
+| image_key | text, nullable | required to make the product visible; the name of the photo file in the products media folder (png, webp or jpg, no path), turned into `/media/products/<key>` by the API. A photo sent through the administration is a `<random>.webp` |
 | image_alt | text, nullable | required to make the product visible |
 
 Constraint `ck_product_photo_when_active`: `CHECK (active = false OR (image_key IS NOT NULL AND image_alt IS NOT NULL))`. A visible product always has a photo and its alternative text.
@@ -165,7 +165,7 @@ A session is usable while it is not revoked, before `expires_at`, and seen less 
 
 Only actions outside orders (catalogue, axes and places, resellers, settings, accounts, logins). Everything about an order goes to `order_event`.
 
-Written so far: `product.availability_changed`, `product.retired` and `product.restored` (`entity = "product"`, `diff` holds the before and after of the flag: `available` or `active`).
+Written so far, with `entity = "product"`: `product.created`, `product.updated` (`diff.fields` lists the changed fields, `diff.priceAr` the old and new price), `product.availability_changed`, `product.retired`, `product.restored` (`diff` holds the before and after of the flag: `available` or `active`) and `product.photo_replaced`.
 
 ### `reseller`
 | Column | Type | Rules |

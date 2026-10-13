@@ -44,6 +44,7 @@ export type { OrderCode } from "./orders/code/order-code.js";
 export {
   GENERIC_PROBLEM_TYPE,
   PROBLEM_DETAILS_CONTENT_TYPE,
+  PRODUCT_PROBLEM_TYPES,
   VALIDATION_PROBLEM_TYPE,
   fieldErrorSchema,
   problemDetailsSchema,
@@ -141,3 +142,21 @@ export type {
   ProductOrderRequest,
 } from "./admin/catalogue/admin-product.js";
 export { isCompleteProductOrder } from "./admin/catalogue/product-order.js";
+export {
+  PRODUCT_DESCRIPTION_MAX_LENGTH,
+  PRODUCT_IMAGE_ALT_MAX_LENGTH,
+  PRODUCT_PHOTO_MAX_BYTES,
+  PRODUCT_PHOTO_MIN_SHORT_SIDE_PX,
+  PRODUCT_NAME_MAX_LENGTH,
+  PRODUCT_PRICE_MAX_AR,
+  createProductRequestSchema,
+  updateProductRequestSchema,
+} from "./admin/catalogue/product-form.js";
+export type { CreateProductRequest, UpdateProductRequest } from "./admin/catalogue/product-form.js";
+export { planProductUpdate } from "./admin/catalogue/plan-product-update.js";
+export type {
+  ProductColumnChanges,
+  ProductState,
+  ProductUpdatePlan,
+  UpdatedField,
+} from "./admin/catalogue/plan-product-update.js";

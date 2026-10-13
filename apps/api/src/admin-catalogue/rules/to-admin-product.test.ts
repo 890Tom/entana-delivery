@@ -7,6 +7,9 @@ const ROW = {
   name: "Fake product",
   sku: "FAKE-1",
   priceAr: 5000,
+  description: null,
+  imageKey: null,
+  imageAlt: null,
   available: false,
   availabilityChangedAt: new Date("2026-10-08T08:00:00.000Z"),
   active: true,
@@ -25,7 +28,27 @@ describe("toAdminProduct", () => {
       available: false,
       availabilityChangedAt: "2026-10-08T08:00:00.000Z",
       retired: false,
+      description: null,
+      image: null,
+      imageAlt: null,
       position: 3,
+    });
+  });
+
+  it("builds the image from the key and the alt", () => {
+    const row = { ...ROW, description: "Short", imageKey: "a.webp", imageAlt: "Alt" };
+
+    expect(toAdminProduct(row)).toMatchObject({
+      description: "Short",
+      image: { url: "/media/products/a.webp" },
+      imageAlt: "Alt",
+    });
+  });
+
+  it("keeps the alt before the photo exists", () => {
+    expect(toAdminProduct({ ...ROW, imageAlt: "Alt" })).toMatchObject({
+      image: null,
+      imageAlt: "Alt",
     });
   });
 
