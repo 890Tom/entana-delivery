@@ -45,6 +45,7 @@ export {
   GENERIC_PROBLEM_TYPE,
   PROBLEM_DETAILS_CONTENT_TYPE,
   PRODUCT_PROBLEM_TYPES,
+  RESELLER_PROBLEM_TYPES,
   VALIDATION_PROBLEM_TYPE,
   fieldErrorSchema,
   problemDetailsSchema,
@@ -160,3 +161,30 @@ export type {
   ProductUpdatePlan,
   UpdatedField,
 } from "./admin/catalogue/plan-product-update.js";
+export {
+  adminResellerListResponseSchema,
+  adminResellerSchema,
+} from "./admin/resellers/admin-reseller.js";
+export type { AdminReseller, AdminResellerListResponse } from "./admin/resellers/admin-reseller.js";
+export {
+  RESELLER_LANDMARK_MAX_LENGTH,
+  RESELLER_NAME_MAX_LENGTH,
+  RESELLER_NEIGHBORHOOD_MAX_LENGTH,
+  createResellerRequestSchema,
+  updateResellerRequestSchema,
+} from "./admin/resellers/reseller-form.js";
+export type {
+  CreateResellerRequest,
+  UpdateResellerRequest,
+} from "./admin/resellers/reseller-form.js";
+export { planResellerUpdate } from "./admin/resellers/plan-reseller-update.js";
+export type {
+  ResellerColumnChanges,
+  ResellerState,
+  ResellerUpdatePlan,
+  ResellerUpdatedField,
+} from "./admin/resellers/plan-reseller-update.js";
+export {
+  RESELLER_VERIFICATION_MAX_AGE_DAYS,
+  isResellerVerificationStale,
+} from "./admin/resellers/reseller-verification.js";

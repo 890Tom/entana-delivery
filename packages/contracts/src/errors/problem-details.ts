@@ -21,6 +21,11 @@ export const PRODUCT_PROBLEM_TYPES = {
   photoTooLarge: "urn:entana:problem:photo_too_large",
 } as const;
 
+/** `type` of the problem of the administration of the resellers that a client acts on. */
+export const RESELLER_PROBLEM_TYPES = {
+  notPublishable: "urn:entana:problem:reseller_not_publishable",
+} as const;
+
 /** One invalid field of a request. `pointer` is a JSON Pointer (RFC 6901) into the request data. */
 export const fieldErrorSchema = z.object({
   pointer: z.string(),
