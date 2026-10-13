@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { PrismaClient } from "@entana/database";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import request from "supertest";
@@ -35,6 +38,14 @@ export interface AdminOrdersHarness {
   readonly clock: ManualClock;
   /** The id of the signed-in admin, whose session cookie every `get` and `post` sends. */
   readonly adminId: string;
+  /** The media folder of this run: a throwaway directory with a `products` folder. */
+  readonly mediaRoot: string;
+  /** PUT of a multipart body with one `photo` file (the name `photo` is the field name). */
+  readonly putPhoto: (
+    path: string,
+    file: Buffer,
+    options?: { readonly cookie?: string | null; readonly field?: string },
+  ) => request.Test;
   readonly get: (path: string, cookie?: string | null) => request.Test;
   readonly post: (path: string, body: unknown, cookie?: string | null) => request.Test;
   readonly put: (path: string, body: unknown, cookie?: string | null) => request.Test;
@@ -57,6 +68,8 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
   let cookie = "";
   let adminId = "";
   let addressCounter = 0;
+  const mediaRoot = mkdtempSync(join(tmpdir(), "entana-admin-media-"));
+  mkdirSync(join(mediaRoot, "products"));
 
   const getApp = (): NestExpressApplication => {
     if (app === undefined) {
@@ -73,6 +86,9 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
     await client.auditLog.deleteMany();
     await client.adminSession.deleteMany();
     await client.staffUser.deleteMany({ where: { email: { not: null } } });
+    for (const file of readdirSync(join(mediaRoot, "products"))) {
+      rmSync(join(mediaRoot, "products", file));
+    }
   };
 
   beforeAll(async () => {
@@ -82,6 +98,7 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
         TRUST_PROXY: "1",
         LOG_LEVEL: "error",
         ADMIN_COOKIE_SECURE: "true",
+        MEDIA_ROOT: mediaRoot,
       }),
       { clock },
     );
@@ -113,6 +130,7 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
     await getApp().close();
     await clean();
     await client.$disconnect();
+    rmSync(mediaRoot, { recursive: true, force: true });
   });
 
   const withCookie = (test: request.Test, sent: string | null | undefined): request.Test => {
@@ -141,6 +159,16 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
     get adminId() {
       return adminId;
     },
+    mediaRoot,
+    putPhoto: (path, file, options = {}) =>
+      withCookie(
+        request(getApp().getHttpServer())
+          .put(path)
+          .set("X-Forwarded-For", nextAddress())
+          .set("Origin", ADMIN_TEST_ORIGIN)
+          .attach(options.field ?? "photo", file, { filename: "photo.jpg" }),
+        options.cookie,
+      ),
     get: (path, sent) =>
       withCookie(
         request(getApp().getHttpServer()).get(path).set("X-Forwarded-For", nextAddress()),

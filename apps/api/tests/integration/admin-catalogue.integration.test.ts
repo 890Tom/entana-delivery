@@ -186,8 +186,17 @@ describe("the administration of the catalogue on a real PostgreSQL", () => {
       expect(await publicIds()).toContain(id);
       expect((await adminIds()).at(-1)).toBe(id);
       expect(await auditRows()).toMatchObject([
+        { action: "product.availability_changed", diff: { available: { from: true, to: false } } },
         { action: "product.restored", entityId: id, diff: { active: { from: false, to: true } } },
       ]);
+    });
+
+    it("writes no availability entry when the product was already unavailable", async () => {
+      const id = await insertProduct(h.client, { active: false, available: false });
+
+      await h.post(restorePath(id), undefined);
+
+      expect((await auditRows()).map((row) => row.action)).toEqual(["product.restored"]);
     });
 
     it("answers 200 without change nor audit for a product that is already active", async () => {
@@ -204,7 +213,7 @@ describe("the administration of the catalogue on a real PostgreSQL", () => {
       expect(await auditRows()).toEqual([]);
     });
 
-    it("answers 409 for a product that has no photo, which cannot be visible", async () => {
+    it("answers 422 product_not_publishable for a product that has no photo", async () => {
       const id = await h.client.product.create({
         data: {
           sku: "SKU-NO-PHOTO",
@@ -220,7 +229,8 @@ describe("the administration of the catalogue on a real PostgreSQL", () => {
 
       const answer = await h.post(restorePath(id.id), undefined);
 
-      expect(answer.status).toBe(409);
+      expect(answer.status).toBe(422);
+      expect(answer.body).toMatchObject({ type: "urn:entana:problem:product_not_publishable" });
       expect((await stored(id.id)).active).toBe(false);
       expect(await auditRows()).toEqual([]);
     });

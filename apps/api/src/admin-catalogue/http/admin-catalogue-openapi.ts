@@ -106,7 +106,8 @@ export const documentRestoreProduct = (): MethodDecorator =>
       summary: "Restore a retired product",
       description:
         "The product is active again, unavailable, at the end of the list. No body. Already " +
-        "active: 200, unchanged. A product that has no photo cannot be visible: 409.",
+        "active: 200, unchanged. A product that has no photo and alternative text cannot be visible: 422 " +
+        "`product_not_publishable`, like the update that asks for it.",
       operationId: "restoreAdminProduct",
     }),
     ApiOkResponse({ description: "The product.", standardSchema: adminProductSchema }),
@@ -114,7 +115,7 @@ export const documentRestoreProduct = (): MethodDecorator =>
       UNAUTHENTICATED,
       FORBIDDEN,
       NOT_FOUND,
-      [409, "The product has no photo and cannot be restored."],
+      [422, "The product has no photo or no alternative text (`product_not_publishable`)."],
       ...COMMON,
     ]),
   );

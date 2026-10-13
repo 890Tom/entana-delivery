@@ -8,6 +8,19 @@ export const GENERIC_PROBLEM_TYPE = "about:blank";
 
 export const VALIDATION_PROBLEM_TYPE = "urn:entana:problem:validation-error";
 
+/**
+ * `type` of the problems of the product form that a client acts on: the status alone does not say
+ * which one it is (422 and 415 are shared by several). The detail is a fixed text.
+ */
+export const PRODUCT_PROBLEM_TYPES = {
+  notPublishable: "urn:entana:problem:product_not_publishable",
+  skuTaken: "urn:entana:problem:sku_taken",
+  photoAltRequired: "urn:entana:problem:photo_alt_required",
+  photoTooSmall: "urn:entana:problem:photo_too_small",
+  photoInvalid: "urn:entana:problem:photo_invalid",
+  photoTooLarge: "urn:entana:problem:photo_too_large",
+} as const;
+
 /** One invalid field of a request. `pointer` is a JSON Pointer (RFC 6901) into the request data. */
 export const fieldErrorSchema = z.object({
   pointer: z.string(),

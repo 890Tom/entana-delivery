@@ -22,6 +22,7 @@ describe("GET /media/<folder>/<file>", () => {
     mkdirSync(join(root, "products"));
     writeFileSync(join(root, "branding", "logo.png"), LOGO);
     writeFileSync(join(root, "products", "photo.webp"), PHOTO);
+    writeFileSync(join(root, "products", "0199f5b0-7c1e-7a3b-9d4f-2b6e8a1c3d5a.webp"), PHOTO);
     writeFileSync(join(directory, "outside.png"), "secret");
     symlinkSync(join(directory, "outside.png"), join(root, "branding", "leak.png"));
     writeFileSync(join(root, "branding", "icon.svg"), "<svg/>");
@@ -33,19 +34,30 @@ describe("GET /media/<folder>/<file>", () => {
   });
 
   it.each([
-    ["/media/branding/logo.png", "image/png", LOGO],
-    ["/media/products/photo.webp", "image/webp", PHOTO],
-  ])("serves %s as it is, with the headers that stop interpretation", async (path, type, file) => {
-    const response = await request(app.getHttpServer()).get(path).responseType("blob");
+    ["/media/branding/logo.png", "image/png", LOGO, "public, max-age=3600"],
+    // A file placed by hand can be replaced under the same name: a short cache.
+    ["/media/products/photo.webp", "image/webp", PHOTO, "public, max-age=3600"],
+    // An uploaded photo changes name at every replacement: it is cached for good.
+    [
+      "/media/products/0199f5b0-7c1e-7a3b-9d4f-2b6e8a1c3d5a.webp",
+      "image/webp",
+      PHOTO,
+      "public, max-age=31536000, immutable",
+    ],
+  ])(
+    "serves %s as it is, with the headers that stop interpretation",
+    async (path, type, file, cache) => {
+      const response = await request(app.getHttpServer()).get(path).responseType("blob");
 
-    expect(response.status).toBe(200);
-    expect(response.headers["content-type"]).toBe(type);
-    expect(response.headers["x-content-type-options"]).toBe("nosniff");
-    expect(response.headers["content-security-policy"]).toBe("default-src 'none'");
-    expect(response.headers["cache-control"]).toBe("public, max-age=3600");
-    expect(response.headers["cross-origin-resource-policy"]).toBe("cross-origin");
-    expect(response.body).toEqual(file);
-  });
+      expect(response.status).toBe(200);
+      expect(response.headers["content-type"]).toBe(type);
+      expect(response.headers["x-content-type-options"]).toBe("nosniff");
+      expect(response.headers["content-security-policy"]).toBe("default-src 'none'");
+      expect(response.headers["cache-control"]).toBe(cache);
+      expect(response.headers["cross-origin-resource-policy"]).toBe("cross-origin");
+      expect(response.body).toEqual(file);
+    },
+  );
 
   it("answers HEAD with the headers of GET and no body", async () => {
     const response = await request(app.getHttpServer()).head("/media/branding/logo.png");

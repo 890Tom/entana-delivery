@@ -1,11 +1,23 @@
 import { STATUS_CODES } from "node:http";
-import { GENERIC_PROBLEM_TYPE, VALIDATION_PROBLEM_TYPE } from "@entana/contracts";
+import {
+  GENERIC_PROBLEM_TYPE,
+  PRODUCT_PHOTO_MAX_BYTES,
+  PRODUCT_PHOTO_MIN_SHORT_SIDE_PX,
+  PRODUCT_PROBLEM_TYPES,
+  VALIDATION_PROBLEM_TYPE,
+} from "@entana/contracts";
 import type { FieldError, ProblemDetails } from "@entana/contracts";
 import {
   AdminProductNotFoundError,
+  PhotoAltRequiredError,
+  PhotoCorruptError,
+  PhotoFormatNotRecognizedError,
+  PhotoTooLargeError,
+  PhotoTooSmallError,
+  ProductNotPublishableError,
   ProductOrderMismatchError,
   ProductRetiredError,
-  ProductWithoutPhotoError,
+  SkuTakenError,
 } from "../../admin-catalogue/errors/admin-catalogue-errors.js";
 import {
   AdminOrderNotFoundError,
@@ -36,6 +48,8 @@ export interface OrderFailure {
   readonly status: number;
   /** A fixed text: it never holds a value the client sent. */
   readonly detail: string;
+  /** The `type` of the problem when the status alone does not tell the client what to do. */
+  readonly problemType?: string;
   readonly errors?: readonly FieldError[];
   readonly productIds?: readonly string[];
   readonly headers?: Readonly<Record<string, string>>;
@@ -90,8 +104,60 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
   [AdminProductNotFoundError, { status: 404, detail: "The requested resource was not found." }],
   [ProductRetiredError, { status: 409, detail: "The product is retired." }],
   [
-    ProductWithoutPhotoError,
-    { status: 409, detail: "The product has no photo and cannot be restored." },
+    ProductNotPublishableError,
+    {
+      status: 422,
+      detail: "The product needs a photo and its alternative text to be visible.",
+      problemType: PRODUCT_PROBLEM_TYPES.notPublishable,
+    },
+  ],
+  [
+    SkuTakenError,
+    {
+      status: 409,
+      detail: "The sku is already used by another product.",
+      problemType: PRODUCT_PROBLEM_TYPES.skuTaken,
+    },
+  ],
+  [
+    PhotoAltRequiredError,
+    {
+      status: 422,
+      detail: "The alternative text of the photo must be set before the photo.",
+      problemType: PRODUCT_PROBLEM_TYPES.photoAltRequired,
+    },
+  ],
+  [
+    PhotoTooSmallError,
+    {
+      status: 422,
+      detail: `The photo is too small: its short side must be at least ${String(PRODUCT_PHOTO_MIN_SHORT_SIDE_PX)} px.`,
+      problemType: PRODUCT_PROBLEM_TYPES.photoTooSmall,
+    },
+  ],
+  [
+    PhotoFormatNotRecognizedError,
+    {
+      status: 415,
+      detail: "The photo must be a JPEG, PNG or WebP image.",
+      problemType: PRODUCT_PROBLEM_TYPES.photoInvalid,
+    },
+  ],
+  [
+    PhotoCorruptError,
+    {
+      status: 422,
+      detail: "The photo cannot be read or has too many pixels.",
+      problemType: PRODUCT_PROBLEM_TYPES.photoInvalid,
+    },
+  ],
+  [
+    PhotoTooLargeError,
+    {
+      status: 413,
+      detail: `The photo is over ${String(PRODUCT_PHOTO_MAX_BYTES / (1024 * 1024))} MB.`,
+      problemType: PRODUCT_PROBLEM_TYPES.photoTooLarge,
+    },
   ],
   [
     ProductOrderMismatchError,
@@ -118,7 +184,7 @@ export function mapOrderFailure(error: unknown): OrderFailure | undefined {
 
 export function toOrderProblem(failure: OrderFailure, instance: string): ProblemDetails {
   return {
-    type: failure.errors === undefined ? GENERIC_PROBLEM_TYPE : VALIDATION_PROBLEM_TYPE,
+    type: failure.problemType ?? validationOrGenericType(failure),
     title: STATUS_CODES[failure.status] ?? "Error",
     status: failure.status,
     detail: failure.detail,
@@ -126,4 +192,8 @@ export function toOrderProblem(failure: OrderFailure, instance: string): Problem
     ...(failure.errors === undefined ? {} : { errors: [...failure.errors] }),
     ...(failure.productIds === undefined ? {} : { productIds: [...failure.productIds] }),
   };
+}
+
+function validationOrGenericType(failure: OrderFailure): string {
+  return failure.errors === undefined ? GENERIC_PROBLEM_TYPE : VALIDATION_PROBLEM_TYPE;
 }
