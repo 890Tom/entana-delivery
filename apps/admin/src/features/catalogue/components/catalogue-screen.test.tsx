@@ -27,6 +27,34 @@ const chocolat = buildProduct(2, { name: "Chocolat", sku: "CHO-01", priceAr: 150
 const fraise = buildProduct(3, { name: "Fraise", sku: "FRA-01", available: false });
 const mangue = buildProduct(4, { name: "Mangue", sku: "MAN-01", retired: true });
 
+describe("the way to the form of a product", () => {
+  it("offers to add a product, to modify one, and shows the photo of the product", async () => {
+    const withPhoto = buildProduct(5, { name: "Mangue", image: { url: "/media/mangue.webp" } });
+    await openCatalogue({ [ROUTES.products]: () => list(vanille, withPhoto) });
+    await screen.findByText("Vanille");
+
+    expect(screen.getByRole("link", { name: t.addProduct }).getAttribute("href")).toBe(
+      "/catalogue/nouveau",
+    );
+    const photo = within(rowOf("Mangue")).getByRole("presentation", { hidden: true });
+    expect(photo.getAttribute("src")).toBe("/media/mangue.webp");
+    expect(photo.getAttribute("loading")).toBe("lazy");
+    fireEvent.click(screen.getByRole("button", { name: t.row.menu("Vanille") }));
+    const entries = screen.getAllByRole("menuitem").map((entry) => entry.textContent);
+    expect(entries).toEqual([t.row.edit, t.row.retire]);
+  });
+
+  it("opens the form of the product from its menu", async () => {
+    await openCatalogue({ [ROUTES.products]: () => list(vanille) });
+    await screen.findByText("Vanille");
+
+    fireEvent.click(screen.getByRole("button", { name: t.row.menu("Vanille") }));
+    fireEvent.click(screen.getByRole("menuitem", { name: t.row.edit }));
+
+    expect(window.location.pathname).toBe(`/catalogue/${vanille.id}`);
+  });
+});
+
 describe("the catalogue list", () => {
   it("shows the active products, the counts and the amounts", async () => {
     await openCatalogue({ [ROUTES.products]: () => list(vanille, chocolat, fraise, mangue) });

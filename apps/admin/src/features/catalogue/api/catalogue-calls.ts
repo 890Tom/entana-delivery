@@ -2,6 +2,7 @@ import { adminProductListResponseSchema, adminProductSchema } from "@entana/cont
 import type { AdminProduct, AdminProductListResponse } from "@entana/contracts";
 
 import { fetchAdmin } from "../../../data-fetching/fetch-admin";
+import type { CreateBody, UpdateBody } from "../rules/product-form";
 import type { AdminResult } from "../../../data-fetching/fetch-admin";
 import { AdminRequestError } from "../../../data-fetching/admin-request-error";
 
@@ -54,6 +55,35 @@ export function postRetire(productId: string): Promise<AdminResult<AdminProduct>
 export function postRestore(productId: string): Promise<AdminResult<AdminProduct>> {
   return fetchAdmin(
     { path: productPath(productId, "restore"), method: "POST" },
+    adminProductSchema,
+  );
+}
+
+/** Creates a product: it is retired until it is published (see `patchProduct`). */
+export function postProduct(body: CreateBody): Promise<AdminResult<AdminProduct>> {
+  return fetchAdmin({ path: PRODUCTS_API_PATH, method: "POST", body }, adminProductSchema);
+}
+
+/** Changes some fields of a product, or its `retired` (visible in the catalogue = not retired). */
+export function patchProduct(
+  productId: string,
+  body: UpdateBody | { readonly retired: boolean },
+): Promise<AdminResult<AdminProduct>> {
+  return fetchAdmin(
+    { path: `${PRODUCTS_API_PATH}/${encodeURIComponent(productId)}`, method: "PATCH", body },
+    adminProductSchema,
+  );
+}
+
+/** Sends or replaces the photo: one multipart file named "photo". */
+export function putProductPhoto(
+  productId: string,
+  photo: File,
+): Promise<AdminResult<AdminProduct>> {
+  const form = new FormData();
+  form.set("photo", photo);
+  return fetchAdmin(
+    { path: productPath(productId, "photo"), method: "PUT", body: form },
     adminProductSchema,
   );
 }

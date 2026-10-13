@@ -7,6 +7,8 @@ interface SwitchProps {
   readonly label: string;
   readonly isOn: boolean;
   readonly isDisabled?: boolean;
+  /** The id of the text that explains the switch. */
+  readonly describedBy?: string;
   readonly onToggle: () => void;
 }
 
@@ -14,13 +16,20 @@ interface SwitchProps {
  * An on/off control. Disabled, it stays focusable (`aria-disabled`) and never toggles, so the
  * focus is not lost while a change is being sent.
  */
-export function Switch({ label, isOn, isDisabled = false, onToggle }: SwitchProps): ReactElement {
+export function Switch({
+  label,
+  isOn,
+  isDisabled = false,
+  describedBy,
+  onToggle,
+}: SwitchProps): ReactElement {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={isOn}
       aria-label={label}
+      aria-describedby={describedBy}
       aria-disabled={isDisabled ? true : undefined}
       className={styles.switch}
       onClick={isDisabled ? undefined : onToggle}

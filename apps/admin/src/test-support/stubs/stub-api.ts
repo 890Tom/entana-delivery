@@ -11,7 +11,17 @@ export const ROUTES = {
   summary: "GET /api/v1/admin/orders/summary",
   products: "GET /api/v1/admin/products",
   productOrder: "PUT /api/v1/admin/products/order",
+  createProduct: "POST /api/v1/admin/products",
 } as const;
+
+/** The change of the fields of one product (and of its `retired`). */
+export const productChangeRoute = (productId: string): `PATCH /api/v1/admin/products/${string}` =>
+  `PATCH /api/v1/admin/products/${productId}`;
+
+/** The photo of one product. */
+export const productPhotoRoute = (
+  productId: string,
+): `PUT /api/v1/admin/products/${string}/photo` => `PUT /api/v1/admin/products/${productId}/photo`;
 
 /** One change of one product of the catalogue: a PATCH of availability, a retire or a restore. */
 export const productRoute = (
@@ -34,7 +44,9 @@ export type Route =
   | (typeof ROUTES)[keyof typeof ROUTES]
   | `POST /api/v1/admin/orders/${string}/transitions`
   | `GET /api/v1/admin/orders/${string}`
-  | ReturnType<typeof productRoute>;
+  | ReturnType<typeof productRoute>
+  | ReturnType<typeof productChangeRoute>
+  | ReturnType<typeof productPhotoRoute>;
 /** The second argument is the address of the call, query string included. */
 export type Handler = (
   init: RequestInit | undefined,
@@ -61,6 +73,20 @@ export function jsonResponse(body: unknown, status = 200): Response {
 export function problemResponse(status: number): Response {
   return new Response(
     JSON.stringify({ type: "about:blank", title: "SECRET-TITLE", status, detail: "SECRET-DETAIL" }),
+    { status, headers: { "Content-Type": "application/problem+json" } },
+  );
+}
+
+/** An RFC 9457 error that names one of the problems of the product form. */
+export function namedProblemResponse(status: number, problem: string): Response {
+  return new Response(
+    JSON.stringify({
+      type: `urn:entana:problem:${problem}`,
+      title: "SECRET-TITLE",
+      status,
+      detail: "SECRET-DETAIL",
+      instance: "/api/v1/admin/products",
+    }),
     { status, headers: { "Content-Type": "application/problem+json" } },
   );
 }

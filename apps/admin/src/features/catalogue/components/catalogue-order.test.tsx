@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../../i18n/texts";
@@ -14,6 +14,7 @@ import { problemResponse, ROUTES } from "../../../test-support/stubs/stub-api";
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -45,14 +46,27 @@ describe("the display order", () => {
     });
   }
 
+  // The delay before the order is sent (and the ticks of the drag) are the only timers: they are
+  // driven by hand, so that no test waits for a real second. Installed once the list is shown.
+  function useDrivenTimers(): void {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+  }
+
+  async function passTime(milliseconds: number): Promise<void> {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(milliseconds);
+    });
+  }
+
   async function moveDown(name: string, position: number, total: number): Promise<void> {
     const handle = handleOf(name, position, total);
     handle.focus();
     fireEvent.keyDown(handle, { code: "Space", key: " " });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await passTime(0);
     fireEvent.keyDown(document.activeElement ?? handle, { code: "ArrowDown", key: "ArrowDown" });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await passTime(0);
     fireEvent.keyDown(document.activeElement ?? handle, { code: "Space", key: " " });
+    await passTime(0);
   }
 
   it("sends one request with the whole order after the moves stop", async () => {
@@ -62,16 +76,14 @@ describe("the display order", () => {
       [ROUTES.productOrder]: () => list(chocolat, vanille, fraise),
     });
     await screen.findByText("Vanille");
+    useDrivenTimers();
 
     await moveDown("Vanille", 1, 3);
-    await waitFor(() => {
-      expect(namesInOrder()).toEqual(["Chocolat", "Vanille", "Fraise"]);
-    });
+    expect(namesInOrder()).toEqual(["Chocolat", "Vanille", "Fraise"]);
     expect(api.calls(ROUTES.productOrder)).toHaveLength(0);
 
-    await waitFor(() => {
-      expect(api.calls(ROUTES.productOrder)).toHaveLength(1);
-    });
+    await passTime(500);
+    expect(api.calls(ROUTES.productOrder)).toHaveLength(1);
     expect(bodyOf(api.calls(ROUTES.productOrder)[0])).toEqual({
       ids: [chocolat.id, vanille.id, fraise.id],
     });
@@ -84,19 +96,18 @@ describe("the display order", () => {
       [ROUTES.productOrder]: () => list(chocolat, fraise, vanille),
     });
     await screen.findByText("Vanille");
+    useDrivenTimers();
 
     await moveDown("Vanille", 1, 3);
-    await waitFor(() => {
-      expect(namesInOrder()).toEqual(["Chocolat", "Vanille", "Fraise"]);
-    });
+    expect(namesInOrder()).toEqual(["Chocolat", "Vanille", "Fraise"]);
+    await passTime(300);
     await moveDown("Vanille", 2, 3);
-    await waitFor(() => {
-      expect(namesInOrder()).toEqual(["Chocolat", "Fraise", "Vanille"]);
-    });
+    expect(namesInOrder()).toEqual(["Chocolat", "Fraise", "Vanille"]);
+    await passTime(300);
+    expect(api.calls(ROUTES.productOrder)).toHaveLength(0);
 
-    await waitFor(() => {
-      expect(api.calls(ROUTES.productOrder)).toHaveLength(1);
-    });
+    await passTime(200);
+    expect(api.calls(ROUTES.productOrder)).toHaveLength(1);
     expect(bodyOf(api.calls(ROUTES.productOrder)[0])).toEqual({
       ids: [chocolat.id, fraise.id, vanille.id],
     });
@@ -106,13 +117,14 @@ describe("the display order", () => {
     giveRowsALayout();
     const api = await openCatalogue({ [ROUTES.products]: () => list(vanille, chocolat) });
     await screen.findByText("Vanille");
+    useDrivenTimers();
 
     const handle = handleOf("Vanille", 1, 2);
     handle.focus();
     fireEvent.keyDown(handle, { code: "Space", key: " " });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await passTime(0);
     fireEvent.keyDown(document.activeElement ?? handle, { code: "Escape", key: "Escape" });
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await passTime(600);
 
     expect(namesInOrder()).toEqual(["Vanille", "Chocolat"]);
     expect(api.calls(ROUTES.productOrder)).toHaveLength(0);
@@ -129,8 +141,11 @@ describe("the display order", () => {
       [ROUTES.productOrder]: () => problemResponse(409),
     });
     await screen.findByText("Vanille");
+    useDrivenTimers();
 
     await moveDown("Vanille", 1, 2);
+    await passTime(500);
+    vi.useRealTimers();
 
     await screen.findByText(t.notices.orderFailed);
     await waitFor(() => {
@@ -163,8 +178,11 @@ describe("the display order", () => {
       [ROUTES.productOrder]: () => list(chocolat, vanille),
     });
     await screen.findByText("Vanille");
+    useDrivenTimers();
 
     await moveDown("Vanille", 1, 2);
+    expect(api.calls(ROUTES.productOrder)).toHaveLength(0);
+    vi.useRealTimers();
     fireEvent.click(screen.getByRole("link", { name: texts.orders.title }));
 
     await waitFor(() => {

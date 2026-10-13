@@ -8,12 +8,16 @@ import visuallyHidden from "../../../components/visually-hidden/visually-hidden.
 import { texts } from "../../../i18n/texts";
 import { useNow } from "../../../clock/use-now";
 import { OrderIcon } from "../../../order-display/order-icons";
+import { CATALOGUE_NEW_PATH } from "../../../routes";
 import { useCatalogueScreen } from "../hooks/use-catalogue-screen";
 import type { CatalogueScreenModel } from "../hooks/use-catalogue-screen";
 import { CATALOGUE_TABS } from "../rules/catalogue-view";
 import type { CatalogueCounts } from "../rules/catalogue-view";
 
 import styles from "./catalogue-screen.module.css";
+import { CatalogueNoticeView } from "./catalogue-notice-view";
+import { FormLink } from "./form-buttons";
+import { CatalogueIcon } from "./catalogue-icons";
 import { ProductTable } from "./product-table";
 
 const t = texts.catalogue;
@@ -38,21 +42,6 @@ function tabsOf(counts: CatalogueCounts): readonly FilterTab<(typeof CATALOGUE_T
     }
     return { key, label };
   });
-}
-
-function ScreenNotice({ model }: { model: CatalogueScreenModel }): ReactElement | null {
-  const notice = model.notice;
-  if (notice === null) {
-    return null;
-  }
-  // An information is announced politely; an error already is an alert.
-  return notice.tone === "info" ? (
-    <div role="status">
-      <Notice tone="info">{notice.text}</Notice>
-    </div>
-  ) : (
-    <Notice tone="error">{notice.text}</Notice>
-  );
 }
 
 function SearchField({ model }: { model: CatalogueScreenModel }): ReactElement {
@@ -134,9 +123,17 @@ export function CatalogueScreen(): ReactElement {
   const model = useCatalogueScreen();
   return (
     <div className={styles.screen}>
-      <header>
-        <h1 className={styles.title}>{t.title}</h1>
-        {model.status === "ready" && <p className={styles.summary}>{summaryOf(model.counts)}</p>}
+      <header className={styles.header}>
+        <div>
+          <h1 className={styles.title}>{t.title}</h1>
+          {model.status === "ready" && <p className={styles.summary}>{summaryOf(model.counts)}</p>}
+        </div>
+        <FormLink
+          href={CATALOGUE_NEW_PATH}
+          label={t.addProduct}
+          variant="primary"
+          icon={<CatalogueIcon name="plus" size={20} />}
+        />
       </header>
       <div className={styles.filters}>
         <FilterTabs
@@ -147,7 +144,7 @@ export function CatalogueScreen(): ReactElement {
         />
         <SearchField model={model} />
       </div>
-      <ScreenNotice model={model} />
+      <CatalogueNoticeView notice={model.notice} />
       <Body model={model} />
     </div>
   );

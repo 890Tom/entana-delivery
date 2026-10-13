@@ -1,18 +1,19 @@
 import type { AdminProduct } from "@entana/contracts";
 import { useRef, useState } from "react";
+import { useLocation } from "wouter";
 import type { CSSProperties, ReactElement, ReactNode, Ref } from "react";
-import { createPortal } from "react-dom";
 
 import { Pill } from "../../../components/pill/pill";
 import { RowMenu } from "../../../components/row-menu/row-menu";
 import type { RowMenuItem } from "../../../components/row-menu/row-menu";
 import { Switch } from "../../../components/switch/switch";
 import { texts } from "../../../i18n/texts";
-import { ModalDialog } from "../../order-detail/components/modal-dialog";
 import { formatAmount } from "../../../order-display/format-order";
+import { catalogueProductPath } from "../../../routes";
 import { daysUnavailable } from "../rules/unavailable-since";
 
 import { CatalogueIcon } from "./catalogue-icons";
+import { RetireDialog } from "./retire-dialog";
 import styles from "./product-row.module.css";
 
 const t = texts.catalogue;
@@ -62,41 +63,20 @@ function AvailabilityCell({
   );
 }
 
-function RetireDialog({
-  product,
-  isBusy,
-  onCancel,
-  onConfirm,
-}: {
-  product: AdminProduct;
-  isBusy: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-}): ReactElement {
-  // In the body: a dialog inside a table row would be invalid markup, and a transformed row
-  // (while it is dragged) would become the reference of its fixed position.
-  return createPortal(
-    <ModalDialog
-      title={t.dialog.title(product.name)}
-      cancelLabel={t.dialog.cancel}
-      confirmLabel={t.dialog.confirm}
-      isBusy={isBusy}
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-    >
-      <p>{t.dialog.body}</p>
-    </ModalDialog>,
-    document.body,
-  );
-}
-
 function menuItemsFor(
   product: AdminProduct,
   actions: RowActions,
-  onAskRetire: () => void,
+  handlers: { onEdit: () => void; onAskRetire: () => void },
 ): readonly RowMenuItem[] {
+  const edit: RowMenuItem = {
+    key: "edit",
+    label: t.row.edit,
+    tone: "normal",
+    onSelect: handlers.onEdit,
+  };
   if (product.retired) {
     return [
+      edit,
       {
         key: "restore",
         label: t.row.restore,
@@ -105,7 +85,24 @@ function menuItemsFor(
       },
     ];
   }
-  return [{ key: "retire", label: t.row.retire, tone: "danger", onSelect: onAskRetire }];
+  return [
+    edit,
+    { key: "retire", label: t.row.retire, tone: "danger", onSelect: handlers.onAskRetire },
+  ];
+}
+
+function useMenuItems(
+  product: AdminProduct,
+  actions: RowActions,
+  onAskRetire: () => void,
+): readonly RowMenuItem[] {
+  const [, navigate] = useLocation();
+  return menuItemsFor(product, actions, {
+    onEdit: () => {
+      navigate(catalogueProductPath(product.id));
+    },
+    onAskRetire,
+  });
 }
 
 function RowActionsCell({
@@ -114,7 +111,7 @@ function RowActionsCell({
 }: Pick<ProductRowViewProps, "product" | "actions">): ReactElement {
   const [isConfirming, setIsConfirming] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const items = menuItemsFor(product, actions, () => {
+  const items = useMenuItems(product, actions, () => {
     setIsConfirming(true);
   });
   return (
@@ -162,7 +159,11 @@ export function ProductRowView({
       <td className={styles.handleCell}>{handle}</td>
       <td className={styles.thumbCell}>
         <span className={styles.thumb} aria-hidden="true">
-          <CatalogueIcon name="image" size={24} />
+          {product.image === null ? (
+            <CatalogueIcon name="image" size={24} />
+          ) : (
+            <img src={product.image.url} alt="" loading="lazy" className={styles.photo} />
+          )}
         </span>
       </td>
       <td className={styles.productCell}>

@@ -4,6 +4,14 @@
   gap: var(--space-5);
 }
 
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
 .title {
   margin: 0;
   font: var(--font-title);

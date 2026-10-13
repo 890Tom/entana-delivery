@@ -11,11 +11,20 @@ const PROFILE = {
   displayName: "Hery Rakoto",
 };
 
-/** The application on the catalogue screen, signed in, with the API stubbed at the network. */
-export async function openCatalogue(handlers: Parameters<typeof stubApi>[0]): Promise<ApiStub> {
-  window.history.replaceState(null, "", "/catalogue");
+/** The application at an address, signed in, with the API stubbed at the network. */
+export async function openAt(
+  path: string,
+  heading: string,
+  handlers: Parameters<typeof stubApi>[0],
+): Promise<ApiStub> {
+  window.history.replaceState(null, "", path);
   const api = stubApi({ [ROUTES.me]: () => jsonResponse(PROFILE), ...handlers });
   render(<App />);
-  await screen.findByRole("heading", { name: texts.catalogue.title });
+  await screen.findByRole("heading", { name: heading });
   return api;
+}
+
+/** The application on the catalogue screen, signed in, with the API stubbed at the network. */
+export function openCatalogue(handlers: Parameters<typeof stubApi>[0]): Promise<ApiStub> {
+  return openAt("/catalogue", texts.catalogue.title, handlers);
 }

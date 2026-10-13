@@ -132,6 +132,59 @@ describe("fetchAdmin", () => {
       body: JSON.stringify({ email: "a@b.mg", password: "p" }),
     });
   });
+
+  describe("the problem of a refusal", () => {
+    const problemBody = (type: string): object => ({
+      type,
+      title: "SECRET-TITLE",
+      status: 409,
+      detail: "SECRET-DETAIL",
+      instance: "/api/v1/admin/products",
+    });
+
+    it("names a known problem by its key, and nothing else of the answer", async () => {
+      stubFetch(() =>
+        Promise.resolve(jsonResponse(problemBody("urn:entana:problem:sku_taken"), 409)),
+      );
+
+      const result = await fetchAdmin({ path: "/x" }, adminProfileSchema);
+
+      expect(result).toEqual({ kind: "conflict", problem: "skuTaken" });
+    });
+
+    it("names the problem of a status that has no kind of its own", async () => {
+      stubFetch(() =>
+        Promise.resolve(jsonResponse(problemBody("urn:entana:problem:photo_too_large"), 413)),
+      );
+
+      const result = await fetchAdmin({ path: "/x" }, adminProfileSchema);
+
+      expect(result).toEqual({ kind: "failure", problem: "photoTooLarge" });
+    });
+
+    it("ignores a problem type it does not know", async () => {
+      stubFetch(() => Promise.resolve(jsonResponse(problemBody("urn:other:problem"), 409)));
+
+      const result = await fetchAdmin({ path: "/x" }, adminProfileSchema);
+
+      expect(result).toEqual({ kind: "conflict" });
+    });
+  });
+
+  it("sends a form as it is, without a JSON content type", async () => {
+    let seen: RequestInit | undefined;
+    stubFetch((init) => {
+      seen = init;
+      return Promise.resolve(jsonResponse(PROFILE));
+    });
+    const form = new FormData();
+    form.set("photo", new File(["x"], "photo.png", { type: "image/png" }));
+
+    await fetchAdmin({ path: "/x", method: "PUT", body: form }, adminProfileSchema);
+
+    expect(seen?.body).toBe(form);
+    expect(seen?.headers).toBeUndefined();
+  });
 });
 
 describe("sendAdminAction", () => {

@@ -2,6 +2,7 @@ import type { AdminProduct } from "@entana/contracts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { fetchProducts } from "../api/catalogue-calls";
+import { upsertProduct } from "../rules/product-list";
 
 const PRODUCTS_KEY = ["admin-products"] as const;
 
@@ -40,5 +41,29 @@ export function useProducts(): ProductsModel {
       );
     },
     reload,
+  };
+}
+
+export interface ProductsCache {
+  /** Puts the server's version of a product in the list held in memory, if the list is held. */
+  readonly upsert: (product: AdminProduct) => void;
+  /** Marks the list as old: it is read again the next time a screen needs it. */
+  readonly invalidate: () => void;
+}
+
+/** The list held in memory, for a screen that does not read it (the form of a new product). */
+export function useProductsCache(): ProductsCache {
+  const queryClient = useQueryClient();
+  return {
+    upsert: (product) => {
+      queryClient.setQueryData(PRODUCTS_KEY, (current: { products: AdminProduct[] } | undefined) =>
+        current === undefined
+          ? current
+          : { products: [...upsertProduct(current.products, product)] },
+      );
+    },
+    invalidate: () => {
+      void queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY });
+    },
   };
 }

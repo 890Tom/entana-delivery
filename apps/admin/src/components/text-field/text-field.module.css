@@ -81,3 +81,13 @@
   margin: 0;
   color: var(--color-error);
 }
+
+.suffix {
+  font: var(--font-body);
+  color: var(--color-text-muted);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+}

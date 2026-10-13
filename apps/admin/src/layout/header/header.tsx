@@ -19,7 +19,8 @@ interface HeaderProps {
  */
 export function Header({ isLoggingOut, onLogout }: HeaderProps): ReactElement {
   const [isOnOrders] = useRoute(ORDERS_PATH);
-  const [isOnCatalogue] = useRoute(CATALOGUE_PATH);
+  // The forms of a product belong to the catalogue: its link stays the current one there.
+  const [isOnCatalogue] = useRoute(`${CATALOGUE_PATH}/*?`);
   return (
     <header className={styles.header}>
       <div className={styles.inner}>

@@ -7,13 +7,20 @@ import { AdminShell } from "../../../layout/admin-shell";
 import { AuthSkeleton } from "../../../layout/auth-skeleton/auth-skeleton";
 import { NotFound } from "../../../layout/not-found/not-found";
 import {
+  CATALOGUE_NEW_PATH,
   CATALOGUE_PATH,
+  CATALOGUE_PRODUCT_PATTERN,
   HOME_PATH,
   LOGIN_PATH,
   ORDER_PATH_PATTERN,
   ORDERS_PATH,
 } from "../../../routes";
 import { CatalogueScreen } from "../../catalogue/components/catalogue-screen";
+import {
+  EditProductScreen,
+  NewProductScreen,
+} from "../../catalogue/components/product-form-screen";
+import { CatalogueFlashProvider } from "../../catalogue/notice/catalogue-flash";
 import { OrderDetailScreen } from "../../order-detail/components/order-detail-screen";
 import { OrdersScreen } from "../../orders/components/orders-screen";
 import { useSession } from "../hooks/use-session";
@@ -43,17 +50,21 @@ export function ProtectedArea(): ReactElement {
       );
     case "authenticated":
       return (
-        <AdminShell>
-          <Switch>
-            <Route path={HOME_PATH}>
-              <Redirect to={ORDERS_PATH} replace />
-            </Route>
-            <Route path={ORDERS_PATH} component={OrdersScreen} />
-            <Route path={ORDER_PATH_PATTERN} component={OrderDetailScreen} />
-            <Route path={CATALOGUE_PATH} component={CatalogueScreen} />
-            <Route component={NotFound} />
-          </Switch>
-        </AdminShell>
+        <CatalogueFlashProvider>
+          <AdminShell>
+            <Switch>
+              <Route path={HOME_PATH}>
+                <Redirect to={ORDERS_PATH} replace />
+              </Route>
+              <Route path={ORDERS_PATH} component={OrdersScreen} />
+              <Route path={ORDER_PATH_PATTERN} component={OrderDetailScreen} />
+              <Route path={CATALOGUE_PATH} component={CatalogueScreen} />
+              <Route path={CATALOGUE_NEW_PATH} component={NewProductScreen} />
+              <Route path={CATALOGUE_PRODUCT_PATTERN} component={EditProductScreen} />
+              <Route component={NotFound} />
+            </Switch>
+          </AdminShell>
+        </CatalogueFlashProvider>
       );
   }
 }
