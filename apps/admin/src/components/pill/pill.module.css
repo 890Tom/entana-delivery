@@ -20,3 +20,9 @@
   background: var(--color-surface-muted);
   border-color: var(--color-border-input);
 }
+
+.error {
+  color: var(--color-error);
+  background: var(--color-surface);
+  border-color: var(--color-error);
+}

@@ -3,13 +3,29 @@ import { Link, useRoute } from "wouter";
 
 import { ShopLogo } from "../../components/shop-logo/shop-logo";
 import { texts } from "../../i18n/texts";
-import { CATALOGUE_PATH, HOME_PATH, ORDERS_PATH } from "../../routes";
+import { CATALOGUE_PATH, HOME_PATH, ORDERS_PATH, RESELLERS_PATH } from "../../routes";
 
 import styles from "./header.module.css";
 
 interface HeaderProps {
   readonly isLoggingOut: boolean;
   readonly onLogout: () => void;
+}
+
+function SectionLink({
+  href,
+  isCurrent,
+  children,
+}: {
+  href: string;
+  isCurrent: boolean;
+  children: string;
+}): ReactElement {
+  return (
+    <Link href={href} className={styles.link} aria-current={isCurrent ? "page" : undefined}>
+      {children}
+    </Link>
+  );
 }
 
 /**
@@ -19,8 +35,9 @@ interface HeaderProps {
  */
 export function Header({ isLoggingOut, onLogout }: HeaderProps): ReactElement {
   const [isOnOrders] = useRoute(ORDERS_PATH);
-  // The forms of a product belong to the catalogue: its link stays the current one there.
+  // The forms of a product or of a reseller belong to their section: its link stays the current one.
   const [isOnCatalogue] = useRoute(`${CATALOGUE_PATH}/*?`);
+  const [isOnResellers] = useRoute(`${RESELLERS_PATH}/*?`);
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
@@ -28,20 +45,15 @@ export function Header({ isLoggingOut, onLogout }: HeaderProps): ReactElement {
           <ShopLogo size="header" />
         </Link>
         <nav aria-label={texts.orders.navLabel} className={styles.nav}>
-          <Link
-            href={ORDERS_PATH}
-            className={styles.link}
-            aria-current={isOnOrders ? "page" : undefined}
-          >
+          <SectionLink href={ORDERS_PATH} isCurrent={isOnOrders}>
             {texts.orders.title}
-          </Link>
-          <Link
-            href={CATALOGUE_PATH}
-            className={styles.link}
-            aria-current={isOnCatalogue ? "page" : undefined}
-          >
+          </SectionLink>
+          <SectionLink href={CATALOGUE_PATH} isCurrent={isOnCatalogue}>
             {texts.catalogue.title}
-          </Link>
+          </SectionLink>
+          <SectionLink href={RESELLERS_PATH} isCurrent={isOnResellers}>
+            {texts.resellers.title}
+          </SectionLink>
         </nav>
         <button
           type="button"

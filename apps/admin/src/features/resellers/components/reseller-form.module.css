@@ -1,0 +1,125 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.back {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--size-touch-min);
+  font: var(--font-body-strong);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.heading {
+  margin: 0;
+  font: var(--font-title);
+}
+
+/* Two columns, as on the owner's capture: information and publication, then the position. */
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 8fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.card {
+  gap: var(--space-4);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.summary {
+  margin: 0;
+  font: var(--font-body-strong);
+  color: var(--color-error);
+}
+
+.consent {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: var(--size-touch-min);
+  padding: 0 var(--space-3);
+  font: var(--font-body);
+  cursor: pointer;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.consent:has(input:checked) {
+  background: var(--color-highlight-soft);
+  border: var(--border-width-strong) solid var(--color-highlight-strong);
+}
+
+.consent input {
+  inline-size: var(--size-checkbox);
+  block-size: var(--size-checkbox);
+  accent-color: var(--color-surface-inverse);
+}
+
+.consent[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+.help {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.verification {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.verificationTitle {
+  margin: 0;
+  font: var(--font-body-strong);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* The deletion sits apart, at the end of the line. */
+.delete {
+  margin-inline-start: auto;
+}

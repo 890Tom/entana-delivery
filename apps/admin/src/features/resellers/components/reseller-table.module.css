@@ -1,0 +1,64 @@
+.frame {
+  overflow: hidden;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.head {
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+.head th {
+  padding: var(--space-3);
+  font: var(--font-body-strong);
+  text-align: start;
+}
+
+.row {
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.row > td {
+  padding: var(--space-3);
+  vertical-align: middle;
+}
+
+/* Not visible on the customer map: a tinted row and a muted name. */
+.dimmed {
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+.name {
+  font: var(--font-body-strong);
+  color: inherit;
+  text-decoration: none;
+}
+
+.name:hover {
+  text-decoration: underline;
+}
+
+.verification {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.visible {
+  font: var(--font-body-strong);
+}
+
+.visibility {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}

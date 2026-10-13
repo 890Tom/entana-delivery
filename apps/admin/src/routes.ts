@@ -28,3 +28,17 @@ export const CATALOGUE_PRODUCT_PATTERN = `${CATALOGUE_PATH}/:id`;
 export function catalogueProductPath(productId: string): string {
   return `${CATALOGUE_PATH}/${encodeURIComponent(productId)}`;
 }
+
+/** The resellers, the third section of the administration. */
+export const RESELLERS_PATH = "/revendeurs";
+
+/** The form of a new reseller. */
+export const RESELLERS_NEW_PATH = `${RESELLERS_PATH}/nouveau`;
+
+/** The pattern of the form of one reseller. */
+export const RESELLER_PATTERN = `${RESELLERS_PATH}/:id`;
+
+/** The address of the form of one reseller. */
+export function resellerPath(resellerId: string): string {
+  return `${RESELLERS_PATH}/${encodeURIComponent(resellerId)}`;
+}
