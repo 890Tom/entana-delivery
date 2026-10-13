@@ -50,6 +50,7 @@ export interface AdminOrdersHarness {
   readonly post: (path: string, body: unknown, cookie?: string | null) => request.Test;
   readonly put: (path: string, body: unknown, cookie?: string | null) => request.Test;
   readonly patch: (path: string, body: unknown, cookie?: string | null) => request.Test;
+  readonly delete: (path: string, cookie?: string | null) => request.Test;
   /** A phone number per call keeps a customer under the limit of recent orders. */
   readonly placeOrder: (
     quantity?: number,
@@ -84,6 +85,7 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
   const clean = async (): Promise<void> => {
     await resetOrderData(client);
     await client.auditLog.deleteMany();
+    await client.reseller.deleteMany();
     await client.adminSession.deleteMany();
     await client.staffUser.deleteMany({ where: { email: { not: null } } });
     for (const file of readdirSync(join(mediaRoot, "products"))) {
@@ -172,6 +174,14 @@ export function useAdminOrdersHarness(): AdminOrdersHarness {
     get: (path, sent) =>
       withCookie(
         request(getApp().getHttpServer()).get(path).set("X-Forwarded-For", nextAddress()),
+        sent,
+      ),
+    delete: (path, sent) =>
+      withCookie(
+        request(getApp().getHttpServer())
+          .delete(path)
+          .set("X-Forwarded-For", nextAddress())
+          .set("Origin", ADMIN_TEST_ORIGIN),
         sent,
       ),
     post: (path, body, sent) => sendWithBody("post", path, body, sent),

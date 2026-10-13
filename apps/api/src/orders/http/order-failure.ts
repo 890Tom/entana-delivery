@@ -4,6 +4,7 @@ import {
   PRODUCT_PHOTO_MAX_BYTES,
   PRODUCT_PHOTO_MIN_SHORT_SIDE_PX,
   PRODUCT_PROBLEM_TYPES,
+  RESELLER_PROBLEM_TYPES,
   VALIDATION_PROBLEM_TYPE,
 } from "@entana/contracts";
 import type { FieldError, ProblemDetails } from "@entana/contracts";
@@ -19,6 +20,10 @@ import {
   ProductRetiredError,
   SkuTakenError,
 } from "../../admin-catalogue/errors/admin-catalogue-errors.js";
+import {
+  AdminResellerNotFoundError,
+  ResellerNotPublishableError,
+} from "../../admin-resellers/errors/admin-reseller-errors.js";
 import {
   AdminOrderNotFoundError,
   OrderTransitionRefusedError,
@@ -162,6 +167,16 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
   [
     ProductOrderMismatchError,
     { status: 409, detail: "The list is not the set of the products that are not retired." },
+  ],
+  // The resellers of the administration: an unknown and a malformed id answer alike.
+  [AdminResellerNotFoundError, { status: 404, detail: "The requested resource was not found." }],
+  [
+    ResellerNotPublishableError,
+    {
+      status: 422,
+      detail: "The reseller needs the consent of its owner to be visible.",
+      problemType: RESELLER_PROBLEM_TYPES.notPublishable,
+    },
   ],
   [
     UnsupportedContentTypeError,

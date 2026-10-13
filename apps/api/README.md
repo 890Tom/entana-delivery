@@ -643,3 +643,38 @@ leaves its empty `test_<hex>` database: list it with `\l test_*` in `psql` and r
 
 Tests need the compiled `@entana/contracts` and `@entana/database` (Turborepo builds them first
 when you run the commands from the root).
+
+### Resellers (administration)
+
+Five routes under `/api/v1/admin/resellers`, closed by the guard above (`401` without a session).
+Every answer carries `Cache-Control: no-store`. No rate limiting. No public route yet.
+
+| Route                                     | Does                                                                      |
+| ----------------------------------------- | ------------------------------------------------------------------------- |
+| `GET /api/v1/admin/resellers`             | Every reseller, by `neighborhood` then `name`: `200` with `{ resellers }` |
+| `POST /api/v1/admin/resellers`            | Creates a reseller, verified now: `201` with the reseller                 |
+| `PATCH /api/v1/admin/resellers/:id`       | Partial change (at least one field, strict): `200` with the reseller      |
+| `POST /api/v1/admin/resellers/:id/verify` | No body: verified now, always audited: `200` with the reseller            |
+| `DELETE /api/v1/admin/resellers/:id`      | Removed for good (ADR 0020): `204` without a body                         |
+
+A reseller is `{ id, name, neighborhood, landmark, latitude, longitude, consentGiven, visible,
+verifiedAt }` (`verifiedAt` is `null` for a row that was never verified). The names of the contract
+map to the columns of `reseller`: `neighborhood` is `area`, `landmark` is `landmark_text`,
+`latitude` and `longitude` are `lat` and `lng`, `visible` is `active`, and `consentGiven` is whether
+`consent_at` is set (giving the consent dates it now, keeping an existing date; withdrawing it clears
+the date).
+
+- **Fields.** `name` 1 to 60, `neighborhood` 1 to 40, `landmark` 1 to 120 (required), `latitude` -90
+  to 90 and `longitude` -180 to 180 (required, never cleared; together in a `PATCH`), `consentGiven`
+  and `visible` (default `false` at creation). Text is trimmed. An unknown field, a missing
+  required field or an empty body is a `400`.
+- **Visible needs the consent.** `visible: true` without `consentGiven: true` (at creation or
+  after the change), and withdrawing the consent of a visible reseller, answer `422` with the
+  type `urn:entana:problem:reseller_not_publishable` and a fixed detail. To withdraw the consent, hide
+  the reseller in the same request (`visible: false`).
+- **Verification.** `isResellerVerificationStale` (contracts) tells a verification older than 90
+  days, or missing, that is due again.
+- **Audit** (`entity = "reseller"`, same transaction, no name, position or phone): `created`,
+  `updated` (`diff.fields`), `consent_changed`, `published`, `unpublished` (before and after of the
+  flag), `verified` and `deleted` (the id only). Nothing is written when no value changes.
+- An unknown or malformed id is one `404`.

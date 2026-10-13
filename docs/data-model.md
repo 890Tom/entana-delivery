@@ -1,6 +1,6 @@
 # Data model
 
-This document is the reference for the database schema. It describes 13 tables, grouped by domain. Money is an integer number of ariary (no decimals). Timestamps are `timestamptz` stored in UTC. The delivery date is a plain day (`date`), interpreted in the `Indian/Antananarivo` time zone by the application. Identifiers are UUIDs. Rows are never deleted (except the sessions of the administration, see `admin_session`): products, axes, places and resellers are deactivated or archived, so history stays intact. Foreign keys use `ON DELETE RESTRICT`.
+This document is the reference for the database schema. It describes 13 tables, grouped by domain. Money is an integer number of ariary (no decimals). Timestamps are `timestamptz` stored in UTC. The delivery date is a plain day (`date`), interpreted in the `Indian/Antananarivo` time zone by the application. Identifiers are UUIDs. Rows are never deleted (except the sessions of the administration, see `admin_session`, and the resellers, see ADR 0020): products, axes and places are deactivated or archived, so history stays intact. Foreign keys use `ON DELETE RESTRICT`.
 
 ## Orders
 
@@ -166,6 +166,8 @@ A session is usable while it is not revoked, before `expires_at`, and seen less 
 Only actions outside orders (catalogue, axes and places, resellers, settings, accounts, logins). Everything about an order goes to `order_event`.
 
 Written so far, with `entity = "product"`: `product.created`, `product.updated` (`diff.fields` lists the changed fields, `diff.priceAr` the old and new price), `product.availability_changed`, `product.retired`, `product.restored` (`diff` holds the before and after of the flag: `available` or `active`) and `product.photo_replaced`.
+
+Written so far, with `entity = "reseller"`: `reseller.created` (`diff` holds `visible` and `consentGiven`), `reseller.updated` (`diff.fields` lists the changed fields), `reseller.consent_changed` and `reseller.published` / `reseller.unpublished` (`diff` holds the before and after of the flag), `reseller.verified` and `reseller.deleted` (`diff` is empty: the entry keeps the id only, no name and no position).
 
 ### `reseller`
 | Column | Type | Rules |
