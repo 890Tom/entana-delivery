@@ -12,6 +12,7 @@ import { HealthModule } from "./health/health.module.js";
 import { InstanceModule } from "./instance/instance.module.js";
 import { MediaModule } from "./media/media.module.js";
 import { OrdersModule } from "./orders/orders.module.js";
+import { ResellersModule } from "./resellers/resellers.module.js";
 import { TrackingModule } from "./tracking/tracking.module.js";
 import { createLoggingModule } from "./logging/create-logging-module.js";
 
@@ -25,6 +26,7 @@ export class AppModule {
         createLoggingModule(config, logDestination),
         HealthModule.register(config),
         CatalogModule.register(config),
+        ResellersModule.register(config),
         InstanceModule.register(config),
         MediaModule.register(config),
         OrdersModule.register(config),

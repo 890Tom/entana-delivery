@@ -432,6 +432,24 @@ internal `sku` is never selected (see [ADR 0016](../../docs/adr/0016-public-prod
   including a corrupt row, is the generic `500` (no product name, id or column in the answer, and
   none in the logs).
 
+## Resellers endpoint
+
+`GET /api/v1/resellers` is public (no authentication, no query parameter, no body). It returns the
+resellers that are visible (`active = true`; the database already guarantees their consent), as
+`{ "resellers": [...] }`: the shape is `resellerListResponseSchema` of `@entana/contracts`. Each
+reseller has exactly `id`, `name`, `neighborhood`, `landmark`, `latitude` and `longitude`. The
+consent, the visibility and the verification date are never selected. A hidden reseller is absent,
+and a deleted one no longer exists (see [ADR 0020](../../docs/adr/0020-resellers-are-deleted-for-good.md)).
+The order is neighborhood, then name, then id. An empty list answers `{ "resellers": [] }`.
+
+- **No pagination:** the whole list is returned on purpose, for a shop-sized list.
+- **Cache:** `Cache-Control: public, max-age=30` on a success (the constant is
+  `RESELLERS_CACHE_CONTROL`, the same value as the catalogue; the value is a product decision to
+  confirm). Every error answer carries `Cache-Control: no-store`.
+- **No rate limiting**, like the public catalogue.
+- **Errors:** an unreachable database is the fixed `503` of "Database errors"; anything else is the
+  generic `500`. OpenAPI tag `resellers`, operation `listResellers`.
+
 ## Order endpoint
 
 `POST /api/v1/orders` creates an order. Public, no account. Documented in the OpenAPI page
@@ -647,7 +665,7 @@ when you run the commands from the root).
 ### Resellers (administration)
 
 Five routes under `/api/v1/admin/resellers`, closed by the guard above (`401` without a session).
-Every answer carries `Cache-Control: no-store`. No rate limiting. No public route yet.
+Every answer carries `Cache-Control: no-store`. No rate limiting. The public list is in "Resellers endpoint" below.
 
 | Route                                     | Does                                                                      |
 | ----------------------------------------- | ------------------------------------------------------------------------- |
