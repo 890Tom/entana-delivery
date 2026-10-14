@@ -696,3 +696,34 @@ the date).
   `updated` (`diff.fields`), `consent_changed`, `published`, `unpublished` (before and after of the
   flag), `verified` and `deleted` (the id only). Nothing is written when no value changes.
 - An unknown or malformed id is one `404`.
+
+### Delivery (administration)
+
+Five routes under `/api/v1/admin/delivery`, closed by the guard above (`401` without a session).
+Every answer carries `Cache-Control: no-store`. No rate limiting. The axes and the places are read
+only: their writes are not part of the API yet. The rules of the fee are those of
+`@entana/contracts` (`resolveDeliveryAxis`, `computeDeliveryFee`), never rewritten here.
+
+| Route                                   | Does                                                                     |
+| --------------------------------------- | ------------------------------------------------------------------------ |
+| `GET /api/v1/admin/delivery/axes`       | Every axis (active or not) by `rank`: `200` with `{ axes }`              |
+| `GET /api/v1/admin/delivery/places`     | The active places by `name`, not paginated: `200` with `{ places }`      |
+| `GET /api/v1/admin/delivery/settings`   | `200` with `{ outOfAxisFeeAr, freeDeliveryMinPieces, outOfAxisMessage }` |
+| `PATCH /api/v1/admin/delivery/settings` | Partial change (at least one field, strict): `200` with the settings     |
+| `GET /api/v1/admin/delivery/resolve`    | Tests an address: `200` with `{ match, feeAr, reason }`                  |
+
+- **Axes.** An axis is `{ id, name, rank, colorKey, active, places }`. Its places come in the order
+  of their positions, inactive ones included (`active: false`), each with `alsoIn`: the `{ id, name }`
+  of the other axes (active or not, by rank) that hold the place, never the axis itself.
+- **Settings.** `outOfAxisFeeAr` is an integer from 0 to `PRODUCT_PRICE_MAX_AR`,
+  `freeDeliveryMinPieces` an integer from 1 to `MAX_FREE_DELIVERY_MIN_PIECES` (an order holds at
+  most 30 lines of 99 pieces: 2 970), `outOfAxisMessage` 1 to 200 characters once trimmed. An unknown
+  field, an empty body or a value out of bounds is a `400`.
+- **Audit** (`delivery_settings.updated`, `entity = "shop_setting"`, same transaction): `diff.fields`
+  names the changed fields; the two numbers also carry `{ from, to }`; the message is named, never
+  written. The row of the settings has an integer key, so `entity_id` is the fixed uuid
+  `00000000-0000-0000-0000-000000000001`. Nothing is written when no value changes.
+- **Test of an address.** Query: `latitude` (-90 to 90) and `longitude` (-180 to 180), both required,
+  and `pieces` (integer from 1 to 2 970, default 1). Anything else, or a value out of bounds, is a
+  `400`. `match` is `null` or `{ axis: { id, name, colorKey }, place: { id, name } }`; `reason` is
+  `axis`, `quantity` or `out_of_axis`. The coordinates are not stored or logged.
