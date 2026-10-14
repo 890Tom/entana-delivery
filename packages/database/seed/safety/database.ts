@@ -18,6 +18,9 @@ const SEEDED_TABLES = [
   "shop_setting",
 ] as const;
 
+// Created by the migrations with its default values, so it does not make a database "not empty".
+const TABLES_FILLED_BY_MIGRATIONS: readonly string[] = ["shop_setting"];
+
 const UNDEFINED_TABLE = "42P01";
 
 function isUndefinedTable(error: unknown): boolean {
@@ -28,6 +31,7 @@ async function tablesWithRows(db: Client): Promise<string[]> {
   const filled: string[] = [];
   try {
     for (const table of SEEDED_TABLES) {
+      if (TABLES_FILLED_BY_MIGRATIONS.includes(table)) continue;
       const result = await db.query<{ filled: boolean }>(
         `SELECT EXISTS (SELECT 1 FROM "${table}") AS filled`,
       );

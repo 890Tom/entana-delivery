@@ -192,3 +192,24 @@ export {
   RESELLER_VERIFICATION_MAX_AGE_DAYS,
   isResellerVerificationStale,
 } from "./admin/resellers/reseller-verification.js";
+export { computeDistanceMeters } from "./delivery/haversine-distance.js";
+export type { GeoPoint } from "./delivery/haversine-distance.js";
+export { resolveDeliveryAxis } from "./delivery/resolve-delivery-axis.js";
+export type {
+  DeliveryAxis,
+  DeliveryMatch,
+  DeliveryPlace,
+} from "./delivery/resolve-delivery-axis.js";
+export { computeDeliveryFee } from "./delivery/compute-delivery-fee.js";
+export type {
+  DeliveryFee,
+  DeliveryFeeInput,
+  DeliveryFeeReason,
+} from "./delivery/compute-delivery-fee.js";
+export {
+  MAX_DELIVERY_AXES,
+  OUT_OF_AXIS_MESSAGE_MAX_LENGTH,
+  deliverySettingsSchema,
+  outOfAxisMessageSchema,
+} from "./delivery/delivery-settings.js";
+export type { DeliverySettings } from "./delivery/delivery-settings.js";

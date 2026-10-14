@@ -199,10 +199,12 @@ model Product {
 
 model Place {
   id      String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  // 1 to 60 characters, unique without regard to case (index place_name_lower_key).
   name    String
   // Centre of the place.
   lat     Float   @db.DoublePrecision
   lng     Float   @db.DoublePrecision
+  // Between 100 and 3000 (ck_place_radius_range).
   radiusM Int     @default(500) @map("radius_m")
   active  Boolean
 
@@ -214,10 +216,14 @@ model Place {
 
 model DeliveryAxis {
   id       String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  name     String  @unique
-  // Priority: when a place belongs to several axes, the lowest position wins.
-  position Int
+  // 1 to 60 characters, unique without regard to case (index delivery_axis_name_lower_key).
+  name     String
+  // Priority, 1 is the highest, no duplicate (deferrable unique constraint). When an address is
+  // in several axes, the lowest rank wins.
+  rank     Int     @unique(map: "delivery_axis_rank_key")
   active   Boolean
+  // Colour of the axis, 0 to 9: the smallest free value at creation, never changed afterwards.
+  colorKey Int     @unique(map: "delivery_axis_color_key_key") @map("color_key")
 
   places AxisPlace[]
   orders CustomerOrder[]
@@ -322,10 +328,14 @@ model Reseller {
 
 // A single row: id is always 1 (CHECK constraint), so there is no default.
 model ShopSetting {
-  id               Int      @id
-  outOfAxisFeeAr   Int      @map("out_of_axis_fee_ar")
-  outOfAxisMessage String   @map("out_of_axis_message")
-  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id                    Int      @id
+  // Flat fee outside every axis, in ariary.
+  outOfAxisFeeAr        Int      @default(4000) @map("out_of_axis_fee_ar")
+  // Delivery is free from this number of pieces, whatever the address.
+  freeDeliveryMinPieces Int      @default(20) @map("free_delivery_min_pieces")
+  // Plain text, 1 to 200 characters once trimmed (ck_shop_setting_message_length).
+  outOfAxisMessage      String   @default("Votre adresse est hors de nos axes de livraison : des frais de livraison s'appliquent.") @map("out_of_axis_message")
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@map("shop_setting")
 }

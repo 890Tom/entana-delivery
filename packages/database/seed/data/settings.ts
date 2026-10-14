@@ -1,12 +1,7 @@
-import { DEMO_OUT_OF_AXIS_FEE_AR } from "./config.ts";
 import type { SeedContext } from "../lib/sql.ts";
-import { insertRow } from "../lib/sql.ts";
 
-export async function seedSettings({ db, now }: SeedContext): Promise<void> {
-  await insertRow(db, "shop_setting", {
-    id: 1,
-    out_of_axis_fee_ar: DEMO_OUT_OF_AXIS_FEE_AR,
-    out_of_axis_message: "DEMO: delivery outside our usual routes costs a flat fee.",
-    updated_at: now,
-  });
+// The migrations create the row with the default values, and a reset empties the table: the
+// values are never written here, so the seed shows the defaults of the data model.
+export async function seedSettings({ db }: SeedContext): Promise<void> {
+  await db.query('INSERT INTO "shop_setting" ("id") VALUES (1) ON CONFLICT ("id") DO NOTHING');
 }

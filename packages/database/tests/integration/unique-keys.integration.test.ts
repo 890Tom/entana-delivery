@@ -8,9 +8,12 @@ import {
 } from "../support/database-access/database.js";
 import {
   insertAdminSession,
+  insertAxisPlace,
   insertCustomer,
+  insertDeliveryAxis,
   insertOrder,
   insertOrderEvent,
+  insertPlace,
   insertProduct,
   insertStaffUser,
 } from "../support/database-access/rows.js";
@@ -95,6 +98,48 @@ const uniqueKeyCases: UniqueKeyCase[] = [
       const clientEventId = randomUUID();
       await insertOrderEvent(db, { order_id: orderId, client_event_id: clientEventId });
       await insertOrderEvent(db, { order_id: orderId, client_event_id: clientEventId });
+    },
+  },
+  {
+    name: "the name of a place, whatever the case",
+    constraint: "place_name_lower_key",
+    insertTwiceWithTheSameValue: async (db) => {
+      await insertPlace(db, { name: "Analakely" });
+      await insertPlace(db, { name: "ANALAKELY" });
+    },
+  },
+  {
+    name: "the name of a delivery axis, whatever the case",
+    constraint: "delivery_axis_name_lower_key",
+    insertTwiceWithTheSameValue: async (db) => {
+      await insertDeliveryAxis(db, { name: "Axe Nord", color_key: 0 });
+      await insertDeliveryAxis(db, { name: "axe nord", color_key: 1 });
+    },
+  },
+  {
+    name: "the rank of a delivery axis",
+    constraint: "delivery_axis_rank_key",
+    insertTwiceWithTheSameValue: async (db) => {
+      await insertDeliveryAxis(db, { rank: 1, color_key: 0 });
+      await insertDeliveryAxis(db, { rank: 1, color_key: 1 });
+    },
+  },
+  {
+    name: "the colour key of a delivery axis",
+    constraint: "delivery_axis_color_key_key",
+    insertTwiceWithTheSameValue: async (db) => {
+      await insertDeliveryAxis(db, { rank: 1, color_key: 3 });
+      await insertDeliveryAxis(db, { rank: 2, color_key: 3 });
+    },
+  },
+  {
+    name: "a place listed twice in the same axis",
+    constraint: "axis_place_pkey",
+    insertTwiceWithTheSameValue: async (db) => {
+      const axisId = await insertDeliveryAxis(db);
+      const placeId = await insertPlace(db);
+      await insertAxisPlace(db, { axis_id: axisId, place_id: placeId, position: 1 });
+      await insertAxisPlace(db, { axis_id: axisId, place_id: placeId, position: 2 });
     },
   },
 ];

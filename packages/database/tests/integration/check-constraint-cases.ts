@@ -1,14 +1,13 @@
 import { adminConstraintCases } from "./admin-check-constraint-cases.js";
 import type { ConstraintCase } from "./constraint-case.js";
+import { deliveryConstraintCases } from "./delivery-check-constraint-cases.js";
 import {
   insertCustomer,
   insertOrder,
   insertOrderEvent,
   insertOrderItem,
-  insertPlace,
   insertProduct,
   insertReseller,
-  insertShopSetting,
   insertStaffUser,
 } from "../support/database-access/rows.js";
 
@@ -211,17 +210,6 @@ export const constraintCases: ConstraintCase[] = [
     ],
   },
   {
-    constraint: "ck_place_radius_range",
-    accepted: [
-      { name: "the smallest radius (100 m)", run: (db) => insertPlace(db, { radius_m: 100 }) },
-      { name: "the largest radius (3000 m)", run: (db) => insertPlace(db, { radius_m: 3000 }) },
-    ],
-    rejected: [
-      { name: "a radius below 100 m", run: (db) => insertPlace(db, { radius_m: 99 }) },
-      { name: "a radius above 3000 m", run: (db) => insertPlace(db, { radius_m: 3001 }) },
-    ],
-  },
-  {
     constraint: "ck_reseller_consent_when_active",
     accepted: [
       {
@@ -241,25 +229,6 @@ export const constraintCases: ConstraintCase[] = [
     ],
   },
   {
-    constraint: "ck_shop_setting_single_row_and_fee",
-    accepted: [
-      {
-        name: "the single settings row with a free out-of-axis fee",
-        run: (db) => insertShopSetting(db, { id: 1, out_of_axis_fee_ar: 0 }),
-      },
-    ],
-    rejected: [
-      {
-        name: "a second settings row",
-        run: (db) => insertShopSetting(db, { id: 2 }),
-      },
-      {
-        name: "a negative out-of-axis fee",
-        run: (db) => insertShopSetting(db, { out_of_axis_fee_ar: -1 }),
-      },
-    ],
-  },
-  {
     constraint: "ck_staff_user_failed_login_count_not_negative",
     accepted: [
       {
@@ -275,4 +244,5 @@ export const constraintCases: ConstraintCase[] = [
     ],
   },
   ...adminConstraintCases,
+  ...deliveryConstraintCases,
 ];

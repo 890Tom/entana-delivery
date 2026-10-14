@@ -1,4 +1,3 @@
-import { DEMO_CENTRE } from "./config.ts";
 import type { SeedContext } from "../lib/sql.ts";
 import { insertRow, insertRowAndReturnId, pick } from "../lib/sql.ts";
 
@@ -13,54 +12,75 @@ export interface SeededGeography {
   readonly axisIds: ReadonlyMap<string, string>;
 }
 
-const PLACE_COUNT = 10;
-const KILOMETRES_PER_DEGREE_OF_LATITUDE = 111.32;
-
-// Places spiral around the centre: deterministic, so two seeds give the same map.
-function positionAround(index: number): { lat: number; lng: number } {
-  const angle = (index * 36 * Math.PI) / 180;
-  const distanceKm = 0.6 + index * 0.35;
-  const lat = DEMO_CENTRE.lat + (distanceKm * Math.sin(angle)) / KILOMETRES_PER_DEGREE_OF_LATITUDE;
-  const lngScale = KILOMETRES_PER_DEGREE_OF_LATITUDE * Math.cos((DEMO_CENTRE.lat * Math.PI) / 180);
-  const lng = DEMO_CENTRE.lng + (distanceKm * Math.cos(angle)) / lngScale;
-  return { lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
+interface DemoPlace {
+  readonly name: string;
+  readonly lat: number;
+  readonly lng: number;
 }
 
-// Place numbers (0 to 9) along each axis. Place 3 belongs to two axes.
-const DEMO_AXES = [
-  { name: "Demo Axis North", places: [0, 1, 2, 3] },
-  { name: "Demo Axis East", places: [3, 4, 5, 6] },
-  { name: "Demo Axis South", places: [7, 8, 9] },
+// Fictional coordinates around Antananarivo. The index of a place is its number in demo-orders.ts.
+const DEMO_PLACES: readonly DemoPlace[] = [
+  { name: "Analakely", lat: -18.9094, lng: 47.5251 },
+  { name: "Behoririka", lat: -18.904, lng: 47.529 },
+  { name: "Ankorondrano", lat: -18.883, lng: 47.525 },
+  { name: "Ambohimanarina", lat: -18.865, lng: 47.524 },
+  { name: "Ambohibao", lat: -18.833, lng: 47.478 },
+  { name: "Mandrosoa", lat: -18.812, lng: 47.472 },
+  { name: "Talatamaty", lat: -18.8, lng: 47.46 },
+  { name: "Ankadifotsy", lat: -18.915, lng: 47.54 },
+  { name: "Lieu fictif Est 1", lat: -18.92, lng: 47.56 },
+  { name: "Lieu fictif Est 2", lat: -18.925, lng: 47.58 },
+  { name: "Ambohimangakely", lat: -18.93, lng: 47.6 },
+  { name: "Isotry", lat: -18.923, lng: 47.516 },
+  { name: "Ampefiloha", lat: -18.938, lng: 47.52 },
+  { name: "Lieu fictif Sud 1", lat: -18.955, lng: 47.515 },
+  { name: "Lieu fictif Sud 2", lat: -18.97, lng: 47.505 },
+  { name: "Lieu fictif Sud 3", lat: -18.99, lng: 47.49 },
+  { name: "Ambohijanaka", lat: -19.01, lng: 47.47 },
+  { name: "67 Ha", lat: -18.92, lng: 47.495 },
+  { name: "Lieu fictif Ouest 1", lat: -18.89, lng: 47.5 },
 ] as const;
+
+// Indexes into DEMO_PLACES, in the order of the axis. Three places belong to two axes
+// (Analakely, Ambohimanarina, Isotry).
+const DEMO_AXES = [
+  { name: "Axe Nord", places: [0, 1, 2, 3, 4, 5, 6] },
+  { name: "Axe Est", places: [0, 7, 8, 9, 10] },
+  { name: "Axe Sud", places: [11, 12, 13, 14, 15, 16] },
+  { name: "Axe Ouest", places: [11, 17, 18, 3] },
+] as const;
+
+// Default radius of a place (docs/data-model.md).
+const DEFAULT_RADIUS_M = 500;
 
 export async function seedPlacesAndAxes({ db }: SeedContext): Promise<SeededGeography> {
   const places: SeededPlace[] = [];
-  for (let index = 0; index < PLACE_COUNT; index += 1) {
-    const { lat, lng } = positionAround(index);
+  for (const place of DEMO_PLACES) {
     const id = await insertRowAndReturnId(db, "place", {
-      name: `Demo Place ${String(index + 1).padStart(2, "0")}`,
-      lat,
-      lng,
-      // Between 100 and 3000 (ck_place_radius_range).
-      radius_m: 300 + index * 80,
+      name: place.name,
+      lat: place.lat,
+      lng: place.lng,
+      radius_m: DEFAULT_RADIUS_M,
       active: true,
     });
-    places.push({ id, lat, lng });
+    places.push({ id, lat: place.lat, lng: place.lng });
   }
 
   const axisIds = new Map<string, string>();
   for (const [axisIndex, axis] of DEMO_AXES.entries()) {
     const axisId = await insertRowAndReturnId(db, "delivery_axis", {
       name: axis.name,
-      position: axisIndex + 1,
+      rank: axisIndex + 1,
+      // The smallest free colour key, as the administration will give it.
+      color_key: axisIndex,
       active: true,
     });
     axisIds.set(axis.name, axisId);
-    for (const [rank, placeNumber] of axis.places.entries()) {
+    for (const [position, placeNumber] of axis.places.entries()) {
       await insertRow(db, "axis_place", {
         axis_id: axisId,
         place_id: pick(places, placeNumber).id,
-        position: rank + 1,
+        position: position + 1,
       });
     }
   }
