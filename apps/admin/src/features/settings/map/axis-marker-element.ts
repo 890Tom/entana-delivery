@@ -20,3 +20,12 @@ export function createAxisMarkerElement(rank: number, name: string, color: strin
   badge.append(label);
   return badge;
 }
+
+/** The marker of the point being named: its number to come, in the accent colour, no name yet. */
+export function createDraftMarkerElement(rank: number): HTMLElement {
+  const badge = document.createElement("div");
+  badge.className = [styles.badge, styles.draft].join(" ");
+  badge.setAttribute("aria-hidden", "true");
+  badge.textContent = String(rank);
+  return badge;
+}

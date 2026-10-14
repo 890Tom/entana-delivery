@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PublicInstance } from "@entana/contracts";
-import type { ReactElement, RefObject } from "react";
+import type { GeoPoint } from "@entana/contracts";
+import type { ReactElement, ReactNode, RefObject } from "react";
 
 import { Notice } from "../../../components/notice/notice";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
@@ -18,14 +19,19 @@ type MapStatus = "loading" | "ready" | "failed";
 interface Sinks {
   readonly handleRef: RefObject<AxisEditorMapHandle | null>;
   readonly latest: RefObject<AxisDrawing>;
+  /** The screen's latest handler of a click: the map is created once, the handler changes. */
+  readonly pick: RefObject<(point: GeoPoint) => void>;
   readonly setStatus: (status: MapStatus) => void;
 }
 
 /** Starts a load; the function it returns cancels it and removes the map that it produced. */
 function startLoad(container: HTMLElement, map: PublicInstance["map"], sinks: Sinks): () => void {
-  const { handleRef, latest, setStatus } = sinks;
+  const { handleRef, latest, pick, setStatus } = sinks;
   let isCancelled = false;
-  loadAxisEditorMap({ container, ...map, drawing: latest.current }).then(
+  const onPick = (point: GeoPoint): void => {
+    pick.current(point);
+  };
+  loadAxisEditorMap({ container, ...map, drawing: latest.current, onPick }).then(
     (handle) => {
       if (isCancelled) {
         handle.destroy();
@@ -50,7 +56,10 @@ function startLoad(container: HTMLElement, map: PublicInstance["map"], sinks: Si
 }
 
 /** The map is created once for a style; the axis then goes through the handle. */
-function useAxisEditorMap(drawing: AxisDrawing): {
+function useAxisEditorMap(
+  drawing: AxisDrawing,
+  onPick: (point: GeoPoint) => void,
+): {
   readonly containerRef: RefObject<HTMLDivElement | null>;
   readonly status: MapStatus;
   readonly retry: () => void;
@@ -60,6 +69,7 @@ function useAxisEditorMap(drawing: AxisDrawing): {
   const containerRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<AxisEditorMapHandle | null>(null);
   const latest = useRef(drawing);
+  const pick = useRef(onPick);
   const [status, setStatus] = useState<MapStatus>("loading");
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
@@ -67,11 +77,14 @@ function useAxisEditorMap(drawing: AxisDrawing): {
     handleRef.current?.setDrawing(drawing);
   }, [drawing]);
   useEffect(() => {
+    pick.current = onPick;
+  }, [onPick]);
+  useEffect(() => {
     const container = containerRef.current;
     if (map === undefined || container === null) {
       return undefined;
     }
-    return startLoad(container, map, { handleRef, latest, setStatus });
+    return startLoad(container, map, { handleRef, latest, pick, setStatus });
   }, [map, attempt]);
   return {
     containerRef,
@@ -83,9 +96,16 @@ function useAxisEditorMap(drawing: AxisDrawing): {
   };
 }
 
+interface AxisEditorMapProps {
+  readonly drawing: AxisDrawing;
+  readonly onPick: (point: GeoPoint) => void;
+  /** The tools and the window shown over the map. */
+  readonly children?: ReactNode;
+}
+
 /** The axis being edited on the shop's map, drawn again as it changes. Loaded on demand. */
-export function AxisEditorMap({ drawing }: { drawing: AxisDrawing }): ReactElement {
-  const { containerRef, status, retry } = useAxisEditorMap(drawing);
+export function AxisEditorMap({ drawing, onPick, children }: AxisEditorMapProps): ReactElement {
+  const { containerRef, status, retry } = useAxisEditorMap(drawing, onPick);
   return (
     <div
       className={styles.frame}
@@ -94,6 +114,7 @@ export function AxisEditorMap({ drawing }: { drawing: AxisDrawing }): ReactEleme
       aria-busy={status === "loading"}
     >
       <div ref={containerRef} className={styles.canvas} />
+      {status === "ready" && children}
       {status === "loading" && (
         <div className={styles.skeleton}>
           <span className={visuallyHidden.visuallyHidden}>{texts.common.loading}</span>

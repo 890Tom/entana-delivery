@@ -5,22 +5,27 @@ import { buildAxisPlace, buildPlace } from "../../../test-support/settings/build
 import { toAxisDrawing, toOtherZones } from "./axis-editor-drawing";
 import { newAxisForm } from "./axis-form";
 
-const first = buildAxisPlace(1, { name: "Gare", radiusM: 400 });
-const second = buildAxisPlace(2, { name: "Marché", radiusM: 900 });
+const first = { ...buildAxisPlace(1, { name: "Gare", radiusM: 400 }), kind: "existing" as const };
+const second = {
+  ...buildAxisPlace(2, { name: "Marché", radiusM: 900 }),
+  kind: "existing" as const,
+};
 const elsewhere = buildAxisPlace(3, { radiusM: 300 });
 const listed = [buildPlace(1, { name: "Gare", radiusM: 400 }), buildPlace(3, { radiusM: 300 })];
 
 describe("the drawing of the axis being edited", () => {
   it("draws its places in order, in its colour, and the other active places apart", () => {
     const values = { ...newAxisForm("#123456"), places: [second, first] };
+    const pending = { lat: -18.7, lng: 47.7, radiusM: 650 };
 
-    expect(toAxisDrawing(values, listed)).toEqual({
+    expect(toAxisDrawing(values, listed, pending)).toEqual({
       color: "#123456",
       places: [
         { name: "Marché", lat: second.latitude, lng: second.longitude, radiusM: 900 },
         { name: "Gare", lat: first.latitude, lng: first.longitude, radiusM: 400 },
       ],
       others: [{ lat: elsewhere.latitude, lng: elsewhere.longitude, radiusM: 300 }],
+      pending,
     });
   });
 

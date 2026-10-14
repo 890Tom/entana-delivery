@@ -7,7 +7,7 @@ import type { AdminFailure, AdminResult } from "../../../data-fetching/fetch-adm
 import { SETTINGS_PATH } from "../../../routes";
 import { postAxis, putAxis } from "../api/axes-calls";
 import { isAxisFormChanged, isAxisFormValid, toSaveAxisRequest } from "../rules/axis-form";
-import type { AxisFormValues } from "../rules/axis-form";
+import type { AxisFormValues, NewAxisPlace } from "../rules/axis-form";
 
 export type AxisFormNotice = "placeUnavailable" | "invalid" | "rateLimited" | "failed";
 
@@ -17,6 +17,8 @@ interface Editing {
   readonly setColor: (color: string) => void;
   readonly setActive: (isActive: boolean) => void;
   readonly addPlace: (place: AdminDeliveryPlace) => void;
+  /** A place created on the map: it is sent with the axis, not before. */
+  readonly addNewPlace: (place: NewAxisPlace) => void;
   readonly removePlace: (placeId: string) => void;
   /** Moves the place at `from` to `to`, the others shifting by one. */
   readonly movePlaces: (from: number, to: number) => void;
@@ -28,6 +30,8 @@ export interface AxisFormModel extends Editing {
   readonly nameError: "empty" | "taken" | null;
   /** After a refused attempt with no place. */
   readonly hasPlacesError: boolean;
+  /** The server says a new place has a taken name; gone once the places change. */
+  readonly hasNewPlaceNameError: boolean;
   readonly notice: AxisFormNotice | null;
   readonly isSaving: boolean;
   /** Greyed: a change with nothing changed, or a creation that cannot be sent yet. */
@@ -42,32 +46,50 @@ interface Dependencies {
   readonly reloadPlaces: () => void;
 }
 
+/** Whose name the server says is taken: the axis's, or a new place's. */
+type TakenName = "axis" | "place" | null;
+
 interface Refusal {
-  readonly isNameTaken: boolean;
+  readonly taken: TakenName;
   readonly notice: AxisFormNotice | null;
 }
 
 /** What a refused save shows: only the problems this screen knows, never a word of the server. */
 function describeRefusal(failure: AdminFailure): Refusal {
   if (failure.problem === "axisNameTaken") {
-    return { isNameTaken: true, notice: null };
+    return { taken: "axis", notice: null };
+  }
+  if (failure.problem === "placeNameTaken") {
+    return { taken: "place", notice: null };
   }
   if (failure.problem === "placeUnavailable") {
-    return { isNameTaken: false, notice: "placeUnavailable" };
+    return { taken: null, notice: "placeUnavailable" };
   }
   switch (failure.kind) {
     case "invalid":
-      return { isNameTaken: false, notice: "invalid" };
+      return { taken: null, notice: "invalid" };
     case "rate_limited":
-      return { isNameTaken: false, notice: "rateLimited" };
+      return { taken: null, notice: "rateLimited" };
     default:
-      return { isNameTaken: false, notice: "failed" };
+      return { taken: null, notice: "failed" };
   }
 }
 
+interface EditingEvents {
+  readonly onNameChange: () => void;
+  readonly onPlacesChange: () => void;
+}
+
 /** The values and their changes, each made on the latest values. */
-function useEditing(initial: AxisFormValues, onNameChange: () => void): Editing {
+function useEditing(initial: AxisFormValues, events: EditingEvents): Editing {
+  const { onNameChange, onPlacesChange } = events;
   const [values, setValues] = useState(initial);
+  const setPlaces = (
+    change: (places: AxisFormValues["places"]) => AxisFormValues["places"],
+  ): void => {
+    onPlacesChange();
+    setValues((current) => ({ ...current, places: change(current.places) }));
+  };
   return {
     values,
     setName: (name) => {
@@ -81,23 +103,23 @@ function useEditing(initial: AxisFormValues, onNameChange: () => void): Editing 
       setValues((current) => ({ ...current, active: isActive }));
     },
     addPlace: (place) => {
-      setValues((current) => ({ ...current, places: [...current.places, place] }));
+      setPlaces((places) => [...places, { ...place, kind: "existing" }]);
+    },
+    addNewPlace: (place) => {
+      setPlaces((places) => [...places, place]);
     },
     removePlace: (placeId) => {
-      setValues((current) => ({
-        ...current,
-        places: current.places.filter((place) => place.id !== placeId),
-      }));
+      setPlaces((places) => places.filter((place) => place.id !== placeId));
     },
     movePlaces: (from, to) => {
-      setValues((current) => ({ ...current, places: arrayMove([...current.places], from, to) }));
+      setPlaces((places) => arrayMove([...places], from, to));
     },
   };
 }
 
 interface Outcome extends Dependencies {
   readonly navigate: (path: string) => void;
-  readonly setIsNameTaken: (isTaken: boolean) => void;
+  readonly setTaken: (taken: TakenName) => void;
   readonly setNotice: (notice: AxisFormNotice | null) => void;
 }
 
@@ -112,7 +134,7 @@ function applySaveResult(result: AdminResult<AdminDeliveryAxis>, outcome: Outcom
     return;
   }
   const refusal = describeRefusal(result);
-  outcome.setIsNameTaken(refusal.isNameTaken);
+  outcome.setTaken(refusal.taken);
   outcome.setNotice(refusal.notice);
   if (refusal.notice === "placeUnavailable") {
     outcome.reloadPlaces();
@@ -122,9 +144,10 @@ function applySaveResult(result: AdminResult<AdminDeliveryAxis>, outcome: Outcom
 interface Saving {
   readonly isSaving: boolean;
   readonly hasTried: boolean;
-  readonly isNameTaken: boolean;
+  readonly taken: TakenName;
   readonly notice: AxisFormNotice | null;
-  readonly clearNameTaken: () => void;
+  /** The message on a name goes once that name, or the places, change. */
+  readonly clearTaken: (which: "axis" | "place") => void;
   readonly save: (values: AxisFormValues) => void;
 }
 
@@ -134,7 +157,7 @@ function useSaving(dependencies: Dependencies): Saving {
   const [, navigate] = useLocation();
   const [isSaving, setIsSaving] = useState(false);
   const [hasTried, setHasTried] = useState(false);
-  const [isNameTaken, setIsNameTaken] = useState(false);
+  const [taken, setTaken] = useState<TakenName>(null);
   const [notice, setNotice] = useState<AxisFormNotice | null>(null);
 
   const applyResult = (result: AdminResult<AdminDeliveryAxis>): void => {
@@ -142,7 +165,7 @@ function useSaving(dependencies: Dependencies): Saving {
     applySaveResult(result, {
       ...dependencies,
       navigate,
-      setIsNameTaken,
+      setTaken,
       setNotice,
     });
   };
@@ -150,10 +173,10 @@ function useSaving(dependencies: Dependencies): Saving {
   return {
     isSaving,
     hasTried,
-    isNameTaken,
+    taken,
     notice,
-    clearNameTaken: () => {
-      setIsNameTaken(false);
+    clearTaken: (which) => {
+      setTaken((current) => (current === which ? null : current));
     },
     save: (values) => {
       setHasTried(true);
@@ -174,7 +197,14 @@ function useSaving(dependencies: Dependencies): Saving {
  */
 export function useAxisForm(initial: AxisFormValues, dependencies: Dependencies): AxisFormModel {
   const saving = useSaving(dependencies);
-  const editing = useEditing(initial, saving.clearNameTaken);
+  const editing = useEditing(initial, {
+    onNameChange: () => {
+      saving.clearTaken("axis");
+    },
+    onPlacesChange: () => {
+      saving.clearTaken("place");
+    },
+  });
   const { values } = editing;
   const isNew = dependencies.axisId === null;
   const isChanged = isAxisFormChanged(initial, values);
@@ -182,8 +212,9 @@ export function useAxisForm(initial: AxisFormValues, dependencies: Dependencies)
   return {
     ...editing,
     isNew,
-    nameError: saving.isNameTaken ? "taken" : isNameEmpty ? "empty" : null,
+    nameError: saving.taken === "axis" ? "taken" : isNameEmpty ? "empty" : null,
     hasPlacesError: saving.hasTried && values.places.length === 0,
+    hasNewPlaceNameError: saving.taken === "place",
     notice: saving.notice,
     isSaving: saving.isSaving,
     isSaveDisabled: isNew ? !isAxisFormValid(values) : !isChanged,

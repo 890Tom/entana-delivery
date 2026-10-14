@@ -18,6 +18,7 @@ import type { AxisFormPlace } from "../rules/axis-form";
 import { badgeTextTone } from "../rules/badge-tone";
 
 import styles from "./axis-editor.module.css";
+import drawingStyles from "./place-drawing.module.css";
 
 const t = texts.settings.axisEditor.places;
 
@@ -36,6 +37,8 @@ interface AxisPlaceListProps {
   /** From one position to another, counted from 0. */
   readonly onMove: (from: number, to: number) => void;
   readonly onRemove: (placeId: string) => void;
+  /** The point being named on the map: a last row with its number to come. */
+  readonly hasDraft: boolean;
 }
 
 /** The number of the place on a badge of the axis colour, as on the map. */
@@ -130,6 +133,18 @@ function announcementsFor(rows: readonly PlaceRow[]): Announcements {
   };
 }
 
+/** The point being named, after the places: no handle, no removal, its number to come. */
+function DraftRow({ rank }: { rank: number }): ReactElement {
+  return (
+    <li className={[styles.placeRow, drawingStyles.draftRow].join(" ")}>
+      <span className={[styles.badge, drawingStyles.draftBadge].join(" ")} aria-hidden="true">
+        {rank}
+      </span>
+      <span className={styles.alsoIn}>{t.draft}</span>
+    </li>
+  );
+}
+
 /** A drop on another row moves the place there; a drop in place is nothing. */
 function dropHandler(
   ids: readonly string[],
@@ -143,7 +158,8 @@ function dropHandler(
 }
 
 /** The places of the axis in the order of the route, moved with the pointer or the keyboard. */
-export function AxisPlaceList({ rows, color, onMove, onRemove }: AxisPlaceListProps): ReactElement {
+export function AxisPlaceList(props: AxisPlaceListProps): ReactElement {
+  const { rows, color, onMove, onRemove } = props;
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -172,6 +188,7 @@ export function AxisPlaceList({ rows, color, onMove, onRemove }: AxisPlaceListPr
               onRemove={onRemove}
             />
           ))}
+          {props.hasDraft && <DraftRow rank={rows.length + 1} />}
         </ol>
       </SortableContext>
     </DndContext>

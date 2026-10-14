@@ -86,7 +86,9 @@ const DRAWING = {
   color: "#123456",
   places: [GARE, PORT],
   others: [{ lat: -18.85, lng: 47.55, radiusM: 300 }],
+  pending: null,
 };
+const PENDING = { lat: -18.7, lng: 47.7, radiusM: 650 };
 
 function optionsWith(overrides: Partial<AxisEditorMapOptions> = {}): AxisEditorMapOptions {
   const container = document.createElement("div");
@@ -94,12 +96,16 @@ function optionsWith(overrides: Partial<AxisEditorMapOptions> = {}): AxisEditorM
   container.style.setProperty("--map-zone-line-width", "2px");
   container.style.setProperty("--map-place-other-color", "#9a9aa0");
   container.style.setProperty("--map-place-other-dash", "2 2");
+  container.style.setProperty("--map-place-draft-fill", "#d2a84c");
+  container.style.setProperty("--map-place-draft-line", "#6b4f10");
+  container.style.setProperty("--map-place-draft-dash", "3 1");
   return {
     container,
     styleUrl: "https://tiles.example/style.json",
     center: { lat: -18.91, lng: 47.52 },
     zoom: 12,
     drawing: DRAWING,
+    onPick: vi.fn(),
     ...overrides,
   };
 }
@@ -145,13 +151,15 @@ describe("the map of the axis editor", () => {
     expect([state.mapOptions?.center, state.mapOptions?.zoom]).toEqual([[47.52, -18.91], 12]);
   });
 
-  it("draws the other places grey and dashed, under the axis in its colour", async () => {
+  it("draws the other places grey and dashed, under the axis, under the point being named", async () => {
     await loaded(optionsWith());
 
     expect(state.layers.map((layer) => layer.paint)).toEqual([
       { "line-color": "#9a9aa0", "line-width": 2, "line-dasharray": [2, 2] },
       { "fill-color": ["get", "color"], "fill-opacity": 0.2 },
       { "line-color": ["get", "color"], "line-width": 2 },
+      { "fill-color": "#d2a84c", "fill-opacity": 0.2 },
+      { "line-color": "#6b4f10", "line-width": 2, "line-dasharray": [3, 1] },
     ]);
     expect(state.sourceData[1]).toMatchObject({
       features: [{ properties: { color: "#123456" } }, {}, { geometry: { type: "LineString" } }],
@@ -171,9 +179,9 @@ describe("the map of the axis editor", () => {
   it("draws the axis and its markers again when it changes", async () => {
     const handle = await loaded(optionsWith());
 
-    handle.setDrawing({ color: "#654321", places: [PORT], others: [] });
+    handle.setDrawing({ color: "#654321", places: [PORT], others: [], pending: null });
 
-    expect(state.sourceData.slice(-2)).toEqual([
+    expect(state.sourceData.slice(-3, -1)).toEqual([
       expect.objectContaining({
         features: [expect.objectContaining({ properties: { color: "#654321" } })],
       }),
@@ -181,6 +189,29 @@ describe("the map of the axis editor", () => {
     ]);
     expect(state.removedMarkers).toBe(2);
     expect(state.markerElements.at(-1)?.textContent).toBe("1Port");
+  });
+
+  it("draws the point being named with the number it will take, and its circle", async () => {
+    const handle = await loaded(optionsWith());
+
+    handle.setDrawing({ ...DRAWING, pending: PENDING });
+
+    expect(state.markerElements.at(-1)?.textContent).toBe("3");
+    expect(state.markerPoints.at(-1)).toEqual([47.7, -18.7]);
+    expect(state.sourceData.at(-1)).toMatchObject({
+      features: [{ geometry: { type: "Polygon" } }],
+    });
+  });
+
+  it("gives the point of a click to the screen", async () => {
+    const onPick = vi.fn();
+    await loaded(optionsWith({ onPick }));
+
+    for (const handler of state.handlers.click ?? []) {
+      handler({ lngLat: { lat: -18.95, lng: 47.45 } });
+    }
+
+    expect(onPick).toHaveBeenCalledWith({ lat: -18.95, lng: 47.45 });
   });
 
   it("removes the map when it is destroyed", async () => {

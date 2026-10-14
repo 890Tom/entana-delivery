@@ -11,11 +11,13 @@ import { SETTINGS_PATH } from "../../../routes";
 import { FormButton, FormLink } from "../../catalogue/components/form-buttons";
 import cardStyles from "../../order-detail/components/card.module.css";
 import type { AxisFormModel } from "../hooks/use-axis-form";
+import type { PlaceDrawingModel } from "../hooks/use-place-drawing";
 import { canAddPlace, searchPlaces, validateAxisForm } from "../rules/axis-form";
 
 import styles from "./axis-editor.module.css";
 import { AxisPlaceList } from "./axis-place-list";
 import type { PlaceRow } from "./axis-place-list";
+import { TraceTools } from "./drawing-tools";
 import { PlaceSearch } from "./place-search";
 
 const t = texts.settings.axisEditor;
@@ -27,6 +29,8 @@ interface AxisFormProps {
   readonly places: readonly AdminDeliveryPlace[];
   /** Present on an axis that exists: it opens the question of the deletion. */
   readonly onAskDelete: (() => void) | null;
+  /** The places created on the map: the trace tools, the point being named. */
+  readonly drawing: PlaceDrawingModel;
 }
 
 function ColorField({ model }: { model: AxisFormModel }): ReactElement {
@@ -50,12 +54,14 @@ function ColorField({ model }: { model: AxisFormModel }): ReactElement {
   );
 }
 
-function PlacesSection({ model, rows, places }: Omit<AxisFormProps, "onAskDelete">): ReactElement {
+function PlacesSection(props: Omit<AxisFormProps, "onAskDelete">): ReactElement {
+  const { model, rows, places, drawing } = props;
   const [search, setSearch] = useState("");
+  const hasDraft = drawing.draft !== null;
   return (
     <div className={styles.places}>
       <h2 className={cardStyles.title}>{t.places.title}</h2>
-      {rows.length === 0 ? (
+      {rows.length === 0 && !hasDraft ? (
         <p className={cardStyles.muted}>{t.places.empty}</p>
       ) : (
         <AxisPlaceList
@@ -63,13 +69,11 @@ function PlacesSection({ model, rows, places }: Omit<AxisFormProps, "onAskDelete
           color={model.values.color}
           onMove={model.movePlaces}
           onRemove={model.removePlace}
+          hasDraft={hasDraft}
         />
       )}
-      {model.hasPlacesError && (
-        <p className={styles.error} role="alert">
-          {t.places.none}
-        </p>
-      )}
+      <PlacesErrors model={model} />
+      <TraceTools drawing={drawing} />
       <PlaceSearch
         search={search}
         results={searchPlaces(places, search, model.values)}
@@ -81,6 +85,23 @@ function PlacesSection({ model, rows, places }: Omit<AxisFormProps, "onAskDelete
         }}
       />
     </div>
+  );
+}
+
+function PlacesErrors({ model }: { model: AxisFormModel }): ReactElement {
+  return (
+    <>
+      {model.hasPlacesError && (
+        <p className={styles.error} role="alert">
+          {t.places.none}
+        </p>
+      )}
+      {model.hasNewPlaceNameError && (
+        <p className={styles.error} role="alert">
+          {t.places.newNameTaken}
+        </p>
+      )}
+    </>
   );
 }
 
@@ -123,7 +144,7 @@ function Reasons({ model }: { model: AxisFormModel }): ReactElement {
   return <p className={cardStyles.muted}>{reasons.join(" ")}</p>;
 }
 
-function Actions({ model, onAskDelete }: AxisFormProps): ReactElement {
+function Actions({ model, onAskDelete, drawing }: AxisFormProps): ReactElement {
   return (
     <>
       <div className={styles.buttons}>
@@ -132,7 +153,8 @@ function Actions({ model, onAskDelete }: AxisFormProps): ReactElement {
           variant="primary"
           label={t.save}
           icon={<OrderIcon name="check" size={20} />}
-          isDisabled={model.isSaveDisabled || model.isSaving}
+          // Not while the window « Nouveau lieu » is open: its point is not in the axis yet.
+          isDisabled={model.isSaveDisabled || model.isSaving || drawing.draft !== null}
           isBusy={model.isSaving}
         />
         <FormLink href={SETTINGS_PATH} variant="ghost" label={t.cancel} />
@@ -164,7 +186,9 @@ export function AxisForm(props: AxisFormProps): ReactElement {
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
-        model.submit();
+        if (props.drawing.draft === null) {
+          model.submit();
+        }
       }}
     >
       <TextField
@@ -176,7 +200,12 @@ export function AxisForm(props: AxisFormProps): ReactElement {
         onChange={model.setName}
       />
       <ColorField model={model} />
-      <PlacesSection model={model} rows={props.rows} places={props.places} />
+      <PlacesSection
+        model={model}
+        rows={props.rows}
+        places={props.places}
+        drawing={props.drawing}
+      />
       <ActiveField model={model} />
       <Actions {...props} />
     </form>

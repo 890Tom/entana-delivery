@@ -67,6 +67,21 @@ describe("the body of the save", () => {
       places: [{ placeId: buildAxisPlace(2).id }, { placeId: buildAxisPlace(1).id }],
     });
   });
+
+  it("sends a new place in full, at the point clicked to six decimals", () => {
+    const created = {
+      kind: "new" as const,
+      id: "new-1",
+      name: "Ivandry",
+      latitude: -18.87654321,
+      longitude: 47.523456789,
+      radiusM: 650,
+    };
+
+    expect(toSaveAxisRequest({ ...saved, places: [created] }).places).toEqual([
+      { name: "Ivandry", latitude: -18.876543, longitude: 47.523457, radiusM: 650 },
+    ]);
+  });
 });
 
 describe("the place search", () => {
@@ -77,7 +92,10 @@ describe("the place search", () => {
   });
 
   it("leaves out the places already in the axis", () => {
-    const values = { ...saved, places: [placeOf(5, "Ambohibao")] };
+    const values = {
+      ...saved,
+      places: [{ ...placeOf(5, "Ambohibao"), kind: "existing" as const }],
+    };
 
     expect(searchPlaces(places, "am", values).map((place) => place.name)).toEqual(["Ampefiloha"]);
   });
@@ -95,7 +113,10 @@ describe("the place search", () => {
 
 describe("the limit of places", () => {
   it("lets a place be added below the limit, not at it", () => {
-    const full = Array.from({ length: MAX_PLACES_PER_AXIS }, (_, index) => placeOf(index));
+    const full = Array.from({ length: MAX_PLACES_PER_AXIS }, (_, index) => ({
+      ...placeOf(index),
+      kind: "existing" as const,
+    }));
 
     expect(canAddPlace(saved)).toBe(true);
     expect(canAddPlace({ ...saved, places: full })).toBe(false);

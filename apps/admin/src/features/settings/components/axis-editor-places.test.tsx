@@ -236,7 +236,8 @@ describe("the places of an axis", () => {
     await openAxis({ ...north, places });
 
     expect(searchBox()).toHaveProperty("disabled", true);
-    expect(screen.getByText(t.search.full)).toBeDefined();
+    const reasonId = searchBox().getAttribute("aria-describedby") ?? "";
+    expect(document.getElementById(reasonId)?.textContent).toBe(t.search.full);
   });
 });
 
@@ -261,6 +262,7 @@ describe("the map of the axis", () => {
         lng: place.longitude,
         radiusM: place.radiusM,
       })),
+      pending: null,
     });
   });
 

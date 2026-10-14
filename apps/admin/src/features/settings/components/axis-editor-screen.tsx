@@ -14,10 +14,14 @@ import { useAxisDelete } from "../hooks/use-axis-delete";
 import type { AxisDeleteModel, AxisDeleteNotice } from "../hooks/use-axis-delete";
 import { useAxisForm } from "../hooks/use-axis-form";
 import type { AxisFormModel, AxisFormNotice } from "../hooks/use-axis-form";
+import { usePlaceDrawing } from "../hooks/use-place-drawing";
+import type { PlaceDrawingModel } from "../hooks/use-place-drawing";
 import { usePlaces } from "../hooks/use-places";
 import { toAxisDrawing } from "../rules/axis-editor-drawing";
 import { formValuesOfAxis, newAxisForm, otherAxesOf } from "../rules/axis-form";
 import { defaultAxisColor } from "../rules/axis-palette";
+import { knownPlaceNames, shownRadius } from "../rules/new-place";
+import type { PlaceDrawing } from "../rules/place-drawing";
 
 import { AxisDeleteDialog } from "./axis-delete-dialog";
 import { AxisEditorMap } from "./axis-editor-map";
@@ -25,6 +29,8 @@ import { AxisEditorSkeleton } from "./axis-editor-skeleton";
 import styles from "./axis-editor.module.css";
 import { AxisForm } from "./axis-form";
 import type { PlaceRow } from "./axis-place-list";
+import { MapTools } from "./drawing-tools";
+import { NewPlaceDialog } from "./new-place-dialog";
 
 const t = texts.settings.axisEditor;
 
@@ -61,20 +67,54 @@ function useRows(model: AxisFormModel, loaded: Loaded, axisId: string | null): P
   const activeIds = useMemo(() => new Set(loaded.places.map((place) => place.id)), [loaded.places]);
   return model.values.places.map((place) => ({
     place,
-    isInactive: !activeIds.has(place.id),
+    isInactive: place.kind === "existing" && !activeIds.has(place.id),
     alsoIn: otherAxesOf(loaded.axes, place.id, axisId),
   }));
 }
 
-function MapCard({ model, loaded }: { model: AxisFormModel; loaded: Loaded }): ReactElement {
-  const drawing = useMemo(
-    () => toAxisDrawing(model.values, loaded.places),
-    [model.values, loaded.places],
-  );
+const LEGEND: Readonly<Record<PlaceDrawing["mode"], string>> = {
+  idle: t.map.legend,
+  create: t.map.createLegend,
+  trace: t.map.traceLegend,
+};
+
+interface MapCardProps {
+  readonly model: AxisFormModel;
+  readonly loaded: Loaded;
+  readonly drawing: PlaceDrawingModel;
+}
+
+function MapCard({ model, loaded, drawing }: MapCardProps): ReactElement {
+  const { draft } = drawing;
+  const axisDrawing = useMemo(() => {
+    const pending =
+      draft === null ? null : { ...draft.point, radiusM: shownRadius(draft.radiusText) };
+    return toAxisDrawing(model.values, loaded.places, pending);
+  }, [model.values, loaded.places, draft]);
   return (
-    <section className={cardStyles.card} aria-label={t.map.title}>
-      <AxisEditorMap drawing={drawing} />
-      <p className={cardStyles.muted}>{t.map.legend}</p>
+    <section
+      className={cardStyles.card}
+      aria-label={t.map.title}
+      onKeyDown={(event) => {
+        // Escape closes the window « Nouveau lieu » and leaves « Créer un lieu ».
+        if (event.key === "Escape") {
+          drawing.cancel();
+        }
+      }}
+    >
+      <AxisEditorMap drawing={axisDrawing} onPick={drawing.pick}>
+        <MapTools drawing={drawing} />
+        {draft !== null && (
+          <NewPlaceDialog
+            draft={draft}
+            errors={drawing.draftErrors}
+            onEdit={drawing.edit}
+            onConfirm={drawing.confirm}
+            onCancel={drawing.cancel}
+          />
+        )}
+      </AxisEditorMap>
+      <p className={cardStyles.muted}>{LEGEND[drawing.mode]}</p>
     </section>
   );
 }
@@ -112,6 +152,11 @@ function EditorPage({ axis, loaded }: EditorPageProps): ReactElement {
     axis === null ? newAxisForm(defaultAxisColor(loaded.axes)) : formValuesOfAxis(axis),
   );
   const model = useAxisForm(initial, { axisId, ...loaded });
+  const takenNames = useMemo(
+    () => knownPlaceNames(loaded.places, loaded.axes, model.values),
+    [loaded.places, loaded.axes, model.values],
+  );
+  const drawing = usePlaceDrawing({ form: model, takenNames });
   const rows = useRows(model, loaded, axisId);
   const deletion = useAxisDelete(axisId, loaded.reloadAxes);
   const notice = deletion.notice ?? model.notice;
@@ -125,8 +170,9 @@ function EditorPage({ axis, loaded }: EditorPageProps): ReactElement {
           rows={rows}
           places={loaded.places}
           onAskDelete={axisId === null ? null : deletion.ask}
+          drawing={drawing}
         />
-        <MapCard model={model} loaded={loaded} />
+        <MapCard model={model} loaded={loaded} drawing={drawing} />
       </div>
       <DeleteQuestion axis={axis} deletion={deletion} />
     </div>

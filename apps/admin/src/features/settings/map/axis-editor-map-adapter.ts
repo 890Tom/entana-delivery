@@ -8,7 +8,7 @@ import { boundsOf, toShapes } from "../rules/axes-drawing";
 import { toOtherZones } from "../rules/axis-editor-drawing";
 import type { AxisDrawing } from "../rules/axis-editor-drawing";
 
-import { createAxisMarkerElement } from "./axis-marker-element";
+import { createAxisMarkerElement, createDraftMarkerElement } from "./axis-marker-element";
 
 // The only file of the axis editor that names the library. It is reached through dynamic imports
 // only, so that the library, its style sheet and its worker stay one separate chunk.
@@ -20,6 +20,8 @@ export interface AxisEditorMapOptions {
   readonly center: GeoPoint;
   readonly zoom: number;
   readonly drawing: AxisDrawing;
+  /** A click on the map, at its point: the screen decides what it does. */
+  readonly onPick: (point: GeoPoint) => void;
 }
 
 export interface AxisEditorMapHandle {
@@ -32,6 +34,7 @@ const t = texts.settings.axisEditor.map;
 
 const AXIS_SOURCE = "axis";
 const OTHERS_SOURCE = "other-places";
+const PENDING_SOURCE = "pending-place";
 const FIT_PADDING = 48;
 const FIT_MAX_ZOOM = 14;
 
@@ -47,6 +50,9 @@ interface Look {
   readonly lineWidth: number;
   readonly otherColor: string;
   readonly otherDash: number[];
+  readonly draftFill: string;
+  readonly draftLine: string;
+  readonly draftDash: number[];
 }
 
 /** The colours, widths and dashes come from the design tokens, so that a theme changes the map. */
@@ -58,6 +64,9 @@ function readLook(container: HTMLElement): Look {
     lineWidth: Number.parseFloat(token("--map-zone-line-width")),
     otherColor: token("--map-place-other-color"),
     otherDash: token("--map-place-other-dash").split(/\s+/).map(Number),
+    draftFill: token("--map-place-draft-fill"),
+    draftLine: token("--map-place-draft-line"),
+    draftDash: token("--map-place-draft-dash").split(/\s+/).map(Number),
   };
 }
 
@@ -95,6 +104,30 @@ function createMap(library: MapLibrary, options: AxisEditorMapOptions): Library.
   map.keyboard.disableRotation();
   map.addControl(new library.NavigationControl({ showCompass: false }), "top-left");
   return map;
+}
+
+const pendingZone = (drawing: AxisDrawing): ReturnType<typeof toOtherZones> =>
+  toOtherZones(drawing.pending === null ? [] : [drawing.pending]);
+
+/** The point being named, dashed in the accent colour, on top of the axis. */
+function addPendingLayers(map: Library.Map, drawing: AxisDrawing, look: Look): void {
+  map.addSource(PENDING_SOURCE, { type: "geojson", data: pendingZone(drawing) });
+  map.addLayer({
+    id: "pending-zone",
+    type: "fill",
+    source: PENDING_SOURCE,
+    paint: { "fill-color": look.draftFill, "fill-opacity": look.fillOpacity },
+  });
+  map.addLayer({
+    id: "pending-edge",
+    type: "line",
+    source: PENDING_SOURCE,
+    paint: {
+      "line-color": look.draftLine,
+      "line-width": look.lineWidth,
+      "line-dasharray": look.draftDash,
+    },
+  });
 }
 
 /** The other places under the axis, so that the axis is always readable on top of them. */
@@ -135,12 +168,21 @@ function createMarkers(library: MapLibrary, map: Library.Map): (drawing: AxisDra
     for (const marker of markers) {
       marker.remove();
     }
-    markers = drawing.places.map((place, index) =>
-      new library.Marker({
-        element: createAxisMarkerElement(index + 1, place.name, drawing.color),
-      })
-        .setLngLat([place.lng, place.lat])
-        .addTo(map),
+    const placed = drawing.places.map((place, index) => ({
+      point: place,
+      element: createAxisMarkerElement(index + 1, place.name, drawing.color),
+    }));
+    const pending =
+      drawing.pending === null
+        ? []
+        : [
+            {
+              point: drawing.pending,
+              element: createDraftMarkerElement(drawing.places.length + 1),
+            },
+          ];
+    markers = [...placed, ...pending].map(({ point, element }) =>
+      new library.Marker({ element }).setLngLat([point.lng, point.lat]).addTo(map),
     );
   };
 }
@@ -160,12 +202,17 @@ export async function loadAxisEditorMap(
   const placeMarkers = createMarkers(library, map);
   map.once("load", () => {
     addLayers(map, options.drawing, look);
+    addPendingLayers(map, options.drawing, look);
+  });
+  map.on("click", (event) => {
+    options.onPick({ lat: event.lngLat.lat, lng: event.lngLat.lng });
   });
   placeMarkers(options.drawing);
   return whenMapLoaded(map, {
     setDrawing: (drawing) => {
       setData(map, AXIS_SOURCE, toShapes([asAxis(drawing)]));
       setData(map, OTHERS_SOURCE, toOtherZones(drawing.others));
+      setData(map, PENDING_SOURCE, pendingZone(drawing));
       placeMarkers(drawing);
     },
     destroy: () => {
