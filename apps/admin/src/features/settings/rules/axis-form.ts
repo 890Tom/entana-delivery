@@ -2,11 +2,24 @@ import { MAX_PLACES_PER_AXIS } from "@entana/contracts";
 import type {
   AdminDeliveryAxis,
   AdminDeliveryPlace,
+  DeliveryAxisPlaceEntry,
   SaveDeliveryAxisRequest,
 } from "@entana/contracts";
 
+/** A place created on the map, sent with the axis: its `id` is a key of the screen only. */
+export interface NewAxisPlace {
+  readonly kind: "new";
+  readonly id: string;
+  readonly name: string;
+  readonly latitude: number;
+  readonly longitude: number;
+  readonly radiusM: number;
+}
+
 /** A place of the axis being edited: what the list shows and the map draws. */
-export type AxisFormPlace = AdminDeliveryPlace;
+export type AxisFormPlace = (AdminDeliveryPlace & { readonly kind: "existing" }) | NewAxisPlace;
+
+const COORDINATE_DECIMALS = 6;
 
 export interface AxisFormValues {
   readonly name: string;
@@ -31,6 +44,7 @@ export function formValuesOfAxis(axis: AdminDeliveryAxis): AxisFormValues {
     color: axis.color,
     active: axis.active,
     places: axis.places.map(({ id, name, latitude, longitude, radiusM }) => ({
+      kind: "existing",
       id,
       name,
       latitude,
@@ -69,13 +83,28 @@ export function isAxisFormChanged(initial: AxisFormValues, current: AxisFormValu
   );
 }
 
-/** The body of the creation and of the change: every place is an existing one, by id. */
+/** Six decimals are a tenth of a metre: the point clicked, without the noise of the screen. */
+const roundCoordinate = (value: number): number => Number(value.toFixed(COORDINATE_DECIMALS));
+
+function toPlaceEntry(place: AxisFormPlace): DeliveryAxisPlaceEntry {
+  if (place.kind === "existing") {
+    return { placeId: place.id };
+  }
+  return {
+    name: place.name,
+    latitude: roundCoordinate(place.latitude),
+    longitude: roundCoordinate(place.longitude),
+    radiusM: place.radiusM,
+  };
+}
+
+/** The body of the creation and of the change: an existing place by id, a new one in full. */
 export function toSaveAxisRequest(values: AxisFormValues): SaveDeliveryAxisRequest {
   return {
     name: values.name.trim(),
     color: values.color,
     active: values.active,
-    places: values.places.map((place) => ({ placeId: place.id })),
+    places: values.places.map(toPlaceEntry),
   };
 }
 

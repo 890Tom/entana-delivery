@@ -1,0 +1,159 @@
+/* The tools over the map, at the top beside the zoom buttons, as the trace banner of the owner's
+   capture. The bar lets the clicks through to the map; only its content takes them. */
+.tools {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  left: calc(var(--space-3) + var(--size-touch-min) + var(--space-3));
+  z-index: var(--layer-map-overlay);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  pointer-events: none;
+}
+
+.tools > * {
+  pointer-events: auto;
+}
+
+/* To confirm: the reason a full axis takes no new place, beside the greyed button. */
+.toolsNote {
+  padding: var(--space-1) var(--space-2);
+  margin: 0;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border: var(--border-width-strong) solid var(--color-accent-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.banner > svg {
+  flex: none;
+}
+
+.bannerText {
+  margin: 0;
+}
+
+/* The window « Nouveau lieu » (to confirm): over the map, at its lower right; full width on a
+   narrow screen. */
+.dialog {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  z-index: var(--layer-map-overlay);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: var(--size-map-popover);
+  max-width: calc(100% - var(--space-3) - var(--space-3));
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+@media (width < 900px) {
+  .dialog {
+    left: var(--space-3);
+    width: auto;
+  }
+}
+
+.dialogTitle {
+  margin: 0;
+  font: var(--font-body-strong);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.radius {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.radiusLabel {
+  font: var(--font-body-strong);
+}
+
+.radiusLine {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* To confirm: the native slider in ink, as on the capture (the design system has no slider). */
+.slider {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--size-touch-min);
+  margin: 0;
+  accent-color: var(--color-text);
+}
+
+.radiusInput {
+  width: var(--size-field-radius);
+  min-height: var(--size-field-height);
+  padding: 0 var(--space-3);
+  font: var(--font-body);
+  color: var(--color-text);
+  text-align: end;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border-input);
+  border-radius: var(--radius);
+}
+
+.radiusInput[aria-invalid="true"] {
+  border: var(--border-width-strong) solid var(--color-error);
+}
+
+.slider:focus-visible,
+.radiusInput:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.muted {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* The trace buttons of the form, full width as on the capture. */
+.traceTools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.on {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-strong);
+}
+
+/* The point being named, at the end of the list: no handle and no removal. */
+.draftRow > :first-child {
+  grid-column: 2;
+}
+
+.draftBadge {
+  color: var(--color-text-on-accent);
+  background: var(--color-accent);
+  border: var(--border-width-strong) solid var(--color-accent-strong);
+}

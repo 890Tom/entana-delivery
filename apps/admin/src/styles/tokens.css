@@ -158,6 +158,15 @@
      dash and the gap in line widths, as the map library reads them). */
   --map-place-other-color: var(--color-neutral-400);
   --map-place-other-dash: 2 2;
+  /* Proposed, to confirm (read on the owner's trace capture): the point being named on the axis
+     map, an accent badge and circle with a strong dashed ring. */
+  --map-place-draft-fill: var(--color-accent);
+  --map-place-draft-line: var(--color-accent-strong);
+  --map-place-draft-dash: 2 2;
+  /* Proposed, to confirm (read on the owner's trace capture): the window « Nouveau lieu » and the
+     number field of its radius. */
+  --size-map-popover: 320px;
+  --size-field-radius: 96px;
   --size-map-pin: 40px;
   /* Proposed, to confirm: a field for a short number (the free delivery threshold). */
   --size-field-short: 160px;
@@ -172,6 +181,8 @@
   --layer-header: 20;
   /* Proposed (the design system writes a literal 10): the bottom bar sits under the header. */
   --layer-bar: 10;
+  /* Proposed, to confirm: the tools and the window over a map, above the map's own controls. */
+  --layer-map-overlay: 5;
 
   /* Opacity */
   --opacity-sold-out: 0.5;

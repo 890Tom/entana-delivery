@@ -4,7 +4,7 @@ import { circleRing } from "./axes-drawing";
 import type { AxisFormValues } from "./axis-form";
 import type { ShapeCollection } from "./axes-drawing";
 
-interface DrawnPlace extends GeoPoint {
+export interface DrawnPlace extends GeoPoint {
   readonly radiusM: number;
 }
 
@@ -20,11 +20,14 @@ export interface AxisDrawing {
   readonly places: readonly NamedPlace[];
   /** The other active places of the shop, drawn grey: what can still be added. */
   readonly others: readonly DrawnPlace[];
+  /** The point being named in the window « Nouveau lieu », at the radius it shows. */
+  readonly pending: DrawnPlace | null;
 }
 
 export function toAxisDrawing(
   values: AxisFormValues,
   activePlaces: readonly AdminDeliveryPlace[],
+  pending: DrawnPlace | null,
 ): AxisDrawing {
   const inAxis = new Set(values.places.map((place) => place.id));
   return {
@@ -38,10 +41,11 @@ export function toAxisDrawing(
     others: activePlaces
       .filter((place) => !inAxis.has(place.id))
       .map((place) => ({ lat: place.latitude, lng: place.longitude, radiusM: place.radiusM })),
+    pending,
   };
 }
 
-/** The outlines of the other places: circles only, no line between them. */
+/** The outlines of the other places, or of the point being named: circles only, no line. */
 export function toOtherZones(places: readonly DrawnPlace[]): ShapeCollection {
   return {
     type: "FeatureCollection",

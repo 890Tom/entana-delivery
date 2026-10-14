@@ -1,4 +1,4 @@
-import { MAX_PLACES_PER_AXIS } from "@entana/contracts";
+import { DELIVERY_NAME_MAX_LENGTH, MAX_PLACES_PER_AXIS } from "@entana/contracts";
 
 // The texts of the screen of one axis. The texts that the owner's capture does not give are
 // marked "to confirm".
@@ -22,6 +22,10 @@ export const axisEditorTexts = {
     none: "Ajoutez au moins un lieu.",
     alsoIn: (axes: readonly string[]): string => `Aussi dans ${axes.join(", ")}.`,
     inactive: "Inactif",
+    draft: "Nouveau lieu, à nommer…",
+    // To confirm.
+    newNameTaken:
+      "Le nom d'un lieu ajouté est déjà pris. Retirez-le et recréez-le avec un autre nom.",
     // To confirm.
     handle: (name: string, position: number, total: number): string =>
       `Déplacer ${name}, position ${String(position)} sur ${String(total)}.`,
@@ -48,6 +52,36 @@ export const axisEditorTexts = {
     noResult: (search: string): string => `Aucun lieu ne s'appelle « ${search} ».`,
     // To confirm.
     full: `${String(MAX_PLACES_PER_AXIS)} lieux au maximum.`,
+  },
+  drawing: {
+    // To confirm: the button is not on the capture (owner's decision B).
+    create: "Créer un lieu",
+    trace: "Tracer l'axe sur la carte",
+    traceOn: "Tracer l'axe sur la carte · activé",
+    undo: "Annuler le dernier point",
+    traceTitle: "Mode tracé",
+    traceHint: "cliquez le long de la route, dans l'ordre",
+    finish: "Terminer",
+  },
+  newPlace: {
+    title: "Nouveau lieu",
+    name: "Nom du lieu",
+    namePlaceholder: "Ex. Ivandry",
+    // To confirm: from the prototype.
+    nameEmpty: "Indiquez le nom du lieu.",
+    // To confirm.
+    nameTooLong: `${String(DELIVERY_NAME_MAX_LENGTH)} caractères au maximum.`,
+    // To confirm.
+    nameTaken: "Un lieu porte déjà ce nom. Choisissez-en un autre.",
+    radius: (radiusM: number): string => `Rayon : ${String(radiusM)} m`,
+    // To confirm: from the prototype, the name of the number field.
+    radiusField: "Rayon en mètres",
+    unit: "m",
+    radiusHint: "De 100 m à 3 km. Le cercle doré montre la zone couverte.",
+    // To confirm: from the prototype.
+    radiusOutOfRange: "Le rayon doit être entre 100 m et 3 km (3 000 m).",
+    add: "Ajouter à l'axe",
+    cancel: "Annuler",
   },
   active: "Axe actif",
   yes: "Oui",
@@ -77,5 +111,10 @@ export const axisEditorTexts = {
     // To confirm: the name of the map for assistive technology.
     label: "Carte de l'axe.",
     legend: "Les cercles gris en pointillé sont les lieux existants.",
+    traceLegend:
+      "Chaque clic crée un lieu, dans l'ordre de la route. Les cercles gris en pointillé sont les lieux existants.",
+    // To confirm: from the prototype's message.
+    createLegend:
+      "Cliquez sur la carte pour placer le lieu. Les cercles gris en pointillé sont les lieux existants.",
   },
 } as const;

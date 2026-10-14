@@ -14,6 +14,7 @@ interface ResponseSchema<T> {
 const DELIVERY_PROBLEMS = {
   axisOrderMismatch: DELIVERY_PROBLEM_TYPES.axisOrderMismatch,
   axisNameTaken: DELIVERY_PROBLEM_TYPES.axisNameTaken,
+  placeNameTaken: DELIVERY_PROBLEM_TYPES.placeNameTaken,
   placeUnavailable: DELIVERY_PROBLEM_TYPES.placeUnavailable,
   axisInUse: DELIVERY_PROBLEM_TYPES.axisInUse,
 } as const;
