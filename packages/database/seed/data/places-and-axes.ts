@@ -44,10 +44,10 @@ const DEMO_PLACES: readonly DemoPlace[] = [
 // Indexes into DEMO_PLACES, in the order of the axis. Three places belong to two axes
 // (Analakely, Ambohimanarina, Isotry).
 const DEMO_AXES = [
-  { name: "Axe Nord", places: [0, 1, 2, 3, 4, 5, 6] },
-  { name: "Axe Est", places: [0, 7, 8, 9, 10] },
-  { name: "Axe Sud", places: [11, 12, 13, 14, 15, 16] },
-  { name: "Axe Ouest", places: [11, 17, 18, 3] },
+  { name: "Axe Nord", color: "#2f6b5a", places: [0, 1, 2, 3, 4, 5, 6] },
+  { name: "Axe Est", color: "#9a4a2a", places: [0, 7, 8, 9, 10] },
+  { name: "Axe Sud", color: "#7a2e5a", places: [11, 12, 13, 14, 15, 16] },
+  { name: "Axe Ouest", color: "#7a5a1e", places: [11, 17, 18, 3] },
 ] as const;
 
 // Default radius of a place (docs/data-model.md).
@@ -71,8 +71,7 @@ export async function seedPlacesAndAxes({ db }: SeedContext): Promise<SeededGeog
     const axisId = await insertRowAndReturnId(db, "delivery_axis", {
       name: axis.name,
       rank: axisIndex + 1,
-      // The smallest free colour key, as the administration will give it.
-      color_key: axisIndex,
+      color: axis.color,
       active: true,
     });
     axisIds.set(axis.name, axisId);

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { deliveryAxisColorSchema } from "./delivery-axis-request.js";
 
 const placeBase = {
   id: z.uuid(),
@@ -19,7 +20,7 @@ export const adminDeliveryAxisSchema = z.strictObject({
   id: z.uuid(),
   name: z.string(),
   rank: z.number().int(),
-  colorKey: z.number().int(),
+  color: deliveryAxisColorSchema,
   active: z.boolean(),
   places: z.array(adminDeliveryAxisPlaceSchema),
 });

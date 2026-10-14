@@ -1,10 +1,9 @@
-import { MAX_DELIVERY_AXES } from "../../delivery/delivery-settings.js";
-
-export type DeliveryAxisField = "name" | "active" | "places";
+export type DeliveryAxisField = "name" | "active" | "color" | "places";
 
 export interface AxisContent {
   readonly name: string;
   readonly active: boolean;
+  readonly color: string;
   /** The ids of the places, in the order of their positions. */
   readonly placeIds: readonly string[];
 }
@@ -21,6 +20,9 @@ export function planAxisUpdate(before: AxisContent, after: AxisContent): AxisUpd
   }
   if (before.active !== after.active) {
     fields.push("active");
+  }
+  if (before.color !== after.color) {
+    fields.push("color");
   }
   const isSameOrder =
     before.placeIds.length === after.placeIds.length &&
@@ -65,13 +67,4 @@ export function planAxisReorder(
     return from === undefined || from === to ? [] : [{ id, from, to }];
   });
   return { kind: "ordered", moves };
-}
-
-/**
- * The smallest colour key (0 to MAX_DELIVERY_AXES - 1) that no axis holds, or undefined when
- * every one is taken: this is the limit of the number of axes.
- */
-export function nextFreeColorKey(usedKeys: readonly number[]): number | undefined {
-  const used = new Set(usedKeys);
-  return Array.from({ length: MAX_DELIVERY_AXES }, (_, key) => key).find((key) => !used.has(key));
 }

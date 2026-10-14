@@ -77,14 +77,13 @@ export const deliveryConstraintCases: ConstraintCase[] = [
     rejected: [{ name: "a rank of 0", run: (db) => insertDeliveryAxis(db, { rank: 0 }) }],
   },
   {
-    constraint: "ck_delivery_axis_color_key_range",
+    constraint: "ck_delivery_axis_color_format",
     accepted: [
-      { name: "the first colour (0)", run: (db) => insertDeliveryAxis(db, { color_key: 0 }) },
-      { name: "the last colour (9)", run: (db) => insertDeliveryAxis(db, { color_key: 9 }) },
+      { name: "a #rrggbb colour", run: (db) => insertDeliveryAxis(db, { color: "#2f6b5a" }) },
     ],
     rejected: [
-      { name: "a colour below 0", run: (db) => insertDeliveryAxis(db, { color_key: -1 }) },
-      { name: "a colour above 9", run: (db) => insertDeliveryAxis(db, { color_key: 10 }) },
+      { name: "a colour in upper case", run: (db) => insertDeliveryAxis(db, { color: "#2F6B5A" }) },
+      { name: "a short colour", run: (db) => insertDeliveryAxis(db, { color: "#abc" }) },
     ],
   },
   {

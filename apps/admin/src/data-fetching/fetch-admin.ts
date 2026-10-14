@@ -1,4 +1,5 @@
 import {
+  DELIVERY_PROBLEM_TYPES,
   PRODUCT_PROBLEM_TYPES,
   problemDetailsSchema,
   RESELLER_PROBLEM_TYPES,
@@ -9,12 +10,18 @@ interface ResponseSchema<T> {
   safeParse(data: unknown): { success: true; data: T } | { success: false };
 }
 
+/** The problems of the delivery axes that a screen acts on: only those, not the whole family. */
+const DELIVERY_PROBLEMS = { axisOrderMismatch: DELIVERY_PROBLEM_TYPES.axisOrderMismatch } as const;
+
 /**
- * A problem of the product form or of the resellers that the answer names. Only the types the
+ * A problem of the product form, of the resellers or of the axes that the answer names. Only the types the
  * contracts know are reported, as a key of our own: no text of the answer ever reaches the
  * interface. The screen that sent the request knows which family the key belongs to.
  */
-type AdminProblem = keyof typeof PRODUCT_PROBLEM_TYPES | keyof typeof RESELLER_PROBLEM_TYPES;
+type AdminProblem =
+  | keyof typeof PRODUCT_PROBLEM_TYPES
+  | keyof typeof RESELLER_PROBLEM_TYPES
+  | keyof typeof DELIVERY_PROBLEMS;
 
 interface Failed<Kind extends string> {
   readonly kind: Kind;
@@ -82,6 +89,7 @@ function toFailure(status: number, problem: AdminProblem | undefined): AdminFail
 const KNOWN_PROBLEMS = [
   ...Object.entries(PRODUCT_PROBLEM_TYPES),
   ...Object.entries(RESELLER_PROBLEM_TYPES),
+  ...Object.entries(DELIVERY_PROBLEMS),
 ] as readonly [AdminProblem, string][];
 
 /** The known problem an error body names, by its `type`; nothing else of the body is read. */

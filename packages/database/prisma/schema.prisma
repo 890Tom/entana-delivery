@@ -222,8 +222,8 @@ model DeliveryAxis {
   // in several axes, the lowest rank wins.
   rank     Int     @unique(map: "delivery_axis_rank_key")
   active   Boolean
-  // Colour of the axis, 0 to 9: the smallest free value at creation, never changed afterwards.
-  colorKey Int     @unique(map: "delivery_axis_color_key_key") @map("color_key")
+  // Colour of the axis, chosen by the administration: #rrggbb in lower case. Not unique.
+  color    String
 
   places AxisPlace[]
   orders CustomerOrder[]

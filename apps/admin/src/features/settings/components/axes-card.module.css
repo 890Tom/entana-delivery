@@ -1,0 +1,107 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* Handle, dot, name and route, count: as on the owner's capture. */
+.row {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) 0;
+  background: var(--color-surface);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.dragging {
+  position: relative;
+  z-index: var(--layer-bar);
+  box-shadow: var(--shadow-md);
+}
+
+.dot {
+  width: var(--size-axis-dot);
+  height: var(--size-axis-dot);
+  border-radius: var(--radius-full);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-half);
+  min-width: 0;
+}
+
+.name {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  font: var(--font-body-strong);
+}
+
+.route,
+.count {
+  color: var(--color-text-muted);
+}
+
+.count {
+  white-space: nowrap;
+}
+
+/* Inactive: the text is muted, never faded under the contrast floor; the pill says it in words. */
+.inactive .name {
+  color: var(--color-text-muted);
+}
+
+.footer {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+}
+
+.info {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  margin: 0;
+}
+
+.info > svg {
+  flex: none;
+}
+
+.skeletonRow {
+  display: block;
+  height: calc(2 * var(--font-size-body) * var(--line-height-body));
+  margin: var(--space-3) 0;
+  background: var(--color-skeleton);
+  border-radius: var(--radius-sm);
+  animation: pulse var(--duration-pulse) var(--ease) infinite alternate;
+}
+
+/* The test line under the map: an icon and its text, as on the owner's capture. */
+.testLine {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: calc(var(--font-size-body) * var(--line-height-body));
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.testLine > svg {
+  flex: none;
+}
+
+@keyframes pulse {
+  to {
+    opacity: var(--opacity-skeleton-pulse);
+  }
+}

@@ -59,10 +59,15 @@ const SAVE_BODY = ApiBody({
   schema: {
     type: "object",
     additionalProperties: false,
-    required: ["name", "active", "places"],
+    required: ["name", "active", "color", "places"],
     properties: {
       name: NAME,
       active: { type: "boolean" },
+      color: {
+        type: "string",
+        pattern: "^#[0-9a-f]{6}$",
+        description: "The colour of the axis, `#rrggbb` in lower case. Two axes may share one.",
+      },
       places: {
         type: "array",
         minItems: 1,
@@ -107,7 +112,7 @@ export const documentCreateDeliveryAxis = (): MethodDecorator =>
     ApiOperation({
       summary: "Create a delivery axis",
       description:
-        "The axis takes the last rank and the smallest free `colorKey`; its places get the " +
+        "The axis takes the last rank and the colour received; its places get the " +
         "positions 1..n in the order received, and the new places are created with it, all in " +
         "one transaction. Audit: `delivery_axis.created` and one `delivery_place.created` per " +
         "new place (ids only).",
@@ -118,7 +123,7 @@ export const documentCreateDeliveryAxis = (): MethodDecorator =>
     documentProblems([
       INVALID_BODY,
       AXIS_NAME_TAKEN,
-      [422, "`delivery_axis_limit_reached` or `delivery_place_unavailable`."],
+      PLACE_UNAVAILABLE,
       UNSUPPORTED_TYPE,
       ...COMMON,
     ]),
@@ -129,11 +134,11 @@ export const documentReplaceDeliveryAxis = (): MethodDecorator =>
     ApiSecurity(ADMIN_SECURITY_SCHEME),
     ID_PARAM,
     ApiOperation({
-      summary: "Replace the name, the state and the places of an axis",
+      summary: "Replace the name, the state, the colour and the places of an axis",
       description:
         "The list of places replaces the old one, positions renumbered 1..n. A place that leaves " +
-        "the axis is never removed. Rank and colour are kept. Audit: `delivery_axis.updated` " +
-        "with the changed fields (`name`, `active`, `places`); nothing is written when nothing " +
+        "the axis is never removed. The rank is kept. Audit: `delivery_axis.updated` with the " +
+        "changed fields (`name`, `active`, `color`, `places`); nothing is written when nothing " +
         "changes.",
       operationId: "replaceAdminDeliveryAxis",
     }),

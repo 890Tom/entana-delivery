@@ -75,12 +75,12 @@ export function insertPlace(db: Client, overrides: Overrides = {}): Promise<stri
   });
 }
 
-// The rank and the colour key are unique: a test that inserts several axes gives them.
+// The rank is unique: a test that inserts several axes gives them.
 export function insertDeliveryAxis(db: Client, overrides: Overrides = {}): Promise<string> {
   return insertAndReturnId(db, "delivery_axis", {
     name: uniqueText("axis"),
     rank: randomInt(1, 1_000_000),
-    color_key: randomInt(10),
+    color: "#2f6b5a",
     active: true,
     ...overrides,
   });

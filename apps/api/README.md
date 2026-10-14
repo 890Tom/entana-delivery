@@ -716,29 +716,28 @@ is created with an axis, and no route changes or removes one. The rules of the f
 | `PATCH /api/v1/admin/delivery/settings`  | Partial change (at least one field, strict): `200` with the settings     |
 | `GET /api/v1/admin/delivery/resolve`     | Tests an address: `200` with `{ match, feeAr, reason }`                  |
 
-- **Axes.** An axis is `{ id, name, rank, colorKey, active, places }`. Its places come in the order
+- **Axes.** An axis is `{ id, name, rank, color, active, places }`. Its places come in the order
   of their positions, inactive ones included (`active: false`), each with `alsoIn`: the `{ id, name }`
   of the other axes (active or not, by rank) that hold the place, never the axis itself.
-- **Writing an axis** (`POST`, `PUT /:id`). Body `{ name, active, places }`: `name` 1 to 60 characters
-  once trimmed, `places` an ordered list of 1 to `MAX_PLACES_PER_AXIS` (50) items, each `{ placeId }`
+- **Writing an axis** (`POST`, `PUT /:id`). Body `{ name, active, color, places }`: `name` 1 to 60 characters
+  once trimmed, `color` a `#rrggbb` colour in lower case (two axes may share one), `places` an ordered list of 1 to `MAX_PLACES_PER_AXIS` (50) items, each `{ placeId }`
   (an existing place, listed once) or a new place `{ name, latitude, longitude, radiusM? }`
   (`radiusM` 100 to 3 000, default 500). Positions are 1..n in the order received. One transaction
   holds the new places, the links and the axis; the writes of the axes are serialised by an advisory
-  lock, so rank and colour are never duplicated. A place that leaves an axis is never removed.
-  `POST` is refused (`422`) when `MAX_DELIVERY_AXES` axes exist, active or not. `PUT` keeps the rank
-  and the colour, and accepts an inactive place only if the axis already holds it.
+  lock, so a rank is never duplicated. A place that leaves an axis is never removed.
+  The number of axes is not limited. `PUT` keeps the rank, and accepts an inactive place only if the axis already holds it.
 - **Reordering** (`PUT /axes/order`). Body `{ ids }`: every axis exactly once, inactive ones
   included; the ranks become 1..n. Anything else is `422`.
 - **Deleting** (`DELETE /axes/:id`). `409` while an order references the axis (deactivate it
-  instead); otherwise the axis and its links go, the places stay and the colour is free again.
+  instead); otherwise the axis and its links go, the places stay.
 - **Errors** (problem details, fixed `detail`, `type` in `urn:entana:problem:`):
   `delivery_axis_name_taken` and `delivery_place_name_taken` (`409`, without regard to case, also
-  inside one body), `delivery_axis_in_use` (`409`), `delivery_axis_limit_reached`,
+  inside one body), `delivery_axis_in_use` (`409`),
   `delivery_axis_order_mismatch` and `delivery_place_unavailable` (`422`), an invalid body (`400`,
   an empty list or a `placeId` twice included), an unknown or malformed id (`404`).
 - **Audit of the axes** (same transaction, ids, field names and ranks only, never a name or a
   coordinate): `delivery_axis.created`, `delivery_axis.updated` (`diff.fields` among `name`,
-  `active`, `places`), `delivery_place.created` (one per new place), `delivery_axis.reordered`
+  `active`, `color`, `places`), `delivery_place.created` (one per new place), `delivery_axis.reordered`
   (`{ from, to }`, one per axis whose rank changes), `delivery_axis.deleted`. Nothing is written
   when nothing changes.
 - **Settings.** `outOfAxisFeeAr` is an integer from 0 to `PRODUCT_PRICE_MAX_AR`,
@@ -751,5 +750,5 @@ is created with an axis, and no route changes or removes one. The rules of the f
   `00000000-0000-0000-0000-000000000001`. Nothing is written when no value changes.
 - **Test of an address.** Query: `latitude` (-90 to 90) and `longitude` (-180 to 180), both required,
   and `pieces` (integer from 1 to 2 970, default 1). Anything else, or a value out of bounds, is a
-  `400`. `match` is `null` or `{ axis: { id, name, colorKey }, place: { id, name } }`; `reason` is
+  `400`. `match` is `null` or `{ axis: { id, name, color }, place: { id, name } }`; `reason` is
   `axis`, `quantity` or `out_of_axis`. The coordinates are not stored or logged.

@@ -36,7 +36,7 @@ export function resolveAddress(
   );
   return {
     match: {
-      axis: { id: axis.id, name: axis.name, colorKey: axis.colorKey },
+      axis: { id: axis.id, name: axis.name, color: axis.color },
       place: { id: place.id, name: place.name },
     },
     feeAr,

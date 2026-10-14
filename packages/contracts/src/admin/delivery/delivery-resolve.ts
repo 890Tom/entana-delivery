@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { MAX_FREE_DELIVERY_MIN_PIECES } from "./delivery-settings-request.js";
+import { deliveryAxisColorSchema } from "./delivery-axis-request.js";
 
 // A query string only holds text: a number is a plain decimal, never "1e3" or " 5".
 const decimalSchema = z
@@ -24,7 +25,7 @@ export type DeliveryResolveQuery = z.infer<typeof deliveryResolveQuerySchema>;
 export const deliveryResolveResponseSchema = z.strictObject({
   match: z
     .strictObject({
-      axis: z.strictObject({ id: z.uuid(), name: z.string(), colorKey: z.number().int() }),
+      axis: z.strictObject({ id: z.uuid(), name: z.string(), color: deliveryAxisColorSchema }),
       place: z.strictObject({ id: z.uuid(), name: z.string() }),
     })
     .nullable(),

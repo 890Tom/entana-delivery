@@ -1,6 +1,6 @@
 # 0021. Delivery axes, places and settings live in the database; free delivery in an axis, fee frozen on the order
 
-- Status: accepted
+- Status: accepted; the colour of an axis and the limit of ten axes are replaced by [0022](0022-delivery-axis-colour-chosen-and-no-limit-of-axes.md)
 - Date: 2026-10-14
 
 ## Context

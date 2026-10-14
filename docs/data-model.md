@@ -112,9 +112,9 @@ Constraint `ck_product_photo_when_active`: `CHECK (active = false OR (image_key 
 | name | text | 1 to 60 characters (`ck_delivery_axis_name_length`), unique without regard to case (index `delivery_axis_name_lower_key`) |
 | rank | integer | priority, 1 is the highest, `ck_delivery_axis_rank_positive`: `>= 1`. Unique (`delivery_axis_rank_key`, deferrable so that two ranks can be swapped in one transaction). When an address is in several axes, the lowest rank wins |
 | active | boolean | an inactive axis serves no address |
-| color_key | integer | 0 to 9 (`ck_delivery_axis_color_key_range`), unique (`delivery_axis_color_key_key`). The smallest free value at creation, never changed afterwards |
+| color | text | chosen by the administration, `#rrggbb` in lower case (`ck_delivery_axis_color_format`). Not unique: two axes may share a colour |
 
-At most 10 axes (`MAX_DELIVERY_AXES` in `packages/contracts`): a limit of the application, one colour key each.
+The number of axes is not limited (ADR 0022).
 
 ### `axis_place`
 | Column | Type | Rules |
