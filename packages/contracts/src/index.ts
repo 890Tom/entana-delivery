@@ -208,7 +208,6 @@ export type {
   DeliveryFeeReason,
 } from "./delivery/compute-delivery-fee.js";
 export {
-  MAX_DELIVERY_AXES,
   OUT_OF_AXIS_MESSAGE_MAX_LENGTH,
   deliverySettingsSchema,
   outOfAxisMessageSchema,
@@ -220,6 +219,7 @@ export {
   MAX_PLACES_PER_AXIS,
   PLACE_RADIUS_MAX_M,
   PLACE_RADIUS_MIN_M,
+  deliveryAxisColorSchema,
   reorderDeliveryAxesRequestSchema,
   saveDeliveryAxisRequestSchema,
 } from "./admin/delivery/delivery-axis-request.js";
@@ -228,11 +228,7 @@ export type {
   ReorderDeliveryAxesRequest,
   SaveDeliveryAxisRequest,
 } from "./admin/delivery/delivery-axis-request.js";
-export {
-  nextFreeColorKey,
-  planAxisReorder,
-  planAxisUpdate,
-} from "./admin/delivery/delivery-axis-plans.js";
+export { planAxisReorder, planAxisUpdate } from "./admin/delivery/delivery-axis-plans.js";
 export type {
   AxisContent,
   AxisRankMove,

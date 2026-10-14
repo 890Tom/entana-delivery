@@ -9,7 +9,12 @@ const ID = "0192b8a0-0000-7000-8000-000000000001";
 const OTHER_ID = "0192b8a0-0000-7000-8000-000000000002";
 const NEW_PLACE = { name: "Fake place", latitude: -18.9, longitude: 47.5 };
 const parse = (body: unknown) => saveDeliveryAxisRequestSchema.safeParse(body);
-const withPlaces = (places: unknown) => ({ name: "Fake axis", active: true, places });
+const withPlaces = (places: unknown) => ({
+  name: "Fake axis",
+  active: true,
+  color: "#2f6b5a",
+  places,
+});
 
 describe("saveDeliveryAxisRequestSchema", () => {
   it("accepts an existing place and a new one with or without radius", () => {
@@ -24,6 +29,7 @@ describe("saveDeliveryAxisRequestSchema", () => {
     const result = saveDeliveryAxisRequestSchema.parse({
       name: "  Fake axis  ",
       active: false,
+      color: "#2f6b5a",
       places: [{ ...NEW_PLACE, name: " Fake place " }],
     });
 
@@ -41,11 +47,12 @@ describe("saveDeliveryAxisRequestSchema", () => {
       "the same placeId twice, in any case",
       withPlaces([{ placeId: ID }, { placeId: ID.toUpperCase() }]),
     ],
-    ["an empty axis name", { name: "  ", active: true, places: [{ placeId: ID }] }],
-    [
-      "an axis name over 60 characters",
-      { name: "x".repeat(61), active: true, places: [{ placeId: ID }] },
-    ],
+    ["an empty axis name", { ...withPlaces([{ placeId: ID }]), name: "  " }],
+    ["an axis name over 60 characters", { ...withPlaces([{ placeId: ID }]), name: "x".repeat(61) }],
+    ["a missing colour", { name: "Fake axis", active: true, places: [{ placeId: ID }] }],
+    ["a colour in upper case", { ...withPlaces([{ placeId: ID }]), color: "#2F6B5A" }],
+    ["a short colour", { ...withPlaces([{ placeId: ID }]), color: "#abc" }],
+    ["a colour name", { ...withPlaces([{ placeId: ID }]), color: "red" }],
     ["a radius under the bound", withPlaces([{ ...NEW_PLACE, radiusM: 99 }])],
     ["a latitude out of range", withPlaces([{ ...NEW_PLACE, latitude: 91 }])],
     ["an entry that is both an id and a new place", withPlaces([{ placeId: ID, ...NEW_PLACE }])],

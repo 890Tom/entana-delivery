@@ -12,6 +12,12 @@ export const DEFAULT_PLACE_RADIUS_M = 500;
 
 const name = z.string().trim().min(1).max(DELIVERY_NAME_MAX_LENGTH);
 
+/**
+ * The colour of an axis, chosen by the administration: `#rrggbb` in lower case, the value of an
+ * `<input type="color">` (ck_delivery_axis_color_format).
+ */
+export const deliveryAxisColorSchema = z.string().regex(/^#[0-9a-f]{6}$/);
+
 const existingPlaceSchema = z.strictObject({ placeId: z.uuid() });
 
 const newPlaceSchema = z.strictObject({
@@ -31,6 +37,7 @@ const placeEntrySchema = z.union([existingPlaceSchema, newPlaceSchema]);
 export const saveDeliveryAxisRequestSchema = z.strictObject({
   name,
   active: z.boolean(),
+  color: deliveryAxisColorSchema,
   places: z
     .array(placeEntrySchema)
     .min(1)

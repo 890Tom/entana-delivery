@@ -8,7 +8,7 @@ const AXES: StoredAxis[] = [
     id: "axis-1",
     name: "North",
     rank: 1,
-    colorKey: 3,
+    color: "#2f6b5a",
     active: true,
     places: [
       {
@@ -25,7 +25,7 @@ describe("resolveAddress", () => {
 
     expect(answer).toEqual({
       match: {
-        axis: { id: "axis-1", name: "North", colorKey: 3 },
+        axis: { id: "axis-1", name: "North", color: "#2f6b5a" },
         place: { id: "place-1", name: "Market" },
       },
       feeAr: 0,

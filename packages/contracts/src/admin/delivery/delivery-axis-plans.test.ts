@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { MAX_DELIVERY_AXES } from "../../delivery/delivery-settings.js";
-import { nextFreeColorKey, planAxisReorder, planAxisUpdate } from "./delivery-axis-plans.js";
+import { planAxisReorder, planAxisUpdate } from "./delivery-axis-plans.js";
 
-const BEFORE = { name: "North", active: true, placeIds: ["a", "b"] };
+const BEFORE = { name: "North", active: true, color: "#2f6b5a", placeIds: ["a", "b"] };
 
 describe("planAxisUpdate", () => {
   it("is unchanged for the same content", () => {
@@ -12,9 +11,14 @@ describe("planAxisUpdate", () => {
   });
 
   it("names the fields that change, in a fixed order", () => {
-    const plan = planAxisUpdate(BEFORE, { name: "South", active: false, placeIds: ["b", "a"] });
+    const plan = planAxisUpdate(BEFORE, {
+      name: "South",
+      active: false,
+      color: "#9a4a2a",
+      placeIds: ["b", "a"],
+    });
 
-    expect(plan).toEqual({ kind: "changed", fields: ["name", "active", "places"] });
+    expect(plan).toEqual({ kind: "changed", fields: ["name", "active", "color", "places"] });
   });
 
   it("sees a removed place as a change of the places", () => {
@@ -63,18 +67,5 @@ describe("planAxisReorder", () => {
     ["an unknown id", ["a", "b", "x"]],
   ])("refuses %s", (_label, ids) => {
     expect(planAxisReorder(current, ids)).toEqual({ kind: "mismatch" });
-  });
-});
-
-describe("nextFreeColorKey", () => {
-  it("takes the smallest free key, including a freed one", () => {
-    expect(nextFreeColorKey([])).toBe(0);
-    expect(nextFreeColorKey([0, 1, 3])).toBe(2);
-  });
-
-  it("is undefined when every key is taken", () => {
-    const all = Array.from({ length: MAX_DELIVERY_AXES }, (_, key) => key);
-
-    expect(nextFreeColorKey(all)).toBeUndefined();
   });
 });

@@ -112,24 +112,16 @@ const uniqueKeyCases: UniqueKeyCase[] = [
     name: "the name of a delivery axis, whatever the case",
     constraint: "delivery_axis_name_lower_key",
     insertTwiceWithTheSameValue: async (db) => {
-      await insertDeliveryAxis(db, { name: "Axe Nord", color_key: 0 });
-      await insertDeliveryAxis(db, { name: "axe nord", color_key: 1 });
+      await insertDeliveryAxis(db, { name: "Axe Nord" });
+      await insertDeliveryAxis(db, { name: "axe nord" });
     },
   },
   {
     name: "the rank of a delivery axis",
     constraint: "delivery_axis_rank_key",
     insertTwiceWithTheSameValue: async (db) => {
-      await insertDeliveryAxis(db, { rank: 1, color_key: 0 });
-      await insertDeliveryAxis(db, { rank: 1, color_key: 1 });
-    },
-  },
-  {
-    name: "the colour key of a delivery axis",
-    constraint: "delivery_axis_color_key_key",
-    insertTwiceWithTheSameValue: async (db) => {
-      await insertDeliveryAxis(db, { rank: 1, color_key: 3 });
-      await insertDeliveryAxis(db, { rank: 2, color_key: 3 });
+      await insertDeliveryAxis(db, { rank: 1 });
+      await insertDeliveryAxis(db, { rank: 1 });
     },
   },
   {

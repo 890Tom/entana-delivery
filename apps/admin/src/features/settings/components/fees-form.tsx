@@ -19,40 +19,38 @@ const FIELDS: readonly DeliverySettingsField[] = ["outOfAxisFeeAr", "freeDeliver
 export function FeesForm({ settings }: { settings: DeliverySettings }): ReactElement {
   const model = useSettingsForm(settings, FIELDS);
   return (
-    <div className={styles.columns}>
-      <form
-        className={[cardStyles.card, styles.card].join(" ")}
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault();
-          model.submit();
+    <form
+      className={[cardStyles.card, styles.card].join(" ")}
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        model.submit();
+      }}
+    >
+      <h2 className={cardStyles.title}>{t.title}</h2>
+      <TextField
+        label={t.fee}
+        hint={t.feeHint}
+        inputMode="numeric"
+        value={showPriceInput(model.values.outOfAxisFeeAr ?? "")}
+        error={model.errors.outOfAxisFeeAr === undefined ? undefined : t.feeError}
+        onChange={(text) => {
+          model.setText("outOfAxisFeeAr", readPriceInput(text));
         }}
-      >
-        <h2 className={cardStyles.title}>{t.title}</h2>
-        <TextField
-          label={t.fee}
-          hint={t.feeHint}
-          inputMode="numeric"
-          value={showPriceInput(model.values.outOfAxisFeeAr ?? "")}
-          error={model.errors.outOfAxisFeeAr === undefined ? undefined : t.feeError}
-          onChange={(text) => {
-            model.setText("outOfAxisFeeAr", readPriceInput(text));
-          }}
-        />
-        <TextField
-          label={t.threshold}
-          hint={t.thresholdHint}
-          inputMode="numeric"
-          width="short"
-          value={model.values.freeDeliveryMinPieces ?? ""}
-          error={model.errors.freeDeliveryMinPieces === undefined ? undefined : t.thresholdError}
-          onChange={(text) => {
-            model.setText("freeDeliveryMinPieces", readCountInput(text));
-          }}
-        />
-        <SettingsNoticeView notice={model.notice} />
-        <SaveButton model={model} />
-      </form>
-    </div>
+      />
+      <TextField
+        label={t.threshold}
+        hint={t.thresholdHint}
+        inputMode="numeric"
+        width="short"
+        value={model.values.freeDeliveryMinPieces ?? ""}
+        error={model.errors.freeDeliveryMinPieces === undefined ? undefined : t.thresholdError}
+        onChange={(text) => {
+          model.setText("freeDeliveryMinPieces", readCountInput(text));
+        }}
+      />
+      <SettingsNoticeView notice={model.notice} />
+      <SaveButton model={model} />
+    </form>
   );
 }

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { nextFreeColorKey, planAxisReorder, planAxisUpdate } from "@entana/contracts";
+import { planAxisReorder, planAxisUpdate } from "@entana/contracts";
 import type {
   AdminDeliveryAxis,
   AdminDeliveryAxisListResponse,
@@ -15,7 +15,6 @@ import type { ResolvedPlaces } from "./delivery-axis-places.js";
 import {
   AdminDeliveryAxisNotFoundError,
   DeliveryAxisInUseError,
-  DeliveryAxisLimitReachedError,
   DeliveryAxisNameTakenError,
   DeliveryAxisOrderMismatchError,
 } from "./errors/admin-delivery-errors.js";
@@ -110,6 +109,7 @@ async function applyAxisChanges(
   await updateAxisColumns(database, axisId, {
     ...(fields.includes("name") ? { name: request.name } : {}),
     ...(fields.includes("active") ? { active: request.active } : {}),
+    ...(fields.includes("color") ? { color: request.color } : {}),
   });
   if (fields.includes("places")) {
     await replaceAxisPlaces(database, axisId, placeIds);
@@ -121,23 +121,18 @@ async function applyAxisChanges(
 export class AdminDeliveryAxesService {
   constructor(@Inject(DATABASE_CLIENT) private readonly database: AdminDeliveryAxesClient) {}
 
-  /** The axis comes last, with the smallest free colour; the new places are created with it. */
+  /** The axis comes last; the new places are created with it. */
   async create(request: SaveDeliveryAxisRequest, adminId: string): Promise<AdminDeliveryAxis> {
     return this.database.$transaction(async (transaction) => {
       await lockDeliveryAxes(transaction);
       const axes = await listAxisSummaries(transaction);
-      // The colour keys run from 0 to MAX_DELIVERY_AXES - 1: none left is the limit of axes.
-      const colorKey = nextFreeColorKey(axes.map((axis) => axis.colorKey));
-      if (colorKey === undefined) {
-        throw new DeliveryAxisLimitReachedError();
-      }
       await assertAxisNameFree(transaction, request.name, null);
       const places = await resolveAxisPlaces(transaction, request.places, NO_LINKED_PLACE);
       const axisId = await insertAxis(transaction, {
         name: request.name,
         active: request.active,
         rank: Math.max(0, ...axes.map((axis) => axis.rank)) + 1,
-        colorKey,
+        color: request.color,
         placeIds: places.placeIds,
       });
       await insertDeliveryAudit(transaction, {
@@ -169,6 +164,7 @@ export class AdminDeliveryAxesService {
       const plan = planAxisUpdate(before, {
         name: request.name,
         active: request.active,
+        color: request.color,
         placeIds: places.placeIds,
       });
       if (plan.kind === "changed") {

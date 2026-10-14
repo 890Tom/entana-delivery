@@ -50,7 +50,7 @@ describe("the delivery administration on a real PostgreSQL", () => {
         data: {
           name,
           rank,
-          colorKey: rank,
+          color: "#2f6b5a",
           active: isActive,
           places: {
             create: placeIds.map((placeId, index) => ({ placeId, position: index + 1 })),
@@ -188,7 +188,7 @@ describe("the delivery administration on a real PostgreSQL", () => {
       expect(answer.headers["cache-control"]).toBe("no-store");
       expect(deliveryResolveResponseSchema.parse(answer.body)).toEqual({
         match: {
-          axis: { id: axisId, name: "North", colorKey: 1 },
+          axis: { id: axisId, name: "North", color: "#2f6b5a" },
           place: { id: placeId, name: "Market" },
         },
         feeAr: 0,

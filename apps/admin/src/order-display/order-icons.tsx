@@ -10,6 +10,8 @@ export type OrderIconName =
   | "chevron-down"
   | "circle-dot"
   | "house"
+  | "info"
+  | "mouse-pointer-click"
   | "phone"
   | "search"
   | "triangle-alert"
@@ -18,7 +20,8 @@ export type OrderIconName =
 
 // Inline line icons (no request, no package). Decorative: the text beside them says the same.
 // "arrow-left", "ban", "circle-dot", "house", "phone", "triangle-alert" and "x" are drawn for the
-// order sheet: to confirm with the owner's icon set.
+// order sheet, "info" and "mouse-pointer-click" for the settings: to confirm with the owner's icon
+// set.
 export const ICON_PATHS: Readonly<Record<OrderIconName, readonly string[]>> = {
   "arrow-left": ["m12 19-7-7 7-7", "M19 12H5"],
   "arrow-right": ["M5 12h14", "m12 5 7 7-7 7"],
@@ -36,6 +39,14 @@ export const ICON_PATHS: Readonly<Record<OrderIconName, readonly string[]>> = {
   house: [
     "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8",
     "M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+  ],
+  info: ["M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "M12 16v-4", "M12 8h.01"],
+  "mouse-pointer-click": [
+    "M14 4.1 12 6",
+    "m5.1 8-2.9-.8",
+    "m6 12-1.9 2",
+    "M7.2 2.2 8 5.1",
+    "M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z",
   ],
   phone: [
     "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z",

@@ -17,6 +17,14 @@
   align-items: start;
 }
 
+/* The left column of « Axes et frais »: the axes above the fee outside every axis. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
 .card {
   gap: var(--space-4);
 }

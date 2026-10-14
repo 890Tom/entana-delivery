@@ -23,13 +23,6 @@ export class DeliveryPlaceNameTakenError extends Error {
   }
 }
 
-export class DeliveryAxisLimitReachedError extends Error {
-  constructor() {
-    super("The maximum number of delivery axes is reached.");
-    this.name = "DeliveryAxisLimitReachedError";
-  }
-}
-
 export class DeliveryAxisInUseError extends Error {
   constructor() {
     super("The delivery axis is used by orders.");

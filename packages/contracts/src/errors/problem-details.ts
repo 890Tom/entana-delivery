@@ -30,7 +30,6 @@ export const RESELLER_PROBLEM_TYPES = {
 export const DELIVERY_PROBLEM_TYPES = {
   axisNameTaken: "urn:entana:problem:delivery_axis_name_taken",
   placeNameTaken: "urn:entana:problem:delivery_place_name_taken",
-  axisLimitReached: "urn:entana:problem:delivery_axis_limit_reached",
   axisInUse: "urn:entana:problem:delivery_axis_in_use",
   axisOrderMismatch: "urn:entana:problem:delivery_axis_order_mismatch",
   placeUnavailable: "urn:entana:problem:delivery_place_unavailable",

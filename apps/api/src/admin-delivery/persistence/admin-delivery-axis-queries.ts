@@ -24,12 +24,11 @@ export async function deferRankConstraint(database: AdminDeliveryAxisDatabase): 
 export interface AxisSummary {
   readonly id: string;
   readonly rank: number;
-  readonly colorKey: number;
 }
 
 export function listAxisSummaries(database: AdminDeliveryAxisDatabase): Promise<AxisSummary[]> {
   return database.deliveryAxis.findMany({
-    select: { id: true, rank: true, colorKey: true },
+    select: { id: true, rank: true },
     orderBy: { rank: "asc" },
   });
 }
@@ -37,6 +36,7 @@ export function listAxisSummaries(database: AdminDeliveryAxisDatabase): Promise<
 export interface StoredAxisContent {
   readonly name: string;
   readonly active: boolean;
+  readonly color: string;
   readonly placeIds: readonly string[];
 }
 
@@ -49,12 +49,15 @@ export async function findAxisContent(
     select: {
       name: true,
       active: true,
+      color: true,
       places: { select: { placeId: true }, orderBy: { position: "asc" } },
     },
   });
-  return axis === null
-    ? null
-    : { name: axis.name, active: axis.active, placeIds: axis.places.map((link) => link.placeId) };
+  if (axis === null) {
+    return null;
+  }
+  const { places, ...columns } = axis;
+  return { ...columns, placeIds: places.map((link) => link.placeId) };
 }
 
 /** Whether another axis than `exceptId` has this name, whatever the case. */
@@ -114,7 +117,7 @@ export interface NewAxisRow {
   readonly name: string;
   readonly active: boolean;
   readonly rank: number;
-  readonly colorKey: number;
+  readonly color: string;
   readonly placeIds: readonly string[];
 }
 
@@ -136,7 +139,7 @@ export async function insertAxis(
 export async function updateAxisColumns(
   database: AdminDeliveryAxisDatabase,
   id: string,
-  data: { readonly name?: string; readonly active?: boolean },
+  data: { readonly name?: string; readonly active?: boolean; readonly color?: string },
 ): Promise<void> {
   await database.deliveryAxis.update({ where: { id }, data, select: { id: true } });
 }

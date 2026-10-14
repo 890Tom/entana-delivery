@@ -1,5 +1,4 @@
 import { adminDeliveryAxisSchema } from "@entana/contracts";
-import { MAX_DELIVERY_AXES } from "@entana/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { useAdminOrdersHarness } from "./support/admin-orders-harness.js";
 
@@ -7,6 +6,7 @@ const AXES_PATH = "/api/v1/admin/delivery/axes";
 const ORDER_PATH = `${AXES_PATH}/order`;
 const UNKNOWN_ID = "0192b8a0-0000-7000-8000-00000000dead";
 const NEW_PLACE = { name: "Fake new place", latitude: -18.9, longitude: 47.5 };
+const COLOR = "#2f6b5a";
 
 describe("the writes of the delivery axes on a real PostgreSQL", () => {
   const h = useAdminOrdersHarness();
@@ -29,7 +29,6 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
   const insertAxis = async (
     name: string,
     rank: number,
-    colorKey: number,
     placeIds: readonly string[] = [],
   ): Promise<string> =>
     (
@@ -37,7 +36,7 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
         data: {
           name,
           rank,
-          colorKey,
+          color: COLOR,
           active: true,
           places: { create: placeIds.map((placeId, index) => ({ placeId, position: index + 1 })) },
         },
@@ -47,6 +46,7 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
   const body = (places: readonly unknown[], extra: Record<string, unknown> = {}) => ({
     name: "Fake axis",
     active: true,
+    color: COLOR,
     places,
     ...extra,
   });
@@ -74,19 +74,19 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
   });
 
   describe("POST /axes", () => {
-    it("creates the axis last, with the smallest free colour and the places in order", async () => {
+    it("creates the axis last, with the chosen colour and the places in order", async () => {
       const existingPlace = await insertPlace("Existing place");
-      await insertAxis("First axis", 4, 0);
-      await insertAxis("Third axis", 6, 2);
+      await insertAxis("First axis", 4);
+      await insertAxis("Third axis", 6);
 
       const answer = await h.post(
         AXES_PATH,
-        body([NEW_PLACE, { placeId: existingPlace }], { name: "  New axis  " }),
+        body([NEW_PLACE, { placeId: existingPlace }], { name: "  New axis  ", color: "#1f6e78" }),
       );
 
       const axis = adminDeliveryAxisSchema.parse(answer.body);
       expect(answer.status).toBe(201);
-      expect([axis.name, axis.rank, axis.colorKey]).toEqual(["New axis", 7, 1]);
+      expect([axis.name, axis.rank, axis.color]).toEqual(["New axis", 7, "#1f6e78"]);
       expect(axis.places.map((place) => place.name)).toEqual(["Fake new place", "Existing place"]);
       expect(axis.places[0]?.radiusM).toBe(500);
       const created = await h.client.place.findFirstOrThrow({ where: { name: "Fake new place" } });
@@ -96,21 +96,19 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
       ]);
     });
 
-    it("refuses a new axis when the maximum number of axes exists", async () => {
-      for (let index = 0; index < MAX_DELIVERY_AXES; index += 1) {
-        await insertAxis(`Axis ${String(index)}`, index + 1, index);
+    it("creates an eleventh axis with the colour of another one", async () => {
+      for (let index = 0; index < 10; index += 1) {
+        await insertAxis(`Axis ${String(index)}`, index + 1);
       }
 
       const answer = await h.post(AXES_PATH, body([NEW_PLACE]));
 
-      expect(answer.status).toBe(422);
-      expect(answer.body).toMatchObject({
-        type: "urn:entana:problem:delivery_axis_limit_reached",
-      });
+      expect(answer.status).toBe(201);
+      expect(adminDeliveryAxisSchema.parse(answer.body).color).toBe(COLOR);
     });
 
     it("answers 409 for an axis name taken in another case, and writes nothing", async () => {
-      await insertAxis("North", 1, 0);
+      await insertAxis("North", 1);
 
       const answer = await h.post(AXES_PATH, body([NEW_PLACE], { name: "NORTH" }));
 
@@ -160,7 +158,7 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
       });
     });
 
-    it("never gives the same rank or colour to two simultaneous creations", async () => {
+    it("never gives the same rank to two simultaneous creations", async () => {
       const answers = await Promise.all(
         ["One", "Two", "Three", "Four"].map((name) =>
           h.post(AXES_PATH, body([{ ...NEW_PLACE, name: `Place ${name}` }], { name })),
@@ -170,31 +168,35 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
       const axes = answers.map((answer) => adminDeliveryAxisSchema.parse(answer.body));
       expect(answers.map((answer) => answer.status)).toEqual([201, 201, 201, 201]);
       expect(new Set(axes.map((axis) => axis.rank)).size).toBe(4);
-      expect(new Set(axes.map((axis) => axis.colorKey)).size).toBe(4);
     });
   });
 
   describe("PUT /axes/:id", () => {
-    it("changes the name, the state and the places, and keeps the removed place", async () => {
+    it("changes the name, the state, the colour and the places, and keeps the removed place", async () => {
       const first = await insertPlace("First place");
       const second = await insertPlace("Second place");
-      const axisId = await insertAxis("North", 1, 3, [first, second]);
+      const axisId = await insertAxis("North", 1, [first, second]);
 
       const answer = await h.put(
         `${AXES_PATH}/${axisId}`,
-        body([NEW_PLACE, { placeId: second }], { name: "South", active: false }),
+        body([NEW_PLACE, { placeId: second }], { name: "South", active: false, color: "#a23b3b" }),
       );
 
       const axis = adminDeliveryAxisSchema.parse(answer.body);
       expect(answer.status).toBe(200);
-      expect([axis.name, axis.active, axis.rank, axis.colorKey]).toEqual(["South", false, 1, 3]);
+      expect([axis.name, axis.active, axis.rank, axis.color]).toEqual([
+        "South",
+        false,
+        1,
+        "#a23b3b",
+      ]);
       expect(axis.places.map((place) => place.name)).toEqual(["Fake new place", "Second place"]);
       expect(await h.client.place.findUnique({ where: { id: first } })).not.toBeNull();
       const [updated, createdPlace] = await audit();
       expect(updated).toMatchObject({
         action: "delivery_axis.updated",
         entityId: axisId,
-        diff: { fields: ["name", "active", "places"] },
+        diff: { fields: ["name", "active", "color", "places"] },
       });
       expect(createdPlace).toMatchObject({ action: "delivery_place.created" });
     });
@@ -202,7 +204,7 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
     it("renumbers the positions when the order of the places changes", async () => {
       const first = await insertPlace("First place");
       const second = await insertPlace("Second place");
-      const axisId = await insertAxis("North", 1, 0, [first, second]);
+      const axisId = await insertAxis("North", 1, [first, second]);
 
       const answer = await h.put(
         `${AXES_PATH}/${axisId}`,
@@ -223,7 +225,7 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
 
     it("writes no audit entry when nothing changes", async () => {
       const placeId = await insertPlace("First place");
-      const axisId = await insertAxis("North", 1, 0, [placeId]);
+      const axisId = await insertAxis("North", 1, [placeId]);
 
       const answer = await h.put(`${AXES_PATH}/${axisId}`, body([{ placeId }], { name: "North" }));
 
@@ -233,7 +235,7 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
 
     it("keeps an inactive place that the axis already holds", async () => {
       const inactive = await insertPlace("Old place", false);
-      const axisId = await insertAxis("North", 1, 0, [inactive]);
+      const axisId = await insertAxis("North", 1, [inactive]);
 
       const answer = await h.put(
         `${AXES_PATH}/${axisId}`,
@@ -246,7 +248,7 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
     it("refuses to add an inactive place to an axis", async () => {
       const inactive = await insertPlace("Old place", false);
       const placeId = await insertPlace("First place");
-      const axisId = await insertAxis("North", 1, 0, [placeId]);
+      const axisId = await insertAxis("North", 1, [placeId]);
 
       const answer = await h.put(
         `${AXES_PATH}/${axisId}`,
@@ -260,8 +262,8 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
     });
 
     it("answers 409 when the name is taken by another axis, and 404 for an unknown id", async () => {
-      await insertAxis("Taken", 1, 0);
-      const axisId = await insertAxis("North", 2, 1);
+      await insertAxis("Taken", 1);
+      const axisId = await insertAxis("North", 2);
 
       const taken = await h.put(`${AXES_PATH}/${axisId}`, body([NEW_PLACE], { name: "taken" }));
       const unknown = await h.put(`${AXES_PATH}/${UNKNOWN_ID}`, body([NEW_PLACE]));
@@ -272,9 +274,9 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
 
   describe("PUT /axes/order", () => {
     it("gives the ranks 1..n and audits each axis that moves", async () => {
-      const a = await insertAxis("A", 1, 0);
-      const b = await insertAxis("B", 2, 1);
-      const c = await insertAxis("C", 5, 2);
+      const a = await insertAxis("A", 1);
+      const b = await insertAxis("B", 2);
+      const c = await insertAxis("C", 5);
 
       const answer = await h.put(ORDER_PATH, { ids: [c, a, b] });
 
@@ -292,8 +294,8 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
     });
 
     it("writes nothing when the order is the same", async () => {
-      const a = await insertAxis("A", 1, 0);
-      const b = await insertAxis("B", 2, 1);
+      const a = await insertAxis("A", 1);
+      const b = await insertAxis("B", 2);
 
       const answer = await h.put(ORDER_PATH, { ids: [a, b] });
 
@@ -305,7 +307,7 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
       ["an incomplete list", (ids: string[]) => ids.slice(1)],
       ["a duplicate", (ids: string[]) => [ids[0] ?? "", ...ids]],
     ])("answers 422 for %s", async (_label, mutate) => {
-      const ids = [await insertAxis("A", 1, 0), await insertAxis("B", 2, 1)];
+      const ids = [await insertAxis("A", 1), await insertAxis("B", 2)];
 
       const answer = await h.put(ORDER_PATH, { ids: mutate(ids) });
 
@@ -317,10 +319,10 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
   });
 
   describe("DELETE /axes/:id", () => {
-    it("removes an axis without order, keeps its places and frees its colour", async () => {
+    it("removes an axis without order and keeps its places", async () => {
       const placeId = await insertPlace("First place");
-      await insertAxis("Keep", 1, 0);
-      const axisId = await insertAxis("Remove", 2, 1, [placeId]);
+      await insertAxis("Keep", 1);
+      const axisId = await insertAxis("Remove", 2, [placeId]);
 
       const answer = await h.delete(`${AXES_PATH}/${axisId}`);
 
@@ -330,12 +332,10 @@ describe("the writes of the delivery axes on a real PostgreSQL", () => {
       expect(await audit()).toEqual([
         { action: "delivery_axis.deleted", entity: "delivery_axis", entityId: axisId, diff: {} },
       ]);
-      const next = await h.post(AXES_PATH, body([{ placeId }], { name: "Next" }));
-      expect(adminDeliveryAxisSchema.parse(next.body).colorKey).toBe(1);
     });
 
     it("answers 409 for an axis that an order references", async () => {
-      const axisId = await insertAxis("Used", 1, 0);
+      const axisId = await insertAxis("Used", 1);
       const order = await h.placeOrder();
       await h.client.customerOrder.update({ where: { id: order.id }, data: { axisId } });
 

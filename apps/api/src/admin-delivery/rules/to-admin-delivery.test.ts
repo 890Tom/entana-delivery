@@ -15,7 +15,7 @@ const axis = (id: string, rank: number, places: readonly StoredPlace[]): StoredA
   id,
   name: `Axis ${id}`,
   rank,
-  colorKey: rank,
+  color: "#2f6b5a",
   active: true,
   places: places.map((stored, index) => ({ position: index + 1, place: stored })),
 });

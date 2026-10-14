@@ -37,7 +37,7 @@ export function listAxesWithPlaces(database: AdminDeliveryDatabase): Promise<Sto
       id: true,
       name: true,
       rank: true,
-      colorKey: true,
+      color: true,
       active: true,
       places: {
         select: { position: true, place: { select: PLACE_SELECT } },

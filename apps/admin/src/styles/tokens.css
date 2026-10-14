@@ -148,6 +148,10 @@
   /* Proposed: the delivery map (the prototype writes 260 and 560 as literals) and its marker. */
   --size-map-height: 260px;
   --size-map-height-large: 560px;
+  /* Proposed, to confirm (read on the owner's settings capture): the colour dot of an axis. */
+  --size-axis-dot: 12px;
+  /* Proposed, to confirm: the outline of a place and the line of an axis on the map. */
+  --map-zone-line-width: 2px;
   --size-map-pin: 40px;
   /* Proposed, to confirm: a field for a short number (the free delivery threshold). */
   --size-field-short: 160px;
@@ -166,6 +170,8 @@
   /* Opacity */
   --opacity-sold-out: 0.5;
   --opacity-skeleton-pulse: 0.5;
+  /* Proposed, to confirm: the fill of a place on the map, translucent so the streets show. */
+  --map-zone-fill-opacity: 0.2;
 
   /* Motion */
   --duration-fast: 120ms;

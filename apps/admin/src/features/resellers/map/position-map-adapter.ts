@@ -1,6 +1,7 @@
 import type * as Library from "maplibre-gl";
 
 import { texts } from "../../../i18n/texts";
+import { loadMapLibrary, whenMapLoaded } from "../../../map/load-maplibre";
 import { createMarkerElement } from "../../order-detail/map/marker-element";
 import type { MapPoint } from "../rules/reseller-form";
 
@@ -115,31 +116,11 @@ function createController(
 
 /** Loads the library, draws the map and resolves once the style is in. */
 export async function loadPositionMap(options: PositionMapOptions): Promise<PositionMapHandle> {
-  const [library, worker] = await Promise.all([
-    import("maplibre-gl"),
-    import("maplibre-gl/dist/maplibre-gl-worker.mjs?url"),
-    import("maplibre-gl/dist/maplibre-gl.css"),
-  ]);
-  // The worker is a file of the application (same origin), not a blob: a strict policy allows it.
-  library.setWorkerUrl(worker.default);
+  const library = await loadMapLibrary();
   const map = createMap(library, options);
   const handle = createController(library, map, options.onPick);
   if (options.point !== null) {
     handle.setPoint(options.point);
   }
-  return new Promise<PositionMapHandle>((resolve, reject) => {
-    let isLoaded = false;
-    // An error before the first load is the style or the library failing; a tile that fails later
-    // is a gap in the picture, not a reason to take the map away.
-    map.on("error", () => {
-      if (!isLoaded) {
-        map.remove();
-        reject(new Error("The map could not be loaded"));
-      }
-    });
-    map.once("load", () => {
-      isLoaded = true;
-      resolve(handle);
-    });
-  });
+  return whenMapLoaded(map, handle);
 }

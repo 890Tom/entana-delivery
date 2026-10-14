@@ -19,7 +19,7 @@ export interface StoredAxis {
   readonly id: string;
   readonly name: string;
   readonly rank: number;
-  readonly colorKey: number;
+  readonly color: string;
   readonly active: boolean;
   readonly places: readonly { readonly position: number; readonly place: StoredPlace }[];
 }
@@ -29,7 +29,7 @@ function toAdminDeliveryAxis(axis: StoredAxis, byRank: readonly StoredAxis[]): A
     id: axis.id,
     name: axis.name,
     rank: axis.rank,
-    colorKey: axis.colorKey,
+    color: axis.color,
     active: axis.active,
     places: axis.places.map(({ place }) => ({
       id: place.id,

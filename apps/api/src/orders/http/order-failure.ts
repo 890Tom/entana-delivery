@@ -28,7 +28,6 @@ import {
 import {
   AdminDeliveryAxisNotFoundError,
   DeliveryAxisInUseError,
-  DeliveryAxisLimitReachedError,
   DeliveryAxisNameTakenError,
   DeliveryAxisOrderMismatchError,
   DeliveryPlaceNameTakenError,
@@ -215,14 +214,6 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
       status: 409,
       detail: "The delivery axis is used by orders: deactivate it instead.",
       problemType: DELIVERY_PROBLEM_TYPES.axisInUse,
-    },
-  ],
-  [
-    DeliveryAxisLimitReachedError,
-    {
-      status: 422,
-      detail: "The maximum number of delivery axes is reached.",
-      problemType: DELIVERY_PROBLEM_TYPES.axisLimitReached,
     },
   ],
   [

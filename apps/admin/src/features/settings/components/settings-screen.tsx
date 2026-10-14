@@ -7,7 +7,7 @@ import { texts } from "../../../i18n/texts";
 import { SETTINGS_PATH, SETTINGS_TEXTS_PATH } from "../../../routes";
 import { useSettings } from "../hooks/use-settings";
 
-import { FeesForm } from "./fees-form";
+import { FeesTab } from "./fees-tab";
 import styles from "./settings-screen.module.css";
 import { SettingsSkeleton } from "./settings-skeleton";
 import { TextsForm } from "./texts-form";
@@ -43,9 +43,9 @@ function SettingsPage({
   );
 }
 
-/** The tab "Axes et frais": for now, the card "Hors axe" only. */
+/** The tab "Axes et frais": the axes and the fee outside them, beside the map of the axes. */
 export function SettingsFeesScreen(): ReactElement {
-  return <SettingsPage renderForm={(settings) => <FeesForm settings={settings} />} />;
+  return <SettingsPage renderForm={(settings) => <FeesTab settings={settings} />} />;
 }
 
 /** The tab "Textes": the message shown outside every axis, with its preview. */
