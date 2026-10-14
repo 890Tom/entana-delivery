@@ -26,6 +26,16 @@ export const RESELLER_PROBLEM_TYPES = {
   notPublishable: "urn:entana:problem:reseller_not_publishable",
 } as const;
 
+/** `type` of the problems of the delivery axes that a client acts on (409 and 422 are shared). */
+export const DELIVERY_PROBLEM_TYPES = {
+  axisNameTaken: "urn:entana:problem:delivery_axis_name_taken",
+  placeNameTaken: "urn:entana:problem:delivery_place_name_taken",
+  axisLimitReached: "urn:entana:problem:delivery_axis_limit_reached",
+  axisInUse: "urn:entana:problem:delivery_axis_in_use",
+  axisOrderMismatch: "urn:entana:problem:delivery_axis_order_mismatch",
+  placeUnavailable: "urn:entana:problem:delivery_place_unavailable",
+} as const;
+
 /** One invalid field of a request. `pointer` is a JSON Pointer (RFC 6901) into the request data. */
 export const fieldErrorSchema = z.object({
   pointer: z.string(),

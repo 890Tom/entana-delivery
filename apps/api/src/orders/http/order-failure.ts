@@ -1,5 +1,6 @@
 import { STATUS_CODES } from "node:http";
 import {
+  DELIVERY_PROBLEM_TYPES,
   GENERIC_PROBLEM_TYPE,
   PRODUCT_PHOTO_MAX_BYTES,
   PRODUCT_PHOTO_MIN_SHORT_SIDE_PX,
@@ -24,6 +25,15 @@ import {
   AdminResellerNotFoundError,
   ResellerNotPublishableError,
 } from "../../admin-resellers/errors/admin-reseller-errors.js";
+import {
+  AdminDeliveryAxisNotFoundError,
+  DeliveryAxisInUseError,
+  DeliveryAxisLimitReachedError,
+  DeliveryAxisNameTakenError,
+  DeliveryAxisOrderMismatchError,
+  DeliveryPlaceNameTakenError,
+  DeliveryPlaceUnavailableError,
+} from "../../admin-delivery/errors/admin-delivery-errors.js";
 import {
   AdminOrderNotFoundError,
   OrderTransitionRefusedError,
@@ -176,6 +186,59 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
       status: 422,
       detail: "The reseller needs the consent of its owner to be visible.",
       problemType: RESELLER_PROBLEM_TYPES.notPublishable,
+    },
+  ],
+  // The delivery axes of the administration: an unknown and a malformed id answer alike.
+  [
+    AdminDeliveryAxisNotFoundError,
+    { status: 404, detail: "The requested resource was not found." },
+  ],
+  [
+    DeliveryAxisNameTakenError,
+    {
+      status: 409,
+      detail: "The name is already used by another delivery axis.",
+      problemType: DELIVERY_PROBLEM_TYPES.axisNameTaken,
+    },
+  ],
+  [
+    DeliveryPlaceNameTakenError,
+    {
+      status: 409,
+      detail: "The name is already used by another delivery place.",
+      problemType: DELIVERY_PROBLEM_TYPES.placeNameTaken,
+    },
+  ],
+  [
+    DeliveryAxisInUseError,
+    {
+      status: 409,
+      detail: "The delivery axis is used by orders: deactivate it instead.",
+      problemType: DELIVERY_PROBLEM_TYPES.axisInUse,
+    },
+  ],
+  [
+    DeliveryAxisLimitReachedError,
+    {
+      status: 422,
+      detail: "The maximum number of delivery axes is reached.",
+      problemType: DELIVERY_PROBLEM_TYPES.axisLimitReached,
+    },
+  ],
+  [
+    DeliveryAxisOrderMismatchError,
+    {
+      status: 422,
+      detail: "The list must hold every delivery axis exactly once.",
+      problemType: DELIVERY_PROBLEM_TYPES.axisOrderMismatch,
+    },
+  ],
+  [
+    DeliveryPlaceUnavailableError,
+    {
+      status: 422,
+      detail: "A place of the list is unknown or inactive.",
+      problemType: DELIVERY_PROBLEM_TYPES.placeUnavailable,
     },
   ],
   [

@@ -1,18 +1,46 @@
-import { Body, Controller, Get, Header, Patch, Query, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Header,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { deliveryResolveQuerySchema, updateDeliverySettingsRequestSchema } from "@entana/contracts";
+import {
+  deliveryResolveQuerySchema,
+  reorderDeliveryAxesRequestSchema,
+  saveDeliveryAxisRequestSchema,
+  updateDeliverySettingsRequestSchema,
+} from "@entana/contracts";
 import type {
+  AdminDeliveryAxis,
   AdminDeliveryAxisListResponse,
   AdminDeliveryPlaceListResponse,
   AdminProfile,
   DeliveryResolveQuery,
   DeliveryResolveResponse,
   DeliverySettings,
+  ReorderDeliveryAxesRequest,
+  SaveDeliveryAxisRequest,
   UpdateDeliverySettingsRequest,
 } from "@entana/contracts";
 import { currentAdmin } from "../admin-auth/http/authenticated-admin.js";
 import { JsonContentTypeGuard } from "../errors/request-body/json-content-type.guard.js";
+import { AdminDeliveryAxesService } from "./admin-delivery-axes.service.js";
 import { AdminDeliveryService } from "./admin-delivery.service.js";
+import {
+  documentCreateDeliveryAxis,
+  documentDeleteDeliveryAxis,
+  documentReorderDeliveryAxes,
+  documentReplaceDeliveryAxis,
+} from "./http/admin-delivery-axes-openapi.js";
 import {
   documentGetDeliverySettings,
   documentListDeliveryAxes,
@@ -27,13 +55,59 @@ const NO_STORE = "no-store";
 @ApiTags("admin")
 @Controller({ path: "admin/delivery", version: "1" })
 export class AdminDeliveryController {
-  constructor(private readonly delivery: AdminDeliveryService) {}
+  constructor(
+    private readonly delivery: AdminDeliveryService,
+    private readonly axes: AdminDeliveryAxesService,
+  ) {}
 
   @Get("axes")
   @Header("Cache-Control", NO_STORE)
   @documentListDeliveryAxes()
   listAxes(): Promise<AdminDeliveryAxisListResponse> {
     return this.delivery.listAxes();
+  }
+
+  @Post("axes")
+  @UseGuards(JsonContentTypeGuard)
+  @Header("Cache-Control", NO_STORE)
+  @documentCreateDeliveryAxis()
+  createAxis(
+    @Body({ schema: saveDeliveryAxisRequestSchema }) body: SaveDeliveryAxisRequest,
+    @currentAdmin() admin: AdminProfile,
+  ): Promise<AdminDeliveryAxis> {
+    return this.axes.create(body, admin.id);
+  }
+
+  // `order` is a literal segment of a PUT: declared first, it cannot be taken for an id.
+  @Put("axes/order")
+  @UseGuards(JsonContentTypeGuard)
+  @Header("Cache-Control", NO_STORE)
+  @documentReorderDeliveryAxes()
+  reorderAxes(
+    @Body({ schema: reorderDeliveryAxesRequestSchema }) body: ReorderDeliveryAxesRequest,
+    @currentAdmin() admin: AdminProfile,
+  ): Promise<AdminDeliveryAxisListResponse> {
+    return this.axes.reorder(body, admin.id);
+  }
+
+  @Put("axes/:id")
+  @UseGuards(JsonContentTypeGuard)
+  @Header("Cache-Control", NO_STORE)
+  @documentReplaceDeliveryAxis()
+  replaceAxis(
+    @Param("id") id: string,
+    @Body({ schema: saveDeliveryAxisRequestSchema }) body: SaveDeliveryAxisRequest,
+    @currentAdmin() admin: AdminProfile,
+  ): Promise<AdminDeliveryAxis> {
+    return this.axes.replace(id, body, admin.id);
+  }
+
+  @Delete("axes/:id")
+  @HttpCode(204)
+  @Header("Cache-Control", NO_STORE)
+  @documentDeleteDeliveryAxis()
+  deleteAxis(@Param("id") id: string, @currentAdmin() admin: AdminProfile): Promise<void> {
+    return this.axes.delete(id, admin.id);
   }
 
   @Get("places")
