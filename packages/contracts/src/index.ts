@@ -214,6 +214,11 @@ export {
 } from "./delivery/delivery-settings.js";
 export type { DeliverySettings } from "./delivery/delivery-settings.js";
 export {
+  deliveryQuoteRequestSchema,
+  deliveryQuoteResponseSchema,
+} from "./delivery/delivery-quote.js";
+export type { DeliveryQuoteRequest, DeliveryQuoteResponse } from "./delivery/delivery-quote.js";
+export {
   DEFAULT_PLACE_RADIUS_M,
   DELIVERY_NAME_MAX_LENGTH,
   MAX_PLACES_PER_AXIS,

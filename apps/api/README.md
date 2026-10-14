@@ -450,6 +450,28 @@ The order is neighborhood, then name, then id. An empty list answers `{ "reselle
 - **Errors:** an unreachable database is the fixed `503` of "Database errors"; anything else is the
   generic `500`. OpenAPI tag `resellers`, operation `listResellers`.
 
+## Delivery quote endpoint
+
+`POST /api/v1/delivery/quote` is public (no authentication, no `Idempotency-Key`). The body,
+`deliveryQuoteRequestSchema` of `@entana/contracts`, is strict: `{ latitude, longitude, pieces }`,
+latitude from -90 to 90, longitude from -180 to 180, `pieces` an integer from 1 to 2970
+(`MAX_ORDER_LINES` × `MAX_ORDER_LINE_QUANTITY`). The server reads the active axes with their active
+places, and the settings (`shop_setting`), then applies `resolveDeliveryAxis` and
+`computeDeliveryFee` of `@entana/contracts`, never rewritten here. The answer,
+`deliveryQuoteResponseSchema`, is
+`{ feeAr, reason, placeName, outOfAxisMessage, freeDeliveryMinPieces }`: `reason` is `axis`,
+`quantity` or `out_of_axis`; `placeName` is set inside an axis only; `outOfAxisMessage` (from the
+settings) only when `reason` is `out_of_axis`. The order creation computes the fee again: a quote
+is only an announcement.
+
+- **Privacy:** a POST, so that the coordinates stay out of URLs and access logs. They are neither
+  logged nor stored.
+- **Cache:** `Cache-Control: no-store`, the answer follows the settings of the moment.
+- **No rate limiting:** no limit applies to the public routes as a whole, and the route has none of
+  its own.
+- **Errors:** `400` (invalid body, pointers and fixed texts only), `413`, `415`, the fixed `503` of
+  "Database errors" and the generic `500`. OpenAPI tag `delivery`, operation `quoteDelivery`.
+
 ## Order endpoint
 
 `POST /api/v1/orders` creates an order. Public, no account. Documented in the OpenAPI page
