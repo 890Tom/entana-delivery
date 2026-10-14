@@ -1,4 +1,4 @@
-import type { AdminDeliveryAxis, DeliverySettings } from "@entana/contracts";
+import type { AdminDeliveryAxis, AdminDeliveryPlace, DeliverySettings } from "@entana/contracts";
 
 import { texts } from "../../i18n/texts";
 import { openAt } from "../catalogue/catalogue-harness";
@@ -22,6 +22,22 @@ export function openAxesTab(
   return openAt("/parametres", texts.settings.title, {
     [ROUTES.settings]: () => jsonResponse(SAVED_SETTINGS),
     [ROUTES.axes]: axes,
+    ...handlers,
+  });
+}
+
+/** The answer of the list of active places. */
+export const placesList = (...places: readonly AdminDeliveryPlace[]): Response =>
+  jsonResponse({ places });
+
+/** The screen of an axis at an address, signed in, with the axes and the places the test gives. */
+export function openAxisScreen(
+  path: string,
+  heading: string,
+  handlers: Parameters<typeof openAt>[2],
+): Promise<ApiStub> {
+  return openAt(path, heading, {
+    [ROUTES.settings]: () => jsonResponse(SAVED_SETTINGS),
     ...handlers,
   });
 }

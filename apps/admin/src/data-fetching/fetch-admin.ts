@@ -11,7 +11,12 @@ interface ResponseSchema<T> {
 }
 
 /** The problems of the delivery axes that a screen acts on: only those, not the whole family. */
-const DELIVERY_PROBLEMS = { axisOrderMismatch: DELIVERY_PROBLEM_TYPES.axisOrderMismatch } as const;
+const DELIVERY_PROBLEMS = {
+  axisOrderMismatch: DELIVERY_PROBLEM_TYPES.axisOrderMismatch,
+  axisNameTaken: DELIVERY_PROBLEM_TYPES.axisNameTaken,
+  placeUnavailable: DELIVERY_PROBLEM_TYPES.placeUnavailable,
+  axisInUse: DELIVERY_PROBLEM_TYPES.axisInUse,
+} as const;
 
 /**
  * A problem of the product form, of the resellers or of the axes that the answer names. Only the types the

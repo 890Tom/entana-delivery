@@ -11,15 +11,21 @@ const PROFILE = {
   displayName: "Hery Rakoto",
 };
 
-/** The application at an address, signed in, with the API stubbed at the network. */
+/** The application at an address, signed in, with the API stubbed at the network; not waited. */
+export function renderSignedIn(path: string, handlers: Parameters<typeof stubApi>[0]): ApiStub {
+  window.history.replaceState(null, "", path);
+  const api = stubApi({ [ROUTES.me]: () => jsonResponse(PROFILE), ...handlers });
+  render(<App />);
+  return api;
+}
+
+/** The application at an address, signed in, once the screen shows its heading. */
 export async function openAt(
   path: string,
   heading: string,
   handlers: Parameters<typeof stubApi>[0],
 ): Promise<ApiStub> {
-  window.history.replaceState(null, "", path);
-  const api = stubApi({ [ROUTES.me]: () => jsonResponse(PROFILE), ...handlers });
-  render(<App />);
+  const api = renderSignedIn(path, handlers);
   await screen.findByRole("heading", { name: heading });
   return api;
 }

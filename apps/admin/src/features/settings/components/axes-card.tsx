@@ -6,6 +6,9 @@ import { Notice } from "../../../components/notice/notice";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
 import { OrderIcon } from "../../../order-display/order-icons";
+import { SETTINGS_AXIS_NEW_PATH } from "../../../routes";
+import { CatalogueIcon } from "../../catalogue/components/catalogue-icons";
+import { FormLink } from "../../catalogue/components/form-buttons";
 import cardStyles from "../../order-detail/components/card.module.css";
 import type { AxesModel } from "../hooks/use-axes";
 import { useAxesOrder } from "../hooks/use-axes-order";
@@ -83,7 +86,7 @@ function AxesContent({ model, helpId }: { model: AxesModel; helpId: string }): R
   return <AxesSkeleton />;
 }
 
-/** The card « Axes de livraison »: the axes in priority order, and how many the shop may have. */
+/** The card « Axes de livraison »: the axes in priority order, and the way to add one. */
 export function AxesCard({ model }: { model: AxesModel }): ReactElement {
   const helpId = useId();
   return (
@@ -91,9 +94,17 @@ export function AxesCard({ model }: { model: AxesModel }): ReactElement {
       className={[cardStyles.card, screenStyles.card].join(" ")}
       aria-labelledby={`${helpId}-title`}
     >
-      <h2 id={`${helpId}-title`} className={cardStyles.title}>
-        {t.title}
-      </h2>
+      <div className={styles.top}>
+        <h2 id={`${helpId}-title`} className={cardStyles.title}>
+          {t.title}
+        </h2>
+        <FormLink
+          href={SETTINGS_AXIS_NEW_PATH}
+          variant="primary"
+          label={t.add}
+          icon={<CatalogueIcon name="plus" size={20} />}
+        />
+      </div>
       <p id={helpId} className={cardStyles.muted}>
         {t.help}
       </p>

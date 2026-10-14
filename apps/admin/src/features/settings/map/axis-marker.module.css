@@ -1,0 +1,35 @@
+/* The badge sits on the centre of the place; the name follows it to the right. */
+.badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-axis-badge);
+  height: var(--size-axis-badge);
+  font: var(--font-body-strong);
+  pointer-events: none;
+  border: var(--border-width-strong) solid var(--color-surface);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+}
+
+.light {
+  color: var(--color-text-inverse);
+}
+
+.dark {
+  color: var(--color-text);
+}
+
+.label {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + var(--space-1));
+  padding: 0 var(--space-2);
+  color: var(--color-text);
+  white-space: nowrap;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-50%);
+}

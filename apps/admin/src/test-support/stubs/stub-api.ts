@@ -18,6 +18,8 @@ export const ROUTES = {
   updateSettings: "PATCH /api/v1/admin/delivery/settings",
   axes: "GET /api/v1/admin/delivery/axes",
   axesOrder: "PUT /api/v1/admin/delivery/axes/order",
+  createAxis: "POST /api/v1/admin/delivery/axes",
+  places: "GET /api/v1/admin/delivery/places",
   resolve: "GET /api/v1/admin/delivery/resolve",
 } as const;
 
@@ -27,6 +29,13 @@ export const resellerRoute = (
   method: "PATCH" | "POST" | "DELETE",
 ): `${"PATCH" | "POST" | "DELETE"} /api/v1/admin/resellers/${string}` =>
   `${method} /api/v1/admin/resellers/${resellerId}${method === "POST" ? "/verify" : ""}`;
+
+/** The replacement and the deletion of one delivery axis. */
+export const axisRoute = (
+  axisId: string,
+  method: "PUT" | "DELETE",
+): `${"PUT" | "DELETE"} /api/v1/admin/delivery/axes/${string}` =>
+  `${method} /api/v1/admin/delivery/axes/${axisId}`;
 
 /** The change of the fields of one product (and of its `retired`). */
 export const productChangeRoute = (productId: string): `PATCH /api/v1/admin/products/${string}` =>
@@ -61,7 +70,8 @@ export type Route =
   | ReturnType<typeof productRoute>
   | ReturnType<typeof productChangeRoute>
   | ReturnType<typeof productPhotoRoute>
-  | ReturnType<typeof resellerRoute>;
+  | ReturnType<typeof resellerRoute>
+  | ReturnType<typeof axisRoute>;
 /** The second argument is the address of the call, query string included. */
 export type Handler = (
   init: RequestInit | undefined,

@@ -6,6 +6,14 @@
   list-style: none;
 }
 
+/* The title, then « Ajouter un axe » at the end of the line. */
+.top {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
 /* Handle, dot, name and route, count: as on the owner's capture. */
 .row {
   display: grid;
@@ -15,6 +23,16 @@
   padding: var(--space-3) 0;
   background: var(--color-surface);
   border-bottom: var(--border-width) solid var(--color-border);
+}
+
+/* The name opens the axis; the handle beside it stays the only place a drag starts. */
+.link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
 }
 
 .dragging {
