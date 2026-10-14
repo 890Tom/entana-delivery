@@ -1,4 +1,8 @@
-import type { AdminDeliveryAxis, AdminDeliveryAxisPlace } from "@entana/contracts";
+import type {
+  AdminDeliveryAxis,
+  AdminDeliveryAxisPlace,
+  AdminDeliveryPlace,
+} from "@entana/contracts";
 
 const idOf = (prefix: string, index: number): string =>
   `0199f5b0-7c1e-7a3b-${prefix}-${String(index).padStart(12, "0")}`;
@@ -34,4 +38,13 @@ export function buildAxis(
     places: [buildAxisPlace(index)],
     ...overrides,
   };
+}
+
+/** The same place as `buildAxisPlace`, as the list of active places gives it. */
+export function buildPlace(
+  index: number,
+  overrides: Partial<AdminDeliveryPlace> = {},
+): AdminDeliveryPlace {
+  const { id, name, latitude, longitude, radiusM } = buildAxisPlace(index);
+  return { id, name, latitude, longitude, radiusM, ...overrides };
 }

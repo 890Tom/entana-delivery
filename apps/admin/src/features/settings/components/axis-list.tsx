@@ -11,9 +11,11 @@ import { CSS } from "@dnd-kit/utilities";
 import type { AdminDeliveryAxis } from "@entana/contracts";
 import { useId } from "react";
 import type { ReactElement } from "react";
+import { Link } from "wouter";
 
 import { Pill } from "../../../components/pill/pill";
 import { texts } from "../../../i18n/texts";
+import { settingsAxisPath } from "../../../routes";
 import { DragHandle } from "../../catalogue/components/drag-handle";
 import { summarizeRoute } from "../rules/route-summary";
 
@@ -37,7 +39,13 @@ function AxisSummary({ axis }: { axis: AdminDeliveryAxis }): ReactElement {
       <span className={styles.dot} style={{ backgroundColor: axis.color }} aria-hidden="true" />
       <span className={styles.text}>
         <span className={styles.name}>
-          {axis.name}
+          <Link
+            href={settingsAxisPath(axis.id)}
+            className={styles.link}
+            aria-label={t.edit(axis.name)}
+          >
+            {axis.name}
+          </Link>
           {!axis.active && <Pill tone="neutral">{t.inactive}</Pill>}
         </span>
         <span className={styles.route}>

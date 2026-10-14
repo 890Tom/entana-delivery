@@ -2,6 +2,8 @@ import { MAX_FREE_DELIVERY_MIN_PIECES, PRODUCT_PRICE_MAX_AR } from "@entana/cont
 
 import { formatAmount, groupThousands } from "../order-display/format-order";
 
+import { axisEditorTexts } from "./axis-editor-texts";
+
 // The texts of the settings screen. The texts that the owner's captures do not give are marked
 // "to confirm".
 export const settingsTexts = {
@@ -40,6 +42,9 @@ export const settingsTexts = {
     handle: (name: string, position: number, total: number): string =>
       `Déplacer ${name}, priorité ${String(position)} sur ${String(total)}.`,
     freeInside: "Dans un axe, la livraison est gratuite.",
+    add: "Ajouter un axe",
+    // To confirm: the name of the link of a row for assistive technology.
+    edit: (name: string): string => `Modifier ${name}`,
     // To confirm.
     empty: "Aucun axe pour le moment : les frais hors axe s'appliquent partout.",
     // To confirm.
@@ -81,6 +86,7 @@ export const settingsTexts = {
     // To confirm.
     testFailed: "Le test n'a pas abouti. Réessayez.",
   },
+  axisEditor: axisEditorTexts,
   texts: {
     title: "Textes",
     message: "Message affiché au client en cas de frais hors axe",

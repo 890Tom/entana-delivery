@@ -150,8 +150,14 @@
   --size-map-height-large: 560px;
   /* Proposed, to confirm (read on the owner's settings capture): the colour dot of an axis. */
   --size-axis-dot: 12px;
+  /* Proposed, to confirm (read on the owner's axis capture): the numbered badge of a place. */
+  --size-axis-badge: 24px;
   /* Proposed, to confirm: the outline of a place and the line of an axis on the map. */
   --map-zone-line-width: 2px;
+  /* Proposed, to confirm: the existing places beside an axis being edited, grey and dashed (the
+     dash and the gap in line widths, as the map library reads them). */
+  --map-place-other-color: var(--color-neutral-400);
+  --map-place-other-dash: 2 2;
   --size-map-pin: 40px;
   /* Proposed, to confirm: a field for a short number (the free delivery threshold). */
   --size-field-short: 160px;

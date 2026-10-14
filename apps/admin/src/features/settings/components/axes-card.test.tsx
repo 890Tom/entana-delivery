@@ -88,12 +88,19 @@ describe("the list of the axes", () => {
     expect(within(rowOf("Axe Nord")).queryByText(t.inactive)).toBeNull();
   });
 
-  it("offers no way to add an axis and no link on the rows", async () => {
+  it("offers to add an axis, links each row to its axis, and counts no maximum", async () => {
     await openAxesTab(() => axesList(north, east));
 
     await screen.findByText("Axe Nord");
-    expect(screen.queryByRole("button", { name: /ajouter un axe/i })).toBeNull();
-    expect(within(listOfAxes()).queryAllByRole("link")).toEqual([]);
+    expect(screen.getByRole("link", { name: t.add }).getAttribute("href")).toBe(
+      "/parametres/axes/nouveau",
+    );
+    expect(
+      within(listOfAxes())
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href")),
+    ).toEqual([`/parametres/axes/${north.id}`, `/parametres/axes/${east.id}`]);
+    expect(screen.queryByText(/sur 10/)).toBeNull();
   });
 
   it("shows a skeleton while the axes load", async () => {

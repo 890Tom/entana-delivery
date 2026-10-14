@@ -17,6 +17,8 @@ import {
   RESELLER_PATTERN,
   RESELLERS_NEW_PATH,
   RESELLERS_PATH,
+  SETTINGS_AXIS_NEW_PATH,
+  SETTINGS_AXIS_PATTERN,
   SETTINGS_PATH,
   SETTINGS_TEXTS_PATH,
 } from "../../../routes";
@@ -33,10 +35,35 @@ import {
   NewResellerScreen,
 } from "../../resellers/components/reseller-form-screen";
 import { ResellersScreen } from "../../resellers/components/resellers-screen";
+import { EditAxisScreen, NewAxisScreen } from "../../settings/components/axis-editor-screen";
 import { SettingsFeesScreen, SettingsTextsScreen } from "../../settings/components/settings-screen";
 import { useSession } from "../hooks/use-session";
 
 import styles from "./protected-area.module.css";
+
+/** The screens of a signed-in person; an unknown address is "not found". */
+function SignedInRoutes(): ReactElement {
+  return (
+    <Switch>
+      <Route path={HOME_PATH}>
+        <Redirect to={ORDERS_PATH} replace />
+      </Route>
+      <Route path={ORDERS_PATH} component={OrdersScreen} />
+      <Route path={ORDER_PATH_PATTERN} component={OrderDetailScreen} />
+      <Route path={CATALOGUE_PATH} component={CatalogueScreen} />
+      <Route path={CATALOGUE_NEW_PATH} component={NewProductScreen} />
+      <Route path={CATALOGUE_PRODUCT_PATTERN} component={EditProductScreen} />
+      <Route path={RESELLERS_PATH} component={ResellersScreen} />
+      <Route path={RESELLERS_NEW_PATH} component={NewResellerScreen} />
+      <Route path={RESELLER_PATTERN} component={EditResellerScreen} />
+      <Route path={SETTINGS_PATH} component={SettingsFeesScreen} />
+      <Route path={SETTINGS_TEXTS_PATH} component={SettingsTextsScreen} />
+      <Route path={SETTINGS_AXIS_NEW_PATH} component={NewAxisScreen} />
+      <Route path={SETTINGS_AXIS_PATTERN} component={EditAxisScreen} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
 
 /**
  * Every address except the sign-in, the unknown ones included: nothing is shown, not even "not
@@ -63,22 +90,7 @@ export function ProtectedArea(): ReactElement {
       return (
         <CatalogueFlashProvider>
           <AdminShell>
-            <Switch>
-              <Route path={HOME_PATH}>
-                <Redirect to={ORDERS_PATH} replace />
-              </Route>
-              <Route path={ORDERS_PATH} component={OrdersScreen} />
-              <Route path={ORDER_PATH_PATTERN} component={OrderDetailScreen} />
-              <Route path={CATALOGUE_PATH} component={CatalogueScreen} />
-              <Route path={CATALOGUE_NEW_PATH} component={NewProductScreen} />
-              <Route path={CATALOGUE_PRODUCT_PATTERN} component={EditProductScreen} />
-              <Route path={RESELLERS_PATH} component={ResellersScreen} />
-              <Route path={RESELLERS_NEW_PATH} component={NewResellerScreen} />
-              <Route path={RESELLER_PATTERN} component={EditResellerScreen} />
-              <Route path={SETTINGS_PATH} component={SettingsFeesScreen} />
-              <Route path={SETTINGS_TEXTS_PATH} component={SettingsTextsScreen} />
-              <Route component={NotFound} />
-            </Switch>
+            <SignedInRoutes />
           </AdminShell>
         </CatalogueFlashProvider>
       );
