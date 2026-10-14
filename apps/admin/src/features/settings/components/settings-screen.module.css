@@ -1,0 +1,81 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.title {
+  margin: 0;
+  font: var(--font-title);
+}
+
+/* Two columns, as on the owner's captures: the card on the left, the map or preview on the right. */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 8fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.card {
+  gap: var(--space-4);
+}
+
+.actions {
+  display: flex;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: var(--size-readable-max);
+}
+
+.where {
+  margin: 0;
+  font: var(--font-title);
+}
+
+.fee {
+  display: flex;
+  justify-content: space-between;
+  padding-top: var(--space-3);
+  margin: 0;
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.block {
+  display: block;
+  background: var(--color-skeleton);
+  border-radius: var(--radius-sm);
+  animation: pulse var(--duration-pulse) var(--ease) infinite alternate;
+}
+
+.blockTitle,
+.blockLabel {
+  height: calc(var(--font-size-body) * var(--line-height-body));
+}
+
+.blockTitle {
+  width: 25%;
+}
+
+.blockLabel {
+  width: 60%;
+}
+
+.blockField {
+  height: var(--size-field-height);
+}
+
+.blockButton {
+  width: 40%;
+  height: var(--size-button-height);
+}
+
+@keyframes pulse {
+  to {
+    opacity: var(--opacity-skeleton-pulse);
+  }
+}

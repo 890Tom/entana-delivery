@@ -17,6 +17,8 @@ import {
   RESELLER_PATTERN,
   RESELLERS_NEW_PATH,
   RESELLERS_PATH,
+  SETTINGS_PATH,
+  SETTINGS_TEXTS_PATH,
 } from "../../../routes";
 import { CatalogueScreen } from "../../catalogue/components/catalogue-screen";
 import {
@@ -31,6 +33,7 @@ import {
   NewResellerScreen,
 } from "../../resellers/components/reseller-form-screen";
 import { ResellersScreen } from "../../resellers/components/resellers-screen";
+import { SettingsFeesScreen, SettingsTextsScreen } from "../../settings/components/settings-screen";
 import { useSession } from "../hooks/use-session";
 
 import styles from "./protected-area.module.css";
@@ -72,6 +75,8 @@ export function ProtectedArea(): ReactElement {
               <Route path={RESELLERS_PATH} component={ResellersScreen} />
               <Route path={RESELLERS_NEW_PATH} component={NewResellerScreen} />
               <Route path={RESELLER_PATTERN} component={EditResellerScreen} />
+              <Route path={SETTINGS_PATH} component={SettingsFeesScreen} />
+              <Route path={SETTINGS_TEXTS_PATH} component={SettingsTextsScreen} />
               <Route component={NotFound} />
             </Switch>
           </AdminShell>

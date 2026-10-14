@@ -1,0 +1,29 @@
+/* The underline of the current tab is the one of the header's current section. */
+.tabs {
+  display: flex;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  min-height: var(--size-touch-min);
+  padding: 0 var(--space-4);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  /* The underline covers the line of the list instead of sitting on it. */
+  margin-bottom: calc(var(--border-width) * -1);
+  border-bottom: var(--border-width-strong) solid transparent;
+}
+
+.tab[aria-current="page"] {
+  font: var(--font-body-strong);
+  color: var(--color-text);
+  border-bottom-color: var(--color-highlight);
+}
+
+@media (hover: hover) {
+  .tab:hover:not([aria-current="page"]) {
+    color: var(--color-text);
+  }
+}
