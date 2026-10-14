@@ -19,12 +19,14 @@ import {
 import { countRows } from "./support/count-rows.js";
 import { insertProduct } from "./support/insert-product.js";
 import {
+  OUT_OF_AXIS_FEE_AR,
   START,
   captureError,
   countCellsContaining,
   createOrdersService,
   describeError,
   openOrdersClient,
+  resetDeliveryRules,
   resetOrderData,
 } from "./support/orders-fixtures.js";
 
@@ -41,6 +43,7 @@ async function twoProducts(): Promise<{ first: string; second: string }> {
 describe("OrdersService.createOrder against a real PostgreSQL", () => {
   beforeEach(async () => {
     await resetOrderData(client);
+    await resetDeliveryRules(client);
   });
 
   afterAll(async () => {
@@ -61,7 +64,11 @@ describe("OrdersService.createOrder against a real PostgreSQL", () => {
 
       expect(isReplay).toBe(false);
       expect(createOrderResponseSchema.safeParse(response).success).toBe(true);
-      expect(response).toMatchObject({ status: "NEW", totalAr: 2 * 5000 + 3 * 1250 });
+      expect(response).toMatchObject({
+        status: "NEW",
+        totalAr: 2 * 5000 + 3 * 1250 + OUT_OF_AXIS_FEE_AR,
+        deliveryFeeAr: OUT_OF_AXIS_FEE_AR,
+      });
       expect(response.createdAt).toBe(START.toISOString());
       const customer = await client.customer.findUniqueOrThrow({
         where: { phoneE164: FAKE_PHONE_E164 },
@@ -77,7 +84,7 @@ describe("OrdersService.createOrder against a real PostgreSQL", () => {
         customerId: customer.id,
         placeId: null,
         axisId: null,
-        deliveryFee: 0,
+        deliveryFee: OUT_OF_AXIS_FEE_AR,
         feeReason: "OUT_OF_AXIS",
         deliveryDate: null,
         status: "NEW",
@@ -87,7 +94,7 @@ describe("OrdersService.createOrder against a real PostgreSQL", () => {
         landmarkText: FAKE_LANDMARK,
         lat: FAKE_LAT,
         lng: FAKE_LNG,
-        totalAr: 13750,
+        totalAr: 13750 + OUT_OF_AXIS_FEE_AR,
         createdAt: START,
       });
       expect(
@@ -149,7 +156,7 @@ describe("OrdersService.createOrder against a real PostgreSQL", () => {
         where: { idempotencyKey: KEY },
         include: { items: true },
       });
-      expect(order.totalAr).toBe(10000);
+      expect(order.totalAr).toBe(10000 + OUT_OF_AXIS_FEE_AR);
       expect(order.items[0]).toMatchObject({ unitPrice: 5000, productName: "Frozen name one" });
     });
 
@@ -227,8 +234,8 @@ describe("OrdersService.createOrder against a real PostgreSQL", () => {
       expect(await countRows(client)).toEqual(before);
     });
 
-    it("accepts a total exactly at the column bound", async () => {
-      const product = await insertProduct(client, { priceAr: 2_147_483_647 });
+    it("accepts a total, delivery fee included, exactly at the column bound", async () => {
+      const product = await insertProduct(client, { priceAr: 2_147_483_647 - OUT_OF_AXIS_FEE_AR });
 
       const { response } = await service.createOrder(
         buildOrderRequest([{ productId: product, quantity: 1 }]),

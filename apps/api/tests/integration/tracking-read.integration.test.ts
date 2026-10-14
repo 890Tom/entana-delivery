@@ -14,7 +14,7 @@ import { FIXED_404, TRACKING_PATH, TRACKING_RESPONSE_HEADERS } from "../support/
 import { newKey } from "../support/order-http.js";
 import { buildOrderRequest } from "../support/order-request.js";
 import { insertProduct } from "./support/insert-product.js";
-import { createOrdersService } from "./support/orders-fixtures.js";
+import { OUT_OF_AXIS_FEE_AR, createOrdersService } from "./support/orders-fixtures.js";
 import { useTrackingHarness } from "./support/tracking-harness.js";
 
 const DAY_MS = 86_400_000;
@@ -35,8 +35,8 @@ describe("reading an order by its tracking token on a real PostgreSQL", () => {
         status: "NEW",
         deliveryDate: null,
         landmarkText: FAKE_LANDMARK,
-        totalAr: 10000,
-        deliveryFeeAr: 0,
+        totalAr: 10000 + OUT_OF_AXIS_FEE_AR,
+        deliveryFeeAr: OUT_OF_AXIS_FEE_AR,
         itemCount: 2,
         createdAt: clock.now().toISOString(),
         rejectionReason: null,

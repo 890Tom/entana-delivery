@@ -56,6 +56,29 @@ export async function resetOrderData(client: PrismaClient): Promise<void> {
   await client.product.deleteMany();
 }
 
+/** The fee of an order away from every axis, below the piece threshold, after the reset below. */
+export const OUT_OF_AXIS_FEE_AR = 4000;
+const FREE_DELIVERY_MIN_PIECES = 20;
+
+/**
+ * No axis, no place and known settings: every order is out of axis, so its fee is known. Other
+ * suites of the database change both. The orders, which reference places, go first.
+ */
+export async function resetDeliveryRules(client: PrismaClient): Promise<void> {
+  await assertThrowawayDatabase(client);
+  await client.axisPlace.deleteMany();
+  await client.deliveryAxis.deleteMany();
+  await client.place.deleteMany();
+  await client.shopSetting.update({
+    where: { id: 1 },
+    data: {
+      outOfAxisFeeAr: OUT_OF_AXIS_FEE_AR,
+      freeDeliveryMinPieces: FREE_DELIVERY_MIN_PIECES,
+      outOfAxisMessage: "Fake out of axis message.",
+    },
+  });
+}
+
 /**
  * How many text, varchar and jsonb cells of the whole public schema contain `needle`. The needle
  * is a bound parameter; table and column names come from the server's own catalogue.

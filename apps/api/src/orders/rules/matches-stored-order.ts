@@ -5,6 +5,7 @@ import { hashTrackingToken } from "./hash-tracking-token.js";
 export interface StoredOrder {
   readonly publicCode: string;
   readonly totalAr: number;
+  readonly deliveryFee: number;
   readonly createdAt: Date;
   readonly publicTokenHash: string;
   readonly contactName: string;
@@ -62,6 +63,7 @@ export function toCreateOrderResponse(stored: StoredOrder): CreateOrderResponse 
     orderCode: stored.publicCode,
     status: "NEW",
     totalAr: stored.totalAr,
+    deliveryFeeAr: stored.deliveryFee,
     createdAt: stored.createdAt.toISOString(),
   };
 }

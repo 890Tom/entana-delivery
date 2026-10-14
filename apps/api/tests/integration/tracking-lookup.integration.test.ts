@@ -8,6 +8,7 @@ import {
   TRACKING_RESPONSE_HEADERS,
 } from "../support/tracking-http.js";
 import { useTrackingHarness } from "./support/tracking-harness.js";
+import { OUT_OF_AXIS_FEE_AR } from "./support/orders-fixtures.js";
 
 // Both are valid for the numbering plan and are not the phone number of the order.
 const OTHER_PHONE_INPUT = "034 11 111 11";
@@ -31,8 +32,8 @@ describe("looking an order up by phone number and order code on a real PostgreSQ
       status: "NEW",
       deliveryDate: null,
       landmarkText: FAKE_LANDMARK,
-      totalAr: 10000,
-      deliveryFeeAr: 0,
+      totalAr: 10000 + OUT_OF_AXIS_FEE_AR,
+      deliveryFeeAr: OUT_OF_AXIS_FEE_AR,
       itemCount: 2,
       createdAt: clock.now().toISOString(),
       rejectionReason: null,
