@@ -149,6 +149,8 @@
   --size-map-height: 260px;
   --size-map-height-large: 560px;
   --size-map-pin: 40px;
+  /* Proposed, to confirm: a field for a short number (the free delivery threshold). */
+  --size-field-short: 160px;
   --size-map-pin-tail-half: 6px;
   --size-map-pin-tail-height: 10px;
   /* The mobile bottom bar: padding above, button, padding below and the phone's safe area. */

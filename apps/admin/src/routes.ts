@@ -42,3 +42,9 @@ export const RESELLER_PATTERN = `${RESELLERS_PATH}/:id`;
 export function resellerPath(resellerId: string): string {
   return `${RESELLERS_PATH}/${encodeURIComponent(resellerId)}`;
 }
+
+/** The settings, tab "Axes et frais": the fourth section of the administration. */
+export const SETTINGS_PATH = "/parametres";
+
+/** The settings, tab "Textes". */
+export const SETTINGS_TEXTS_PATH = `${SETTINGS_PATH}/textes`;

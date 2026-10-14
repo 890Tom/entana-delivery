@@ -3,7 +3,13 @@ import { Link, useRoute } from "wouter";
 
 import { ShopLogo } from "../../components/shop-logo/shop-logo";
 import { texts } from "../../i18n/texts";
-import { CATALOGUE_PATH, HOME_PATH, ORDERS_PATH, RESELLERS_PATH } from "../../routes";
+import {
+  CATALOGUE_PATH,
+  HOME_PATH,
+  ORDERS_PATH,
+  RESELLERS_PATH,
+  SETTINGS_PATH,
+} from "../../routes";
 
 import styles from "./header.module.css";
 
@@ -38,6 +44,7 @@ export function Header({ isLoggingOut, onLogout }: HeaderProps): ReactElement {
   // The forms of a product or of a reseller belong to their section: its link stays the current one.
   const [isOnCatalogue] = useRoute(`${CATALOGUE_PATH}/*?`);
   const [isOnResellers] = useRoute(`${RESELLERS_PATH}/*?`);
+  const [isOnSettings] = useRoute(`${SETTINGS_PATH}/*?`);
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
@@ -53,6 +60,9 @@ export function Header({ isLoggingOut, onLogout }: HeaderProps): ReactElement {
           </SectionLink>
           <SectionLink href={RESELLERS_PATH} isCurrent={isOnResellers}>
             {texts.resellers.title}
+          </SectionLink>
+          <SectionLink href={SETTINGS_PATH} isCurrent={isOnSettings}>
+            {texts.settings.title}
           </SectionLink>
         </nav>
         <button

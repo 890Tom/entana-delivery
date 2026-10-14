@@ -55,6 +55,26 @@
   border: 0;
 }
 
+.short {
+  width: var(--size-field-short);
+}
+
+/* Several lines: the text starts at the top and the person may make the area taller. */
+.multiline {
+  align-items: stretch;
+  padding-block: var(--space-3);
+}
+
+.multiline:focus-within,
+.multiline.invalid {
+  padding-block: calc(var(--space-3) - var(--border-width-strong) + var(--border-width));
+}
+
+.multiline .control {
+  min-height: 0;
+  resize: vertical;
+}
+
 /* The frame draws the focus: its border replaces the global ring. */
 .control:focus-visible {
   outline: none;

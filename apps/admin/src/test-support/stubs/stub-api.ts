@@ -14,6 +14,8 @@ export const ROUTES = {
   createProduct: "POST /api/v1/admin/products",
   resellers: "GET /api/v1/admin/resellers",
   createReseller: "POST /api/v1/admin/resellers",
+  settings: "GET /api/v1/admin/delivery/settings",
+  updateSettings: "PATCH /api/v1/admin/delivery/settings",
 } as const;
 
 /** The change, the verification and the deletion of one reseller. */

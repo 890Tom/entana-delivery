@@ -29,6 +29,10 @@ interface TextFieldProps {
   readonly placeholder?: string;
   readonly inputMode?: "numeric" | "text";
   readonly maxLength?: number;
+  /** Several lines of prose (a message to customers): spell checking is then on. */
+  readonly isMultiline?: boolean;
+  /** "short" for a number of a few digits; the label and the hint keep the full width. */
+  readonly width?: "full" | "short";
   readonly onBlur?: () => void;
   readonly action?: FieldAction;
   /** The control, so that a screen can move the focus to it. */
@@ -88,39 +92,74 @@ interface ControlProps {
   readonly describedBy: string | undefined;
 }
 
-/** The frame with the input and, in the border, the action of the field. */
-function FieldControl({ id, props, hasError, describedBy }: ControlProps): ReactElement {
-  const { value, onChange, type = "text", action } = props;
+/** A text area for prose: capitalised and spell checked, unlike an identifier. */
+function MultilineControl({ id, props, hasError, describedBy }: ControlProps): ReactElement {
+  const { value, onChange } = props;
   return (
-    <div className={[styles.frame, hasError ? styles.invalid : ""].join(" ")}>
-      <input
-        ref={props.ref}
-        id={id}
-        className={styles.control}
-        type={type}
-        value={value}
-        autoComplete={props.autoComplete}
-        autoCapitalize="none"
-        spellCheck={false}
-        placeholder={props.placeholder}
-        inputMode={props.inputMode}
-        maxLength={props.maxLength}
-        aria-invalid={hasError ? true : undefined}
-        aria-describedby={describedBy}
-        onChange={(event) => {
-          onChange(event.target.value);
-        }}
-        onBlur={props.onBlur}
-      />
-      {action !== undefined && <ActionButton action={action} controlId={id} />}
+    <textarea
+      id={id}
+      className={styles.control}
+      rows={3}
+      value={value}
+      placeholder={props.placeholder}
+      maxLength={props.maxLength}
+      aria-invalid={hasError ? true : undefined}
+      aria-describedby={describedBy}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+      onBlur={props.onBlur}
+    />
+  );
+}
+
+/** A single line: an identifier, a number or a password, never prose. */
+function SingleLineControl({ id, props, hasError, describedBy }: ControlProps): ReactElement {
+  const { value, onChange, type = "text" } = props;
+  return (
+    <input
+      ref={props.ref}
+      id={id}
+      className={styles.control}
+      type={type}
+      value={value}
+      autoComplete={props.autoComplete}
+      autoCapitalize="none"
+      spellCheck={false}
+      placeholder={props.placeholder}
+      inputMode={props.inputMode}
+      maxLength={props.maxLength}
+      aria-invalid={hasError ? true : undefined}
+      aria-describedby={describedBy}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+      onBlur={props.onBlur}
+    />
+  );
+}
+
+/** The frame with the control and, in the border, the action of the field. */
+function FieldControl(control: ControlProps): ReactElement {
+  const { action, isMultiline = false, width = "full" } = control.props;
+  const frameClasses = [
+    styles.frame,
+    isMultiline ? styles.multiline : "",
+    width === "short" ? styles.short : "",
+    control.hasError ? styles.invalid : "",
+  ];
+  return (
+    <div className={frameClasses.join(" ")}>
+      {isMultiline ? <MultilineControl {...control} /> : <SingleLineControl {...control} />}
+      {action !== undefined && <ActionButton action={action} controlId={control.id} />}
     </div>
   );
 }
 
 /**
- * The single-line text field of the design system: label, control (with an optional action in
- * the border), then the error and the hint. Autocapitalisation and spell checking are off: the
- * field holds an identifier or a password, never prose.
+ * The text field of the design system: label, control (with an optional action in the border),
+ * then the error and the hint. On a single line, autocapitalisation and spell checking are off:
+ * the field holds an identifier, a number or a password, never prose.
  */
 export function TextField({
   label,
