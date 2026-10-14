@@ -213,3 +213,35 @@ export {
   outOfAxisMessageSchema,
 } from "./delivery/delivery-settings.js";
 export type { DeliverySettings } from "./delivery/delivery-settings.js";
+export {
+  adminDeliveryAxisListResponseSchema,
+  adminDeliveryAxisPlaceSchema,
+  adminDeliveryAxisSchema,
+  adminDeliveryPlaceListResponseSchema,
+  adminDeliveryPlaceSchema,
+} from "./admin/delivery/admin-delivery.js";
+export type {
+  AdminDeliveryAxis,
+  AdminDeliveryAxisListResponse,
+  AdminDeliveryAxisPlace,
+  AdminDeliveryPlace,
+  AdminDeliveryPlaceListResponse,
+} from "./admin/delivery/admin-delivery.js";
+export {
+  MAX_FREE_DELIVERY_MIN_PIECES,
+  updateDeliverySettingsRequestSchema,
+} from "./admin/delivery/delivery-settings-request.js";
+export type { UpdateDeliverySettingsRequest } from "./admin/delivery/delivery-settings-request.js";
+export { planDeliverySettingsUpdate } from "./admin/delivery/plan-delivery-settings-update.js";
+export type {
+  DeliverySettingsField,
+  DeliverySettingsUpdatePlan,
+} from "./admin/delivery/plan-delivery-settings-update.js";
+export {
+  deliveryResolveQuerySchema,
+  deliveryResolveResponseSchema,
+} from "./admin/delivery/delivery-resolve.js";
+export type {
+  DeliveryResolveQuery,
+  DeliveryResolveResponse,
+} from "./admin/delivery/delivery-resolve.js";

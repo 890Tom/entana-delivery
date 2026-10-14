@@ -5,6 +5,7 @@ import type { AppConfig } from "./config/app-config.js";
 import { AdminAuthModule } from "./admin-auth/admin-auth.module.js";
 import { AdminCatalogueModule } from "./admin-catalogue/admin-catalogue.module.js";
 import { AdminOrdersModule } from "./admin-orders/admin-orders.module.js";
+import { AdminDeliveryModule } from "./admin-delivery/admin-delivery.module.js";
 import { AdminResellersModule } from "./admin-resellers/admin-resellers.module.js";
 import { CatalogModule } from "./catalog/catalog.module.js";
 import { NotFoundFallback } from "./errors/problem-details/not-found-fallback.js";
@@ -35,6 +36,7 @@ export class AppModule {
         AdminOrdersModule.register(config),
         AdminCatalogueModule.register(config),
         AdminResellersModule.register(config),
+        AdminDeliveryModule.register(config),
       ],
       providers: [NotFoundFallback],
     };
