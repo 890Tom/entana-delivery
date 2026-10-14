@@ -22,5 +22,6 @@
 | [0018](0018-separate-admin-application-with-minimal-copy-of-ui.md)       | A separate administration application, with a minimal copy of the interface primitives          | accepted |
 | [0019](0019-product-photos-processed-with-sharp.md)                      | Product photos: uploaded through the administration and processed with sharp                    | accepted |
 | [0020](0020-resellers-are-deleted-for-good.md)                           | Resellers are deleted for good, with an audit entry that holds the id only                      | accepted |
+| [0021](0021-delivery-axes-places-and-settings-in-the-database.md)        | Delivery axes, places and settings live in the database; free delivery in an axis, frozen fee   | accepted |
 
 Planned records: PostGIS left out (setup in ADR 0006), delivery axes made of places, idempotent orders and offline mode, simplified order statuses, VPS hosting with OpenFreeMap tiles, hashed tracking token. Use [`0000-template.md`](0000-template.md).

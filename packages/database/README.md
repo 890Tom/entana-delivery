@@ -50,11 +50,11 @@ How they stay out of your way:
 
 A run interrupted by SIGINT or SIGTERM (Ctrl+C, or turbo stopping the task after a sibling failed) drops its database before it exits. Only a hard kill (SIGKILL, for example `kill -9`) leaves its empty `test_<hex>` database on the server: list it with `\l test_*` in `psql` and remove it with `DROP DATABASE test_<hex>`. In CI the container is thrown away.
 
-A test checks that every CHECK constraint of the schema has a test case. When you add a constraint in a migration, add its case in `tests/integration/check-constraints.integration.test.ts`, or that test fails.
+A test checks that every CHECK constraint of the schema has a test case. When you add a constraint in a migration, add its case in `tests/integration/check-constraint-cases.ts` (or `admin-check-constraint-cases.ts`, `delivery-check-constraint-cases.ts`), or that test fails.
 
 ## Seed data
 
-The seed fills a migrated, empty database with obviously fake demo data: settings, six products, ten places, three delivery axes, five customers, eight orders (with items and events), six resellers, an admin and an inactive driver. It respects every CHECK constraint. Delivery dates are relative to today in the Indian/Antananarivo time zone. The tracking tokens and order codes of the demo orders are fixed, public, fake values (`demo-tracking-token-01`, code `DEMA22`, and so on).
+The seed fills a migrated, empty database with obviously fake demo data: the settings (default values), six products, nineteen places in four delivery axes, five customers, eight orders (with items and events), six resellers, an admin and an inactive driver. It respects every CHECK constraint. Delivery dates are relative to today in the Indian/Antananarivo time zone. The tracking tokens and order codes of the demo orders are fixed, public, fake values (`demo-tracking-token-01`, code `DEMA22`, and so on).
 
 1. Start PostgreSQL and apply the migrations (`pnpm db:up`, then `prisma migrate deploy` or `dev`).
 2. Run `pnpm db:seed`.

@@ -99,18 +99,22 @@ Constraint `ck_product_photo_when_active`: `CHECK (active = false OR (image_key 
 | Column | Type | Rules |
 |---|---|---|
 | id | uuid | primary key |
-| name | text | |
-| lat, lng | double precision | centre of the place |
+| name | text | 1 to 60 characters (`ck_place_name_length`), unique without regard to case (index `place_name_lower_key` on `lower(name)`) |
+| lat | double precision | centre of the place, `ck_place_latitude_range`: between -90 and 90 |
+| lng | double precision | centre of the place, `ck_place_longitude_range`: between -180 and 180 |
 | radius_m | integer | default 500, `ck_place_radius_range`: `CHECK (radius_m BETWEEN 100 AND 3000)` |
-| active | boolean | |
+| active | boolean | an inactive place covers no address |
 
 ### `delivery_axis`
 | Column | Type | Rules |
 |---|---|---|
 | id | uuid | primary key |
-| name | text | unique |
-| position | integer | priority: when a place belongs to several axes, the lowest position wins |
-| active | boolean | |
+| name | text | 1 to 60 characters (`ck_delivery_axis_name_length`), unique without regard to case (index `delivery_axis_name_lower_key`) |
+| rank | integer | priority, 1 is the highest, `ck_delivery_axis_rank_positive`: `>= 1`. Unique (`delivery_axis_rank_key`, deferrable so that two ranks can be swapped in one transaction). When an address is in several axes, the lowest rank wins |
+| active | boolean | an inactive axis serves no address |
+| color_key | integer | 0 to 9 (`ck_delivery_axis_color_key_range`), unique (`delivery_axis_color_key_key`). The smallest free value at creation, never changed afterwards |
+
+At most 10 axes (`MAX_DELIVERY_AXES` in `packages/contracts`): a limit of the application, one colour key each.
 
 ### `axis_place`
 | Column | Type | Rules |
@@ -119,7 +123,7 @@ Constraint `ck_product_photo_when_active`: `CHECK (active = false OR (image_key 
 | place_id | uuid | foreign key to `place` |
 | position | integer | rank of the place along the axis |
 
-Primary key `(axis_id, place_id)`. A place can belong to several axes.
+Primary key `(axis_id, place_id)`: a place appears at most once in an axis, and can belong to several axes.
 
 ## Administration, resellers and settings
 
@@ -185,21 +189,22 @@ Constraint `ck_reseller_consent_when_active`: `CHECK (active = false OR consent_
 | Column | Type | Rules |
 |---|---|---|
 | id | integer | primary key, a single row |
-| out_of_axis_fee_ar | integer | >= 0 |
-| out_of_axis_message | text | |
-| updated_at | timestamptz | |
+| out_of_axis_fee_ar | integer | >= 0, default 4000. Flat fee outside every axis |
+| free_delivery_min_pieces | integer | >= 1 (`ck_shop_setting_free_delivery_min_pieces`), default 20. Delivery is free from this number of pieces |
+| out_of_axis_message | text | plain text, 1 to 200 characters once trimmed (`ck_shop_setting_message_length`). Default: « Votre adresse est hors de nos axes de livraison : des frais de livraison s'appliquent. » The only delivery text the administration can change |
+| updated_at | timestamptz | default `now()` |
 
-Constraint `ck_shop_setting_single_row_and_fee`: `CHECK (id = 1 AND out_of_axis_fee_ar >= 0)`.
+Constraint `ck_shop_setting_single_row_and_fee`: `CHECK (id = 1 AND out_of_axis_fee_ar >= 0)`. The migration creates the row with the default values (and keeps an existing one), so the application updates it and never inserts it.
 
 ## Rules enforced by the application, not the database
 
 - `total_ar` equals the sum of the items plus `delivery_fee` (recomputed by the server, covered by a unit test).
 - `public_code` uses an alphabet without ambiguous characters (no `0`, `O`, `1`, `I`); the database only checks the length.
 - Status transitions are valid and happen one step at a time (shared pure function).
-- `quote` computes the place, the axis and the fee from a position; the result is frozen on the order.
+- `resolveDeliveryAxis` (the active axis of the lowest rank with an active place whose radius covers the point, and in it the closest place) and `computeDeliveryFee` (free in an axis, free from the piece threshold, the flat fee otherwise) are pure functions of `packages/contracts`. The values (radius, threshold, fee) are parameters read from the database. The result is frozen on the order: changing an axis, a place or a setting never changes a past order. Branching them on the creation of an order comes later.
 
 ## Seed data (fake)
 
-Created by `pnpm db:seed` (see `packages/database/README.md`): the settings row, six products (one out of stock, one hidden), ten fictional places, three delivery axes (one place is shared by two of them), five customers with fake phone numbers (the `+44 7700 900xxx` range reserved for drama), eight orders with their items and events: 2 new, 2 confirmed, 1 out for delivery, 1 delivered, 1 rejected, 1 cancelled, six resellers, an admin account and an inactive driver account. The admin password is random and printed once by the script. No real business, person or number.
+Created by `pnpm db:seed` (see `packages/database/README.md`): six products (one out of stock, one hidden), nineteen fictional places in four delivery axes (Axe Nord, Axe Est, Axe Sud, Axe Ouest, with three places shared by two axes), the settings with their default values, five customers with fake phone numbers (the `+44 7700 900xxx` range reserved for drama), eight orders with their items and events: 2 new, 2 confirmed, 1 out for delivery, 1 delivered, 1 rejected, 1 cancelled, six resellers, an admin account and an inactive driver account. The admin password is random and printed once by the script. No real business, person or number.
 
 An order creation is recorded as a `STATUS_CHANGED` event with `from_status` null, `to_status` `NEW` and `actor_type` `CUSTOMER`, because `ck_order_event_to_status_when_status_changed` requires a target status on that type.

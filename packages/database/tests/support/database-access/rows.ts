@@ -75,6 +75,26 @@ export function insertPlace(db: Client, overrides: Overrides = {}): Promise<stri
   });
 }
 
+// The rank and the colour key are unique: a test that inserts several axes gives them.
+export function insertDeliveryAxis(db: Client, overrides: Overrides = {}): Promise<string> {
+  return insertAndReturnId(db, "delivery_axis", {
+    name: uniqueText("axis"),
+    rank: randomInt(1, 1_000_000),
+    color_key: randomInt(10),
+    active: true,
+    ...overrides,
+  });
+}
+
+export async function insertAxisPlace(db: Client, overrides: Overrides = {}): Promise<void> {
+  await insert(db, "axis_place", {
+    axis_id: overrides.axis_id ?? (await insertDeliveryAxis(db)),
+    place_id: overrides.place_id ?? (await insertPlace(db)),
+    position: 1,
+    ...overrides,
+  });
+}
+
 // A new order by default: no delivery date and no reason are required yet.
 export async function insertOrder(db: Client, overrides: Overrides = {}): Promise<string> {
   const customerId = overrides.customer_id ?? (await insertCustomer(db));
@@ -157,13 +177,18 @@ export async function insertAdminSession(db: Client, overrides: Overrides = {}):
   });
 }
 
-// The only row of shop_setting has the fixed id 1, which is an integer, not a UUID.
-export async function insertShopSetting(db: Client, overrides: Overrides = {}): Promise<void> {
-  await insert(db, "shop_setting", {
-    id: 1,
-    out_of_axis_fee_ar: 0,
-    out_of_axis_message: "Test message",
-    updated_at: new Date(),
-    ...overrides,
-  });
+// shop_setting has one row, id 1, created by the migration with the default values: a test changes
+// it, it never inserts it again.
+export async function updateShopSetting(db: Client, values: Overrides): Promise<void> {
+  const entries = Object.entries(values);
+  const assignments = entries.map(([column], index) => `"${column}" = $${String(index + 1)}`);
+  await db.query(
+    `UPDATE "shop_setting" SET ${assignments.join(", ")} WHERE "id" = 1`,
+    entries.map(([, value]) => value),
+  );
+}
+
+// A row with another id than 1, which the CHECK constraint must refuse.
+export async function insertShopSettingWithId(db: Client, id: number): Promise<void> {
+  await insert(db, "shop_setting", { id });
 }
