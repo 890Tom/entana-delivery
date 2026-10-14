@@ -24,7 +24,7 @@ A customer is created automatically on the first order. There is no customer acc
 | place_id | uuid, nullable | foreign key to `place`; null when no place matches |
 | axis_id | uuid, nullable | foreign key to `delivery_axis`; null outside an axis |
 | delivery_fee | integer | >= 0, frozen at creation |
-| fee_reason | enum `IN_AXIS`, `OUT_OF_AXIS`, `ADJUSTED` | |
+| fee_reason | enum `IN_AXIS`, `OUT_OF_AXIS`, `QUANTITY`, `ADJUSTED` | frozen at creation; `QUANTITY`: free outside every axis from the piece threshold, with `place_id` and `axis_id` null |
 | delivery_date | date, nullable | null until the order is confirmed |
 | status | enum | `NEW`, `CONFIRMED`, `OUT_FOR_DELIVERY`, `DELIVERED`, `REJECTED`, `CANCELLED`, `FAILED` |
 | status_reason | text, nullable | reason of a refusal, cancellation or failed delivery |

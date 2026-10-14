@@ -37,6 +37,8 @@ enum OrderStatus {
 enum FeeReason {
   IN_AXIS
   OUT_OF_AXIS
+  // Free outside every axis, from the piece threshold of the settings.
+  QUANTITY
   ADJUSTED
 
   @@map("fee_reason")
