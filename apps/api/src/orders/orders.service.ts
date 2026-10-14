@@ -6,6 +6,11 @@ import type { PrismaClient } from "@entana/database";
 import { CLOCK } from "../clock/clock.js";
 import type { Clock } from "../clock/clock.js";
 import { DATABASE_CLIENT } from "../database/client-token/database-client.js";
+import { computeDeliveryQuote } from "../delivery-quote/delivery-quote.service.js";
+import type {
+  DeliveryQuote,
+  DeliveryQuoteReader,
+} from "../delivery-quote/delivery-quote.service.js";
 import { insertOrder } from "./persistence/insert-order.js";
 import { matchesStoredOrder, toCreateOrderResponse } from "./rules/matches-stored-order.js";
 import type { StoredOrder } from "./rules/matches-stored-order.js";
@@ -33,6 +38,7 @@ import {
 } from "./persistence/order-queries.js";
 import type { OrderReader } from "./persistence/order-queries.js";
 import { resolveOrderLines } from "./rules/resolve-order-lines.js";
+import type { OrderLine } from "./rules/resolve-order-lines.js";
 
 /** n unpredictable bytes: the API passes node:crypto's `randomBytes`. */
 export type RandomBytes = (count: number) => Uint8Array;
@@ -51,6 +57,15 @@ export interface CreateOrderResult {
 type TransactionOutcome =
   | { readonly kind: "created"; readonly order: StoredOrder }
   | { readonly kind: "existing"; readonly order: StoredOrder };
+
+/** What a creation writes and reads in its transaction. */
+type CreationTransaction = OrderReader & DeliveryQuoteReader & Pick<PrismaClient, "customerOrder">;
+
+interface PricedOrder {
+  readonly lines: readonly OrderLine[];
+  readonly fee: DeliveryQuote;
+  readonly totalAr: number;
+}
 
 interface Attempt {
   readonly request: CreateOrderRequest;
@@ -121,7 +136,7 @@ export class OrdersService {
   }
 
   private async createInTransaction(
-    transaction: OrderReader & Pick<PrismaClient, "customerOrder">,
+    transaction: CreationTransaction,
     attempt: Attempt,
   ): Promise<TransactionOutcome> {
     const customer = await ensureCustomer(transaction, attempt.phoneE164);
@@ -139,35 +154,45 @@ export class OrdersService {
     if (isRateLimited(recent)) {
       throw new OrderRateLimitedError();
     }
-    const { lines, totalAr } = await this.priceLines(transaction, attempt.request);
+    const { lines, fee, totalAr } = await priceOrder(transaction, attempt.request);
     const order = await insertOrder(transaction, {
       request: attempt.request,
       idempotencyKey: attempt.idempotencyKey,
       customerId: customer.id,
       orderCode: generateOrderCode(this.randomBytes),
       lines,
+      fee,
       totalAr,
       createdAt: now,
     });
     return { kind: "created", order };
   }
+}
 
-  private async priceLines(transaction: OrderReader, request: CreateOrderRequest) {
-    const products = await readProducts(
-      transaction,
-      request.items.map((item) => item.productId),
-    );
-    const resolution = resolveOrderLines(request.items, products);
-    if (resolution.kind === "unusable") {
-      throw new UnavailableProductsError(resolution.productIds);
-    }
-    // Phase 1a: no delivery fee yet.
-    const totalAr = computeOrderTotal(resolution.lines, 0);
-    if (!doesAmountFitColumn(totalAr)) {
-      throw new OrderTooLargeError();
-    }
-    return { lines: resolution.lines, totalAr };
+/**
+ * Prices and names from the database, and the delivery fee quoted in the same transaction from
+ * the point of the order and the pieces counted here: nothing about money comes from the client.
+ * The fee is frozen on the order and never computed again.
+ */
+async function priceOrder(
+  transaction: CreationTransaction,
+  request: CreateOrderRequest,
+): Promise<PricedOrder> {
+  const products = await readProducts(
+    transaction,
+    request.items.map((item) => item.productId),
+  );
+  const resolution = resolveOrderLines(request.items, products);
+  if (resolution.kind === "unusable") {
+    throw new UnavailableProductsError(resolution.productIds);
   }
+  const pieces = request.items.reduce((sum, item) => sum + item.quantity, 0);
+  const fee = await computeDeliveryQuote(transaction, request.location, pieces);
+  const totalAr = computeOrderTotal(resolution.lines, fee.feeAr);
+  if (!doesAmountFitColumn(totalAr)) {
+    throw new OrderTooLargeError();
+  }
+  return { lines: resolution.lines, fee, totalAr };
 }
 
 function toReplay(stored: StoredOrder, attempt: Attempt): CreateOrderResult {

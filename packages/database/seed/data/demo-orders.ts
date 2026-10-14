@@ -2,7 +2,7 @@ import { DEMO_OUT_OF_AXIS_FEE_AR, demoPhone } from "./config.ts";
 
 type Status =
   "NEW" | "CONFIRMED" | "OUT_FOR_DELIVERY" | "DELIVERED" | "REJECTED" | "CANCELLED" | "FAILED";
-type FeeReason = "IN_AXIS" | "OUT_OF_AXIS" | "ADJUSTED";
+type FeeReason = "IN_AXIS" | "OUT_OF_AXIS" | "QUANTITY" | "ADJUSTED";
 export type Actor = "CUSTOMER" | "STAFF" | "SYSTEM";
 
 // What happened to an order, in order. The first step is always the creation.

@@ -4,6 +4,8 @@ import { hashTrackingToken } from "../rules/hash-tracking-token.js";
 import type { StoredOrder } from "../rules/matches-stored-order.js";
 import { STORED_ORDER_SELECT } from "./order-queries.js";
 import type { OrderLine } from "../rules/resolve-order-lines.js";
+import { toFeeReason } from "../rules/to-fee-reason.js";
+import type { DeliveryQuote } from "../../delivery-quote/delivery-quote.service.js";
 
 export interface NewOrder {
   readonly request: CreateOrderRequest;
@@ -11,6 +13,7 @@ export interface NewOrder {
   readonly customerId: string;
   readonly orderCode: string;
   readonly lines: readonly OrderLine[];
+  readonly fee: DeliveryQuote;
   readonly totalAr: number;
   readonly createdAt: Date;
 }
@@ -44,9 +47,11 @@ export function insertOrder(
       publicTokenHash: hashTrackingToken(request.trackingToken),
       publicCode: order.orderCode,
       customerId: order.customerId,
-      // Phase 1a: no delivery quote yet. The admin sets the fee and the reason at confirmation.
-      deliveryFee: 0,
-      feeReason: "OUT_OF_AXIS",
+      // Frozen: a later change of an axis, a place or a setting never touches them.
+      placeId: order.fee.placeId,
+      axisId: order.fee.axisId,
+      deliveryFee: order.fee.feeAr,
+      feeReason: toFeeReason(order.fee.reason),
       status: "NEW",
       contactName: request.contactName,
       customerNote: request.customerNote ?? null,

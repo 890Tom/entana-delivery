@@ -17,6 +17,7 @@ export interface CustomerRecord {
 export const STORED_ORDER_SELECT = {
   publicCode: true,
   totalAr: true,
+  deliveryFee: true,
   createdAt: true,
   publicTokenHash: true,
   contactName: true,

@@ -19,6 +19,7 @@ import {
   ManualClock,
   createOrdersService,
   openOrdersClient,
+  resetDeliveryRules,
   resetOrderData,
 } from "./orders-fixtures.js";
 
@@ -74,6 +75,7 @@ export function useTrackingHarness(): TrackingHarness {
   });
   beforeEach(async () => {
     await resetOrderData(client);
+    await resetDeliveryRules(client);
     logs.reset();
   });
   afterAll(async () => {

@@ -43,5 +43,6 @@ export const CREATED_BODY = {
   orderCode: "K7M2QX",
   status: "NEW",
   totalAr: 9000,
+  deliveryFeeAr: 0,
   createdAt: "2026-10-10T08:30:00.000Z",
 } as const;

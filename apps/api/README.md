@@ -450,6 +450,28 @@ The order is neighborhood, then name, then id. An empty list answers `{ "reselle
 - **Errors:** an unreachable database is the fixed `503` of "Database errors"; anything else is the
   generic `500`. OpenAPI tag `resellers`, operation `listResellers`.
 
+## Delivery quote endpoint
+
+`POST /api/v1/delivery/quote` is public (no authentication, no `Idempotency-Key`). The body,
+`deliveryQuoteRequestSchema` of `@entana/contracts`, is strict: `{ latitude, longitude, pieces }`,
+latitude from -90 to 90, longitude from -180 to 180, `pieces` an integer from 1 to 2970
+(`MAX_ORDER_LINES` × `MAX_ORDER_LINE_QUANTITY`). The server reads the active axes with their active
+places, and the settings (`shop_setting`), then applies `resolveDeliveryAxis` and
+`computeDeliveryFee` of `@entana/contracts`, never rewritten here. The answer,
+`deliveryQuoteResponseSchema`, is
+`{ feeAr, reason, placeName, outOfAxisMessage, freeDeliveryMinPieces }`: `reason` is `axis`,
+`quantity` or `out_of_axis`; `placeName` is set inside an axis only; `outOfAxisMessage` (from the
+settings) only when `reason` is `out_of_axis`. The order creation computes the fee again: a quote
+is only an announcement.
+
+- **Privacy:** a POST, so that the coordinates stay out of URLs and access logs. They are neither
+  logged nor stored.
+- **Cache:** `Cache-Control: no-store`, the answer follows the settings of the moment.
+- **No rate limiting:** no limit applies to the public routes as a whole, and the route has none of
+  its own.
+- **Errors:** `400` (invalid body, pointers and fixed texts only), `413`, `415`, the fixed `503` of
+  "Database errors" and the generic `500`. OpenAPI tag `delivery`, operation `quoteDelivery`.
+
 ## Order endpoint
 
 `POST /api/v1/orders` creates an order. Public, no account. Documented in the OpenAPI page
@@ -461,11 +483,16 @@ header is a 400 that names only the header). The client generates both the idemp
 reused to retry) and the tracking token (32 random bytes in base64url, 43 characters): the API
 stores only the hash of the token and never returns it. The body is the `createOrderRequestSchema`
 of `@entana/contracts`; it is strict, so a price, a total, a fee or a status sent by the client is
-a 400. The server prices the order from the database.
+a 400. The server prices the order from the database, and computes the delivery fee itself, in the
+same transaction, with the rules of the quote below: from `location` and the sum of the quantities
+of the lines. It freezes `delivery_fee`, `fee_reason` (`IN_AXIS`, `OUT_OF_AXIS` or `QUANTITY`),
+`place_id` and `axis_id` (both null outside an axis, including a free delivery by quantity) on the
+order; they are never computed again, whatever later happens to an axis, a place or a setting.
 
-On success: `201` with `{ orderCode, status, totalAr, createdAt }` and `Cache-Control: no-store`. A
-replay (same key, same request) answers the same `201` and the same body with
-`Idempotent-Replayed: true`, and writes nothing.
+On success: `201` with `{ orderCode, status, totalAr, deliveryFeeAr, createdAt }` (`totalAr`
+includes `deliveryFeeAr`) and `Cache-Control: no-store`. A replay (same key, same request) answers
+the same `201` and the same body, with the frozen fee, with `Idempotent-Replayed: true`, and
+writes nothing.
 
 | Status | When                                                                                                | Body                                                             |
 | ------ | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |

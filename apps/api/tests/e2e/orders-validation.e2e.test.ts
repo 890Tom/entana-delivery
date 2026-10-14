@@ -23,6 +23,7 @@ const CREATED: CreateOrderResult = {
     orderCode: "ABC234",
     status: "NEW",
     totalAr: 12000,
+    deliveryFeeAr: 0,
     createdAt: "2026-10-08T08:00:00.000Z",
   },
   replayed: false,

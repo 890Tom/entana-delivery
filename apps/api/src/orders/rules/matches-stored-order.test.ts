@@ -33,6 +33,7 @@ const storedFor = (
   return {
     publicCode: "ABCDEF",
     totalAr: 12000,
+    deliveryFee: 2500,
     createdAt: new Date("2026-10-08T08:00:00.000Z"),
     publicTokenHash: hashTrackingToken(original.trackingToken),
     contactName: original.contactName,
@@ -122,11 +123,12 @@ describe("matchesStoredOrder", () => {
 });
 
 describe("toCreateOrderResponse", () => {
-  it("returns only the order code, NEW, the total and the creation instant", () => {
+  it("returns only the order code, NEW, the total, the frozen fee and the creation instant", () => {
     expect(toCreateOrderResponse(storedFor(request()))).toEqual({
       orderCode: "ABCDEF",
       status: "NEW",
       totalAr: 12000,
+      deliveryFeeAr: 2500,
       createdAt: "2026-10-08T08:00:00.000Z",
     });
   });

@@ -32,9 +32,10 @@ change must never alter an order that was already taken.
 
 - The migration turns the existing `position` into `rank`, renumbered 1..n, and gives the
   existing axes the colour keys 0..n-1. It does not touch `customer_order`.
-- The reason `quantity` of the fee exists in the pure rule only. The `fee_reason` enum of the
-  database has no matching value yet: it is added when the quote is branched on the creation of
-  an order.
+- The reason `quantity` of the fee is stored as the `fee_reason` value `QUANTITY`, added when the
+  quote was branched on the creation of an order (migration `fee_reason_quantity`). The rule maps
+  `axis` to `IN_AXIS`, `out_of_axis` to `OUT_OF_AXIS` and `quantity` to `QUANTITY`; orders created
+  before keep their values.
 - Case-insensitive uniqueness uses expression indexes (`lower(name)`), written by hand in the
   migration.
 

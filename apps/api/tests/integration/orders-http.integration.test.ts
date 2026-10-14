@@ -20,6 +20,8 @@ import {
   ManualClock,
   countCellsContaining,
   openOrdersClient,
+  OUT_OF_AXIS_FEE_AR,
+  resetDeliveryRules,
   resetOrderData,
 } from "./support/orders-fixtures.js";
 
@@ -42,6 +44,7 @@ describe("POST /api/v1/orders on a real PostgreSQL", () => {
   });
   beforeEach(async () => {
     await resetOrderData(client);
+    await resetDeliveryRules(client);
     logs.reset();
   });
   afterEach(() => {
@@ -83,7 +86,10 @@ describe("POST /api/v1/orders on a real PostgreSQL", () => {
 
       expect(response.status).toBe(201);
       const body = createOrderResponseSchema.parse(response.body);
-      expect(body.totalAr).toBe(10000);
+      expect(body).toMatchObject({
+        totalAr: 10000 + OUT_OF_AXIS_FEE_AR,
+        deliveryFeeAr: OUT_OF_AXIS_FEE_AR,
+      });
       expect(response.headers["cache-control"]).toBe("no-store");
       expect(response.headers["idempotent-replayed"]).toBeUndefined();
       const orders = await client.customerOrder.findMany({ include: { items: true } });
