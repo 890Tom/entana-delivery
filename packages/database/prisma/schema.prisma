@@ -235,13 +235,14 @@ model DeliveryAxis {
 model AxisPlace {
   axisId   String @map("axis_id") @db.Uuid
   placeId  String @map("place_id") @db.Uuid
-  // Rank of the place along the axis.
+  // Rank of the place along the axis, no duplicate in an axis (deferrable unique constraint).
   position Int
 
   axis  DeliveryAxis @relation(fields: [axisId], references: [id], onDelete: Restrict)
   place Place        @relation(fields: [placeId], references: [id], onDelete: Restrict)
 
   @@id([axisId, placeId])
+  @@unique([axisId, position], map: "axis_place_axis_id_position_key")
   @@map("axis_place")
 }
 

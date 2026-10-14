@@ -142,6 +142,17 @@ const uniqueKeyCases: UniqueKeyCase[] = [
       await insertAxisPlace(db, { axis_id: axisId, place_id: placeId, position: 2 });
     },
   },
+  {
+    name: "the position of two places in the same axis",
+    constraint: "axis_place_axis_id_position_key",
+    insertTwiceWithTheSameValue: async (db) => {
+      const axisId = await insertDeliveryAxis(db);
+      const firstPlaceId = await insertPlace(db, { name: "First place" });
+      const secondPlaceId = await insertPlace(db, { name: "Second place" });
+      await insertAxisPlace(db, { axis_id: axisId, place_id: firstPlaceId, position: 1 });
+      await insertAxisPlace(db, { axis_id: axisId, place_id: secondPlaceId, position: 1 });
+    },
+  },
 ];
 
 describe("unique keys that carry business rules", () => {

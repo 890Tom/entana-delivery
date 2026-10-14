@@ -50,6 +50,7 @@ export {
   PROBLEM_DETAILS_CONTENT_TYPE,
   PRODUCT_PROBLEM_TYPES,
   RESELLER_PROBLEM_TYPES,
+  DELIVERY_PROBLEM_TYPES,
   VALIDATION_PROBLEM_TYPE,
   fieldErrorSchema,
   problemDetailsSchema,
@@ -213,6 +214,32 @@ export {
   outOfAxisMessageSchema,
 } from "./delivery/delivery-settings.js";
 export type { DeliverySettings } from "./delivery/delivery-settings.js";
+export {
+  DEFAULT_PLACE_RADIUS_M,
+  DELIVERY_NAME_MAX_LENGTH,
+  MAX_PLACES_PER_AXIS,
+  PLACE_RADIUS_MAX_M,
+  PLACE_RADIUS_MIN_M,
+  reorderDeliveryAxesRequestSchema,
+  saveDeliveryAxisRequestSchema,
+} from "./admin/delivery/delivery-axis-request.js";
+export type {
+  DeliveryAxisPlaceEntry,
+  ReorderDeliveryAxesRequest,
+  SaveDeliveryAxisRequest,
+} from "./admin/delivery/delivery-axis-request.js";
+export {
+  nextFreeColorKey,
+  planAxisReorder,
+  planAxisUpdate,
+} from "./admin/delivery/delivery-axis-plans.js";
+export type {
+  AxisContent,
+  AxisRankMove,
+  AxisReorderPlan,
+  AxisUpdatePlan,
+  DeliveryAxisField,
+} from "./admin/delivery/delivery-axis-plans.js";
 export {
   adminDeliveryAxisListResponseSchema,
   adminDeliveryAxisPlaceSchema,

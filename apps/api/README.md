@@ -699,22 +699,48 @@ the date).
 
 ### Delivery (administration)
 
-Five routes under `/api/v1/admin/delivery`, closed by the guard above (`401` without a session).
-Every answer carries `Cache-Control: no-store`. No rate limiting. The axes and the places are read
-only: their writes are not part of the API yet. The rules of the fee are those of
+Nine routes under `/api/v1/admin/delivery`, closed by the guard above (`401` without a session).
+Every answer carries `Cache-Control: no-store`. No rate limiting. The places are read only: a place
+is created with an axis, and no route changes or removes one. The rules of the fee are those of
 `@entana/contracts` (`resolveDeliveryAxis`, `computeDeliveryFee`), never rewritten here.
 
-| Route                                   | Does                                                                     |
-| --------------------------------------- | ------------------------------------------------------------------------ |
-| `GET /api/v1/admin/delivery/axes`       | Every axis (active or not) by `rank`: `200` with `{ axes }`              |
-| `GET /api/v1/admin/delivery/places`     | The active places by `name`, not paginated: `200` with `{ places }`      |
-| `GET /api/v1/admin/delivery/settings`   | `200` with `{ outOfAxisFeeAr, freeDeliveryMinPieces, outOfAxisMessage }` |
-| `PATCH /api/v1/admin/delivery/settings` | Partial change (at least one field, strict): `200` with the settings     |
-| `GET /api/v1/admin/delivery/resolve`    | Tests an address: `200` with `{ match, feeAr, reason }`                  |
+| Route                                    | Does                                                                     |
+| ---------------------------------------- | ------------------------------------------------------------------------ |
+| `GET /api/v1/admin/delivery/axes`        | Every axis (active or not) by `rank`: `200` with `{ axes }`              |
+| `POST /api/v1/admin/delivery/axes`       | Creates an axis (last rank, smallest free colour): `201` with the axis   |
+| `PUT /api/v1/admin/delivery/axes/order`  | Reorders every axis: `200` with `{ axes }` by their new rank             |
+| `PUT /api/v1/admin/delivery/axes/:id`    | Replaces `name`, `active` and the places: `200` with the axis            |
+| `DELETE /api/v1/admin/delivery/axes/:id` | Deletes an axis that no order uses: `204`                                |
+| `GET /api/v1/admin/delivery/places`      | The active places by `name`, not paginated: `200` with `{ places }`      |
+| `GET /api/v1/admin/delivery/settings`    | `200` with `{ outOfAxisFeeAr, freeDeliveryMinPieces, outOfAxisMessage }` |
+| `PATCH /api/v1/admin/delivery/settings`  | Partial change (at least one field, strict): `200` with the settings     |
+| `GET /api/v1/admin/delivery/resolve`     | Tests an address: `200` with `{ match, feeAr, reason }`                  |
 
 - **Axes.** An axis is `{ id, name, rank, colorKey, active, places }`. Its places come in the order
   of their positions, inactive ones included (`active: false`), each with `alsoIn`: the `{ id, name }`
   of the other axes (active or not, by rank) that hold the place, never the axis itself.
+- **Writing an axis** (`POST`, `PUT /:id`). Body `{ name, active, places }`: `name` 1 to 60 characters
+  once trimmed, `places` an ordered list of 1 to `MAX_PLACES_PER_AXIS` (50) items, each `{ placeId }`
+  (an existing place, listed once) or a new place `{ name, latitude, longitude, radiusM? }`
+  (`radiusM` 100 to 3 000, default 500). Positions are 1..n in the order received. One transaction
+  holds the new places, the links and the axis; the writes of the axes are serialised by an advisory
+  lock, so rank and colour are never duplicated. A place that leaves an axis is never removed.
+  `POST` is refused (`422`) when `MAX_DELIVERY_AXES` axes exist, active or not. `PUT` keeps the rank
+  and the colour, and accepts an inactive place only if the axis already holds it.
+- **Reordering** (`PUT /axes/order`). Body `{ ids }`: every axis exactly once, inactive ones
+  included; the ranks become 1..n. Anything else is `422`.
+- **Deleting** (`DELETE /axes/:id`). `409` while an order references the axis (deactivate it
+  instead); otherwise the axis and its links go, the places stay and the colour is free again.
+- **Errors** (problem details, fixed `detail`, `type` in `urn:entana:problem:`):
+  `delivery_axis_name_taken` and `delivery_place_name_taken` (`409`, without regard to case, also
+  inside one body), `delivery_axis_in_use` (`409`), `delivery_axis_limit_reached`,
+  `delivery_axis_order_mismatch` and `delivery_place_unavailable` (`422`), an invalid body (`400`,
+  an empty list or a `placeId` twice included), an unknown or malformed id (`404`).
+- **Audit of the axes** (same transaction, ids, field names and ranks only, never a name or a
+  coordinate): `delivery_axis.created`, `delivery_axis.updated` (`diff.fields` among `name`,
+  `active`, `places`), `delivery_place.created` (one per new place), `delivery_axis.reordered`
+  (`{ from, to }`, one per axis whose rank changes), `delivery_axis.deleted`. Nothing is written
+  when nothing changes.
 - **Settings.** `outOfAxisFeeAr` is an integer from 0 to `PRODUCT_PRICE_MAX_AR`,
   `freeDeliveryMinPieces` an integer from 1 to `MAX_FREE_DELIVERY_MIN_PIECES` (an order holds at
   most 30 lines of 99 pieces: 2 970), `outOfAxisMessage` 1 to 200 characters once trimmed. An unknown
