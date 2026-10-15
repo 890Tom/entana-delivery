@@ -4,7 +4,7 @@ import type * as Library from "maplibre-gl";
 import { texts } from "../../../i18n/texts";
 import { loadMapLibrary, whenMapLoaded } from "../../../map/load-maplibre";
 import type { MapLibrary } from "../../../map/load-maplibre";
-import { createMarkerElement } from "../../order-detail/map/marker-element";
+import { createMarkerElement } from "../../../map/marker-element";
 import { boundsOf, toShapes } from "../rules/axes-drawing";
 import type { DrawnAxis } from "../rules/axes-drawing";
 

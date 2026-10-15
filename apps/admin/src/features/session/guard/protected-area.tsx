@@ -22,22 +22,16 @@ import {
   SETTINGS_PATH,
   SETTINGS_TEXTS_PATH,
 } from "../../../routes";
-import { CatalogueScreen } from "../../catalogue/components/catalogue-screen";
-import {
-  EditProductScreen,
-  NewProductScreen,
-} from "../../catalogue/components/product-form-screen";
+import { CatalogueScreen } from "../../catalogue/catalogue-screen";
+import { EditProductScreen, NewProductScreen } from "../../catalogue/product-form-screen";
 import { CatalogueFlashProvider } from "../../catalogue/notice/catalogue-flash";
-import { OrderDetailScreen } from "../../order-detail/components/order-detail-screen";
-import { OrdersScreen } from "../../orders/components/orders-screen";
-import {
-  EditResellerScreen,
-  NewResellerScreen,
-} from "../../resellers/components/reseller-form-screen";
-import { ResellersScreen } from "../../resellers/components/resellers-screen";
-import { EditAxisScreen, NewAxisScreen } from "../../settings/components/axis-editor-screen";
-import { SettingsFeesScreen, SettingsTextsScreen } from "../../settings/components/settings-screen";
-import { useSession } from "../hooks/use-session";
+import { OrderDetailScreen } from "../../order-detail/order-detail-screen";
+import { OrdersScreen } from "../../orders/orders-screen";
+import { EditResellerScreen, NewResellerScreen } from "../../resellers/reseller-form-screen";
+import { ResellersScreen } from "../../resellers/resellers-screen";
+import { EditAxisScreen, NewAxisScreen } from "../../settings/axis-editor-screen";
+import { SettingsFeesScreen, SettingsTextsScreen } from "../../settings/settings-screen";
+import { useSession } from "../api/use-session";
 
 import styles from "./protected-area.module.css";
 
