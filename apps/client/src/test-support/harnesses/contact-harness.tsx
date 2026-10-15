@@ -60,6 +60,8 @@ interface OpenOptions {
   readonly quote?: DeliveryQuoteResponse | null;
   /** What the network answers to the order request; it never answers when left out. */
   readonly order?: (init: RequestInit | undefined) => Promise<Response>;
+  /** What the tracking screen a confirmed order leads to reads; it never answers when left out. */
+  readonly tracking?: () => Promise<Response>;
 }
 
 const COMPLETE_DELIVERY = {
@@ -79,14 +81,17 @@ function answer(kind: Answer, body: unknown, init: RequestInit | undefined): Pro
  * The network boundary: the order, the tracking that follows it, the delivery screen (when a test
  * is sent back to it), the instance, the catalogue.
  */
-function stubNetwork(control: ApiControl, order: OpenOptions["order"]): ReturnType<typeof vi.fn> {
+function stubNetwork(
+  control: ApiControl,
+  { order, tracking }: Pick<OpenOptions, "order" | "tracking">,
+): ReturnType<typeof vi.fn> {
   const fetchStub = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     if (input === "/api/v1/orders") {
       return order?.(init) ?? pendingUntilAborted(init);
     }
-    // The tracking screen that a confirmed order leads to: it is not what these tests look at.
+    // The tracking screen that a confirmed order leads to: most of these tests do not look at it.
     if (input === "/api/v1/tracking") {
-      return pendingUntilAborted(init);
+      return tracking?.() ?? pendingUntilAborted(init);
     }
     if (input === "/api/v1/delivery/zones") {
       return Promise.resolve(jsonResponse({ zones: [] }));
@@ -126,7 +131,7 @@ export function openContact(options: OpenOptions = {}): {
     products: [SAKAFO, MOFO, KOBA],
     ...options.api,
   };
-  const fetchStub = stubNetwork(control, options.order);
+  const fetchStub = stubNetwork(control, options);
   sessionStorage.clear();
   localStorage.clear();
   const lines = options.lines ?? [[SAKAFO.id, 1]];

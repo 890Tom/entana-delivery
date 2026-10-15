@@ -209,6 +209,7 @@ export function TrackingView({
           day={status.card}
           landmark={view.landmarkText}
           itemCount={view.itemCount}
+          deliveryFeeAr={view.deliveryFeeAr}
           totalAr={view.totalAr}
         >
           <TrackingActions phone={phone} available={available} cancel={cancel} />

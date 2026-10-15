@@ -1,3 +1,4 @@
+import { formatAmount } from "@entana/contracts";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -7,7 +8,9 @@ import {
   OTHER_TOKEN,
   TOKEN,
   TRACKING_ADDRESS,
+  feeRowText,
   inSequence,
+  itemsLine,
   networkFailure,
   openTracking,
   problemAnswer,
@@ -180,4 +183,25 @@ describe("an order that cannot be read", () => {
       (await screen.findAllByText(texts.tracking.awaitingConfirmation)).length,
     ).toBeGreaterThan(0);
   }, 15000);
+});
+
+describe("the amounts of the order", () => {
+  it.each([
+    [0, texts.delivery.fee.free],
+    [1500, formatAmount(1500)],
+  ])("shows the delivery fee frozen on the order (%i Ar)", async (deliveryFeeAr, value) => {
+    openTracking({ hash: `#${TOKEN}`, tracking: viewAnswer({ deliveryFeeAr }) });
+
+    await screen.findAllByText(texts.tracking.awaitingConfirmation);
+
+    expect(feeRowText()).toBe(`${texts.delivery.fee.label}${value}`);
+  });
+
+  it("shows the total of the order", async () => {
+    openTracking({ hash: `#${TOKEN}`, tracking: viewAnswer({ totalAr: 4700, itemCount: 2 }) });
+
+    await screen.findAllByText(texts.tracking.awaitingConfirmation);
+
+    expect(document.body.textContent).toContain(itemsLine(2, 4700));
+  });
 });

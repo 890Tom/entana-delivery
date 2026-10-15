@@ -1,8 +1,11 @@
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { formatAmount } from "@entana/contracts";
+
 import { texts } from "../../i18n/texts";
-import { buildDrafts } from "../../test-support/builders/build-order-submission";
+import { buildDeliveryQuote } from "../../test-support/builders/build-delivery-quote";
+import { CREATED_BODY, buildDrafts } from "../../test-support/builders/build-order-submission";
 import { NOTE, SAKAFO } from "../../test-support/harnesses/contact-harness";
 import { expectNoAccessibilityViolations } from "../../test-support/assertions/expect-no-accessibility-violations";
 import { buildCleanup } from "../../test-support/order-submission/order-submission-answers";
@@ -16,6 +19,7 @@ import {
   problemAnswer,
   readySendButtons,
 } from "../../test-support/harnesses/review-harness";
+import { feeRowText, itemsLine, viewAnswer } from "../../test-support/harnesses/tracking-harness";
 import { jsonResponse } from "../../test-support/stubs/stub-fetch";
 import { getOrderSubmissionState, submitOrder } from "../order-submission/order-submission";
 
@@ -146,6 +150,24 @@ describe("the end of a confirmed order", () => {
     // The tracking screen dismisses the confirmation as it opens: that it still showed the thanks
     // is the proof that the review had not dismissed it before.
     expect(await screen.findByText(texts.tracking.thanks)).toBeTruthy();
+  });
+
+  it("shows the amounts of the server, not those of the quote, once the order is sent", async () => {
+    const server = { deliveryFeeAr: 2500, totalAr: 11500 };
+    openReview({
+      quote: buildDeliveryQuote({ feeAr: 0 }),
+      order: () => Promise.resolve(jsonResponse({ ...CREATED_BODY, ...server }, 201)),
+      tracking: viewAnswer({ ...server, itemCount: 1 }),
+    });
+    const { card } = await readySendButtons();
+
+    fireEvent.click(card);
+
+    await screen.findByText(texts.tracking.thanks);
+    await waitFor(() => {
+      expect(feeRowText()).toBe(`${texts.delivery.fee.label}${formatAmount(2500)}`);
+    });
+    expect(document.body.textContent).toContain(itemsLine(1, 11500));
   });
 
   it("goes to the tracking address when the order is confirmed and the cart is empty", async () => {
