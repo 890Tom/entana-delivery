@@ -218,6 +218,8 @@ export {
   deliveryQuoteResponseSchema,
 } from "./delivery/delivery-quote.js";
 export type { DeliveryQuoteRequest, DeliveryQuoteResponse } from "./delivery/delivery-quote.js";
+export { deliveryZoneListResponseSchema, deliveryZoneSchema } from "./delivery/delivery-zones.js";
+export type { DeliveryZone, DeliveryZoneListResponse } from "./delivery/delivery-zones.js";
 export {
   DEFAULT_PLACE_RADIUS_M,
   DELIVERY_NAME_MAX_LENGTH,

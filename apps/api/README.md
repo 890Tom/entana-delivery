@@ -472,6 +472,24 @@ is only an announcement.
 - **Errors:** `400` (invalid body, pointers and fixed texts only), `413`, `415`, the fixed `503` of
   "Database errors" and the generic `500`. OpenAPI tag `delivery`, operation `quoteDelivery`.
 
+## Delivery zones endpoint
+
+`GET /api/v1/delivery/zones` is public (no authentication, no query parameter, no body). It
+returns the places a quote may match, so that the customer app draws one circle per place: the
+active places that belong to at least one active axis, as `{ "zones": [...] }`. The shape is
+`deliveryZoneListResponseSchema` of `@entana/contracts`. Each zone has exactly `id`, `name`,
+`latitude`, `longitude` and `radiusM`; nothing of the axes (name, rank, colour) is returned. A place
+of several active axes comes once. The order is name, then id. An empty list answers
+`{ "zones": [] }`.
+
+- **No pagination:** the whole list is returned on purpose, for a shop-sized list.
+- **Cache:** `Cache-Control: public, max-age=30` on a success (the constant is
+  `DELIVERY_ZONES_CACHE_CONTROL`, the same value as `RESELLERS_CACHE_CONTROL`). Every error answer
+  carries `Cache-Control: no-store`.
+- **No rate limiting**, like the resellers.
+- **Errors:** an unreachable database is the fixed `503` of "Database errors"; anything else is the
+  generic `500`. OpenAPI tag `delivery`, operation `listDeliveryZones`.
+
 ## Order endpoint
 
 `POST /api/v1/orders` creates an order. Public, no account. Documented in the OpenAPI page
