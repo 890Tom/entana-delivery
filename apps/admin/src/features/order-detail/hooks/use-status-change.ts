@@ -2,6 +2,7 @@ import type { StatusTransitionRequest } from "@entana/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
+import type { AdminResult } from "../../../data-fetching/fetch-admin";
 import { ORDERS_KEY } from "../../orders/hooks/use-order-pages";
 import { postStatusTransition } from "../api/order-detail-calls";
 
@@ -9,9 +10,21 @@ import { orderDetailKey } from "./use-order-detail";
 
 export interface StatusChange {
   readonly isSending: boolean;
-  readonly notice: "conflict" | "failed" | null;
+  /** `totalTooLarge`: an adjusted fee was refused; the confirmation says it under its field. */
+  readonly notice: "conflict" | "failed" | "totalTooLarge" | null;
   /** Resolves true when the order moved. The data are read again whatever the answer. */
   readonly send: (request: StatusTransitionRequest) => Promise<boolean>;
+}
+
+/** What a refused change says: nothing for a session that ended (the reload shows the sign-in). */
+function noticeOf(result: AdminResult<unknown>): StatusChange["notice"] {
+  if (result.kind === "ok" || result.kind === "unauthorized") {
+    return null;
+  }
+  if (result.problem === "totalTooLarge") {
+    return "totalTooLarge";
+  }
+  return result.kind === "conflict" ? "conflict" : "failed";
 }
 
 /**
@@ -30,9 +43,8 @@ export function useStatusChange(orderId: string): StatusChange {
     setIsSending(false);
     if (result.kind === "ok") {
       queryClient.setQueryData(orderDetailKey(orderId), result.data);
-    } else if (result.kind !== "unauthorized") {
-      setNotice(result.kind === "conflict" ? "conflict" : "failed");
     }
+    setNotice(noticeOf(result));
     void queryClient.invalidateQueries({ queryKey: ORDERS_KEY });
     return result.kind === "ok";
   };
