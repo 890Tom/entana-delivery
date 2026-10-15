@@ -7,6 +7,7 @@ import { texts } from "../../../i18n/texts";
 import { useNow } from "../../../clock/use-now";
 import { useOrderDetail } from "../hooks/use-order-detail";
 import { useStatusChange } from "../hooks/use-status-change";
+import type { StatusChange } from "../hooks/use-status-change";
 import { todayInShop } from "../../../order-display/format-order";
 
 import { AddressCard } from "./address-card";
@@ -28,15 +29,17 @@ function Message({ children }: { children: ReactElement | string }): ReactElemen
   );
 }
 
-function ChangeNotice({ kind }: { kind: "conflict" | "failed" | null }): ReactElement | null {
-  if (kind === null) {
-    return null;
+/** The notices of the whole sheet; a refused fee is said by the confirmation, under its field. */
+function ChangeNotice({ kind }: { kind: StatusChange["notice"] }): ReactElement | null {
+  switch (kind) {
+    case "conflict":
+      return <Notice tone="info">{t.conflict}</Notice>;
+    case "failed":
+      return <Notice tone="error">{texts.orders.actionFailed}</Notice>;
+    case "totalTooLarge":
+    case null:
+      return null;
   }
-  return kind === "conflict" ? (
-    <Notice tone="info">{t.conflict}</Notice>
-  ) : (
-    <Notice tone="error">{texts.orders.actionFailed}</Notice>
-  );
 }
 
 function ReadySheet({

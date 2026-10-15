@@ -2,10 +2,14 @@ import type { AdminOrderDetail } from "@entana/contracts";
 import { useState } from "react";
 import type { ReactElement } from "react";
 
+import { TextField } from "../../../components/text-field/text-field";
 import { texts } from "../../../i18n/texts";
+import { readPriceInput, showPriceInput } from "../../catalogue/rules/product-form";
 import type { StatusChange } from "../hooks/use-status-change";
 import { resolveChosenDay } from "../rules/delivery-days";
 import type { ChosenDay, DaySelection } from "../rules/delivery-days";
+import { confirmRequestOf, readFeeChoice } from "../rules/delivery-fee-input";
+import type { FeeChoice } from "../rules/delivery-fee-input";
 import { formatLongDay } from "../rules/format-detail";
 
 import card from "./card.module.css";
@@ -36,9 +40,100 @@ function useDayChoice(today: string): DayChoice {
   };
 }
 
+interface FeeEntry {
+  readonly digits: string;
+  readonly choice: FeeChoice;
+  /** True once the amount changed after the last attempt: a refusal no longer speaks of it. */
+  readonly isEditedSinceSend: boolean;
+  readonly edit: (digits: string) => void;
+  readonly markSent: () => void;
+}
+
+/** The field starts with the fee the order has. */
+function useFeeEntry(currentFeeAr: number): FeeEntry {
+  const [digits, setDigits] = useState(String(currentFeeAr));
+  const [isEditedSinceSend, setIsEditedSinceSend] = useState(false);
+  return {
+    digits,
+    choice: readFeeChoice(currentFeeAr, digits),
+    isEditedSinceSend,
+    edit: (next) => {
+      setDigits(next);
+      setIsEditedSinceSend(true);
+    },
+    markSent: () => {
+      setIsEditedSinceSend(false);
+    },
+  };
+}
+
 /**
- * The decision of an order to handle: a day is picked, then "Confirmer pour …" becomes
- * available; "Refuser…" opens the modal of the refusal.
+ * The error under the fee: a value the schema refuses, or a total the server refused for the
+ * amount sent, until the amount changes.
+ */
+function feeErrorOf(entry: FeeEntry, notice: StatusChange["notice"]): string | undefined {
+  if (entry.choice.kind === "invalid") {
+    return d.feeInvalid;
+  }
+  return notice === "totalTooLarge" && !entry.isEditedSinceSend ? d.totalTooLarge : undefined;
+}
+
+/** The fee of this order only, filled with the one it has; typed as digits, like a price. */
+function FeeField({
+  digits,
+  error,
+  onChange,
+}: {
+  digits: string;
+  error: string | undefined;
+  onChange: (digits: string) => void;
+}): ReactElement {
+  return (
+    <TextField
+      label={d.feeLabel}
+      hint={d.feeHint}
+      inputMode="numeric"
+      value={showPriceInput(digits)}
+      error={error}
+      onChange={(text) => {
+        onChange(readPriceInput(text));
+      }}
+    />
+  );
+}
+
+/** Available once a day is picked and the fee is valid; the label names the day only. */
+function ConfirmButton({
+  day,
+  fee,
+  change,
+  onSend,
+}: {
+  day: string | null;
+  fee: FeeChoice;
+  change: StatusChange;
+  onSend: () => void;
+}): ReactElement {
+  return (
+    <DetailButton
+      label={day === null ? d.confirmIdle : d.confirmFor(formatLongDay(day))}
+      variant="primary"
+      icon="check"
+      isDisabled={day === null || fee.kind === "invalid" || change.isSending}
+      isBusy={change.isSending}
+      onClick={() => {
+        if (day !== null && fee.kind !== "invalid") {
+          onSend();
+          void change.send(confirmRequestOf(day, fee));
+        }
+      }}
+    />
+  );
+}
+
+/**
+ * The decision of an order to handle: a day is picked and the fee checked, then "Confirmer pour …"
+ * becomes available; "Refuser…" opens the modal of the refusal.
  */
 export function NewOrderDecision({
   order,
@@ -50,6 +145,7 @@ export function NewOrderDecision({
   change: StatusChange;
 }): ReactElement {
   const choice = useDayChoice(today);
+  const fee = useFeeEntry(order.deliveryFeeAr);
   const { day } = choice.chosen;
   return (
     <>
@@ -62,18 +158,8 @@ export function NewOrderDecision({
         onSelect={choice.setSelection}
         onOtherDayChange={choice.setOtherDay}
       />
-      <DetailButton
-        label={day === null ? d.confirmIdle : d.confirmFor(formatLongDay(day))}
-        variant="primary"
-        icon="check"
-        isDisabled={day === null || change.isSending}
-        isBusy={change.isSending}
-        onClick={() => {
-          if (day !== null) {
-            void change.send({ to: "CONFIRMED", deliveryDate: day });
-          }
-        }}
-      />
+      <FeeField digits={fee.digits} error={feeErrorOf(fee, change.notice)} onChange={fee.edit} />
+      <ConfirmButton day={day} fee={fee.choice} change={change} onSend={fee.markSent} />
       <RejectAction order={order} change={change} />
       <p className={card.muted}>{d.informed}</p>
     </>

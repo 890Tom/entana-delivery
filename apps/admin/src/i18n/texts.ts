@@ -1,3 +1,7 @@
+import { PRODUCT_PRICE_MAX_AR } from "@entana/contracts";
+
+import { formatAmount } from "../order-display/format-order";
+
 import { catalogueFormTexts } from "./catalogue-form-texts";
 import { ordersTexts } from "./orders-texts";
 import { resellersTexts } from "./resellers-texts";
@@ -88,6 +92,11 @@ export const texts = {
       confirmFor: (day: string): string => `Confirmer pour ${day}`,
       reject: "Refuser…",
       informed: "Le client est informé sur son suivi.",
+      // À confirmer : absents des sources
+      feeLabel: "Frais de livraison (Ar)",
+      feeHint: "Ne modifie que cette commande.",
+      feeInvalid: `Indiquez un montant entre 0 et ${formatAmount(PRODUCT_PRICE_MAX_AR)}.`,
+      totalTooLarge: "Le total serait trop élevé : la commande n'a pas été modifiée.",
       plannedFor: (day: string): string => `Livraison prévue ${day}`,
       deliveredOn: (day: string): string => `Livrée le ${day}`,
       deliveryDay: (day: string): string => `Jour de livraison : ${day}`,

@@ -162,6 +162,16 @@ describe("fetchAdmin", () => {
       expect(result).toEqual({ kind: "failure", problem: "photoTooLarge" });
     });
 
+    it("names the problem of an order whose total would be too large", async () => {
+      stubFetch(() =>
+        Promise.resolve(jsonResponse(problemBody("urn:entana:problem:order_total_too_large"), 422)),
+      );
+
+      const result = await fetchAdmin({ path: "/x" }, adminProfileSchema);
+
+      expect(result).toEqual({ kind: "invalid", problem: "totalTooLarge" });
+    });
+
     it("ignores a problem type it does not know", async () => {
       stubFetch(() => Promise.resolve(jsonResponse(problemBody("urn:other:problem"), 409)));
 
