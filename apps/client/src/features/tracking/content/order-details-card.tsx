@@ -1,6 +1,7 @@
 import { formatAmount } from "@entana/contracts";
 import type { ReactElement, ReactNode } from "react";
 
+import { DeliveryFeeLine } from "../../../components/delivery-fee-line/delivery-fee-line";
 import { texts } from "../../../i18n/texts";
 
 import styles from "./order-details-card.module.css";
@@ -10,19 +11,22 @@ interface OrderDetailsCardProps {
   readonly day: { readonly value: string; readonly line: string } | null;
   readonly landmark: string;
   readonly itemCount: number;
+  /** The fee frozen on the order, already included in its total. */
+  readonly deliveryFeeAr: number;
   readonly totalAr: number;
   /** The actions of the order: in the fixed bar on a phone, at the foot of the card otherwise. */
   readonly children: ReactNode;
 }
 
 /**
- * Where, how much and how to pay, and under it the actions. Every text that came from the
+ * Where, the delivery fee, how much and how to pay, and under it the actions. Every text that came from the
  * customer or the shop is rendered as text: no markup is ever interpreted.
  */
 export function OrderDetailsCard({
   day,
   landmark,
   itemCount,
+  deliveryFeeAr,
   totalAr,
   children,
 }: OrderDetailsCardProps): ReactElement {
@@ -38,6 +42,8 @@ export function OrderDetailsCard({
       )}
       <div className={styles.details}>
         <span className={styles.landmark}>{landmark}</span>
+        {/* Placed between the address and the items, plain: in no image, to confirm (6g-8c). */}
+        <DeliveryFeeLine state={{ status: "frozen", feeAr: deliveryFeeAr }} variant="plain" />
         <span className={styles.muted}>
           {`${details.items(itemCount)}${texts.common.amountSeparator}${formatAmount(totalAr)}`}
         </span>

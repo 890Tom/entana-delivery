@@ -1,3 +1,4 @@
+import { formatAmount } from "@entana/contracts";
 import type { PublicInstance, TrackingResponse } from "@entana/contracts";
 import { screen } from "@testing-library/react";
 import { vi } from "vitest";
@@ -121,6 +122,15 @@ export function storedOrders(): readonly { code: string; token: string }[] {
   const orders = (content as { orders?: { code: string; token: string }[] } | null)?.orders;
   return orders ?? [];
 }
+
+/** The text of the card's delivery row: its label and its value, side by side. */
+export function feeRowText(): string | null {
+  return screen.getByText(texts.delivery.fee.label).parentElement?.textContent ?? null;
+}
+
+/** The card's line of the item count and the order's total. */
+export const itemsLine = (itemCount: number, totalAr: number): string =>
+  `${texts.tracking.details.items(itemCount)}${texts.common.amountSeparator}${formatAmount(totalAr)}`;
 
 export const cancelButton = (): Promise<HTMLElement> =>
   screen.findByRole("button", { name: texts.tracking.actions.cancel });

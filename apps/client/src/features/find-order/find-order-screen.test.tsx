@@ -1,3 +1,4 @@
+import { formatAmount } from "@entana/contracts";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -14,7 +15,9 @@ import {
 } from "../../test-support/harnesses/find-order-harness";
 import { resetOrderSubmission } from "../../test-support/order-submission/reset-order-submission";
 import {
+  feeRowText,
   inSequence,
+  itemsLine,
   networkFailure,
   problemAnswer,
   viewAnswer,
@@ -180,6 +183,16 @@ describe("the order found", () => {
       "/retrouver",
     );
     expect(document.body.innerHTML).not.toContain(SENT_BODY.orderCode.toLowerCase());
+  });
+
+  it("shows the delivery fee and the total of the order, as the tracking does", async () => {
+    openFindOrder({ lookup: viewAnswer({ deliveryFeeAr: 1500, totalAr: 4700, itemCount: 2 }) });
+
+    await fillAndSend();
+
+    await screen.findByRole("button", { name: findOrder.refresh });
+    expect(feeRowText()).toBe(`${texts.delivery.fee.label}${formatAmount(1500)}`);
+    expect(document.body.textContent).toContain(itemsLine(2, 4700));
   });
 
   it("offers to order again once the order is finished", async () => {

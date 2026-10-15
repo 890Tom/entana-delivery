@@ -6,14 +6,19 @@ import { Icon } from "../icon/icon";
 import { Notice } from "../notice/notice";
 import visuallyHidden from "../visually-hidden/visually-hidden.module.css";
 
-import { describeDeliveryFee } from "./describe-delivery-fee";
+import { describeDeliveryFee, describeFrozenFee } from "./describe-delivery-fee";
+import type { FeeDescription } from "./describe-delivery-fee";
 import styles from "./delivery-fee-line.module.css";
 
-/** The fee as the server gives it: being computed, failed (with a retry), or known. */
+/**
+ * The fee as the server gives it: being computed, failed (with a retry), known from a quote, or
+ * frozen on a sent order.
+ */
 type DeliveryFeeState =
   | { readonly status: "loading" }
   | { readonly status: "failed"; readonly onRetry: () => void }
-  | { readonly status: "ready"; readonly quote: DeliveryQuoteResponse };
+  | { readonly status: "ready"; readonly quote: DeliveryQuoteResponse }
+  | { readonly status: "frozen"; readonly feeAr: number };
 
 type Variant = "highlighted" | "plain";
 
@@ -50,13 +55,13 @@ function FeeSkeleton({ variant }: { variant: Variant }): ReactElement {
 }
 
 function FeeRow({
-  quote,
+  description,
   variant,
 }: {
-  quote: DeliveryQuoteResponse;
+  description: FeeDescription;
   variant: Variant;
 }): ReactElement {
-  const { label, value, note } = describeDeliveryFee(quote);
+  const { label, value, note } = description;
   return (
     <div className={styles.group}>
       <div className={lineClass(variant)}>
@@ -70,7 +75,7 @@ function FeeRow({
 }
 
 /**
- * The delivery fee of the server's quote as one line, and the note that may follow it. It is
+ * The delivery fee of the server's quote, or of a sent order, as one line, and the note that may follow it. It is
  * information, not a control. Shared by the screens of the order that show the fee; the screen
  * that changes it puts it in a polite live region.
  */
@@ -93,6 +98,8 @@ export function DeliveryFeeLine({
         </Notice>
       );
     case "ready":
-      return <FeeRow quote={state.quote} variant={variant} />;
+      return <FeeRow description={describeDeliveryFee(state.quote)} variant={variant} />;
+    case "frozen":
+      return <FeeRow description={describeFrozenFee(state.feeAr)} variant={variant} />;
   }
 }

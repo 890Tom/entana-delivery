@@ -33,3 +33,12 @@ export function describeDeliveryFee(quote: DeliveryQuoteResponse): FeeDescriptio
       };
   }
 }
+
+/**
+ * The words of the fee frozen on a sent order. The order keeps no place name: the line says
+ * "Livraison", with no note, since nothing can change the fee any more.
+ */
+export function describeFrozenFee(feeAr: number): FeeDescription {
+  const { fee } = texts.delivery;
+  return { label: fee.label, value: feeAr === 0 ? fee.free : formatAmount(feeAr), note: null };
+}
