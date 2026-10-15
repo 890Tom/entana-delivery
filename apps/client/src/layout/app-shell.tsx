@@ -8,6 +8,7 @@ import { CartPanel } from "../features/cart/cart-panel/cart-panel";
 
 import { AppUpdateNotice } from "./app-update/app-update-notice";
 import { Header } from "./header/header";
+import { OfflineNotice } from "./offline-notice/offline-notice";
 import styles from "./app-shell.module.css";
 import { StepIndicator } from "./step-indicator/step-indicator";
 
@@ -34,6 +35,7 @@ export function AppShell({ children }: { children: ReactNode }): ReactElement {
   return (
     <>
       <Header />
+      <OfflineNotice />
       <AppUpdateNotice />
       {step === undefined ? null : <StepIndicator current={step} />}
       {/* The side cart is a complementary area: a sibling of main, not inside it. */}

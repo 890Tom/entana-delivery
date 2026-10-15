@@ -1,4 +1,4 @@
-/* Aligned with the step indicator below it. */
+/* The notices under the sticky header (offline, new version), aligned with the step indicator. */
 .frame {
   max-width: calc(var(--size-content-max) + 2 * var(--space-6));
   padding: var(--space-4) var(--space-6) 0;

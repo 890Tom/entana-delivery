@@ -194,7 +194,7 @@ describe("the delivery quote", () => {
     });
     await waitForQuote();
 
-    const region = document.querySelector('[aria-live="polite"]');
+    const region = screen.getByRole("main").querySelector('[aria-live="polite"]');
     expect(region?.textContent).toContain(texts.delivery.fee.free);
     await expectNoAccessibilityViolations(document.body);
   });

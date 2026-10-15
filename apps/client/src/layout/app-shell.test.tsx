@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "../app";
 import { createQueryClient } from "../data-fetching/query-client";
+import { APP_UPDATE_CONTEXT } from "./app-update/app-update-context";
+import { createAppUpdateStore } from "./app-update/app-update-store";
 import { texts } from "../i18n/texts";
 import { buildInstance } from "../test-support/builders/build-instance";
 import { buildProduct } from "../test-support/builders/build-product";
@@ -40,6 +42,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 describe("application shell", () => {
@@ -186,5 +189,25 @@ describe("application shell", () => {
     await screen.findByRole("img", { name: "Maison Démo" });
 
     await expectNoAccessibilityViolations(container);
+  });
+
+  it("shows the offline notice above the new version notice when both are visible", async () => {
+    stubApi(() => Promise.resolve(jsonResponse(buildInstance())));
+    vi.spyOn(window.navigator, "onLine", "get").mockReturnValue(false);
+    const store = createAppUpdateStore();
+    store.markWaiting();
+    window.history.pushState({}, "", "/");
+    render(
+      <QueryClientProvider client={createQueryClient()}>
+        <APP_UPDATE_CONTEXT value={{ store, apply: vi.fn() }}>
+          <App />
+        </APP_UPDATE_CONTEXT>
+      </QueryClientProvider>,
+    );
+
+    const offline = await screen.findByText(texts.connection.offline);
+    const update = screen.getByText(texts.appUpdate.message);
+
+    expect(offline.compareDocumentPosition(update) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
