@@ -2,8 +2,9 @@ import type * as Library from "maplibre-gl";
 
 import { texts } from "../../../i18n/texts";
 
-import type { MapAdapter, MapAdapterOptions, MapLoader } from "./map-adapter";
+import type { MapAdapter, MapAdapterOptions, MapLoader, MapZone } from "./map-adapter";
 import { createMarkerElement } from "./marker-element";
+import { readZoneLineStyle, toZoneFeatures } from "./zone-layer";
 
 // The only file that names the library. It is reached through dynamic imports only, so that the
 // library, its style sheet and its worker are one separate chunk that the first page never loads.
@@ -47,6 +48,24 @@ function createMarkerHandle(
   };
 }
 
+const ZONES_ID = "delivery-zones";
+
+/** One source and one dashed line layer for every circle, under the marker (a DOM element). */
+function createZonesHandle(map: Library.Map, container: HTMLElement): MapAdapter["setZones"] {
+  const style = readZoneLineStyle(container);
+  map.addSource(ZONES_ID, { type: "geojson", data: toZoneFeatures([]) });
+  map.addLayer({
+    id: ZONES_ID,
+    type: "line",
+    source: ZONES_ID,
+    paint: { "line-color": style.color, "line-width": style.width, "line-dasharray": style.dash },
+  });
+  return (zones: readonly MapZone[]) => {
+    // The library parses the data in its worker: nothing waits for it, and nothing can fail here.
+    void map.getSource<Library.GeoJSONSource>(ZONES_ID)?.setData(toZoneFeatures(zones));
+  };
+}
+
 function createAdapter(
   library: LibraryModule,
   map: Library.Map,
@@ -60,6 +79,7 @@ function createAdapter(
   const setMarker = createMarkerHandle(library, map, options.onPick);
   return {
     setMarker,
+    setZones: createZonesHandle(map, options.container),
     centreOn: (point, zoom) => {
       const center: [number, number] = [point.lng, point.lat];
       const view = { center, zoom };

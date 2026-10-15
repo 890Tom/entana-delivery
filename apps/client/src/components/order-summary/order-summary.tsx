@@ -1,4 +1,5 @@
 import { formatAmount } from "@entana/contracts";
+import type { DeliveryQuoteResponse } from "@entana/contracts";
 import { useId } from "react";
 import type { ReactElement, ReactNode } from "react";
 
@@ -25,7 +26,8 @@ export type OrderSummaryContent =
   | {
       readonly status: "ready";
       readonly lines: readonly OrderSummaryLine[];
-      readonly deliveryFeeAr: number;
+      /** The quote retained on the delivery screen: the fee of the total. */
+      readonly deliveryQuote: DeliveryQuoteResponse;
       readonly totalAr: number;
     };
 
@@ -82,7 +84,7 @@ function SummaryLines({
           </li>
         ))}
       </ul>
-      <DeliveryFeeLine amountAr={content.deliveryFeeAr} variant="plain" />
+      <DeliveryFeeLine state={{ status: "ready", quote: content.deliveryQuote }} variant="plain" />
       <p className={styles.total}>
         <span className={styles.totalLabel}>{texts.orderSummary.total}</span>
         <span className={styles.totalAmount}>{formatAmount(content.totalAr)}</span>

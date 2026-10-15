@@ -11,6 +11,8 @@ interface ValidatedRequest<T, E extends Error> {
   readonly url: string;
   readonly schema: ResponseSchema<T>;
   readonly signal?: AbortSignal | undefined;
+  /** Sent as JSON with a POST when present: what it holds never goes into the address. */
+  readonly body?: unknown;
   readonly createError: (kind: RequestErrorKind) => E;
 }
 
@@ -60,8 +62,25 @@ function classifyFailure(
   return new RequestFailure(error instanceof SyntaxError ? "unexpected" : "network");
 }
 
+/** A GET as before, or a POST of a JSON body that no redirect or referrer can carry elsewhere. */
+function toRequestInit(body: unknown, signal: AbortSignal): RequestInit {
+  if (body === undefined) {
+    return { method: "GET", credentials: "omit", signal };
+  }
+  return {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    credentials: "omit",
+    cache: "no-store",
+    referrerPolicy: "no-referrer",
+    redirect: "error",
+    signal,
+  };
+}
+
 /**
- * GET a public address and validate the answer with its shared schema. Rejects with the error
+ * GET a public address (or POST to it, with `body`) and validate the answer with its shared schema. Rejects with the error
  * made by `createError`, which carries only a kind (no response text, no status, no URL), or
  * with the abort of `signal`.
  */
@@ -77,11 +96,7 @@ export async function fetchValidated<T, E extends Error>(
       ? timeout.signal
       : AbortSignal.any([request.signal, timeout.signal]);
   try {
-    const response = await fetch(request.url, {
-      method: "GET",
-      credentials: "omit",
-      signal: combined,
-    });
+    const response = await fetch(request.url, toRequestInit(request.body, combined));
     return await readValidated(response, request.schema);
   } catch (error: unknown) {
     const failure = classifyFailure(error, timeout.signal.aborted, request.signal);

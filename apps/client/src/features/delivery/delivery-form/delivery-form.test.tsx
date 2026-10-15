@@ -10,6 +10,7 @@ import {
   readyMap,
   renderAt,
   renderDelivery,
+  waitForQuote,
 } from "../../../test-support/harnesses/delivery-harness";
 import { expectNoAccessibilityViolations } from "../../../test-support/assertions/expect-no-accessibility-violations";
 import { createFakeMapLoader } from "../../../test-support/stubs/fake-map";
@@ -82,6 +83,7 @@ describe("the delivery form", () => {
         map.pick(TAPPED);
       });
       type(text);
+      await waitForQuote();
 
       fireEvent.click(continueButtons().card);
 
@@ -95,6 +97,8 @@ describe("the delivery form", () => {
   it("refuses to continue without a point: one notice, with the focus on it", async () => {
     await renderDelivery(createFakeMapLoader());
     type(LANDMARK);
+    // Inactive but still reachable: the click says what is missing.
+    expect(continueButtons().bar.getAttribute("aria-disabled")).toBe("true");
 
     fireEvent.click(continueButtons().bar);
 
@@ -136,13 +140,6 @@ describe("the delivery form", () => {
     await expectNoAccessibilityViolations(document.body);
   });
 
-  it("shows the delivery section, free, once", async () => {
-    await renderDelivery(createFakeMapLoader());
-
-    expect(screen.getAllByText(texts.delivery.fee.label)).toHaveLength(1);
-    expect(screen.getAllByText(texts.delivery.fee.free)).toHaveLength(1);
-  });
-
   it.each([
     ["the button of the fixed bar", (): HTMLElement => continueButtons().bar],
     ["the button of the side card", (): HTMLElement => continueButtons().card],
@@ -156,6 +153,7 @@ describe("the delivery form", () => {
         map.pick(TAPPED);
       });
       type(LANDMARK);
+      await waitForQuote();
 
       fireEvent.click(button());
 
@@ -178,6 +176,7 @@ describe("the delivery form", () => {
       map.pick(TAPPED);
     });
     type(LANDMARK);
+    await waitForQuote();
     const form = landmarkField().form;
 
     // jsdom does not turn the Enter key into a submission, the browser does for a form with a
@@ -268,6 +267,7 @@ describe("the delivery draft", () => {
       map.pick(TAPPED);
     });
     type(LANDMARK);
+    await waitForQuote();
 
     fireEvent.click(continueButtons().card);
 

@@ -30,6 +30,51 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The line and its note, as one block of the column around them. */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Muted, as the hint of a field. Proposed, to confirm (6g-8b): the note is in no capture. */
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* The skeleton: the label and the value as blocks of one body line. */
+.block {
+  height: calc(var(--font-size-body) * var(--line-height-body));
+  background: var(--color-skeleton);
+  border-radius: var(--radius-sm);
+  animation: pulse var(--duration-pulse) var(--ease) infinite alternate;
+}
+
+.labelBlock {
+  flex: 1;
+}
+
+.valueBlock {
+  width: 8ch;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: var(--opacity-skeleton-pulse);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block {
+    animation: none;
+  }
+}
+
 /* In the order summary: the muted words of a row, on the card's own ground. */
 .plain {
   padding: 0;

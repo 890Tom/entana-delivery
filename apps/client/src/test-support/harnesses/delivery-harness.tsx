@@ -6,8 +6,10 @@ import { App } from "../../app";
 import { createQueryClient } from "../../data-fetching/query-client";
 import { CART_STORAGE_KEY } from "../../features/cart/storage/cart-storage";
 import { MAP_LOADER_CONTEXT } from "../../features/delivery/map/map-loader-context";
+import { forgetDeliveryQuote } from "../../features/delivery/quote/retained-quote";
 import { texts } from "../../i18n/texts";
 
+import { buildDeliveryQuote, buildDeliveryZone } from "../builders/build-delivery-quote";
 import { buildInstance } from "../builders/build-instance";
 import { buildProduct, buildProductId } from "../builders/build-product";
 import type { FakeMap, FakeMapLoader } from "../stubs/fake-map";
@@ -25,19 +27,42 @@ const PRODUCT = buildProduct({ id: buildProductId(1) });
 export const TAPPED = { lat: -18.9123456789, lng: 47.5123456789 };
 export const TAPPED_ROUNDED = { lat: -18.912346, lng: 47.512346 };
 
-/** The network boundary, answered by address: the instance and the catalogue. */
-export function stubApi(): ReturnType<typeof vi.fn> {
-  const fetchStub = vi.fn((input: RequestInfo | URL) =>
-    Promise.resolve(
-      input === "/api/v1/instance" ? jsonResponse(INSTANCE) : jsonResponse({ products: [PRODUCT] }),
-    ),
-  );
+const ZONE = buildDeliveryZone();
+const QUOTE = buildDeliveryQuote();
+
+type Answer = (init: RequestInit | undefined) => Promise<Response>;
+
+interface ApiAnswers {
+  /** The delivery zones: one circle by default. */
+  readonly zones?: Answer;
+  /** The delivery quote: a free delivery inside an axis by default. */
+  readonly quote?: Answer;
+}
+
+/** The network boundary, answered by address: the instance, the delivery and the catalogue. */
+export function stubApi(answers: ApiAnswers = {}): ReturnType<typeof vi.fn> {
+  const fetchStub = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    switch (input) {
+      case "/api/v1/instance":
+        return Promise.resolve(jsonResponse(INSTANCE));
+      case "/api/v1/delivery/zones":
+        return answers.zones?.(init) ?? Promise.resolve(jsonResponse({ zones: [ZONE] }));
+      case "/api/v1/delivery/quote":
+        return answers.quote?.(init) ?? Promise.resolve(jsonResponse(QUOTE));
+      default:
+        return Promise.resolve(jsonResponse({ products: [PRODUCT] }));
+    }
+  });
   vi.stubGlobal("fetch", fetchStub);
   return fetchStub;
 }
 
-/** A cart with one product, in a new session: the delivery draft of an earlier test is gone. */
+/**
+ * A cart with one product, in a new session: the delivery draft and the quote retained by an
+ * earlier test are gone.
+ */
 export function seedCart(): void {
+  forgetDeliveryQuote();
   sessionStorage.clear();
   localStorage.setItem(
     CART_STORAGE_KEY,
@@ -61,13 +86,17 @@ export function renderAt(path: string, fake: FakeMapLoader): ReturnType<typeof r
 }
 
 /** The delivery screen with a cart, and the map load asked for (not yet settled). */
-export async function renderDelivery(fake: FakeMapLoader): Promise<void> {
-  stubApi();
+export async function renderDelivery(
+  fake: FakeMapLoader,
+  answers: ApiAnswers = {},
+): Promise<ReturnType<typeof vi.fn>> {
+  const fetchStub = stubApi(answers);
   seedCart();
   renderAt("/livraison", fake);
   await waitFor(() => {
     expect(fake.loader).toHaveBeenCalledOnce();
   });
+  return fetchStub;
 }
 
 /** Settles the pending map load as a success and waits for the map to be usable. */
@@ -94,4 +123,11 @@ export function continueButtons(): { readonly bar: HTMLElement; readonly card: H
     throw new Error("The page must hold one Continuer in the bar and one in the form");
   }
   return { bar, card };
+}
+
+/** Waits for the quote of the point: "Continuer" is then active. */
+export async function waitForQuote(): Promise<void> {
+  await waitFor(() => {
+    expect(continueButtons().card.getAttribute("aria-disabled")).toBeNull();
+  });
 }

@@ -48,8 +48,11 @@ describe("the review guards", () => {
     expect(window.history.length).toBe(lengthBefore + 1);
   });
 
-  it("sends an incomplete delivery back to the delivery screen", async () => {
-    openReview({ delivery: { version: 1, point: null, landmark: "Portail bleu" } });
+  it.each([
+    ["an incomplete delivery", { delivery: { version: 1, point: null, landmark: "Portail bleu" } }],
+    ["a delivery without a retained quote", { quote: null }],
+  ])("sends %s back to the delivery screen", async (_label, options) => {
+    openReview(options);
 
     await screen.findByRole("heading", { level: 1, name: texts.delivery.heading });
     expect(window.location.pathname).toBe("/livraison");

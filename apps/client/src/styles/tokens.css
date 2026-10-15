@@ -124,6 +124,10 @@
   --size-map-pin: 40px;
   --size-map-pin-tail-half: 6px;
   --size-map-pin-tail-height: 10px;
+  /* Proposed, to confirm (6g-8b): the dashed outline of a delivery place (prototype values). */
+  --size-map-zone-stroke: 1.5px;
+  /* Dash and gap in pixels; the map turns them into line widths. */
+  --map-zone-dash: 6 6;
   /* Proposed, to confirm: the screen of the resellers (values from its screen sheet). */
   --size-map-height-compact: 220px;
   --size-list-width: 420px;
