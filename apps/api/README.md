@@ -321,6 +321,16 @@ the instance time zone. Without a reason the stored text is "Aucun motif précis
 is required by a CHECK constraint. Any other move, an order already in that status and an order
 changed in between (a customer's cancellation included) get the same `409`.
 
+**Fee at confirmation.** The confirmation may add `"deliveryFeeAr"`: an integer from 0 to 1 000 000
+(`PRODUCT_PRICE_MAX_AR`). Absent, or equal to the recorded fee, nothing about the fee changes. Any
+other value is written with the status in the same update: `delivery_fee` takes it, `fee_reason`
+becomes `ADJUSTED`, `total_ar` is the frozen lines plus the new fee, and a `FEE_ADJUSTED` event
+(actor `STAFF`, the admin's id, payload `{ fromAr, toAr }`) is written in the same transaction.
+Only this order changes: the delivery settings and the other orders do not, and the public
+tracking shows the adjusted fee and total. The status is checked first (a refused move is a `409`).
+A total that the order cannot hold (a signed 32-bit integer) is a `422` of type
+`urn:entana:problem:order_total_too_large`, and nothing changes. The amounts are never logged.
+
 ### Catalogue (administration)
 
 Eight routes under `/api/v1/admin/products`, closed by the guard above (`401` without a session).

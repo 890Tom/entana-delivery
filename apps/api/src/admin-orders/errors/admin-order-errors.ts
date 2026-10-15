@@ -19,3 +19,11 @@ export class OrderTransitionRefusedError extends Error {
     this.name = "OrderTransitionRefusedError";
   }
 }
+
+/** The fee given at confirmation would make a total that the order cannot hold. */
+export class OrderTotalTooLargeError extends Error {
+  constructor() {
+    super("The order total is too large.");
+    this.name = "OrderTotalTooLargeError";
+  }
+}

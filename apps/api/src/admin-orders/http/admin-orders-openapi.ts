@@ -11,6 +11,8 @@ import {
 import {
   adminOrderDetailSchema,
   MAX_STATUS_REASON_LENGTH,
+  ORDER_PROBLEM_TYPES,
+  PRODUCT_PRICE_MAX_AR,
   adminOrderListResponseSchema,
   adminOrderSummaryResponseSchema,
   problemDetailsSchema,
@@ -43,6 +45,7 @@ const TRANSITION_BODY: Extract<ApiBodyOptions, { schema: unknown }>["schema"] = 
       properties: {
         to: { type: "string", enum: ["CONFIRMED"] },
         deliveryDate: { type: "string", format: "date" },
+        deliveryFeeAr: { type: "integer", minimum: 0, maximum: PRODUCT_PRICE_MAX_AR },
       },
     },
     {
@@ -140,7 +143,10 @@ export const documentChangeStatus = (): MethodDecorator =>
         "Allowed: NEW to CONFIRMED (with `deliveryDate`, today to 60 days ahead) or REJECTED, " +
         "CONFIRMED to OUT_FOR_DELIVERY, REJECTED or CANCELLED, OUT_FOR_DELIVERY to DELIVERED or FAILED. " +
         "`reason` is optional for REJECTED and CANCELLED. The same 409 answers a forbidden move, an order " +
-        "already in that status and an order changed in between (a cancellation included).",
+        "already in that status and an order changed in between (a cancellation included). " +
+        "A confirmation may carry `deliveryFeeAr`: when it differs from the recorded fee, the fee " +
+        "becomes ADJUSTED, the total is computed again from the frozen lines and a FEE_ADJUSTED " +
+        "event is written, all with the status. Without it, or with the same fee, nothing changes.",
       operationId: "changeAdminOrderStatus",
     }),
     ApiBody({ schema: TRANSITION_BODY }),
@@ -155,6 +161,10 @@ export const documentChangeStatus = (): MethodDecorator =>
       NOT_FOUND,
       [409, "The order cannot move to this status."],
       [415, "The content type is not application/json."],
+      [
+        422,
+        `The new fee would make a total the order cannot hold (type ${ORDER_PROBLEM_TYPES.totalTooLarge}). Nothing changes.`,
+      ],
       ...COMMON,
     ]),
   );

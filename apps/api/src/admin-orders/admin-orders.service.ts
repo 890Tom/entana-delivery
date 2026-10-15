@@ -8,6 +8,7 @@ import {
   dayInTimeZone,
   encodeOrderCursor,
   isDeliveryDateInWindow,
+  planDeliveryFeeAdjustment,
 } from "@entana/contracts";
 import type {
   AdminOrderDetail,
@@ -15,6 +16,7 @@ import type {
   AdminOrderListResponse,
   AdminOrderSummaryQuery,
   AdminOrderSummaryResponse,
+  DeliveryFeeAdjustmentPlan,
   InstanceConfig,
   StatusTransitionRequest,
 } from "@entana/contracts";
@@ -27,6 +29,7 @@ import { RequestValidationError } from "../errors/request-body/request-validatio
 import { INSTANCE_CONFIG } from "../instance/config-token/instance-config.token.js";
 import {
   AdminOrderNotFoundError,
+  OrderTotalTooLargeError,
   OrderTransitionRefusedError,
 } from "./errors/admin-order-errors.js";
 import {
@@ -36,13 +39,19 @@ import {
   countOrdersToProcess,
   findFirstOrderIds,
   findNewOrdersSince,
+  findOrderAmounts,
   findOrderDetail,
   findOrderPage,
   findOrderStatus,
   requireOrderDetail,
+  insertFeeAdjustedEvent,
   insertStatusChangedEvent,
 } from "./persistence/admin-order-queries.js";
-import type { OrderFilter, StatusChange } from "./persistence/admin-order-queries.js";
+import type {
+  AdminOrderDatabase,
+  OrderFilter,
+  StatusChange,
+} from "./persistence/admin-order-queries.js";
 import { toAdminOrderDetail, toAdminOrderListItem } from "./rules/to-admin-order.js";
 
 /** What the service needs from the database client: the PrismaClient fits. */
@@ -139,7 +148,8 @@ export class AdminOrdersService {
   /**
    * Moves the order one step. The status is changed only if it is still the one that was read, and
    * the event is written in the same transaction: a concurrent change, a customer's cancellation
-   * included, leaves no row to update and the answer is the same refusal as a forbidden move.
+   * included, leaves no row to update and the answer is the same refusal as a forbidden move. A fee
+   * given at confirmation is written by the same update, so it never outlives a refused move.
    */
   async changeStatus(
     id: string,
@@ -158,7 +168,8 @@ export class AdminOrdersService {
         throw new OrderTransitionRefusedError();
       }
       const { change, payload } = describeChange(from, request);
-      if (!(await changeStatusIfStatusIs(transaction, orderId, change))) {
+      const fee = await planFee(transaction, orderId, request);
+      if (!(await changeStatusIfStatusIs(transaction, orderId, withFee(change, fee)))) {
         throw new OrderTransitionRefusedError();
       }
       await insertStatusChangedEvent(transaction, {
@@ -168,6 +179,7 @@ export class AdminOrdersService {
         payload,
         createdAt: now,
       });
+      await recordFeeAdjustment(transaction, fee, { orderId, adminId, createdAt: now });
       return toAdminOrderDetail(await requireOrderDetail(transaction, orderId));
     });
   }
@@ -180,6 +192,47 @@ export class AdminOrdersService {
     if (!isDeliveryDateInWindow(request.deliveryDate, today)) {
       throw new RequestValidationError([OUT_OF_WINDOW_ISSUE]);
     }
+  }
+}
+
+type AllowedFeePlan = Exclude<DeliveryFeeAdjustmentPlan, { kind: "too-large" }>;
+
+/**
+ * The fee given at confirmation, checked once the move is allowed: a total the order cannot hold
+ * is refused before anything is written. The other moves never touch the fee.
+ */
+async function planFee(
+  transaction: AdminOrderDatabase,
+  orderId: string,
+  request: StatusTransitionRequest,
+): Promise<AllowedFeePlan> {
+  if (request.to !== "CONFIRMED" || request.deliveryFeeAr === undefined) {
+    return { kind: "unchanged" };
+  }
+  const plan = planDeliveryFeeAdjustment(
+    await findOrderAmounts(transaction, orderId),
+    request.deliveryFeeAr,
+  );
+  if (plan.kind === "too-large") {
+    throw new OrderTotalTooLargeError();
+  }
+  return plan;
+}
+
+function withFee(change: StatusChange, fee: AllowedFeePlan): StatusChange {
+  return fee.kind === "adjusted"
+    ? { ...change, fee: { deliveryFeeAr: fee.toAr, totalAr: fee.totalAr } }
+    : change;
+}
+
+/** The FEE_ADJUSTED event, written only when the fee really changed. */
+async function recordFeeAdjustment(
+  transaction: AdminOrderDatabase,
+  fee: AllowedFeePlan,
+  event: { readonly orderId: string; readonly adminId: string; readonly createdAt: Date },
+): Promise<void> {
+  if (fee.kind === "adjusted") {
+    await insertFeeAdjustedEvent(transaction, { ...event, fromAr: fee.fromAr, toAr: fee.toAr });
   }
 }
 

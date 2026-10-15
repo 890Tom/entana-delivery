@@ -35,6 +35,11 @@ export const DELIVERY_PROBLEM_TYPES = {
   placeUnavailable: "urn:entana:problem:delivery_place_unavailable",
 } as const;
 
+/** `type` of the problems of the administration of orders that a client acts on (422 is shared). */
+export const ORDER_PROBLEM_TYPES = {
+  totalTooLarge: "urn:entana:problem:order_total_too_large",
+} as const;
+
 /** One invalid field of a request. `pointer` is a JSON Pointer (RFC 6901) into the request data. */
 export const fieldErrorSchema = z.object({
   pointer: z.string(),

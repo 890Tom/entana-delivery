@@ -1,4 +1,4 @@
-import type { OrderSearch, OrderStatus } from "@entana/contracts";
+import type { FrozenOrderAmounts, OrderSearch, OrderStatus } from "@entana/contracts";
 import type { PrismaClient } from "@entana/database";
 import type { StoredAdminOrder, StoredOrderListItem } from "../rules/to-admin-order.js";
 
@@ -181,11 +181,28 @@ export async function findOrderStatus(
   return order?.status ?? null;
 }
 
+/** The fee and the total recorded on the order, and its frozen lines. */
+export async function findOrderAmounts(
+  database: AdminOrderDatabase,
+  id: string,
+): Promise<FrozenOrderAmounts> {
+  const order = await database.customerOrder.findUniqueOrThrow({
+    where: { id },
+    select: { deliveryFee: true, items: { select: { unitPrice: true, qty: true } } },
+  });
+  return {
+    deliveryFeeAr: order.deliveryFee,
+    lines: order.items.map((item) => ({ unitPrice: item.unitPrice, quantity: item.qty })),
+  };
+}
+
 export interface StatusChange {
   readonly from: OrderStatus;
   readonly to: OrderStatus;
   readonly statusReason?: string;
   readonly deliveryDate?: Date;
+  /** An adjusted fee, written with the status: both change, or neither. */
+  readonly fee?: { readonly deliveryFeeAr: number; readonly totalAr: number };
 }
 
 /**
@@ -203,6 +220,13 @@ export async function changeStatusIfStatusIs(
       status: change.to,
       ...(change.statusReason === undefined ? {} : { statusReason: change.statusReason }),
       ...(change.deliveryDate === undefined ? {} : { deliveryDate: change.deliveryDate }),
+      ...(change.fee === undefined
+        ? {}
+        : {
+            deliveryFee: change.fee.deliveryFeeAr,
+            feeReason: "ADJUSTED" as const,
+            totalAr: change.fee.totalAr,
+          }),
     },
   });
   return count === 1;
@@ -227,6 +251,29 @@ export async function insertStatusChangedEvent(
       actorType: "STAFF",
       actorId: event.adminId,
       payload: { ...event.payload },
+      createdAt: event.createdAt,
+    },
+  });
+}
+
+/** The fee given at confirmation, by the same admin and at the same instant as the status. */
+export async function insertFeeAdjustedEvent(
+  database: AdminOrderDatabase,
+  event: {
+    readonly orderId: string;
+    readonly adminId: string;
+    readonly fromAr: number;
+    readonly toAr: number;
+    readonly createdAt: Date;
+  },
+): Promise<void> {
+  await database.orderEvent.create({
+    data: {
+      orderId: event.orderId,
+      type: "FEE_ADJUSTED",
+      actorType: "STAFF",
+      actorId: event.adminId,
+      payload: { fromAr: event.fromAr, toAr: event.toAr },
       createdAt: event.createdAt,
     },
   });
