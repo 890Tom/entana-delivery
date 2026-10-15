@@ -2,12 +2,12 @@ import { Inject, Injectable } from "@nestjs/common";
 import type { CanActivate, ExecutionContext } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import type { Request } from "express";
-import { AdminSessionService } from "./admin-session.service.js";
-import { ADMIN_PUBLIC_KEY } from "./http/admin-public.decorator.js";
-import { setAuthenticatedAdmin } from "./http/authenticated-admin.js";
-import { isAdminPath } from "./http/is-admin-path.js";
-import { readSessionToken } from "./http/session-cookie.js";
-import type { SessionCookieSettings } from "./http/session-cookie.js";
+import { AdminSessionService } from "../admin-session.service.js";
+import { ADMIN_PUBLIC_KEY } from "./admin-public.decorator.js";
+import { setAuthenticatedAdmin } from "./authenticated-admin.js";
+import { isAdminPath } from "./is-admin-path.js";
+import { readSessionToken } from "./session-cookie.js";
+import type { SessionCookieSettings } from "./session-cookie.js";
 
 export const ADMIN_COOKIE_SETTINGS = Symbol("ADMIN_COOKIE_SETTINGS");
 

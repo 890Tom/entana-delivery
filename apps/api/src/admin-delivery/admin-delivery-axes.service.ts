@@ -10,8 +10,8 @@ import type {
 import type { PrismaClient } from "@entana/database";
 import { z } from "zod";
 import { DATABASE_CLIENT } from "../database/client-token/database-client.js";
-import { resolveAxisPlaces } from "./delivery-axis-places.js";
-import type { ResolvedPlaces } from "./delivery-axis-places.js";
+import { resolveAxisPlaces } from "./persistence/delivery-axis-places.js";
+import type { ResolvedPlaces } from "./persistence/delivery-axis-places.js";
 import {
   AdminDeliveryAxisNotFoundError,
   DeliveryAxisInUseError,

@@ -3,13 +3,13 @@ import type { DeliveryAxisPlaceEntry } from "@entana/contracts";
 import {
   DeliveryPlaceNameTakenError,
   DeliveryPlaceUnavailableError,
-} from "./errors/admin-delivery-errors.js";
+} from "../errors/admin-delivery-errors.js";
 import {
   areAnyPlaceNamesTaken,
   findPlaceStates,
   insertPlace,
-} from "./persistence/admin-delivery-axis-queries.js";
-import type { AdminDeliveryAxisDatabase } from "./persistence/admin-delivery-axis-queries.js";
+} from "./admin-delivery-axis-queries.js";
+import type { AdminDeliveryAxisDatabase } from "./admin-delivery-axis-queries.js";
 
 export interface ResolvedPlaces {
   /** Every place of the axis, in the order received. */

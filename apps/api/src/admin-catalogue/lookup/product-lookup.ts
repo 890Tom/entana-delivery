@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { AdminProductNotFoundError } from "./errors/admin-catalogue-errors.js";
-import { findProduct } from "./persistence/admin-product-queries.js";
-import type { AdminProductDatabase } from "./persistence/admin-product-queries.js";
-import type { StoredAdminProduct } from "./rules/to-admin-product.js";
+import { AdminProductNotFoundError } from "../errors/admin-catalogue-errors.js";
+import { findProduct } from "../persistence/admin-product-queries.js";
+import type { AdminProductDatabase } from "../persistence/admin-product-queries.js";
+import type { StoredAdminProduct } from "../rules/to-admin-product.js";
 
 const productIdSchema = z.uuid();
 

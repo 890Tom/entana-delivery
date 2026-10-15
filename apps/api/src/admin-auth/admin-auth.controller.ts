@@ -16,7 +16,7 @@ import type { AdminLoginRequest, AdminProfile } from "@entana/contracts";
 import type { Request, Response } from "express";
 import { JsonContentTypeGuard } from "../errors/request-body/json-content-type.guard.js";
 import { AdminAuthService } from "./admin-auth.service.js";
-import { ADMIN_COOKIE_SETTINGS } from "./admin-auth.guard.js";
+import { ADMIN_COOKIE_SETTINGS } from "./http/admin-auth.guard.js";
 import { AdminSessionService } from "./admin-session.service.js";
 import { documentLogin, documentLogout, documentMe } from "./http/admin-openapi.js";
 import { adminPublic } from "./http/admin-public.decorator.js";

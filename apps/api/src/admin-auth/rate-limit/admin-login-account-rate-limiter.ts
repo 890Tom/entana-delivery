@@ -7,7 +7,7 @@ import { TRACKING_MAX_TRACKED } from "../../tracking/rate-limit/tracking-http-li
 import {
   ADMIN_LOGIN_ACCOUNT_MAX_FAILURES,
   ADMIN_LOGIN_ACCOUNT_WINDOW_MS,
-} from "../http/admin-http-limits.js";
+} from "./admin-http-limits.js";
 
 /**
  * The limit of failed logins per account, whatever the address: it stops a guess spread over many

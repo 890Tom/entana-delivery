@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { AdminResellerNotFoundError } from "./errors/admin-reseller-errors.js";
-import { findReseller } from "./persistence/admin-reseller-queries.js";
-import type { AdminResellerDatabase } from "./persistence/admin-reseller-queries.js";
-import type { StoredAdminReseller } from "./rules/to-admin-reseller.js";
+import { AdminResellerNotFoundError } from "../errors/admin-reseller-errors.js";
+import { findReseller } from "../persistence/admin-reseller-queries.js";
+import type { AdminResellerDatabase } from "../persistence/admin-reseller-queries.js";
+import type { StoredAdminReseller } from "../rules/to-admin-reseller.js";
 
 const resellerIdSchema = z.uuid();
 

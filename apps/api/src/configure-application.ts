@@ -4,7 +4,7 @@ import helmet from "helmet";
 import { Logger } from "nestjs-pino";
 import type { AppConfig } from "./config/app-config.js";
 import { AdminLoginAddressRateLimiter } from "./admin-auth/rate-limit/admin-login-address-rate-limiter.js";
-import { ADMIN_LOGIN_PATH, ADMIN_PATH } from "./admin-auth/http/admin-http-limits.js";
+import { ADMIN_LOGIN_PATH, ADMIN_PATH } from "./admin-auth/rate-limit/admin-http-limits.js";
 import { createAdminOriginMiddleware } from "./admin-auth/http/admin-origin.middleware.js";
 import { sessionCookieSettings } from "./admin-auth/http/session-cookie.js";
 import { rejectBody } from "./errors/request-body/body-rejected-error.js";

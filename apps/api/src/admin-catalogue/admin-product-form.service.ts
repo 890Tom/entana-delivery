@@ -6,7 +6,7 @@ import { CLOCK } from "../clock/clock.js";
 import type { Clock } from "../clock/clock.js";
 import { DATABASE_CLIENT } from "../database/client-token/database-client.js";
 import { MEDIA_ROOT } from "../media/media-root/media-root.token.js";
-import { applyProductUpdate } from "./apply-product-update.js";
+import { applyProductUpdate } from "./persistence/apply-product-update.js";
 import { PhotoAltRequiredError, SkuTakenError } from "./errors/admin-catalogue-errors.js";
 import { processProductPhoto } from "./photo/process-product-photo.js";
 import { removeProductPhoto, writeProductPhoto } from "./photo/product-photo-files.js";
@@ -17,7 +17,7 @@ import {
   insertProductAudit,
   updateProduct,
 } from "./persistence/admin-product-queries.js";
-import { parseProductId, requireProduct } from "./product-lookup.js";
+import { parseProductId, requireProduct } from "./lookup/product-lookup.js";
 import { toAdminProduct } from "./rules/to-admin-product.js";
 
 export type AdminProductFormClient = Pick<PrismaClient, "$transaction" | "product" | "auditLog">;
