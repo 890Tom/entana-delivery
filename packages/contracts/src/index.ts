@@ -31,7 +31,7 @@ export { createOrderResponseSchema } from "./orders/response/create-order-respon
 export type { CreateOrderResponse } from "./orders/response/create-order-response.js";
 export { idempotencyKeySchema } from "./orders/request/idempotency-key.js";
 export type { IdempotencyKey } from "./orders/request/idempotency-key.js";
-export { normalizePhone } from "./orders/phone/normalize-phone.js";
+export { normalizePhone } from "./orders/phone-numbering/normalize-phone.js";
 export {
   formatNationalNumber,
   maxNationalDigits,
@@ -88,10 +88,10 @@ export {
   adminLoginRequestSchema,
   normalizeEmail,
   validateAdminPassword,
-} from "./admin/admin-credentials.js";
-export type { AdminLoginRequest, PasswordValidation } from "./admin/admin-credentials.js";
-export { adminProfileSchema } from "./admin/admin-profile.js";
-export type { AdminProfile } from "./admin/admin-profile.js";
+} from "./admin-auth/admin-credentials.js";
+export type { AdminLoginRequest, PasswordValidation } from "./admin-auth/admin-credentials.js";
+export { adminProfileSchema } from "./admin-auth/admin-profile.js";
+export type { AdminProfile } from "./admin-auth/admin-profile.js";
 export {
   ADMIN_SESSION_IDLE_TIMEOUT_MS,
   ADMIN_SESSION_LIFETIME_MS,
@@ -99,8 +99,8 @@ export {
   computeSessionExpiry,
   evaluateAdminSession,
   shouldRecordSessionActivity,
-} from "./admin/admin-session-rules.js";
-export type { AdminSessionDates, AdminSessionState } from "./admin/admin-session-rules.js";
+} from "./admin-auth/admin-session-rules.js";
+export type { AdminSessionDates, AdminSessionState } from "./admin-auth/admin-session-rules.js";
 export { canTransition } from "./orders/admin/order-transitions.js";
 export {
   DEFAULT_REJECTION_REASON,
@@ -147,14 +147,14 @@ export {
   adminProductSchema,
   availabilityRequestSchema,
   productOrderRequestSchema,
-} from "./admin/catalogue/admin-product.js";
+} from "./catalog/admin/admin-product.js";
 export type {
   AdminProduct,
   AdminProductListResponse,
   AvailabilityRequest,
   ProductOrderRequest,
-} from "./admin/catalogue/admin-product.js";
-export { isCompleteProductOrder } from "./admin/catalogue/product-order.js";
+} from "./catalog/admin/admin-product.js";
+export { isCompleteProductOrder } from "./catalog/admin/product-order.js";
 export {
   PRODUCT_DESCRIPTION_MAX_LENGTH,
   PRODUCT_IMAGE_ALT_MAX_LENGTH,
@@ -164,42 +164,42 @@ export {
   PRODUCT_PRICE_MAX_AR,
   createProductRequestSchema,
   updateProductRequestSchema,
-} from "./admin/catalogue/product-form.js";
-export type { CreateProductRequest, UpdateProductRequest } from "./admin/catalogue/product-form.js";
-export { planProductUpdate } from "./admin/catalogue/plan-product-update.js";
+} from "./catalog/admin/product-form.js";
+export type { CreateProductRequest, UpdateProductRequest } from "./catalog/admin/product-form.js";
+export { planProductUpdate } from "./catalog/admin/plan-product-update.js";
 export type {
   ProductColumnChanges,
   ProductState,
   ProductUpdatePlan,
   UpdatedField,
-} from "./admin/catalogue/plan-product-update.js";
+} from "./catalog/admin/plan-product-update.js";
 export {
   adminResellerListResponseSchema,
   adminResellerSchema,
-} from "./admin/resellers/admin-reseller.js";
-export type { AdminReseller, AdminResellerListResponse } from "./admin/resellers/admin-reseller.js";
+} from "./resellers/admin/admin-reseller.js";
+export type { AdminReseller, AdminResellerListResponse } from "./resellers/admin/admin-reseller.js";
 export {
   RESELLER_LANDMARK_MAX_LENGTH,
   RESELLER_NAME_MAX_LENGTH,
   RESELLER_NEIGHBORHOOD_MAX_LENGTH,
   createResellerRequestSchema,
   updateResellerRequestSchema,
-} from "./admin/resellers/reseller-form.js";
+} from "./resellers/admin/reseller-form.js";
 export type {
   CreateResellerRequest,
   UpdateResellerRequest,
-} from "./admin/resellers/reseller-form.js";
-export { planResellerUpdate } from "./admin/resellers/plan-reseller-update.js";
+} from "./resellers/admin/reseller-form.js";
+export { planResellerUpdate } from "./resellers/admin/plan-reseller-update.js";
 export type {
   ResellerColumnChanges,
   ResellerState,
   ResellerUpdatePlan,
   ResellerUpdatedField,
-} from "./admin/resellers/plan-reseller-update.js";
+} from "./resellers/admin/plan-reseller-update.js";
 export {
   RESELLER_VERIFICATION_MAX_AGE_DAYS,
   isResellerVerificationStale,
-} from "./admin/resellers/reseller-verification.js";
+} from "./resellers/admin/reseller-verification.js";
 export { computeDistanceMeters } from "./delivery/haversine-distance.js";
 export type { GeoPoint } from "./delivery/haversine-distance.js";
 export { resolveDeliveryAxis } from "./delivery/resolve-delivery-axis.js";
@@ -236,49 +236,49 @@ export {
   deliveryAxisColorSchema,
   reorderDeliveryAxesRequestSchema,
   saveDeliveryAxisRequestSchema,
-} from "./admin/delivery/delivery-axis-request.js";
+} from "./delivery/admin/delivery-axis-request.js";
 export type {
   DeliveryAxisPlaceEntry,
   ReorderDeliveryAxesRequest,
   SaveDeliveryAxisRequest,
-} from "./admin/delivery/delivery-axis-request.js";
-export { planAxisReorder, planAxisUpdate } from "./admin/delivery/delivery-axis-plans.js";
+} from "./delivery/admin/delivery-axis-request.js";
+export { planAxisReorder, planAxisUpdate } from "./delivery/admin/delivery-axis-plans.js";
 export type {
   AxisContent,
   AxisRankMove,
   AxisReorderPlan,
   AxisUpdatePlan,
   DeliveryAxisField,
-} from "./admin/delivery/delivery-axis-plans.js";
+} from "./delivery/admin/delivery-axis-plans.js";
 export {
   adminDeliveryAxisListResponseSchema,
   adminDeliveryAxisPlaceSchema,
   adminDeliveryAxisSchema,
   adminDeliveryPlaceListResponseSchema,
   adminDeliveryPlaceSchema,
-} from "./admin/delivery/admin-delivery.js";
+} from "./delivery/admin/admin-delivery.js";
 export type {
   AdminDeliveryAxis,
   AdminDeliveryAxisListResponse,
   AdminDeliveryAxisPlace,
   AdminDeliveryPlace,
   AdminDeliveryPlaceListResponse,
-} from "./admin/delivery/admin-delivery.js";
+} from "./delivery/admin/admin-delivery.js";
 export {
   MAX_FREE_DELIVERY_MIN_PIECES,
   updateDeliverySettingsRequestSchema,
-} from "./admin/delivery/delivery-settings-request.js";
-export type { UpdateDeliverySettingsRequest } from "./admin/delivery/delivery-settings-request.js";
-export { planDeliverySettingsUpdate } from "./admin/delivery/plan-delivery-settings-update.js";
+} from "./delivery/admin/delivery-settings-request.js";
+export type { UpdateDeliverySettingsRequest } from "./delivery/admin/delivery-settings-request.js";
+export { planDeliverySettingsUpdate } from "./delivery/admin/plan-delivery-settings-update.js";
 export type {
   DeliverySettingsField,
   DeliverySettingsUpdatePlan,
-} from "./admin/delivery/plan-delivery-settings-update.js";
+} from "./delivery/admin/plan-delivery-settings-update.js";
 export {
   deliveryResolveQuerySchema,
   deliveryResolveResponseSchema,
-} from "./admin/delivery/delivery-resolve.js";
+} from "./delivery/admin/delivery-resolve.js";
 export type {
   DeliveryResolveQuery,
   DeliveryResolveResponse,
-} from "./admin/delivery/delivery-resolve.js";
+} from "./delivery/admin/delivery-resolve.js";

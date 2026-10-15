@@ -3,8 +3,8 @@ import {
   MAX_ORDER_LINES,
   MAX_ORDER_LINE_QUANTITY,
 } from "../../orders/request/create-order-request.js";
-import { outOfAxisMessageSchema } from "../../delivery/delivery-settings.js";
-import { PRODUCT_PRICE_MAX_AR } from "../catalogue/product-form.js";
+import { outOfAxisMessageSchema } from "../delivery-settings.js";
+import { PRODUCT_PRICE_MAX_AR } from "../../catalog/admin/product-form.js";
 
 /** The most pieces an order can hold: a threshold above it could never be reached. */
 export const MAX_FREE_DELIVERY_MIN_PIECES = MAX_ORDER_LINES * MAX_ORDER_LINE_QUANTITY;

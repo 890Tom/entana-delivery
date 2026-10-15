@@ -1,4 +1,4 @@
-import { normalizePhone } from "../phone/normalize-phone.js";
+import { normalizePhone } from "./normalize-phone.js";
 import { findNumberingRule } from "./numbering-plan.js";
 import type { NumberingRule } from "./numbering-plan.js";
 

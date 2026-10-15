@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PRODUCT_PRICE_MAX_AR } from "../../admin/catalogue/product-form.js";
+import { PRODUCT_PRICE_MAX_AR } from "../../catalog/admin/product-form.js";
 import {
   MAX_STATUS_REASON_LENGTH,
   statusTransitionRequestSchema,

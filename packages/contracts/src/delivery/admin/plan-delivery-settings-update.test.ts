@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { DeliverySettings } from "../../delivery/delivery-settings.js";
+import type { DeliverySettings } from "../delivery-settings.js";
 import { planDeliverySettingsUpdate } from "./plan-delivery-settings-update.js";
 
 const BEFORE: DeliverySettings = {
