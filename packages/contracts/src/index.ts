@@ -11,6 +11,7 @@ export { healthResponseSchema } from "./health/health.js";
 export type { HealthResponse } from "./health/health.js";
 export { computeOrderTotal } from "./orders/total/compute-order-total.js";
 export type { OrderLineAmount } from "./orders/total/compute-order-total.js";
+export { MAX_AMOUNT_AR, doesAmountFitColumn } from "./orders/total/order-amount-limit.js";
 export {
   MAX_CONTACT_NAME_LENGTH,
   MAX_CUSTOMER_NOTE_LENGTH,
