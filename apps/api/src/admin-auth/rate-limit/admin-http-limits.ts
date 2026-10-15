@@ -9,3 +9,9 @@ export const ADMIN_LOGIN_ADDRESS_WINDOW_MS = 10 * 60_000;
 /** Failed logins per account (the normalised e-mail), whatever the address. */
 export const ADMIN_LOGIN_ACCOUNT_MAX_FAILURES = 10;
 export const ADMIN_LOGIN_ACCOUNT_WINDOW_MS = 15 * 60_000;
+
+/**
+ * Addresses or accounts tracked at once by each login limit. Beyond it the least recently seen one
+ * that is not limited goes.
+ */
+export const ADMIN_LOGIN_MAX_TRACKED = 10_000;
