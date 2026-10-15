@@ -31,9 +31,10 @@ library is large and is used by two screens only. The administration is a separa
   network. There is no order queue and no background synchronisation.
 - The administration is not a PWA.
 - The icons in the repository are generic. A deployment replaces them before the build (same names,
-  same sizes), and sets `name` and `short_name`, `theme_color` and `background_color` in the
-  manifest. The service worker controls the whole origin of the client, so the administration must
-  be served from another origin.
+  same sizes), and sets `name` and `short_name` in the manifest, `theme_color` both in the
+  manifest and in the `theme-color` meta tag of `apps/client/index.html`, and `background_color`,
+  which exists in the manifest only. The service worker controls the whole origin of the client,
+  so the administration must be served from another origin.
 
 ## Consequences
 
