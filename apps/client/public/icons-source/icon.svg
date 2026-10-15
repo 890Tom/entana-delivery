@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Generic icon, no shop's brand: the inverse surface token as fill, an "E" in the surface token. -->
+  <rect width="512" height="512" fill="#1a1a1a" />
+  <g fill="#ffffff">
+    <rect x="160" y="128" width="56" height="256" />
+    <rect x="160" y="128" width="192" height="56" />
+    <rect x="160" y="228" width="160" height="56" />
+    <rect x="160" y="328" width="192" height="56" />
+  </g>
+</svg>

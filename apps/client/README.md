@@ -1,6 +1,6 @@
 # @entana/client
 
-The customer application: React, Vite, TanStack Query, wouter for routing and MapLibre GL for the maps. The interface is in French. It is not a progressive web app yet: there is no web app manifest and no service worker, and the PWA and accessibility audit is still to come.
+The customer application: React, Vite, TanStack Query, wouter for routing and MapLibre GL for the maps. The interface is in French. It is installable (a web app manifest, see [Installable app](#installable-app)) but has no service worker yet, so it does not work offline.
 
 ```sh
 pnpm --filter @entana/client dev       # http://localhost:5173
@@ -30,6 +30,18 @@ pnpm check:bundle                      # from the root, after a build: initial d
 - `src/components/`, `src/layout/`: shared interface primitives and the application shell.
 - `src/i18n/`: the French texts.
 - `src/routes.ts`: the fixed addresses of the screens.
+
+## Installable app
+
+- `public/manifest.webmanifest`: the static web app manifest (name, colours, icons). No orientation lock, no custom install button: the browser offers the installation.
+- `public/icons-source/icon.svg`: the source of the icons. `public/icons/`: the generated PNG files (192, 512, 512 maskable, apple-touch-icon 180, favicon 32).
+- Regenerate the icons from the root (sharp is a dependency of the API):
+
+  ```sh
+  pnpm --filter @entana/api exec node -e "const s=require('sharp'),i='../client/public/icons-source/icon.svg',o='../client/public/icons/';Promise.all([[192,'icon-192'],[512,'icon-512'],[180,'apple-touch-icon'],[32,'favicon-32']].map(([n,f])=>s(i,{density:300}).resize(n,n).png().toFile(o+f+'.png')).concat(s(i,{density:300}).resize(410,410).extend({top:51,bottom:51,left:51,right:51,background:'#1a1a1a'}).png().toFile(o+'icon-maskable-512.png')))"
+  ```
+
+- The icons, the name and the colours in the repository are generic. Before the build, a deployment replaces the icons with its own (same names, same sizes), and sets its `name` and `short_name` in the manifest and its `theme_color` and `background_color` in the manifest and in the `theme-color` meta tag of `index.html`. The maskable icon keeps its symbol in the central 80 % on a full background (the `background` of the command).
 
 ## Points of attention
 
