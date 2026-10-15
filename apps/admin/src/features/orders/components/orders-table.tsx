@@ -43,6 +43,7 @@ function TableHead(
         </th>
         <th scope="col">{c.order}</th>
         <th scope="col">{c.customer}</th>
+        <th scope="col">{c.zone}</th>
         <th scope="col" className={styles.numeric}>
           {c.total}
         </th>

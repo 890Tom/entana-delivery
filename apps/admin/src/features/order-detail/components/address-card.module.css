@@ -5,5 +5,18 @@
 
 .landmark {
   margin: 0;
+  font: var(--font-body);
+}
+
+.zone {
+  margin: 0;
+  font: var(--font-body);
+}
+
+.place {
   font: var(--font-body-strong);
+}
+
+.axis {
+  color: var(--color-text-muted);
 }

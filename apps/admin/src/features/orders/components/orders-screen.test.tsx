@@ -76,6 +76,35 @@ describe("the tabs", () => {
   });
 });
 
+describe("the filters row", () => {
+  it("puts the zone, the date and the search in a group apart from the status tabs", async () => {
+    await openOrders({ [ROUTES.orders]: nothing });
+
+    const filters = screen.getByRole("group", { name: "Filtres" });
+    const tabs = screen.getByRole("group", { name: texts.orders.tabsLabel });
+    expect(within(filters).getAllByRole("combobox")).toHaveLength(2);
+    expect(within(filters).getByRole("searchbox")).toBeTruthy();
+    expect(within(tabs).queryByRole("combobox")).toBeNull();
+    expect(within(tabs).queryByRole("searchbox")).toBeNull();
+    expect(tabs.contains(filters) || filters.contains(tabs)).toBe(false);
+  });
+
+  it("names what each filter applies to, and says which ones reach the orders to process", async () => {
+    await openOrders({ [ROUTES.orders]: nothing });
+
+    const filters = screen.getByRole("group", {
+      name: "Filtres",
+      description:
+        "L'axe et la date filtrent le tableau. La recherche (2 caractères minimum) filtre aussi les cartes « À traiter ».",
+    });
+    expect(within(filters).getByRole("combobox", { name: "Zone (axe)" })).toBeTruthy();
+    expect(within(filters).getByRole("combobox", { name: "Reçue ou à livrer le" })).toBeTruthy();
+    expect(
+      within(filters).getByRole("searchbox", { name: "Client (nom ou téléphone)" }),
+    ).toHaveProperty("placeholder", "Nom ou téléphone");
+  });
+});
+
 describe("the search", () => {
   it("sends nothing under 2 characters, then one request per list after the delay", async () => {
     const api = await openOrders({ [ROUTES.orders]: nothing });

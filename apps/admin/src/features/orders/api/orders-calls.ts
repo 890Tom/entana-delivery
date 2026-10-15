@@ -16,10 +16,12 @@ import { AdminRequestError } from "../../../data-fetching/admin-request-error";
 
 const ORDERS_API_PATH = "/api/v1/admin/orders";
 
-/** What a list asks for. `date` and `q` are left out when the screen does not filter on them. */
+/** What a list asks for. `date`, `zone` and `q` are left out when the screen does not filter on them. */
 export interface OrderListRequest {
   readonly statuses: readonly OrderStatus[];
   readonly date?: string;
+  /** The id of an axis, or "none" for the orders outside every axis. */
+  readonly zone?: string;
   readonly q?: string;
   readonly limit?: number;
 }
@@ -28,6 +30,9 @@ function toQueryString(request: OrderListRequest, cursor: string | null): string
   const query = new URLSearchParams({ status: request.statuses.join(",") });
   if (request.date !== undefined) {
     query.set("date", request.date);
+  }
+  if (request.zone !== undefined) {
+    query.set("zone", request.zone);
   }
   if (request.q !== undefined) {
     query.set("q", request.q);

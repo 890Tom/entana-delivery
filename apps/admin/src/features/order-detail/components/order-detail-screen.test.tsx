@@ -76,6 +76,29 @@ describe("the sheet", () => {
     expect(within(history).getByText(t.history.byCustomer)).toBeTruthy();
   });
 
+  it("shows the zone in the address card and names its place on the delivery fee", async () => {
+    await openOrderDetail(
+      serve(buildDetail({ deliveryZone: { placeName: "Analakely", axisName: "Axe nord" } })),
+    );
+
+    const address = screen.getByRole("region", { name: t.address.title });
+    expect(within(address).getByText("Analakely")).toBeTruthy();
+    expect(within(address).getByText("Axe nord")).toBeTruthy();
+    const lines = screen.getByRole("region", { name: t.lines.title });
+    expect(
+      within(lines).getByText(t.lines.deliveryTo("Analakely")).parentElement?.textContent,
+    ).toContain(formatAmount(2500));
+  });
+
+  it("says the order is outside an axis, and names no place on the fee, when it has no zone", async () => {
+    await openOrderDetail(serve());
+
+    const address = screen.getByRole("region", { name: t.address.title });
+    expect(within(address).getByText(t.address.outsideAxis)).toBeTruthy();
+    const lines = screen.getByRole("region", { name: t.lines.title });
+    expect(within(lines).getByText(t.lines.delivery)).toBeTruthy();
+  });
+
   it("says when the order was received yesterday, and on which day before that", async () => {
     await openOrderDetail(serve(buildDetail({ createdAt: "2026-09-30T06:47:00.000Z" })));
     expect(screen.getByText(t.receivedYesterday("9 h 47"))).toBeTruthy();

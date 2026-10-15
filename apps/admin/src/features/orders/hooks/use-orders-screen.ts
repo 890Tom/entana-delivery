@@ -2,6 +2,7 @@ import type { AdminOrderListItem } from "@entana/contracts";
 import { useEffect, useMemo, useState } from "react";
 
 import { useInstance } from "../../instance/hooks/use-instance";
+import { useAxes } from "../../settings/hooks/use-axes";
 import type { OrderListRequest } from "../api/orders-calls";
 import { buildDateOptions } from "../rules/date-options";
 import type { DateOption } from "../rules/date-options";
@@ -10,6 +11,8 @@ import { DEFAULT_TAB, tableStatuses } from "../rules/order-tabs";
 import type { OrderTab } from "../rules/order-tabs";
 import { pruneSelection, selectAllRows, toggleRow } from "../rules/selection";
 import type { Selection } from "../rules/selection";
+import { buildZoneOptions } from "../rules/zone-options";
+import type { ZoneOption } from "../rules/zone-options";
 
 import { useDebouncedValue } from "./use-debounced-value";
 import { useNewOrders } from "./use-new-orders";
@@ -31,6 +34,9 @@ export interface OrdersScreenModel {
   readonly tab: OrderTab;
   readonly date: string;
   readonly dateOptions: readonly DateOption[];
+  /** "" for every zone, the id of an axis, or "none". */
+  readonly zone: string;
+  readonly zoneOptions: readonly ZoneOption[];
   readonly searchText: string;
   readonly countryCode: string | null;
   readonly toProcess: OrderPages;
@@ -41,6 +47,7 @@ export interface OrdersScreenModel {
   readonly selection: Selection | null;
   readonly selectTab: (tab: OrderTab) => void;
   readonly selectDate: (date: string) => void;
+  readonly selectZone: (zone: string) => void;
   readonly search: (text: string) => void;
   readonly toggleOne: (row: AdminOrderListItem) => void;
   readonly toggleAll: () => void;
@@ -49,33 +56,48 @@ export interface OrdersScreenModel {
   readonly showNewOrders: () => void;
 }
 
+/** What the filters show: the chosen values and the choices offered. */
+type FiltersView = Pick<
+  OrdersScreenModel,
+  "tab" | "date" | "dateOptions" | "zone" | "zoneOptions" | "searchText"
+>;
+
 interface Filters {
   readonly tab: OrderTab;
   readonly date: string;
-  readonly searchText: string;
+  readonly zone: string;
   readonly q: string | undefined;
+  readonly view: FiltersView;
 }
 
 function useFilters(today: string): Filters & {
   setTab: (tab: OrderTab) => void;
   setDate: (date: string) => void;
+  setZone: (zone: string) => void;
   setSearchText: (text: string) => void;
 } {
   const [tab, setTab] = useState<OrderTab>(DEFAULT_TAB);
   const [date, setDate] = useState(today);
+  const [zone, setZone] = useState("");
   const [searchText, setSearchText] = useState("");
   const trimmed = useDebouncedValue(searchText.trim(), SEARCH_DELAY_MS);
   const q = trimmed.length >= MIN_SEARCH_LENGTH ? trimmed : undefined;
-  return { tab, date, searchText, q, setTab, setDate, setSearchText };
+  const dateOptions = useMemo(() => buildDateOptions(today), [today]);
+  const zoneOptions = buildZoneOptions(useAxes().axes);
+  const view = { tab, date, dateOptions, zone, zoneOptions, searchText };
+  return { tab, date, zone, q, view, setTab, setDate, setZone, setSearchText };
 }
 
-/** The cards ask for NEW, three a page, never for a day; the table asks for the tab's statuses. */
+/**
+ * The cards ask for NEW, three a page, never for a day nor a zone; the table asks for the tab's
+ * statuses, the day and the zone.
+ */
 function useLists(filters: Filters): {
   toProcess: OrderPages;
   table: OrderTablePage | null;
   rows: readonly AdminOrderListItem[];
 } {
-  const { tab, date, q } = filters;
+  const { tab, date, zone, q } = filters;
   const toProcessRequest = useMemo<OrderListRequest>(
     () => ({ statuses: ["NEW"], limit: CARDS_PAGE_SIZE, ...(q === undefined ? {} : { q }) }),
     [q],
@@ -84,8 +106,13 @@ function useLists(filters: Filters): {
     const statuses = tableStatuses(tab);
     return statuses === null
       ? UNUSED_REQUEST
-      : { statuses, ...(date === "" ? {} : { date }), ...(q === undefined ? {} : { q }) };
-  }, [tab, date, q]);
+      : {
+          statuses,
+          ...(date === "" ? {} : { date }),
+          ...(zone === "" ? {} : { zone }),
+          ...(q === undefined ? {} : { q }),
+        };
+  }, [tab, date, zone, q]);
   const hasTable = tableStatuses(tab) !== null;
   const toProcess = useOrderPages(toProcessRequest, true);
   const table = useOrderTablePage(tableRequest, hasTable);
@@ -152,10 +179,7 @@ export function useOrdersScreen(): OrdersScreenModel {
       change(value);
     };
   return {
-    tab: filters.tab,
-    date: filters.date,
-    dateOptions: useMemo(() => buildDateOptions(today), [today]),
-    searchText: filters.searchText,
+    ...filters.view,
     countryCode: useInstance().data?.phoneCountryCode ?? null,
     toProcess,
     table,
@@ -164,6 +188,7 @@ export function useOrdersScreen(): OrdersScreenModel {
     selection: selecting.selection,
     selectTab: resetThen(filters.setTab),
     selectDate: resetThen(filters.setDate),
+    selectZone: resetThen(filters.setZone),
     search: resetThen(filters.setSearchText),
     toggleOne: selecting.toggleOne,
     toggleAll: selecting.toggleAll,
