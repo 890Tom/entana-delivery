@@ -29,7 +29,12 @@ describe("adminOrderListQuerySchema", () => {
     });
   });
 
+  it.each(["none", ORDER_ID])("reads the zone %j", (zone) => {
+    expect(adminOrderListQuerySchema.parse({ zone }).zone).toBe(zone);
+  });
+
   it.each([
+    ["a zone that is neither an axis id nor none", { zone: "outside" }],
     ["a limit over 100", { limit: "101" }],
     ["a limit of 0", { limit: "0" }],
     ["a limit that is not a number", { limit: "ten" }],

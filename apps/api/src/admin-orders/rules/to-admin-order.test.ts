@@ -13,6 +13,8 @@ const STORED: StoredAdminOrder = {
   totalAr: 10000,
   customer: { phoneE164: "+261340000000" },
   items: [{ productName: "Fake product", unitPrice: 5000, qty: 2 }],
+  place: { name: "Fake place" },
+  axis: { name: "Fake axis" },
   deliveryFee: 0,
   customerNote: null,
   lat: -18.9,
@@ -34,6 +36,19 @@ describe("toAdminOrderDetail", () => {
     const detail = toAdminOrderDetail({ ...STORED, status: "CANCELLED" });
 
     expect(detail.rejectionReason).toBeNull();
+  });
+});
+
+describe("the delivery zone of an order", () => {
+  it("names the place and the axis of an order in an axis", () => {
+    expect(toAdminOrderDetail(STORED).deliveryZone).toEqual({
+      placeName: "Fake place",
+      axisName: "Fake axis",
+    });
+  });
+
+  it("is null for an order outside every axis", () => {
+    expect(toAdminOrderDetail({ ...STORED, place: null, axis: null }).deliveryZone).toBeNull();
   });
 });
 

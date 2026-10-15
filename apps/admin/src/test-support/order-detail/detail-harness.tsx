@@ -31,6 +31,7 @@ export function buildDetail(overrides: Partial<AdminOrderDetail> = {}): AdminOrd
     landmarkText: "Maison jaune, en face de l'épicerie",
     totalAr: 4500,
     itemCount: 2,
+    deliveryZone: null,
     lines: [{ productName: "Vanille", unitPriceAr: 1000, quantity: 2 }],
     deliveryFeeAr: 2500,
     customerNote: null,

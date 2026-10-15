@@ -36,6 +36,7 @@ export function buildOrder(
     landmarkText: "Près du baobab",
     totalAr: 8500,
     itemCount: 5,
+    deliveryZone: null,
     customerName: `Client ${String(index)}`,
     isNewCustomer: false,
     ...overrides,
