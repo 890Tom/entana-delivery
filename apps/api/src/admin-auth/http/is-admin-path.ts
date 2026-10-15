@@ -1,4 +1,4 @@
-import { ADMIN_PATH } from "./admin-http-limits.js";
+import { ADMIN_PATH } from "../rate-limit/admin-http-limits.js";
 
 function decodeOrKeep(path: string): string {
   try {

@@ -10,7 +10,7 @@ import { TRACKING_MAX_TRACKED } from "../../tracking/rate-limit/tracking-http-li
 import {
   ADMIN_LOGIN_ADDRESS_MAX_ATTEMPTS,
   ADMIN_LOGIN_ADDRESS_WINDOW_MS,
-} from "../http/admin-http-limits.js";
+} from "./admin-http-limits.js";
 
 /**
  * The limit of login attempts per client address. An Express middleware installed before the body

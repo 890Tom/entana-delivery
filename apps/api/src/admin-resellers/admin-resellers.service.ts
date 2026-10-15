@@ -23,7 +23,7 @@ import {
   updateReseller,
 } from "./persistence/admin-reseller-queries.js";
 import type { ResellerAudit } from "./persistence/admin-reseller-queries.js";
-import { parseResellerId, requireReseller } from "./reseller-lookup.js";
+import { parseResellerId, requireReseller } from "./lookup/reseller-lookup.js";
 import { toAdminReseller, toResellerState } from "./rules/to-admin-reseller.js";
 import { toResellerWrite } from "./rules/to-reseller-write.js";
 

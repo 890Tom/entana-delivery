@@ -20,8 +20,8 @@ import {
   setPosition,
 } from "./persistence/admin-product-queries.js";
 import type { AdminProductDatabase, ProductAudit } from "./persistence/admin-product-queries.js";
-import { parseProductId, requireProduct } from "./product-lookup.js";
-import { applyProductUpdate } from "./apply-product-update.js";
+import { parseProductId, requireProduct } from "./lookup/product-lookup.js";
+import { applyProductUpdate } from "./persistence/apply-product-update.js";
 import { toAdminProduct } from "./rules/to-admin-product.js";
 import type { StoredAdminProduct } from "./rules/to-admin-product.js";
 

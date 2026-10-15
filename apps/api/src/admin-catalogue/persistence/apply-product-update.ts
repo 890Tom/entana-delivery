@@ -1,13 +1,9 @@
 import { planProductUpdate } from "@entana/contracts";
 import type { ProductUpdatePlan, UpdateProductRequest } from "@entana/contracts";
-import { ProductNotPublishableError } from "./errors/admin-catalogue-errors.js";
-import {
-  findLastPosition,
-  insertProductAudit,
-  updateProduct,
-} from "./persistence/admin-product-queries.js";
-import type { AdminProductDatabase, ProductAudit } from "./persistence/admin-product-queries.js";
-import type { StoredAdminProduct } from "./rules/to-admin-product.js";
+import { ProductNotPublishableError } from "../errors/admin-catalogue-errors.js";
+import { findLastPosition, insertProductAudit, updateProduct } from "./admin-product-queries.js";
+import type { AdminProductDatabase, ProductAudit } from "./admin-product-queries.js";
+import type { StoredAdminProduct } from "../rules/to-admin-product.js";
 
 type ChangedPlan = Extract<ProductUpdatePlan, { kind: "changed" }>;
 type Entry = Pick<ProductAudit, "action" | "diff">;
