@@ -49,7 +49,12 @@ export function LinesCard({ order }: { order: AdminOrderDetail }): ReactElement 
       </ul>
       <dl className={styles.totals}>
         <Row label={t.subtotal(count)} amount={subtotal} />
-        <Row label={t.delivery} amount={order.deliveryFeeAr} />
+        <Row
+          label={
+            order.deliveryZone === null ? t.delivery : t.deliveryTo(order.deliveryZone.placeName)
+          }
+          amount={order.deliveryFeeAr}
+        />
         <Row label={t.total} amount={order.totalAr} isStrong />
       </dl>
     </section>

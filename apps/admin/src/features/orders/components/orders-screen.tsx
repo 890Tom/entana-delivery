@@ -126,9 +126,12 @@ export function OrdersScreen(): ReactElement {
         toProcessCount={summary?.toProcessCount ?? null}
         date={model.date}
         dateOptions={model.dateOptions}
+        zone={model.zone}
+        zoneOptions={model.zoneOptions}
         searchText={model.searchText}
         onTab={model.selectTab}
         onDate={model.selectDate}
+        onZone={model.selectZone}
         onSearch={model.search}
       />
       {model.newOrders.banner !== null && (

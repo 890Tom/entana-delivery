@@ -6,6 +6,7 @@ import type { DateOption } from "../rules/date-options";
 import { formatDay } from "../../../order-display/format-order";
 import { ORDER_TABS } from "../rules/order-tabs";
 import type { OrderTab } from "../rules/order-tabs";
+import type { ZoneOption } from "../rules/zone-options";
 
 import { OrderIcon } from "../../../order-display/order-icons";
 import styles from "./order-filters.module.css";
@@ -15,9 +16,12 @@ interface OrderFiltersProps {
   readonly toProcessCount: number | null;
   readonly date: string;
   readonly dateOptions: readonly DateOption[];
+  readonly zone: string;
+  readonly zoneOptions: readonly ZoneOption[];
   readonly searchText: string;
   readonly onTab: (tab: OrderTab) => void;
   readonly onDate: (date: string) => void;
+  readonly onZone: (zone: string) => void;
   readonly onSearch: (text: string) => void;
 }
 
@@ -32,6 +36,17 @@ function optionLabel(option: DateOption): string {
       return texts.orders.yesterday(day);
     case "earlier":
       return day;
+  }
+}
+
+function zoneLabel(option: ZoneOption): string {
+  switch (option.kind) {
+    case "all":
+      return texts.orders.allZones;
+    case "axis":
+      return option.isActive ? option.name : texts.orders.inactiveAxis(option.name);
+    case "none":
+      return texts.orders.outsideAxis;
   }
 }
 
@@ -83,6 +98,29 @@ function DateSelect(
   );
 }
 
+function ZoneSelect(
+  props: Pick<OrderFiltersProps, "zone" | "zoneOptions" | "onZone">,
+): ReactElement {
+  return (
+    <label className={styles.field}>
+      <span>{texts.orders.zoneLabel}</span>
+      <select
+        className={styles.select}
+        value={props.zone}
+        onChange={(event) => {
+          props.onZone(event.target.value);
+        }}
+      >
+        {props.zoneOptions.map((option) => (
+          <option key={option.kind + option.value} value={option.value}>
+            {zoneLabel(option)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function SearchField(props: Pick<OrderFiltersProps, "searchText" | "onSearch">): ReactElement {
   return (
     <label className={styles.search}>
@@ -101,11 +139,15 @@ function SearchField(props: Pick<OrderFiltersProps, "searchText" | "onSearch">):
   );
 }
 
-/** The status chips, the day and the search: the state lives in memory, never in the address. */
+/**
+ * The status chips, the zone, the day and the search: the state lives in memory, never in the
+ * address.
+ */
 export function OrderFilters(props: OrderFiltersProps): ReactElement {
   return (
     <div className={styles.filters}>
       <StatusChips tab={props.tab} toProcessCount={props.toProcessCount} onTab={props.onTab} />
+      <ZoneSelect zone={props.zone} zoneOptions={props.zoneOptions} onZone={props.onZone} />
       <DateSelect date={props.date} dateOptions={props.dateOptions} onDate={props.onDate} />
       <SearchField searchText={props.searchText} onSearch={props.onSearch} />
     </div>

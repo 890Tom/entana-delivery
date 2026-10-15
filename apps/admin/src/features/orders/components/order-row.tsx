@@ -54,7 +54,34 @@ function RowAction({
   );
 }
 
-/** One order of the table: the checkbox, the order, the customer, the amount, the status. */
+/** A cell of a main line and a muted one under it; no muted line when there is no detail. */
+function TwoLineCell({
+  main,
+  detail,
+  className,
+}: {
+  main: string;
+  detail: string | null;
+  className?: string;
+}): ReactElement {
+  return (
+    <td className={className}>
+      <span className={styles.line}>{main}</span>
+      {detail !== null && <span className={[styles.line, styles.muted].join(" ")}>{detail}</span>}
+    </td>
+  );
+}
+
+/** The place and its axis, or « Hors axe » for an order outside every axis or older than zones. */
+function ZoneCell({ zone }: { zone: AdminOrderListItem["deliveryZone"] }): ReactElement {
+  return zone === null ? (
+    <TwoLineCell main={texts.orders.outsideAxis} detail={null} />
+  ) : (
+    <TwoLineCell main={zone.placeName} detail={zone.axisName} />
+  );
+}
+
+/** One order of the table: the checkbox, the order, the customer, the zone, the amount, the status. */
 export function OrderRow(props: OrderRowProps): ReactElement {
   const { order, countryCode, isChecked, isSelectable, onToggle } = props;
   const phone = countryCode === null ? order.phone : formatPhone(order.phone, countryCode);
@@ -76,16 +103,13 @@ export function OrderRow(props: OrderRowProps): ReactElement {
         </Link>
         <span className={[styles.line, styles.muted].join(" ")}>{formatTime(order.createdAt)}</span>
       </td>
-      <td>
-        <span className={styles.line}>{order.customerName}</span>
-        <span className={[styles.line, styles.muted].join(" ")}>{phone}</span>
-      </td>
-      <td className={styles.numeric}>
-        <span className={styles.line}>{formatAmount(order.totalAr)}</span>
-        <span className={[styles.line, styles.muted].join(" ")}>
-          {texts.orders.articles(order.itemCount)}
-        </span>
-      </td>
+      <TwoLineCell main={order.customerName} detail={phone} />
+      <ZoneCell zone={order.deliveryZone} />
+      <TwoLineCell
+        className={styles.numeric}
+        main={formatAmount(order.totalAr)}
+        detail={texts.orders.articles(order.itemCount)}
+      />
       <td>
         <StatusPill order={order} />
       </td>

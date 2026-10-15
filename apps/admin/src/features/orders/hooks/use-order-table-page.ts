@@ -41,14 +41,32 @@ function toErrorKind(error: unknown): AdminFailure["kind"] | null {
   return error instanceof AdminRequestError ? error.kind : null;
 }
 
+/** The cursors of the request; another request forgets them and starts from the first page. */
+function useCursorTrail(requestKey: string): {
+  cursors: readonly (string | null)[];
+  setCursors: (cursors: readonly (string | null)[]) => void;
+} {
+  const [trail, setTrail] = useState<CursorTrail>({ requestKey, cursors: FIRST_PAGE });
+  const isSameRequest = trail.requestKey === requestKey;
+  if (!isSameRequest) {
+    // Forgotten, not only ignored: coming back to an earlier view starts again from its first page.
+    setTrail({ requestKey, cursors: FIRST_PAGE });
+  }
+  return {
+    cursors: isSameRequest ? trail.cursors : FIRST_PAGE,
+    setCursors: (cursors) => {
+      setTrail({ requestKey, cursors });
+    },
+  };
+}
+
 /**
  * The table, one page at a time. The API pages by cursor (no page number), so the cursors of
  * the pages visited are kept: "previous" is the one before, and a page that was read is cached.
  */
 export function useOrderTablePage(request: OrderListRequest, isEnabled: boolean): OrderTablePage {
   const requestKey = JSON.stringify(request);
-  const [trail, setTrail] = useState<CursorTrail>({ requestKey, cursors: FIRST_PAGE });
-  const cursors = trail.requestKey === requestKey ? trail.cursors : FIRST_PAGE;
+  const { cursors, setCursors } = useCursorTrail(requestKey);
   const cursor = cursors.at(-1) ?? null;
   const query = useQuery({
     queryKey: [...ORDERS_KEY, "list", request, cursor],
@@ -70,11 +88,11 @@ export function useOrderTablePage(request: OrderListRequest, isEnabled: boolean)
     isSuccess: query.isSuccess,
     errorKind: toErrorKind(query.error),
     showPrevious: () => {
-      setTrail({ requestKey, cursors: cursors.slice(0, -1) });
+      setCursors(cursors.slice(0, -1));
     },
     showNext: () => {
       if (nextCursor !== null) {
-        setTrail({ requestKey, cursors: [...cursors, nextCursor] });
+        setCursors([...cursors, nextCursor]);
       }
     },
     retry: () => {
