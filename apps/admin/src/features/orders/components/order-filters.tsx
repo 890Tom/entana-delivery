@@ -1,6 +1,6 @@
+import { useId } from "react";
 import type { ReactElement } from "react";
 
-import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
 import type { DateOption } from "../rules/date-options";
 import { formatDay } from "../../../order-display/format-order";
@@ -123,33 +123,58 @@ function ZoneSelect(
 
 function SearchField(props: Pick<OrderFiltersProps, "searchText" | "onSearch">): ReactElement {
   return (
-    <label className={styles.search}>
-      <span className={visuallyHidden.visuallyHidden}>{texts.orders.searchLabel}</span>
-      <OrderIcon name="search" size={20} />
-      <input
-        type="search"
-        className={styles.input}
-        value={props.searchText}
-        placeholder={texts.orders.searchPlaceholder}
-        onChange={(event) => {
-          props.onSearch(event.target.value);
-        }}
-      />
+    <label className={styles.field}>
+      <span>{texts.orders.searchLabel}</span>
+      <span className={styles.search}>
+        <OrderIcon name="search" size={20} />
+        <input
+          type="search"
+          className={styles.input}
+          value={props.searchText}
+          placeholder={texts.orders.searchPlaceholder}
+          onChange={(event) => {
+            props.onSearch(event.target.value);
+          }}
+        />
+      </span>
     </label>
   );
 }
 
+/** The zone, the day and the search on a row of their own, with a line that says what each reaches. */
+function FilterFields(
+  props: Omit<OrderFiltersProps, "tab" | "toProcessCount" | "onTab">,
+): ReactElement {
+  const hintId = useId();
+  return (
+    <div className={styles.fieldsBlock}>
+      <div
+        role="group"
+        aria-label={texts.orders.filtersLabel}
+        aria-describedby={hintId}
+        className={styles.fields}
+      >
+        <ZoneSelect zone={props.zone} zoneOptions={props.zoneOptions} onZone={props.onZone} />
+        <DateSelect date={props.date} dateOptions={props.dateOptions} onDate={props.onDate} />
+        <SearchField searchText={props.searchText} onSearch={props.onSearch} />
+      </div>
+      <p id={hintId} className={styles.hint}>
+        {texts.orders.filtersHint}
+      </p>
+    </div>
+  );
+}
+
 /**
- * The status chips, the zone, the day and the search: the state lives in memory, never in the
- * address.
+ * The status chips, then the zone, the day and the search: the state lives in memory, never in
+ * the address.
  */
 export function OrderFilters(props: OrderFiltersProps): ReactElement {
+  const { tab, toProcessCount, onTab, ...fields } = props;
   return (
     <div className={styles.filters}>
-      <StatusChips tab={props.tab} toProcessCount={props.toProcessCount} onTab={props.onTab} />
-      <ZoneSelect zone={props.zone} zoneOptions={props.zoneOptions} onZone={props.onZone} />
-      <DateSelect date={props.date} dateOptions={props.dateOptions} onDate={props.onDate} />
-      <SearchField searchText={props.searchText} onSearch={props.onSearch} />
+      <StatusChips tab={tab} toProcessCount={toProcessCount} onTab={onTab} />
+      <FilterFields {...fields} />
     </div>
   );
 }

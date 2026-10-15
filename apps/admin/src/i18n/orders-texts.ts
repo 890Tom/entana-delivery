@@ -17,17 +17,25 @@ export const ordersTexts = {
     delivered: "Livrées",
     closed: "Refusées ou annulées",
   },
-  zoneLabel: "Zone",
+  // À confirmer : absent des sources
+  filtersLabel: "Filtres",
+  // À confirmer : absent des sources
+  filtersHint:
+    "L'axe et la date filtrent le tableau. La recherche (2 caractères minimum) filtre aussi les cartes « À traiter ».",
+  // À confirmer : absent des sources
+  zoneLabel: "Zone (axe)",
   allZones: "Toutes",
   // À confirmer : absent des sources
   inactiveAxis: (name: string): string => `${name} (inactif)`,
   // À confirmer : absent des sources
   outsideAxis: "Hors axe",
-  dateLabel: "Date",
+  // À confirmer : absent des sources
+  dateLabel: "Reçue ou à livrer le",
   allDates: "Toutes les dates",
   today: (day: string): string => `Aujourd'hui, ${day}`,
   yesterday: (day: string): string => `Hier, ${day}`,
-  searchLabel: "Rechercher un nom ou un téléphone",
+  // À confirmer : absent des sources
+  searchLabel: "Client (nom ou téléphone)",
   searchPlaceholder: "Nom ou téléphone",
   toProcessTitle: "À traiter",
   allHandled: "Tout est traité pour le moment.",
