@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PRODUCT_PRICE_MAX_AR } from "../../admin/catalogue/product-form.js";
 
 /** Longest reason the shop can give for a refusal. */
 export const MAX_STATUS_REASON_LENGTH = 300;
@@ -21,10 +22,15 @@ const reasonSchema = z.string().trim().min(1).max(MAX_STATUS_REASON_LENGTH);
  * The body of a status change, a union on `to`. Each member is strict: a field that the requested
  * move does not take is refused. That `deliveryDate` is neither in the past nor too far ahead
  * depends on today's date in the shop's time zone, so the server checks it
- * (see `isDeliveryDateInWindow`).
+ * (see `isDeliveryDateInWindow`). A confirmation may set the delivery fee of the order (see
+ * `planDeliveryFeeAdjustment`); without it the fee does not change.
  */
 export const statusTransitionRequestSchema = z.discriminatedUnion("to", [
-  z.strictObject({ to: z.literal("CONFIRMED"), deliveryDate: z.iso.date() }),
+  z.strictObject({
+    to: z.literal("CONFIRMED"),
+    deliveryDate: z.iso.date(),
+    deliveryFeeAr: z.number().int().min(0).max(PRODUCT_PRICE_MAX_AR).optional(),
+  }),
   z.strictObject({ to: z.literal("REJECTED"), reason: reasonSchema.optional() }),
   z.strictObject({ to: z.literal("CANCELLED"), reason: reasonSchema.optional() }),
   z.strictObject({ to: z.literal("OUT_FOR_DELIVERY") }),

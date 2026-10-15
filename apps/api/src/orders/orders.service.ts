@@ -1,5 +1,10 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { computeOrderTotal, generateOrderCode, parsePhoneNumber } from "@entana/contracts";
+import {
+  computeOrderTotal,
+  doesAmountFitColumn,
+  generateOrderCode,
+  parsePhoneNumber,
+} from "@entana/contracts";
 import type { CreateOrderRequest, CreateOrderResponse } from "@entana/contracts";
 import { classifyDatabaseError } from "@entana/database";
 import type { PrismaClient } from "@entana/database";
@@ -24,7 +29,6 @@ import {
   UnavailableProductsError,
 } from "./errors/order-errors.js";
 import {
-  doesAmountFitColumn,
   getRateLimitWindowStart,
   isRateLimited,
   MAX_CREATION_ATTEMPTS,

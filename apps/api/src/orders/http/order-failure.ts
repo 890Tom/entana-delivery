@@ -2,6 +2,7 @@ import { STATUS_CODES } from "node:http";
 import {
   DELIVERY_PROBLEM_TYPES,
   GENERIC_PROBLEM_TYPE,
+  ORDER_PROBLEM_TYPES,
   PRODUCT_PHOTO_MAX_BYTES,
   PRODUCT_PHOTO_MIN_SHORT_SIDE_PX,
   PRODUCT_PROBLEM_TYPES,
@@ -35,6 +36,7 @@ import {
 } from "../../admin-delivery/errors/admin-delivery-errors.js";
 import {
   AdminOrderNotFoundError,
+  OrderTotalTooLargeError,
   OrderTransitionRefusedError,
 } from "../../admin-orders/errors/admin-order-errors.js";
 import {
@@ -114,6 +116,14 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
   // The orders of the administration: an unknown and a malformed id answer alike.
   [AdminOrderNotFoundError, { status: 404, detail: "The requested resource was not found." }],
   [OrderTransitionRefusedError, { status: 409, detail: "The order cannot move to this status." }],
+  [
+    OrderTotalTooLargeError,
+    {
+      status: 422,
+      detail: "The order total is too large.",
+      problemType: ORDER_PROBLEM_TYPES.totalTooLarge,
+    },
+  ],
   // The catalogue of the administration: an unknown and a malformed id answer alike.
   [AdminProductNotFoundError, { status: 404, detail: "The requested resource was not found." }],
   [ProductRetiredError, { status: 409, detail: "The product is retired." }],
