@@ -1,12 +1,12 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { CLOCK } from "../../clock/clock.js";
 import type { Clock } from "../../clock/clock.js";
-import { AddressRateLimitedError } from "../../orders/errors/order-errors.js";
+import { AddressRateLimitedError } from "../../rate-limit/address-rate-limited-error.js";
 import { SlidingWindowLimiter } from "../../rate-limit/sliding-window-limiter.js";
-import { TRACKING_MAX_TRACKED } from "../../tracking/rate-limit/tracking-http-limits.js";
 import {
   ADMIN_LOGIN_ACCOUNT_MAX_FAILURES,
   ADMIN_LOGIN_ACCOUNT_WINDOW_MS,
+  ADMIN_LOGIN_MAX_TRACKED,
 } from "./admin-http-limits.js";
 
 /**
@@ -26,7 +26,7 @@ export class AdminLoginAccountRateLimiter {
       {
         maxHits: ADMIN_LOGIN_ACCOUNT_MAX_FAILURES,
         windowMs: ADMIN_LOGIN_ACCOUNT_WINDOW_MS,
-        maxKeys: TRACKING_MAX_TRACKED,
+        maxKeys: ADMIN_LOGIN_MAX_TRACKED,
       },
       clock,
     );

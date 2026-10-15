@@ -52,20 +52,3 @@ export class OrderCreationFailedError extends Error {
     this.name = "OrderCreationFailedError";
   }
 }
-
-// The two errors below come from the HTTP layer, not from the service.
-
-/** The address made too many requests (the limit runs before the body is read). */
-export class AddressRateLimitedError extends Error {
-  constructor() {
-    super("Too many requests came from this address.");
-    this.name = "AddressRateLimitedError";
-  }
-}
-
-export class UnsupportedContentTypeError extends Error {
-  constructor() {
-    super("The content type of the request is not supported.");
-    this.name = "UnsupportedContentTypeError";
-  }
-}

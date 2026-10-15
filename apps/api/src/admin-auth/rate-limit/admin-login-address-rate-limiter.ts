@@ -3,13 +3,13 @@ import type { NextFunction, Request, Response } from "express";
 import { CLOCK } from "../../clock/clock.js";
 import type { Clock } from "../../clock/clock.js";
 import { resolveRequestId } from "../../logging/pino-http-options.js";
-import { AddressRateLimitedError } from "../../orders/errors/order-errors.js";
+import { AddressRateLimitedError } from "../../rate-limit/address-rate-limited-error.js";
 import { normalizeAddress } from "../../rate-limit/normalize-address.js";
 import { SlidingWindowLimiter } from "../../rate-limit/sliding-window-limiter.js";
-import { TRACKING_MAX_TRACKED } from "../../tracking/rate-limit/tracking-http-limits.js";
 import {
   ADMIN_LOGIN_ADDRESS_MAX_ATTEMPTS,
   ADMIN_LOGIN_ADDRESS_WINDOW_MS,
+  ADMIN_LOGIN_MAX_TRACKED,
 } from "./admin-http-limits.js";
 
 /**
@@ -28,7 +28,7 @@ export class AdminLoginAddressRateLimiter {
       {
         maxHits: ADMIN_LOGIN_ADDRESS_MAX_ATTEMPTS,
         windowMs: ADMIN_LOGIN_ADDRESS_WINDOW_MS,
-        maxKeys: TRACKING_MAX_TRACKED,
+        maxKeys: ADMIN_LOGIN_MAX_TRACKED,
       },
       clock,
     );

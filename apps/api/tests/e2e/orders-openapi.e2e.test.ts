@@ -2,7 +2,7 @@ import { parsePhoneNumber } from "@entana/contracts";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { EXAMPLE_PHONE } from "../../src/orders/orders.controller.js";
+import { EXAMPLE_PHONE } from "../../src/docs/example-phone.js";
 import { startOrdersApp } from "./support/start-orders-app.js";
 import { buildTestConfig } from "./support/test-config.js";
 

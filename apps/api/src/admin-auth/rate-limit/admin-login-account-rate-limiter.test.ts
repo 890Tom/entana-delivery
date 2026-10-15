@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Clock } from "../../clock/clock.js";
-import { AddressRateLimitedError } from "../../orders/errors/order-errors.js";
+import { AddressRateLimitedError } from "../../rate-limit/address-rate-limited-error.js";
 import { ADMIN_LOGIN_ACCOUNT_WINDOW_MS } from "./admin-http-limits.js";
 import { AdminLoginAccountRateLimiter } from "./admin-login-account-rate-limiter.js";
 

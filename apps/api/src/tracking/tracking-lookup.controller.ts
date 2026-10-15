@@ -7,7 +7,7 @@ import {
 } from "@entana/contracts";
 import type { TrackingLookupRequest, TrackingResponse } from "@entana/contracts";
 import { JsonContentTypeGuard } from "../errors/request-body/json-content-type.guard.js";
-import { EXAMPLE_PHONE } from "../orders/orders.controller.js";
+import { EXAMPLE_PHONE } from "../docs/example-phone.js";
 import { TrackingService } from "./tracking.service.js";
 
 const PROBLEMS = [

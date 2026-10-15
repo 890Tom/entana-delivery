@@ -3,7 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import { CLOCK } from "../../clock/clock.js";
 import type { Clock } from "../../clock/clock.js";
 import { resolveRequestId } from "../../logging/pino-http-options.js";
-import { AddressRateLimitedError } from "../../orders/errors/order-errors.js";
+import { AddressRateLimitedError } from "../../rate-limit/address-rate-limited-error.js";
 import { normalizeAddress } from "../../rate-limit/normalize-address.js";
 import { SlidingWindowLimiter } from "../../rate-limit/sliding-window-limiter.js";
 import {
