@@ -43,15 +43,15 @@ import {
   AdminOriginRefusedError,
   AdminUnauthenticatedError,
 } from "../../admin-auth/errors/admin-auth-errors.js";
+import { AddressRateLimitedError } from "../../rate-limit/address-rate-limited-error.js";
+import { UnsupportedContentTypeError } from "../../errors/request-body/unsupported-content-type-error.js";
 import {
-  AddressRateLimitedError,
   CustomerBlockedError,
   IdempotencyConflictError,
   InvalidPhoneError,
   OrderRateLimitedError,
   OrderTooLargeError,
   UnavailableProductsError,
-  UnsupportedContentTypeError,
 } from "../errors/order-errors.js";
 import {
   OrderNotCancellableError,

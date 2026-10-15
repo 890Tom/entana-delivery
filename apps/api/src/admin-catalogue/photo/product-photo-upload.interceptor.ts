@@ -9,7 +9,7 @@ import { PRODUCT_PHOTO_MAX_BYTES } from "@entana/contracts";
 import { FileInterceptor } from "@nestjs/platform-express";
 import type { Request } from "express";
 import type { Observable } from "rxjs";
-import { UnsupportedContentTypeError } from "../../orders/errors/order-errors.js";
+import { UnsupportedContentTypeError } from "../../errors/request-body/unsupported-content-type-error.js";
 import { PhotoTooLargeError } from "../errors/admin-catalogue-errors.js";
 
 // The file is read in memory (no `dest`), bounded by the limit; `fields: 0` refuses every text

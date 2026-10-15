@@ -1,7 +1,7 @@
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { AddressRateLimitedError } from "../../src/orders/errors/order-errors.js";
+import { AddressRateLimitedError } from "../../src/rate-limit/address-rate-limited-error.js";
 import {
   OrderNotCancellableError,
   TrackingNotFoundError,

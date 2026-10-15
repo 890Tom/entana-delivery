@@ -1,7 +1,7 @@
 import { Logger } from "@nestjs/common";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Clock } from "../../clock/clock.js";
-import { AddressRateLimitedError } from "../../orders/errors/order-errors.js";
+import { AddressRateLimitedError } from "../../rate-limit/address-rate-limited-error.js";
 import { TrackingLookupPhoneRateLimiter } from "./tracking-lookup-phone-rate-limiter.js";
 
 const FIXED_CLOCK: Clock = { now: () => new Date("2026-10-08T08:00:00.000Z") };

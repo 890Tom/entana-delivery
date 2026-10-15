@@ -4,7 +4,7 @@ import { CLOCK } from "../../clock/clock.js";
 import type { Clock } from "../../clock/clock.js";
 import { resolveRequestId } from "../../logging/pino-http-options.js";
 import { normalizeAddress } from "../../rate-limit/normalize-address.js";
-import { AddressRateLimitedError } from "../errors/order-errors.js";
+import { AddressRateLimitedError } from "../../rate-limit/address-rate-limited-error.js";
 import {
   ADDRESS_MAX_REQUESTS,
   ADDRESS_MAX_TRACKED,

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { CanActivate, ExecutionContext } from "@nestjs/common";
 import type { Request } from "express";
-import { UnsupportedContentTypeError } from "../../orders/errors/order-errors.js";
+import { UnsupportedContentTypeError } from "./unsupported-content-type-error.js";
 
 /**
  * Only application/json is accepted: the body parser leaves any other type unread, which would
