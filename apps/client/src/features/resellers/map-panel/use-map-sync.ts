@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-import type { GeoPoint } from "../delivery/map/map-adapter";
+import type { GeoPoint } from "../../delivery/map/map-adapter";
 
-import type { MapShop, ResellersMapAdapter } from "./map/resellers-map-adapter";
-import type { Selection } from "./use-shop-selection";
+import type { MapShop, ResellersMapAdapter } from "../map/resellers-map-adapter";
+import type { Selection } from "../selection/use-shop-selection";
 
 interface MapSyncState {
   readonly shops: readonly MapShop[];

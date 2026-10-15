@@ -11,16 +11,16 @@ import { useInstance } from "../instance/api/use-instance";
 import { useResellers } from "./api/use-resellers";
 import type { MapShop } from "./map/resellers-map-adapter";
 import { useResellersMap } from "./map/use-resellers-map";
-import { ResellersListPanel } from "./resellers-list-panel";
-import type { ListState } from "./resellers-list-panel";
-import { ResellersMapPanel } from "./resellers-map-panel";
+import { ResellersListPanel } from "./list/resellers-list-panel";
+import type { ListState } from "./list/resellers-list-panel";
+import { ResellersMapPanel } from "./map-panel/resellers-map-panel";
 import styles from "./resellers-screen.module.css";
 import { filterByNeighborhood } from "./rules/filter-by-neighborhood";
 import { toShopEntries } from "./rules/sort-by-distance";
 import type { ShopEntry } from "./rules/sort-by-distance";
-import { useMapSync } from "./use-map-sync";
-import { useNearbyPosition } from "./use-nearby-position";
-import { useShopSelection } from "./use-shop-selection";
+import { useMapSync } from "./map-panel/use-map-sync";
+import { useNearbyPosition } from "./position/use-nearby-position";
+import { useShopSelection } from "./selection/use-shop-selection";
 
 function toMapShops(entries: readonly ShopEntry[]): readonly MapShop[] {
   return entries.map(({ reseller }) => ({

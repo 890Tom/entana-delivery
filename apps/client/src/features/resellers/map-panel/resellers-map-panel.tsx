@@ -1,8 +1,8 @@
 import type { ReactElement, RefObject } from "react";
 
-import { Notice } from "../../components/notice/notice";
-import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
-import { texts } from "../../i18n/texts";
+import { Notice } from "../../../components/notice/notice";
+import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
+import { texts } from "../../../i18n/texts";
 
 import styles from "./resellers-map-panel.module.css";
 

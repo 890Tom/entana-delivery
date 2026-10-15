@@ -3,21 +3,21 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import type { ReactElement, ReactNode } from "react";
 import { Link } from "wouter";
 
-import { BottomBar } from "../../../components/bottom-bar/bottom-bar";
-import bar from "../../../components/bottom-bar/bottom-bar.module.css";
-import { Notice } from "../../../components/notice/notice";
-import { texts } from "../../../i18n/texts";
-import { useDocumentTitle } from "../../../layout/document-title/use-document-title";
-import { DELIVERY_PATH } from "../../../routes";
-import { readCatalogueErrorKind } from "../../catalogue/api/fetch-products";
-import { useProducts } from "../../catalogue/api/use-products";
-import { useCart } from "../cart-state/cart-context";
-import { toDisplayLines } from "../rules/to-display-lines";
-import { useCartReconciliation } from "../reconciliation/use-cart-reconciliation";
+import { BottomBar } from "../../components/bottom-bar/bottom-bar";
+import bar from "../../components/bottom-bar/bottom-bar.module.css";
+import { Notice } from "../../components/notice/notice";
+import { texts } from "../../i18n/texts";
+import { useDocumentTitle } from "../../layout/document-title/use-document-title";
+import { DELIVERY_PATH } from "../../routes";
+import { readCatalogueErrorKind } from "../catalogue/api/fetch-products";
+import { useProducts } from "../catalogue/api/use-products";
+import { useCart } from "./cart-state/cart-context";
+import { toDisplayLines } from "./rules/to-display-lines";
+import { useCartReconciliation } from "./reconciliation/use-cart-reconciliation";
 
-import { CartContent } from "./cart-content";
+import { CartContent } from "./cart-content/cart-content";
 import styles from "./cart-screen.module.css";
-import { CartSkeleton } from "./cart-skeleton";
+import { CartSkeleton } from "./cart-content/cart-skeleton";
 
 function Card({ children }: { children: ReactNode }): ReactElement {
   return <div className={styles.card}>{children}</div>;
