@@ -9,6 +9,11 @@ export const MAX_ADMIN_ORDER_LIMIT = 100;
 
 const statusSchema = z.enum(ORDER_STATUSES);
 
+/** The place and the axis of the order, by their current names; null outside an axis. */
+const deliveryZoneSchema = z
+  .strictObject({ placeName: z.string(), axisName: z.string() })
+  .nullable();
+
 /** What a row of the list and the head of the detail both show. */
 export const adminOrderSummarySchema = z.strictObject({
   id: z.uuid(),
@@ -21,6 +26,7 @@ export const adminOrderSummarySchema = z.strictObject({
   landmarkText: z.string(),
   totalAr: z.number().int(),
   itemCount: z.number().int().positive(),
+  deliveryZone: deliveryZoneSchema,
 });
 
 export type AdminOrderSummary = z.infer<typeof adminOrderSummarySchema>;
@@ -74,6 +80,8 @@ export const adminOrderListQuerySchema = z.strictObject({
   /** Orders received that day or to be delivered that day (a day of the instance time zone). */
   date: z.iso.date().optional(),
   q: orderSearchSchema.optional(),
+  /** The id of an axis, or `none` for the orders outside every axis. */
+  zone: z.union([z.literal("none"), z.uuid()]).optional(),
   limit: limitSchema.default(DEFAULT_ADMIN_ORDER_LIMIT),
   cursor: cursorSchema.optional(),
 });

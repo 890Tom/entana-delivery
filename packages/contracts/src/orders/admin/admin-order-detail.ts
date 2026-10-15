@@ -24,7 +24,8 @@ const orderEventSchema = z.strictObject({
 
 /**
  * An order for the administration. Strict: the hash of the tracking token, the internal ids of
- * the customer, the place and the axis, and the payload of the events are not part of it.
+ * the customer, the place and the axis, and the payload of the events are not part of it (the
+ * place and the axis are given by their names, in `deliveryZone`).
  */
 export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
   lines: z.array(orderLineSchema),

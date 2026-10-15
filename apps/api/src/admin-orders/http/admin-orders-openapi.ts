@@ -78,7 +78,8 @@ export const documentListOrders = (): MethodDecorator =>
         "instance time zone) keeps the orders received that day or to be delivered that day. " +
         "`q` (2 to 50 characters) searches the name typed on the order (letters, spaces, `-` and " +
         "`'`, case ignored, accents not) or, when it is only digits, a part of the phone number " +
-        "(3 digits at least). `totalCount` counts the orders of the filters, whatever the cursor. " +
+        "(3 digits at least). `zone` keeps the orders of an axis (its id) or, with `none`, the " +
+        "orders outside every axis. `totalCount` counts the orders of the filters, whatever the cursor. " +
         "`limit` is 25 by default, 100 at most.",
       operationId: "listAdminOrders",
     }),
@@ -120,7 +121,9 @@ export const documentGetOrder = (): MethodDecorator =>
     ID_PARAM,
     ApiOperation({
       summary: "Read an order with its lines and its history",
-      description: "Never holds the hash of the tracking token.",
+      description:
+        "Never holds the hash of the tracking token. `deliveryZone` gives the current names of " +
+        "the place and the axis of the order, or null outside every axis.",
       operationId: "getAdminOrder",
     }),
     ApiOkResponse({ description: "The order.", standardSchema: adminOrderDetailSchema }),

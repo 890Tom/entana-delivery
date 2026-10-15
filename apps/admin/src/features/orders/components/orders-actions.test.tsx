@@ -50,6 +50,7 @@ function detailOf(order: { id: string }, status: "OUT_FOR_DELIVERY" | "DELIVERED
     landmarkText: row.landmarkText,
     totalAr: row.totalAr,
     itemCount: row.itemCount,
+    deliveryZone: null,
     lines: [{ productName: "Vanille", unitPriceAr: 1000, quantity: 1 }],
     deliveryFeeAr: 0,
     customerNote: null,

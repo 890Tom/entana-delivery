@@ -116,13 +116,14 @@ export class AdminOrdersService {
   }
 
   private toFilter(query: AdminOrderListQuery): OrderFilter {
-    const { status, date, q } = query;
+    const { status, date, q, zone } = query;
     return {
       ...(status === undefined ? {} : { statuses: status }),
       ...(date === undefined
         ? {}
         : { day: { ...dayBoundsInTimeZone(date, this.instance.timezone), date } }),
       ...(q === undefined ? {} : { search: q }),
+      ...(zone === undefined ? {} : { zone }),
     };
   }
 

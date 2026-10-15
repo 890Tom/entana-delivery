@@ -266,13 +266,14 @@ answer carries `Cache-Control: no-store`. OpenAPI tag `admin`, security scheme `
 
 **List.** Parameters, all optional:
 
-| Parameter | Meaning                                                                                                                            |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `status`  | One status or a comma separated list (`REJECTED,CANCELLED,FAILED`). Each value is checked, a repeated one counts once              |
-| `date`    | `YYYY-MM-DD`, a day of the instance time zone: the orders received that day **or** to be delivered that day                        |
-| `q`       | 2 to 50 characters once trimmed. Without a digit: the name typed on the order. Digits only: a part of the phone number (see below) |
-| `limit`   | 25 by default, 100 at most                                                                                                         |
-| `cursor`  | The `nextCursor` of the previous page                                                                                              |
+| Parameter | Meaning                                                                                                                                   |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `status`  | One status or a comma separated list (`REJECTED,CANCELLED,FAILED`). Each value is checked, a repeated one counts once                     |
+| `date`    | `YYYY-MM-DD`, a day of the instance time zone: the orders received that day **or** to be delivered that day                               |
+| `q`       | 2 to 50 characters once trimmed. Without a digit: the name typed on the order. Digits only: a part of the phone number (see below)        |
+| `zone`    | The id of a delivery axis: the orders of that axis. `none`: the orders outside every axis. An unknown or deactivated axis is not an error |
+| `limit`   | 25 by default, 100 at most                                                                                                                |
+| `cursor`  | The `nextCursor` of the previous page                                                                                                     |
 
 Any other parameter, a value out of range or a cursor this API did not issue is a `400` that never
 repeats the value; `q` is never logged.
@@ -288,6 +289,11 @@ Each item is the row of the detail without the lines, plus `customerName` (the n
 order, `contactName`) and `isNewCustomer` (true when no older order of the same customer exists,
 whatever its status, the filters and the page). The answer adds `totalCount`: every order of the
 filters, whatever the cursor and the limit.
+
+The list and the detail both carry `deliveryZone`: `{ placeName, axisName }` for an order in an
+axis, read from the place and the axis when the order is read (a renamed place shows its current
+name), or `null` for an order outside every axis, created before the axes existed included. No
+internal id and no colour.
 
 **Summary.** `GET /api/v1/admin/orders/summary?since=<order id>` answers `toProcessCount` (orders
 `NEW`), `todayCount` (orders received today in the instance time zone, any status) and, only when

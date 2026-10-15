@@ -17,6 +17,8 @@ interface StoredOrderSummary {
   readonly totalAr: number;
   readonly customer: { readonly phoneE164: string };
   readonly items: readonly { readonly qty: number }[];
+  readonly place: { readonly name: string } | null;
+  readonly axis: { readonly name: string } | null;
 }
 
 /** A row of the list: the customer's id is read to find out whether it is a first order. */
@@ -65,6 +67,10 @@ function toAdminOrderSummary(order: StoredOrderSummary): AdminOrderSummary {
     landmarkText: order.landmarkText,
     totalAr: order.totalAr,
     itemCount: order.items.reduce((total, item) => total + item.qty, 0),
+    deliveryZone:
+      order.place === null || order.axis === null
+        ? null
+        : { placeName: order.place.name, axisName: order.axis.name },
   };
 }
 

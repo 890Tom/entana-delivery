@@ -17,6 +17,9 @@ const SUMMARY_SELECT = {
   totalAr: true,
   customer: { select: { phoneE164: true } },
   items: { select: { qty: true } },
+  // Joined when read: a place or an axis renamed later shows its current name.
+  place: { select: { name: true } },
+  axis: { select: { name: true } },
 } as const;
 
 const LIST_SELECT = { ...SUMMARY_SELECT, customerId: true } as const;
@@ -29,10 +32,12 @@ export interface OrderFilter {
   /** The instants a day of the instance time zone starts and ends (excluded), and that day. */
   readonly day?: { readonly start: Date; readonly end: Date; readonly date: string };
   readonly search?: OrderSearch;
+  /** The id of an axis, or `none` for the orders outside every axis. */
+  readonly zone?: string;
 }
 
 function buildWhere(filter: OrderFilter): OrderWhere {
-  const { statuses, day, search } = filter;
+  const { statuses, day, search, zone } = filter;
   return {
     ...(statuses === undefined ? {} : { status: { in: [...statuses] } }),
     ...(day === undefined
@@ -47,6 +52,7 @@ function buildWhere(filter: OrderFilter): OrderWhere {
       ? { contactName: { contains: search.text, mode: "insensitive" as const } }
       : {}),
     ...(search?.kind === "phone" ? { customer: { phoneE164: { contains: search.digits } } } : {}),
+    ...(zone === undefined ? {} : { axisId: zone === "none" ? null : zone }),
   };
 }
 
