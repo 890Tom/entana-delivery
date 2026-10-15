@@ -1,112 +1,169 @@
 # entana-delivery
 
-[![CI](https://github.com/890Tom/entana-delivery/actions/workflows/ci.yml/badge.svg)](https://github.com/890Tom/entana-delivery/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+An open-source ordering and delivery app for small local businesses. Customers order from their phone without an account; the shop confirms with a delivery day, delivers, and both follow the order. One instance per business, self-hosted, described by a configuration file.
 
-**An open-source ordering and delivery app for small local businesses.** Customers order from their phone, the shop confirms and delivers, and everyone can follow the order, without a marketplace and without an account.
+It started from a family business in Madagascar that took orders through Facebook messages. The design follows local constraints: unstable mobile networks, no precise postal addresses, cash on delivery.
 
-> **Status: early development.** The tooling is in place (TypeScript, ESLint, Prettier, Vitest, Turborepo, Git hooks, CI) along with the first shared package. The applications (database, API, customer PWA, admin dashboard) are added step by step, toward a first vertical slice: a customer orders, the admin confirms with a delivery date, the customer sees the confirmation. See the [roadmap](#roadmap).
+## Project status
 
-## Why this project
+Early development. Nothing is deployed yet.
 
-It started from a real need: a family business in Madagascar taking orders through Facebook messages. The app replaces that with a structured flow designed for local constraints: unstable mobile networks, no precise postal addresses, cash on delivery.
+**Done**
 
-## Key ideas
+- Customer application (`apps/client`), in the browser:
+  - catalogue with manual availability, and a cart kept on the device;
+  - delivery step: a point chosen on a map (MapLibre GL), the delivery zones drawn on it, a written landmark, and the delivery fee announced by the server;
+  - contact details (name, and a phone number checked with the numbering rule of the instance's country), review, then an idempotent order creation;
+  - tracking of an order through its link (the token stays in the URL fragment), with cancellation while the order is `NEW` or `CONFIRMED`;
+  - finding an order again with the phone number and the 6-character order code;
+  - a map and a list of the shop's resellers.
+- Administration (`apps/admin`):
+  - sign-in with an e-mail and a password (session cookie);
+  - orders: list with filters, search and counters, new orders shown every 30 seconds, an order's detail with its history, one-step status changes (confirm with a delivery day and an optional adjusted fee, refuse, cancel, out for delivery, delivered, failed);
+  - catalogue: create, edit, photo upload, availability, retire and restore, display order;
+  - resellers: create, edit, verify, delete, on a map;
+  - settings: delivery axes and their places on a map, the out-of-axis fee, the free-delivery threshold and the out-of-axis message.
+- API (`apps/api`): the routes behind both applications, listed in [`apps/api/README.md`](apps/api/README.md#routes), with health and readiness probes and an OpenAPI page.
+- Database schema, migrations and fake seed data (`packages/database`).
 
-- **No customer account.** The phone number and a tracking link are enough; an order code lets a customer find their order again.
-- **Delivery axes.** A delivery axis is an ordered list of places. Delivery is free along an axis, with a flat fee elsewhere. The fee is computed by a pure function shared by the API and both front ends.
-- **Tolerant of bad networks.** Idempotent order creation, an offline-friendly PWA, no feature that requires the map to work.
-- **Self-hosted and configurable.** One instance per business, configured by a file (name, logo, currency, language, map), with fake demo data to try it in minutes.
-- **Admin dashboard.** Orders (confirm with a date, edit lines, refuse, move forward), catalogue with manual availability, resellers map, delivery axes.
+**In progress**
 
-## Tech stack
+- Progressive web app: the customer application has no web app manifest and no service worker yet. Its PWA and accessibility audit is still to come.
 
-NestJS · Prisma · PostgreSQL · React + Vite (PWA) · MapLibre GL with OpenFreeMap tiles · Zod contracts shared across apps · pnpm + Turborepo · Docker Compose · GitHub Actions.
+**Planned**
 
-## Getting started
+- Editing the lines of an order from the administration (the `LINES_EDITED` event type exists in the schema, no route writes it).
+- Production deployment: a reverse proxy, backups, a one-command demo setup.
+- A driver application with dispatch by axis (the `DRIVER` role and the `driver_id` and `tour_position` columns are reserved for it).
 
-Today you can set up the development environment, run the checks, and start the database and the API (liveness and readiness endpoints, and the public catalogue `GET /api/v1/products`).
+## Known limits and what comes next
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) 24.7 or later (see `.nvmrc`)
-- [pnpm](https://pnpm.io/) (the version is pinned in `package.json`)
-- [Docker](https://www.docker.com/) (for the PostgreSQL database, from the database step on)
-- [gitleaks](https://github.com/gitleaks/gitleaks) (the pre-commit hook scans staged changes and needs it installed locally)
-
-### Install
-
-```bash
-git clone https://github.com/890Tom/entana-delivery.git
-cd entana-delivery
-pnpm install
-```
-
-Git hooks are installed automatically by `pnpm install` (through Husky). See [CONTRIBUTING.md](CONTRIBUTING.md) for what they check.
-
-### Commands
-
-| Command              | What it does                              |
-| -------------------- | ----------------------------------------- |
-| `pnpm typecheck`     | Type-check all packages                   |
-| `pnpm lint`          | Lint with ESLint                          |
-| `pnpm format`        | Format the repository with Prettier       |
-| `pnpm format:check`  | Check formatting without changing files   |
-| `pnpm test`          | Run the unit tests (Vitest)               |
-| `pnpm test:coverage` | Run the unit tests with a coverage report |
-| `pnpm db:up`         | Start PostgreSQL (Docker Compose)         |
-| `pnpm db:down`       | Stop PostgreSQL (data is kept)            |
-| `pnpm db:validate`   | Validate the Prisma schema                |
-
-### Start the database
-
-```bash
-cp .env.example .env   # then set the same password in POSTGRES_PASSWORD and DATABASE_URL
-pnpm db:up             # starts PostgreSQL 18 and waits until it is healthy
-pnpm db:validate       # checks the Prisma schema
-```
-
-`DATABASE_URL` repeats the user, password, database and port of the `POSTGRES_*` variables, so change them together. A password with special characters must be URL-encoded in `DATABASE_URL` (a password of letters and digits avoids the problem).
-
-PostgreSQL listens on `127.0.0.1:5433` only, not on the network (set `POSTGRES_PORT` to change the port). Data is stored in the `postgres_data` Docker volume and survives `pnpm db:down`. To erase it, run `docker compose down -v`.
-
-Start the API (with the database running): `pnpm build && pnpm --filter @entana/api start`. See [`apps/api/README.md`](apps/api/README.md) for its configuration, health and catalogue endpoints and Compose profile.
-
-The goal for the first vertical slice is a first test order in under 10 minutes with `docker compose up`. That setup is not available yet.
+- No deployment before the production step: the repository runs locally only.
+- The PWA and accessibility audit is still to come.
+- Orders are paid in cash on delivery only: no online payment and no payment tracking.
+- No stock management: availability is set by hand.
+- One business per instance: no multi-tenant hosting.
 
 ## Repository layout
 
 ```
+apps/
+  api/          NestJS API (REST under /api/v1)
+  client/       customer application (React + Vite)
+  admin/        administration (React + Vite)
 packages/
-  contracts/   shared Zod schemas and pure domain rules (first tests in place)
-  database/    Prisma schema, migrations, client and seed (schema only for now)
+  contracts/      shared Zod schemas and pure domain rules
+  database/       Prisma schema, migrations, client factory and seed
+  password-hash/  Argon2id password hashing
+  lint-tests/     tests of the ESLint configuration
+examples/demo/  demo instance configuration
 docs/
-  adr/         architecture decision records
-  data-model.md  database schema reference
-.github/       CI workflows, issue and pull request templates
-.husky/        Git hooks
+  adr/            architecture decision records
+  data-model.md   database schema reference
+  engineering-standards.md
+scripts/        bundle size check
 ```
 
-Planned, not yet created: `apps/` (API, customer PWA, admin dashboard), `examples/` (demo configuration and fake seed data), `infra/` (reverse proxy, backups).
+Dependency direction: `contracts` is used by everything and imports nothing from the repository; only `apps/api` uses `database` and `password-hash`; applications never import each other (`pnpm lint:architecture`).
+
+Stack: Node 24, TypeScript 6.0, NestJS 12, Prisma 7, PostgreSQL 18, React, Vite, TanStack Query, MapLibre GL with OpenFreeMap tiles, pnpm workspaces, Turborepo, Docker Compose.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) 24.7 or later (`.nvmrc`, `engines` in `package.json`)
+- [pnpm](https://pnpm.io/), at the version pinned in `packageManager` of `package.json`
+- [Docker](https://www.docker.com/), for PostgreSQL
+- [gitleaks](https://github.com/gitleaks/gitleaks), used by the pre-commit hook
+
+## Run it locally
+
+```bash
+git clone https://github.com/890Tom/entana-delivery.git
+cd entana-delivery
+pnpm install                 # also installs the Git hooks (Husky)
+cp .env.example .env         # then choose a database password (see below)
+pnpm db:up                   # PostgreSQL 18 on 127.0.0.1:5433, waits until healthy
+pnpm --filter @entana/database exec prisma migrate deploy
+pnpm build
+pnpm db:seed                 # fake demo data; prints a random password once
+pnpm --filter @entana/api admin:upsert you@example.com --name "You"
+pnpm dev                     # API, customer application and administration in watch mode
+```
+
+- Set the same password in `POSTGRES_PASSWORD` and `DATABASE_URL`. `DATABASE_URL` repeats the user, password, database and port of the `POSTGRES_*` variables; percent-encode special characters of the password in it.
+- The seeded admin account has no e-mail, so it cannot sign in: `admin:upsert` creates an account that can (it asks for the password twice on the terminal).
+- Addresses in development: the API on `http://127.0.0.1:3000` (OpenAPI page at `/api/docs`), the customer application on `http://localhost:5173`, the administration on `http://localhost:5174` (use `localhost`, not `127.0.0.1`). Both front ends forward `/api` and `/media` to the API.
+- Data lives in the `postgres_data` Docker volume and survives `pnpm db:down`; `docker compose down -v` erases it.
+- Product photos and the shop logo are read from `./media` at the repository root in development (git-ignored).
+
+The API can also run as a container: see [`apps/api/README.md`](apps/api/README.md#container).
+
+## Scripts
+
+Run from the repository root.
+
+| Command                  | What it does                                                                  |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `pnpm dev`               | Starts the API, the customer application and the administration (watch)       |
+| `pnpm build`             | Builds every package and application                                          |
+| `pnpm typecheck`         | Type-checks every package                                                     |
+| `pnpm lint`              | Generates the Prisma client, then runs ESLint                                 |
+| `pnpm format`            | Formats the repository with Prettier                                          |
+| `pnpm format:check`      | Checks formatting without changing files                                      |
+| `pnpm lint:architecture` | Checks dependency direction and circular imports (dependency-cruiser)         |
+| `pnpm knip`              | Reports unused files, exports and dependencies                                |
+| `pnpm test`              | Unit and end-to-end tests (Vitest). No database needed                        |
+| `pnpm test:e2e`          | The API end-to-end tests alone                                                |
+| `pnpm test:coverage`     | Tests with the coverage floors (the API floor is applied by the next one)     |
+| `pnpm test:coverage:api` | API unit and integration coverage merged, with its 90% floor. Needs database  |
+| `pnpm test:integration`  | Tests against a real PostgreSQL (throwaway database). Needs `pnpm db:up`      |
+| `pnpm test:scripts`      | Tests of the scripts in `scripts/`                                            |
+| `pnpm check:bundle`      | Checks the initial download of the built customer application (300 KB gzip)   |
+| `pnpm db:up`             | Starts PostgreSQL (Docker Compose)                                            |
+| `pnpm db:down`           | Stops PostgreSQL (data is kept)                                               |
+| `pnpm db:generate`       | Generates the Prisma client                                                   |
+| `pnpm db:validate`       | Validates the Prisma schema                                                   |
+| `pnpm db:seed`           | Fills an empty local database with fake data                                  |
+| `pnpm db:reset-and-seed` | Erases a local database and seeds it again (guarded, see the database README) |
+
+Before a commit: `pnpm typecheck`, `pnpm lint`, `pnpm format:check`.
+
+## Environment variables
+
+Copy [`.env.example`](.env.example) to `.env` at the repository root. `.env` is never committed.
+
+| Variable                 | Read by                     | Purpose                                                |
+| ------------------------ | --------------------------- | ------------------------------------------------------ |
+| `NODE_ENV`               | API, seed                   | `development`, `test` or `production` (API default)    |
+| `HOST`, `PORT`           | API                         | Listening interface and port                           |
+| `LOG_LEVEL`              | API                         | pino log level                                         |
+| `TRUST_PROXY`            | API                         | Number of reverse proxies in front of the API          |
+| `BODY_LIMIT_KB`          | API                         | Largest JSON request body                              |
+| `SWAGGER_ENABLED`        | API                         | Serves `/api/docs`                                     |
+| `CORS_ORIGINS`           | API                         | Browser origins allowed to call the API                |
+| `ADMIN_ALLOWED_ORIGINS`  | API                         | Origins allowed to change data under `/api/v1/admin`   |
+| `ADMIN_COOKIE_SECURE`    | API                         | `Secure` flag of the session cookie                    |
+| `INSTANCE_CONFIG_PATH`   | API                         | Instance configuration file                            |
+| `MEDIA_ROOT`             | API                         | Media folder (logo, product photos)                    |
+| `DATABASE_URL`           | API, database package, seed | PostgreSQL connection URL                              |
+| `POSTGRES_*`             | Docker Compose              | User, password, database and host port of PostgreSQL   |
+| `INSTANCE_CONFIG_FILE`   | Docker Compose              | Instance file mounted in the `api` container           |
+| `API_PORT`               | Docker Compose              | Host port of the `api` container                       |
+| `INITIAL_ADMIN_USERNAME` | Seed                        | Username of the seeded admin account (default `admin`) |
+| `ADMIN_DEV_API_TARGET`   | Administration (Vite)       | Where the dev server forwards `/api` and `/media`      |
+
+Details and defaults: [`apps/api/README.md`](apps/api/README.md#configuration) and [`packages/database/README.md`](packages/database/README.md).
 
 ## Documentation
 
-- Architecture decision records: [`docs/adr`](docs/adr)
+- API: [`apps/api/README.md`](apps/api/README.md)
+- Customer application: [`apps/client/README.md`](apps/client/README.md)
+- Administration: [`apps/admin/README.md`](apps/admin/README.md)
+- Packages: [`contracts`](packages/contracts/README.md), [`database`](packages/database/README.md), [`password-hash`](packages/password-hash/README.md), [`lint-tests`](packages/lint-tests/README.md)
 - Database schema: [`docs/data-model.md`](docs/data-model.md)
-- API container image (build, run, Compose, health check): [`apps/api/README.md`](apps/api/README.md#container)
-- Product specification (French): to be published in `docs/`
-
-## Roadmap
-
-| Milestone | Scope                                                           |
-| --------- | --------------------------------------------------------------- |
-| 1a        | Orders end to end: customer PWA, admin login, orders, catalogue |
-| 1b        | Delivery axes with automatic fees, resellers map                |
-| 2         | Driver app, dispatch by axis (not a priority yet)               |
-
-## Contributing
-
-Contributions are welcome once the first slice is in place. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md) first. To report a vulnerability, see [SECURITY.md](SECURITY.md).
+- Architecture decision records: [`docs/adr`](docs/adr/README.md)
+- Engineering standards: [`docs/engineering-standards.md`](docs/engineering-standards.md)
+- Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md), security: [`SECURITY.md`](SECURITY.md)
 
 ## License
 
