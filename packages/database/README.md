@@ -56,7 +56,7 @@ A test checks that every CHECK constraint of the schema has a test case. When yo
 
 The seed fills a migrated, empty database with obviously fake demo data: the settings (default values), six products, nineteen places in four delivery axes, five customers, eight orders (with items and events), six resellers, an admin and an inactive driver. It respects every CHECK constraint. Delivery dates are relative to today in the Indian/Antananarivo time zone. The tracking tokens and order codes of the demo orders are fixed, public, fake values (`demo-tracking-token-01`, code `DEMA22`, and so on).
 
-1. Start PostgreSQL and apply the migrations (`pnpm db:up`, then `prisma migrate deploy` or `dev`).
+1. Start PostgreSQL and apply the migrations: `pnpm db:up`, then `pnpm --filter @entana/database exec prisma migrate deploy` (there is no root script for it; `prisma.config.ts` reads `DATABASE_URL` from the root `.env`).
 2. Run `pnpm db:seed`.
 3. **Note the admin password at the end of the output.** It is random, shown once, never written to a file, and only its Argon2id hash is stored (ADR 0008). The username is `INITIAL_ADMIN_USERNAME` (default `admin`).
 
@@ -76,7 +76,7 @@ To start over:
 ALLOW_DESTRUCTIVE_SEED=true pnpm db:reset-and-seed
 ```
 
-This is the only destructive command: it empties all 12 tables (the migration history is kept) and seeds again. It refuses, and tells you why, unless all three conditions hold:
+This is the only destructive command: it empties all 13 tables (the migration history is kept) and seeds again. It refuses, and tells you why, unless all three conditions hold:
 
 - `NODE_ENV` is not `production`.
 - `ALLOW_DESTRUCTIVE_SEED` is exactly `true`. Pass it on the command line. If the root `.env` defines it (or `ALLOW_SEED_NON_LOCAL`), the seed refuses to run at all, so a leftover line can never arm a later reset.

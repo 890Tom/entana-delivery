@@ -1,6 +1,6 @@
 # Data model
 
-This document is the reference for the database schema. It describes 13 tables, grouped by domain. Money is an integer number of ariary (no decimals). Timestamps are `timestamptz` stored in UTC. The delivery date is a plain day (`date`), interpreted in the `Indian/Antananarivo` time zone by the application. Identifiers are UUIDs. Rows are never deleted (except the sessions of the administration, see `admin_session`, and the resellers, see ADR 0020): products, axes and places are deactivated or archived, so history stays intact. Foreign keys use `ON DELETE RESTRICT`.
+This document is the reference for the database schema. It describes 13 tables, grouped by domain. Money is an integer number of ariary (no decimals). Timestamps are `timestamptz` stored in UTC. The delivery date is a plain day (`date`), interpreted in the `Indian/Antananarivo` time zone by the application. Identifiers are UUIDs. Rows are never deleted (except the sessions of the administration, see `admin_session`, the resellers, see ADR 0020, and a delivery axis that no order references, with its `axis_place` links): products, axes and places are deactivated or archived, so history stays intact. Foreign keys use `ON DELETE RESTRICT`.
 
 ## Orders
 
@@ -23,8 +23,8 @@ A customer is created automatically on the first order. There is no customer acc
 | customer_id | uuid | foreign key to `customer` |
 | place_id | uuid, nullable | foreign key to `place`; null when no place matches |
 | axis_id | uuid, nullable | foreign key to `delivery_axis`; null outside an axis |
-| delivery_fee | integer | >= 0, frozen at creation |
-| fee_reason | enum `IN_AXIS`, `OUT_OF_AXIS`, `QUANTITY`, `ADJUSTED` | frozen at creation; `QUANTITY`: free outside every axis from the piece threshold, with `place_id` and `axis_id` null |
+| delivery_fee | integer | >= 0, frozen at creation; changed only when the administration adjusts it at confirmation |
+| fee_reason | enum `IN_AXIS`, `OUT_OF_AXIS`, `QUANTITY`, `ADJUSTED` | set at creation; `QUANTITY`: free outside every axis from the piece threshold, with `place_id` and `axis_id` null; `ADJUSTED`: fee changed at confirmation (with a `FEE_ADJUSTED` event) |
 | delivery_date | date, nullable | null until the order is confirmed |
 | status | enum | `NEW`, `CONFIRMED`, `OUT_FOR_DELIVERY`, `DELIVERED`, `REJECTED`, `CANCELLED`, `FAILED` |
 | status_reason | text, nullable | reason of a refusal, cancellation or failed delivery |
@@ -57,6 +57,8 @@ Indexes:
 | product_name | text | name frozen at order time |
 | qty | integer | > 0 (`ck_order_item_qty_and_price`) |
 | unit_price | integer | >= 0 (same constraint), frozen at order time |
+
+Index on `order_id`.
 
 ### `order_event`
 | Column | Type | Rules |
@@ -123,7 +125,7 @@ The number of axes is not limited (ADR 0022).
 | place_id | uuid | foreign key to `place` |
 | position | integer | rank of the place along the axis |
 
-Primary key `(axis_id, place_id)`: a place appears at most once in an axis, and can belong to several axes.
+Primary key `(axis_id, place_id)`: a place appears at most once in an axis, and can belong to several axes. Unique `(axis_id, position)` (`axis_place_axis_id_position_key`): two places of an axis never share a position. Updating an axis replaces its links; the places stay.
 
 ## Administration, resellers and settings
 
@@ -173,6 +175,8 @@ Written so far, with `entity = "product"`: `product.created`, `product.updated` 
 
 Written so far, with `entity = "reseller"`: `reseller.created` (`diff` holds `visible` and `consentGiven`), `reseller.updated` (`diff.fields` lists the changed fields), `reseller.consent_changed` and `reseller.published` / `reseller.unpublished` (`diff` holds the before and after of the flag), `reseller.verified` and `reseller.deleted` (`diff` is empty: the entry keeps the id only, no name and no position).
 
+Written so far for delivery: `delivery_axis.created`, `delivery_axis.updated` (`diff.fields`), `delivery_axis.reordered` (`from`, `to`), `delivery_axis.deleted` (entity `delivery_axis`), `delivery_place.created` (entity `delivery_place`) and `delivery_settings.updated` (entity `shop_setting`, `entity_id` the fixed uuid `00000000-0000-0000-0000-000000000001`, because that row has an integer key). Ids, field names and ranks only, never a name or a coordinate.
+
 ### `reseller`
 | Column | Type | Rules |
 |---|---|---|
@@ -196,12 +200,25 @@ Constraint `ck_reseller_consent_when_active`: `CHECK (active = false OR consent_
 
 Constraint `ck_shop_setting_single_row_and_fee`: `CHECK (id = 1 AND out_of_axis_fee_ar >= 0)`. The migration creates the row with the default values (and keeps an existing one), so the application updates it and never inserts it.
 
+## Enumerations
+
+| Enum (PostgreSQL type) | Values |
+|---|---|
+| `trust_level` | `NEW`, `KNOWN`, `BLOCKED` |
+| `order_status` | `NEW`, `CONFIRMED`, `OUT_FOR_DELIVERY`, `DELIVERED`, `REJECTED`, `CANCELLED`, `FAILED` |
+| `fee_reason` | `IN_AXIS`, `OUT_OF_AXIS`, `QUANTITY`, `ADJUSTED` |
+| `order_event_type` | `STATUS_CHANGED`, `LINES_EDITED`, `FEE_ADJUSTED`, `DATE_CHANGED` |
+| `actor_type` | `STAFF`, `CUSTOMER`, `SYSTEM` |
+| `staff_role` | `ADMIN`, `DRIVER` |
+
+`LINES_EDITED` and `DATE_CHANGED` are reserved: no code writes them yet. `DRIVER`, `driver_id` and `tour_position` are reserved for the driver phase.
+
 ## Rules enforced by the application, not the database
 
 - `total_ar` equals the sum of the items plus `delivery_fee` (recomputed by the server, covered by a unit test).
 - `public_code` uses an alphabet without ambiguous characters (no `0`, `O`, `1`, `I`); the database only checks the length.
 - Status transitions are valid and happen one step at a time (shared pure function).
-- `resolveDeliveryAxis` (the active axis of the lowest rank with an active place whose radius covers the point, and in it the closest place) and `computeDeliveryFee` (free in an axis, free from the piece threshold, the flat fee otherwise) are pure functions of `packages/contracts`. The values (radius, threshold, fee) are parameters read from the database. The result is frozen on the order: changing an axis, a place or a setting never changes a past order. Branching them on the creation of an order comes later.
+- `resolveDeliveryAxis` (the active axis of the lowest rank with an active place whose radius covers the point, and in it the closest place) and `computeDeliveryFee` (free in an axis, free from the piece threshold, the flat fee otherwise) are pure functions of `packages/contracts`. The values (radius, threshold, fee) are parameters read from the database. The result is frozen on the order: changing an axis, a place or a setting never changes a past order. The order creation and the public delivery quote both use them.
 
 ## Seed data (fake)
 

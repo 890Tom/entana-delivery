@@ -1,8 +1,9 @@
 # @entana/api
 
-NestJS 12 (ESM, Express) API. For now: liveness and readiness endpoints, access to PostgreSQL
-through `@entana/database`, the public catalogue (`GET /api/v1/products`), and the production
-basics (configuration, logging, errors, security headers, API documentation).
+NestJS 12 (ESM, Express) API of the customer application and the administration: catalogue,
+delivery quote, orders, tracking, resellers, and the administration of orders, products,
+resellers, delivery axes and settings. It reaches PostgreSQL only through `@entana/database`, and
+its business rules are the pure functions of `@entana/contracts`.
 
 ## Run it
 
@@ -16,6 +17,88 @@ See [Health endpoints](#health-endpoints) for the two probes.
 
 - `GET /api/docs` — Swagger UI, and `/api/docs-json` the OpenAPI document. Off in production
   unless `SWAGGER_ENABLED=true`.
+
+## Routes
+
+Every route is under `/api/v1`, except the media and the API documentation. Every error is a
+problem details answer (see [Errors](#errors)).
+
+**Public** (no account)
+
+| Method | Path                      | Role                                                       |
+| ------ | ------------------------- | ---------------------------------------------------------- |
+| GET    | `/api/v1/health`          | Liveness probe                                             |
+| GET    | `/api/v1/health/ready`    | Readiness probe (one query to the database)                |
+| GET    | `/api/v1/instance`        | Public part of the instance configuration                  |
+| GET    | `/api/v1/products`        | The catalogue                                              |
+| GET    | `/api/v1/resellers`       | The visible resellers                                      |
+| GET    | `/api/v1/delivery/zones`  | The places a quote may match, to draw on the map           |
+| POST   | `/api/v1/delivery/quote`  | The delivery fee for a point and a number of pieces        |
+| POST   | `/api/v1/orders`          | Creates an order (`Idempotency-Key` required)              |
+| GET    | `/api/v1/tracking`        | Reads an order with its tracking token                     |
+| POST   | `/api/v1/tracking/cancel` | Cancels an order with its tracking token                   |
+| POST   | `/api/v1/tracking/lookup` | Finds an order with the phone number and the order code    |
+| GET    | `/media/:folder/:file`    | A file of `branding/` or `products/` (also `HEAD`)         |
+| GET    | `/api/docs`               | Swagger UI (`/api/docs-json`: the OpenAPI document), if on |
+
+**Administration** (session cookie, except the login and the logout)
+
+| Method | Path                                      | Role                                         |
+| ------ | ----------------------------------------- | -------------------------------------------- |
+| POST   | `/api/v1/admin/auth/login`                | Signs in, sets the session cookie            |
+| POST   | `/api/v1/admin/auth/logout`               | Revokes the session, clears the cookie       |
+| GET    | `/api/v1/admin/auth/me`                   | The signed-in admin                          |
+| GET    | `/api/v1/admin/orders`                    | One page of orders, with filters and search  |
+| GET    | `/api/v1/admin/orders/summary`            | Counters of the list, new orders since an id |
+| GET    | `/api/v1/admin/orders/:id`                | One order with its lines and history         |
+| POST   | `/api/v1/admin/orders/:id/transitions`    | Moves an order one status forward            |
+| GET    | `/api/v1/admin/products`                  | Every product, retired ones included         |
+| POST   | `/api/v1/admin/products`                  | Creates a product (retired until published)  |
+| PATCH  | `/api/v1/admin/products/:id`              | Changes a product                            |
+| PUT    | `/api/v1/admin/products/:id/photo`        | Uploads the photo of a product               |
+| PATCH  | `/api/v1/admin/products/:id/availability` | Sets the availability                        |
+| POST   | `/api/v1/admin/products/:id/retire`       | Takes a product out of the catalogue         |
+| POST   | `/api/v1/admin/products/:id/restore`      | Puts a retired product back                  |
+| PUT    | `/api/v1/admin/products/order`            | Sets the display order                       |
+| GET    | `/api/v1/admin/resellers`                 | Every reseller                               |
+| POST   | `/api/v1/admin/resellers`                 | Creates a reseller                           |
+| PATCH  | `/api/v1/admin/resellers/:id`             | Changes a reseller                           |
+| POST   | `/api/v1/admin/resellers/:id/verify`      | Marks a reseller verified now                |
+| DELETE | `/api/v1/admin/resellers/:id`             | Deletes a reseller for good                  |
+| GET    | `/api/v1/admin/delivery/axes`             | Every delivery axis with its places          |
+| POST   | `/api/v1/admin/delivery/axes`             | Creates an axis                              |
+| PUT    | `/api/v1/admin/delivery/axes/order`       | Sets the rank of every axis                  |
+| PUT    | `/api/v1/admin/delivery/axes/:id`         | Replaces an axis and its places              |
+| DELETE | `/api/v1/admin/delivery/axes/:id`         | Deletes an axis that no order uses           |
+| GET    | `/api/v1/admin/delivery/places`           | The active places                            |
+| GET    | `/api/v1/admin/delivery/settings`         | The delivery settings                        |
+| PATCH  | `/api/v1/admin/delivery/settings`         | Changes the delivery settings                |
+| GET    | `/api/v1/admin/delivery/resolve`          | Tests an address against the axes            |
+
+Each group is described in its own section below.
+
+## Security rules
+
+- **Administration closed by default.** A global guard closes every path under `/api/v1/admin`
+  unless a route is marked public (only the login and the logout). Session: an opaque token in an
+  `HttpOnly`, `SameSite=Strict` cookie; only its SHA-256 is stored (ADR 0017). A change under
+  `/api/v1/admin` must come from an origin of `ADMIN_ALLOWED_ORIGINS`. See
+  [Administration](#administration).
+- **Tracking token.** Only the SHA-256 of an order's tracking token is stored. The token travels
+  in the `X-Tracking-Token` header only, and is redacted from the logs. See
+  [Order tracking](#order-tracking).
+- **Rate limits** (in memory, per instance): order creation per address and per phone number,
+  tracking per address, lookup per address and per phone number, login per address and per
+  account. Behind a reverse proxy, `TRUST_PROXY` must be set.
+- **Validation at the boundary** with the shared Zod schemas; strict bodies (an unknown field is a
+  `400`); a body with a `__proto__`, `constructor` or `prototype` key, deeper than 64 levels or
+  with more than 100 000 values is refused; JSON bodies are limited by `BODY_LIMIT_KB`.
+- **No personal data in answers or logs** beyond what a route is for: errors carry fixed texts and
+  JSON pointers, never a value sent by the client; the access log holds the route template, never
+  the real path, the query, the headers or the client address.
+- **Headers.** Security headers by helmet; `Cache-Control: no-store` on every error and on the
+  order, tracking and administration routes; API documentation off in production unless
+  `SWAGGER_ENABLED=true`.
 
 ## Configuration
 
@@ -129,7 +212,7 @@ A product whose key is not such a name makes the catalogue answer the generic `5
   file on `/config/instance.config.yaml`, **read-only**. `INSTANCE_CONFIG_FILE` (in `.env`) picks
   the file on the host; the demo file is the default. The image holds no configuration and no
   media, and sets neither variable: a container started without them refuses to start.
-- **Put a file in** (manual, until the administration can upload):
+- **Put a branding file in** (by hand: the administration uploads product photos only):
   `docker compose cp ./logo.png api:/media/branding/logo.png`, then name it in `branding.logoFile`
   of the instance file. The files must be readable by the user of the image (`node`).
 - **Backup**: the `media` volume is data, like the database: back both up together.
@@ -400,6 +483,97 @@ now`, last position, unless `available` is in the same request.
   `product.photo_replaced` (`hadPhoto`). No name, description or personal data. The name of the
   uploaded file is never read, kept or logged.
 
+### Resellers (administration)
+
+Five routes under `/api/v1/admin/resellers`, closed by the guard above (`401` without a session).
+Every answer carries `Cache-Control: no-store`. No rate limiting. The public list is in [Resellers endpoint](#resellers-endpoint).
+
+| Route                                     | Does                                                                      |
+| ----------------------------------------- | ------------------------------------------------------------------------- |
+| `GET /api/v1/admin/resellers`             | Every reseller, by `neighborhood` then `name`: `200` with `{ resellers }` |
+| `POST /api/v1/admin/resellers`            | Creates a reseller, verified now: `201` with the reseller                 |
+| `PATCH /api/v1/admin/resellers/:id`       | Partial change (at least one field, strict): `200` with the reseller      |
+| `POST /api/v1/admin/resellers/:id/verify` | No body: verified now, always audited: `200` with the reseller            |
+| `DELETE /api/v1/admin/resellers/:id`      | Removed for good (ADR 0020): `204` without a body                         |
+
+A reseller is `{ id, name, neighborhood, landmark, latitude, longitude, consentGiven, visible,
+verifiedAt }` (`verifiedAt` is `null` for a row that was never verified). The names of the contract
+map to the columns of `reseller`: `neighborhood` is `area`, `landmark` is `landmark_text`,
+`latitude` and `longitude` are `lat` and `lng`, `visible` is `active`, and `consentGiven` is whether
+`consent_at` is set (giving the consent dates it now, keeping an existing date; withdrawing it clears
+the date).
+
+- **Fields.** `name` 1 to 60, `neighborhood` 1 to 40, `landmark` 1 to 120 (required), `latitude` -90
+  to 90 and `longitude` -180 to 180 (required, never cleared; together in a `PATCH`), `consentGiven`
+  and `visible` (default `false` at creation). Text is trimmed. An unknown field, a missing
+  required field or an empty body is a `400`.
+- **Visible needs the consent.** `visible: true` without `consentGiven: true` (at creation or
+  after the change), and withdrawing the consent of a visible reseller, answer `422` with the
+  type `urn:entana:problem:reseller_not_publishable` and a fixed detail. To withdraw the consent, hide
+  the reseller in the same request (`visible: false`).
+- **Verification.** `isResellerVerificationStale` (contracts) tells a verification older than 90
+  days, or missing, that is due again.
+- **Audit** (`entity = "reseller"`, same transaction, no name, position or phone): `created`,
+  `updated` (`diff.fields`), `consent_changed`, `published`, `unpublished` (before and after of the
+  flag), `verified` and `deleted` (the id only). Nothing is written when no value changes.
+- An unknown or malformed id is one `404`.
+
+### Delivery (administration)
+
+Nine routes under `/api/v1/admin/delivery`, closed by the guard above (`401` without a session).
+Every answer carries `Cache-Control: no-store`. No rate limiting. The places are read only: a place
+is created with an axis, and no route changes or removes one. The rules of the fee are those of
+`@entana/contracts` (`resolveDeliveryAxis`, `computeDeliveryFee`), never rewritten here.
+
+| Route                                    | Does                                                                     |
+| ---------------------------------------- | ------------------------------------------------------------------------ |
+| `GET /api/v1/admin/delivery/axes`        | Every axis (active or not) by `rank`: `200` with `{ axes }`              |
+| `POST /api/v1/admin/delivery/axes`       | Creates an axis (last rank, smallest free colour): `201` with the axis   |
+| `PUT /api/v1/admin/delivery/axes/order`  | Reorders every axis: `200` with `{ axes }` by their new rank             |
+| `PUT /api/v1/admin/delivery/axes/:id`    | Replaces `name`, `active` and the places: `200` with the axis            |
+| `DELETE /api/v1/admin/delivery/axes/:id` | Deletes an axis that no order uses: `204`                                |
+| `GET /api/v1/admin/delivery/places`      | The active places by `name`, not paginated: `200` with `{ places }`      |
+| `GET /api/v1/admin/delivery/settings`    | `200` with `{ outOfAxisFeeAr, freeDeliveryMinPieces, outOfAxisMessage }` |
+| `PATCH /api/v1/admin/delivery/settings`  | Partial change (at least one field, strict): `200` with the settings     |
+| `GET /api/v1/admin/delivery/resolve`     | Tests an address: `200` with `{ match, feeAr, reason }`                  |
+
+- **Axes.** An axis is `{ id, name, rank, color, active, places }`. Its places come in the order
+  of their positions, inactive ones included (`active: false`), each with `alsoIn`: the `{ id, name }`
+  of the other axes (active or not, by rank) that hold the place, never the axis itself.
+- **Writing an axis** (`POST`, `PUT /:id`). Body `{ name, active, color, places }`: `name` 1 to 60 characters
+  once trimmed, `color` a `#rrggbb` colour in lower case (two axes may share one), `places` an ordered list of 1 to `MAX_PLACES_PER_AXIS` (50) items, each `{ placeId }`
+  (an existing place, listed once) or a new place `{ name, latitude, longitude, radiusM? }`
+  (`radiusM` 100 to 3 000, default 500). Positions are 1..n in the order received. One transaction
+  holds the new places, the links and the axis; the writes of the axes are serialised by an advisory
+  lock, so a rank is never duplicated. A place that leaves an axis is never removed.
+  The number of axes is not limited. `PUT` keeps the rank, and accepts an inactive place only if the axis already holds it.
+- **Reordering** (`PUT /axes/order`). Body `{ ids }`: every axis exactly once, inactive ones
+  included; the ranks become 1..n. Anything else is `422`.
+- **Deleting** (`DELETE /axes/:id`). `409` while an order references the axis (deactivate it
+  instead); otherwise the axis and its links go, the places stay.
+- **Errors** (problem details, fixed `detail`, `type` in `urn:entana:problem:`):
+  `delivery_axis_name_taken` and `delivery_place_name_taken` (`409`, without regard to case, also
+  inside one body), `delivery_axis_in_use` (`409`),
+  `delivery_axis_order_mismatch` and `delivery_place_unavailable` (`422`), an invalid body (`400`,
+  an empty list or a `placeId` twice included), an unknown or malformed id (`404`).
+- **Audit of the axes** (same transaction, ids, field names and ranks only, never a name or a
+  coordinate): `delivery_axis.created`, `delivery_axis.updated` (`diff.fields` among `name`,
+  `active`, `color`, `places`), `delivery_place.created` (one per new place), `delivery_axis.reordered`
+  (`{ from, to }`, one per axis whose rank changes), `delivery_axis.deleted`. Nothing is written
+  when nothing changes.
+- **Settings.** `outOfAxisFeeAr` is an integer from 0 to `PRODUCT_PRICE_MAX_AR`,
+  `freeDeliveryMinPieces` an integer from 1 to `MAX_FREE_DELIVERY_MIN_PIECES` (an order holds at
+  most 30 lines of 99 pieces: 2 970), `outOfAxisMessage` 1 to 200 characters once trimmed. An unknown
+  field, an empty body or a value out of bounds is a `400`.
+- **Audit** (`delivery_settings.updated`, `entity = "shop_setting"`, same transaction): `diff.fields`
+  names the changed fields; the two numbers also carry `{ from, to }`; the message is named, never
+  written. The row of the settings has an integer key, so `entity_id` is the fixed uuid
+  `00000000-0000-0000-0000-000000000001`. Nothing is written when no value changes.
+- **Test of an address.** Query: `latitude` (-90 to 90) and `longitude` (-180 to 180), both required,
+  and `pieces` (integer from 1 to 2 970, default 1). Anything else, or a value out of bounds, is a
+  `400`. `match` is `null` or `{ axis: { id, name, color }, place: { id, name } }`; `reason` is
+  `axis`, `quantity` or `out_of_axis`. The coordinates are not stored or logged.
+
 ## Logs
 
 One JSON object per line on stdout (pino). Each request gets an id, returned in the
@@ -580,7 +754,7 @@ an IPv6 address counts by its /64 prefix. The address is never logged.
 - The `409`, `403` and `422` answers say whether a key is in use, a customer is blocked, or a
   product id is unusable: they are the only status codes beyond the above that reveal anything.
 
-## Suivi (order tracking)
+## Order tracking
 
 A customer who holds the tracking token of an order reads it and cancels it. Public, no account.
 The token is the 43-character secret the client generated for the order (see "Order endpoint"). It
@@ -722,94 +896,3 @@ leaves its empty `test_<hex>` database: list it with `\l test_*` in `psql` and r
 
 Tests need the compiled `@entana/contracts` and `@entana/database` (Turborepo builds them first
 when you run the commands from the root).
-
-### Resellers (administration)
-
-Five routes under `/api/v1/admin/resellers`, closed by the guard above (`401` without a session).
-Every answer carries `Cache-Control: no-store`. No rate limiting. The public list is in "Resellers endpoint" below.
-
-| Route                                     | Does                                                                      |
-| ----------------------------------------- | ------------------------------------------------------------------------- |
-| `GET /api/v1/admin/resellers`             | Every reseller, by `neighborhood` then `name`: `200` with `{ resellers }` |
-| `POST /api/v1/admin/resellers`            | Creates a reseller, verified now: `201` with the reseller                 |
-| `PATCH /api/v1/admin/resellers/:id`       | Partial change (at least one field, strict): `200` with the reseller      |
-| `POST /api/v1/admin/resellers/:id/verify` | No body: verified now, always audited: `200` with the reseller            |
-| `DELETE /api/v1/admin/resellers/:id`      | Removed for good (ADR 0020): `204` without a body                         |
-
-A reseller is `{ id, name, neighborhood, landmark, latitude, longitude, consentGiven, visible,
-verifiedAt }` (`verifiedAt` is `null` for a row that was never verified). The names of the contract
-map to the columns of `reseller`: `neighborhood` is `area`, `landmark` is `landmark_text`,
-`latitude` and `longitude` are `lat` and `lng`, `visible` is `active`, and `consentGiven` is whether
-`consent_at` is set (giving the consent dates it now, keeping an existing date; withdrawing it clears
-the date).
-
-- **Fields.** `name` 1 to 60, `neighborhood` 1 to 40, `landmark` 1 to 120 (required), `latitude` -90
-  to 90 and `longitude` -180 to 180 (required, never cleared; together in a `PATCH`), `consentGiven`
-  and `visible` (default `false` at creation). Text is trimmed. An unknown field, a missing
-  required field or an empty body is a `400`.
-- **Visible needs the consent.** `visible: true` without `consentGiven: true` (at creation or
-  after the change), and withdrawing the consent of a visible reseller, answer `422` with the
-  type `urn:entana:problem:reseller_not_publishable` and a fixed detail. To withdraw the consent, hide
-  the reseller in the same request (`visible: false`).
-- **Verification.** `isResellerVerificationStale` (contracts) tells a verification older than 90
-  days, or missing, that is due again.
-- **Audit** (`entity = "reseller"`, same transaction, no name, position or phone): `created`,
-  `updated` (`diff.fields`), `consent_changed`, `published`, `unpublished` (before and after of the
-  flag), `verified` and `deleted` (the id only). Nothing is written when no value changes.
-- An unknown or malformed id is one `404`.
-
-### Delivery (administration)
-
-Nine routes under `/api/v1/admin/delivery`, closed by the guard above (`401` without a session).
-Every answer carries `Cache-Control: no-store`. No rate limiting. The places are read only: a place
-is created with an axis, and no route changes or removes one. The rules of the fee are those of
-`@entana/contracts` (`resolveDeliveryAxis`, `computeDeliveryFee`), never rewritten here.
-
-| Route                                    | Does                                                                     |
-| ---------------------------------------- | ------------------------------------------------------------------------ |
-| `GET /api/v1/admin/delivery/axes`        | Every axis (active or not) by `rank`: `200` with `{ axes }`              |
-| `POST /api/v1/admin/delivery/axes`       | Creates an axis (last rank, smallest free colour): `201` with the axis   |
-| `PUT /api/v1/admin/delivery/axes/order`  | Reorders every axis: `200` with `{ axes }` by their new rank             |
-| `PUT /api/v1/admin/delivery/axes/:id`    | Replaces `name`, `active` and the places: `200` with the axis            |
-| `DELETE /api/v1/admin/delivery/axes/:id` | Deletes an axis that no order uses: `204`                                |
-| `GET /api/v1/admin/delivery/places`      | The active places by `name`, not paginated: `200` with `{ places }`      |
-| `GET /api/v1/admin/delivery/settings`    | `200` with `{ outOfAxisFeeAr, freeDeliveryMinPieces, outOfAxisMessage }` |
-| `PATCH /api/v1/admin/delivery/settings`  | Partial change (at least one field, strict): `200` with the settings     |
-| `GET /api/v1/admin/delivery/resolve`     | Tests an address: `200` with `{ match, feeAr, reason }`                  |
-
-- **Axes.** An axis is `{ id, name, rank, color, active, places }`. Its places come in the order
-  of their positions, inactive ones included (`active: false`), each with `alsoIn`: the `{ id, name }`
-  of the other axes (active or not, by rank) that hold the place, never the axis itself.
-- **Writing an axis** (`POST`, `PUT /:id`). Body `{ name, active, color, places }`: `name` 1 to 60 characters
-  once trimmed, `color` a `#rrggbb` colour in lower case (two axes may share one), `places` an ordered list of 1 to `MAX_PLACES_PER_AXIS` (50) items, each `{ placeId }`
-  (an existing place, listed once) or a new place `{ name, latitude, longitude, radiusM? }`
-  (`radiusM` 100 to 3 000, default 500). Positions are 1..n in the order received. One transaction
-  holds the new places, the links and the axis; the writes of the axes are serialised by an advisory
-  lock, so a rank is never duplicated. A place that leaves an axis is never removed.
-  The number of axes is not limited. `PUT` keeps the rank, and accepts an inactive place only if the axis already holds it.
-- **Reordering** (`PUT /axes/order`). Body `{ ids }`: every axis exactly once, inactive ones
-  included; the ranks become 1..n. Anything else is `422`.
-- **Deleting** (`DELETE /axes/:id`). `409` while an order references the axis (deactivate it
-  instead); otherwise the axis and its links go, the places stay.
-- **Errors** (problem details, fixed `detail`, `type` in `urn:entana:problem:`):
-  `delivery_axis_name_taken` and `delivery_place_name_taken` (`409`, without regard to case, also
-  inside one body), `delivery_axis_in_use` (`409`),
-  `delivery_axis_order_mismatch` and `delivery_place_unavailable` (`422`), an invalid body (`400`,
-  an empty list or a `placeId` twice included), an unknown or malformed id (`404`).
-- **Audit of the axes** (same transaction, ids, field names and ranks only, never a name or a
-  coordinate): `delivery_axis.created`, `delivery_axis.updated` (`diff.fields` among `name`,
-  `active`, `color`, `places`), `delivery_place.created` (one per new place), `delivery_axis.reordered`
-  (`{ from, to }`, one per axis whose rank changes), `delivery_axis.deleted`. Nothing is written
-  when nothing changes.
-- **Settings.** `outOfAxisFeeAr` is an integer from 0 to `PRODUCT_PRICE_MAX_AR`,
-  `freeDeliveryMinPieces` an integer from 1 to `MAX_FREE_DELIVERY_MIN_PIECES` (an order holds at
-  most 30 lines of 99 pieces: 2 970), `outOfAxisMessage` 1 to 200 characters once trimmed. An unknown
-  field, an empty body or a value out of bounds is a `400`.
-- **Audit** (`delivery_settings.updated`, `entity = "shop_setting"`, same transaction): `diff.fields`
-  names the changed fields; the two numbers also carry `{ from, to }`; the message is named, never
-  written. The row of the settings has an integer key, so `entity_id` is the fixed uuid
-  `00000000-0000-0000-0000-000000000001`. Nothing is written when no value changes.
-- **Test of an address.** Query: `latitude` (-90 to 90) and `longitude` (-180 to 180), both required,
-  and `pieces` (integer from 1 to 2 970, default 1). Anything else, or a value out of bounds, is a
-  `400`. `match` is `null` or `{ axis: { id, name, color }, place: { id, name } }`; `reason` is
-  `axis`, `quantity` or `out_of_axis`. The coordinates are not stored or logged.
