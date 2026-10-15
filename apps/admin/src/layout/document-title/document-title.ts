@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { useShopName } from "../../features/instance/hooks/use-instance";
+import { useShopName } from "../../features/instance/use-instance";
 import { texts } from "../../i18n/texts";
 
 /** Titles the document "Administration — {shop}", set as text so no markup is interpreted. */

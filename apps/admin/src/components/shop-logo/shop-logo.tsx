@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
 
-import { useInstance } from "../../features/instance/hooks/use-instance";
+import { useInstance } from "../../features/instance/use-instance";
 import { texts } from "../../i18n/texts";
 
 import styles from "./shop-logo.module.css";
