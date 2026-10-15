@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 
-import buttonStyles from "../../catalogue/components/form-buttons.module.css";
+import buttonStyles from "../../../components/form-buttons/form-buttons.module.css";
 
 import styles from "./place-drawing.module.css";
 

@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { Notice } from "../../../components/notice/notice";
 import { texts } from "../../../i18n/texts";
 import { formatAmount } from "../../../order-display/format-order";
-import cardStyles from "../../order-detail/components/card.module.css";
+import cardStyles from "../../../components/card/card.module.css";
 
 import styles from "./settings-screen.module.css";
 

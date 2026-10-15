@@ -2,7 +2,7 @@ import type * as Library from "maplibre-gl";
 
 import { texts } from "../../../i18n/texts";
 import { loadMapLibrary, whenMapLoaded } from "../../../map/load-maplibre";
-import { createMarkerElement } from "../../order-detail/map/marker-element";
+import { createMarkerElement } from "../../../map/marker-element";
 import type { MapPoint } from "../rules/reseller-form";
 
 // The only file of the resellers that names the library. It is reached through dynamic imports

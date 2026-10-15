@@ -3,9 +3,9 @@ import type { ReactElement } from "react";
 
 import { useNow } from "../../../clock/use-now";
 import { texts } from "../../../i18n/texts";
-import cardStyles from "../../order-detail/components/card.module.css";
-import { FormButton } from "../../catalogue/components/form-buttons";
-import { SwitchRow } from "../../catalogue/components/switch-row";
+import cardStyles from "../../../components/card/card.module.css";
+import { FormButton } from "../../../components/form-buttons/form-buttons";
+import { SwitchRow } from "../../../components/switch-row/switch-row";
 import type { ResellerFormModel } from "../hooks/use-reseller-form";
 import { isStale } from "../rules/reseller-list";
 import { verificationViewOf } from "../rules/verification-view";

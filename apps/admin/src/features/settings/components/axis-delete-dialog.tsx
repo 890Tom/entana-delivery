@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { createPortal } from "react-dom";
 
 import { texts } from "../../../i18n/texts";
-import { ModalDialog } from "../../order-detail/components/modal-dialog";
+import { ModalDialog } from "../../../components/modal-dialog/modal-dialog";
 
 const t = texts.settings.axisEditor.dialog;
 

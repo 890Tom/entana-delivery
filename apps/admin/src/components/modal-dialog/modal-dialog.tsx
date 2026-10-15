@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef } from "react";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
-import { DetailButton } from "./detail-button";
+import { DetailButton } from "../detail-button/detail-button";
 import styles from "./modal-dialog.module.css";
 
 interface ModalDialogProps {

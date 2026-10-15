@@ -7,9 +7,9 @@ import visuallyHidden from "../../../components/visually-hidden/visually-hidden.
 import { texts } from "../../../i18n/texts";
 import { OrderIcon } from "../../../order-display/order-icons";
 import { SETTINGS_AXIS_NEW_PATH } from "../../../routes";
-import { CatalogueIcon } from "../../catalogue/components/catalogue-icons";
-import { FormLink } from "../../catalogue/components/form-buttons";
-import cardStyles from "../../order-detail/components/card.module.css";
+import { CatalogueIcon } from "../../../components/catalogue-icons/catalogue-icons";
+import { FormLink } from "../../../components/form-buttons/form-buttons";
+import cardStyles from "../../../components/card/card.module.css";
 import type { AxesModel } from "../hooks/use-axes";
 import { useAxesOrder } from "../hooks/use-axes-order";
 import type { OrderNotice } from "../hooks/use-axes-order";

@@ -8,13 +8,13 @@ import { CATALOGUE_PATH } from "../../../routes";
 import type { ProductFormModel } from "../hooks/use-product-form";
 import { showPriceInput } from "../rules/product-form";
 import type { ProductFormField } from "../rules/product-form";
-import cardStyles from "../../order-detail/components/card.module.css";
+import cardStyles from "../../../components/card/card.module.css";
 
-import { CatalogueIcon } from "./catalogue-icons";
+import { CatalogueIcon } from "../../../components/catalogue-icons/catalogue-icons";
 import { fieldErrorText } from "./field-error-text";
-import { FormButton, FormLink } from "./form-buttons";
+import { FormButton, FormLink } from "../../../components/form-buttons/form-buttons";
 import styles from "./information-card.module.css";
-import { SwitchRow } from "./switch-row";
+import { SwitchRow } from "../../../components/switch-row/switch-row";
 
 const t = texts.catalogueForm;
 

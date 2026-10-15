@@ -10,8 +10,8 @@ import { TextField } from "../../../components/text-field/text-field";
 import { texts } from "../../../i18n/texts";
 import { OrderIcon } from "../../../order-display/order-icons";
 import { RESELLERS_PATH } from "../../../routes";
-import { FormButton, FormLink } from "../../catalogue/components/form-buttons";
-import cardStyles from "../../order-detail/components/card.module.css";
+import { FormButton, FormLink } from "../../../components/form-buttons/form-buttons";
+import cardStyles from "../../../components/card/card.module.css";
 import type { ResellerFormModel } from "../hooks/use-reseller-form";
 import type { ResellerFormField } from "../rules/reseller-form";
 

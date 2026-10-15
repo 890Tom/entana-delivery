@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 
 import { TextField } from "../../../components/text-field/text-field";
 import { texts } from "../../../i18n/texts";
-import cardStyles from "../../order-detail/components/card.module.css";
+import cardStyles from "../../../components/card/card.module.css";
 import { useSettingsForm } from "../hooks/use-settings-form";
 import type { SettingsFieldError } from "../rules/settings-form";
 

@@ -16,7 +16,7 @@ import { Link } from "wouter";
 import { Pill } from "../../../components/pill/pill";
 import { texts } from "../../../i18n/texts";
 import { settingsAxisPath } from "../../../routes";
-import { DragHandle } from "../../catalogue/components/drag-handle";
+import { DragHandle } from "../../../components/drag-handle/drag-handle";
 import { summarizeRoute } from "../rules/route-summary";
 
 import styles from "./axes-card.module.css";

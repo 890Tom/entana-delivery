@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
-import cardStyles from "../../order-detail/components/card.module.css";
+import cardStyles from "../../../components/card/card.module.css";
 
 import styles from "./settings-screen.module.css";
 

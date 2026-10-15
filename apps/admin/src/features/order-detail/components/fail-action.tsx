@@ -5,8 +5,8 @@ import type { ReactElement } from "react";
 import { texts } from "../../../i18n/texts";
 import type { StatusChange } from "../hooks/use-status-change";
 
-import { DetailButton } from "./detail-button";
-import { ModalDialog } from "./modal-dialog";
+import { DetailButton } from "../../../components/detail-button/detail-button";
+import { ModalDialog } from "../../../components/modal-dialog/modal-dialog";
 
 const t = texts.orderDetail;
 

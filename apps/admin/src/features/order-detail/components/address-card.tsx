@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { texts } from "../../../i18n/texts";
 
 import styles from "./address-card.module.css";
-import card from "./card.module.css";
+import card from "../../../components/card/card.module.css";
 import { OrderMap } from "./order-map";
 
 const t = texts.orderDetail.address;

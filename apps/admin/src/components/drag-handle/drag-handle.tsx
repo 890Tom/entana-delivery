@@ -1,7 +1,7 @@
 import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
 import type { ReactElement, Ref } from "react";
 
-import { CatalogueIcon } from "./catalogue-icons";
+import { CatalogueIcon } from "../catalogue-icons/catalogue-icons";
 import styles from "./drag-handle.module.css";
 
 interface DragHandleProps {

@@ -12,9 +12,9 @@ import { confirmRequestOf, readFeeChoice } from "../rules/delivery-fee-input";
 import type { FeeChoice } from "../rules/delivery-fee-input";
 import { formatLongDay } from "../rules/format-detail";
 
-import card from "./card.module.css";
+import card from "../../../components/card/card.module.css";
 import { DayPicker } from "./day-picker";
-import { DetailButton } from "./detail-button";
+import { DetailButton } from "../../../components/detail-button/detail-button";
 import { RejectAction } from "./reject-action";
 
 const d = texts.orderDetail.decision;

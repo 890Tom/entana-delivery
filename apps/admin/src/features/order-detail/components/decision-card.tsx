@@ -6,9 +6,9 @@ import type { StatusChange } from "../hooks/use-status-change";
 import { formatLongDay } from "../rules/format-detail";
 import { STATUS_LOOKS } from "../rules/status-look";
 
-import card from "./card.module.css";
+import card from "../../../components/card/card.module.css";
 import styles from "./decision-card.module.css";
-import { DetailButton } from "./detail-button";
+import { DetailButton } from "../../../components/detail-button/detail-button";
 import { FailAction } from "./fail-action";
 import { NewOrderDecision } from "./new-order-decision";
 import { RejectAction } from "./reject-action";

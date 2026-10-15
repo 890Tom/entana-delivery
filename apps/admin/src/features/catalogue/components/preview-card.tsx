@@ -3,8 +3,8 @@ import type { ReactElement } from "react";
 import { texts } from "../../../i18n/texts";
 import { formatAmount } from "../../../order-display/format-order";
 
-import { CatalogueIcon } from "./catalogue-icons";
-import cardStyles from "../../order-detail/components/card.module.css";
+import { CatalogueIcon } from "../../../components/catalogue-icons/catalogue-icons";
+import cardStyles from "../../../components/card/card.module.css";
 import styles from "./preview-card.module.css";
 
 const t = texts.catalogueForm.preview;

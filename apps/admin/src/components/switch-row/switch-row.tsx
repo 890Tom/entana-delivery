@@ -1,11 +1,11 @@
 import { useId } from "react";
 import type { ReactElement } from "react";
 
-import { NoticeIcon } from "../../../components/notice/notice-icons";
-import { Switch } from "../../../components/switch/switch";
-import { texts } from "../../../i18n/texts";
+import { NoticeIcon } from "../notice/notice-icons";
+import { Switch } from "../switch/switch";
+import { texts } from "../../i18n/texts";
 
-import { CatalogueIcon } from "./catalogue-icons";
+import { CatalogueIcon } from "../catalogue-icons/catalogue-icons";
 import styles from "./switch-row.module.css";
 
 interface SwitchRowProps {

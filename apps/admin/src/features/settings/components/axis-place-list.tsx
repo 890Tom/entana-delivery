@@ -13,7 +13,7 @@ import type { ReactElement } from "react";
 import { Pill } from "../../../components/pill/pill";
 import { texts } from "../../../i18n/texts";
 import { OrderIcon } from "../../../order-display/order-icons";
-import { DragHandle } from "../../catalogue/components/drag-handle";
+import { DragHandle } from "../../../components/drag-handle/drag-handle";
 import type { AxisFormPlace } from "../rules/axis-form";
 import { badgeTextTone } from "../rules/badge-tone";
 

@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 
 import { texts } from "../../../i18n/texts";
 import { OrderIcon } from "../../../order-display/order-icons";
-import { FormButton } from "../../catalogue/components/form-buttons";
+import { FormButton } from "../../../components/form-buttons/form-buttons";
 import type { SettingsFormModel } from "../hooks/use-settings-form";
 
 import styles from "./settings-screen.module.css";

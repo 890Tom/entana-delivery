@@ -8,8 +8,8 @@ import visuallyHidden from "../../../components/visually-hidden/visually-hidden.
 import { texts } from "../../../i18n/texts";
 import { OrderIcon } from "../../../order-display/order-icons";
 import { RESELLERS_NEW_PATH, resellerPath } from "../../../routes";
-import { CatalogueIcon } from "../../catalogue/components/catalogue-icons";
-import { FormLink } from "../../catalogue/components/form-buttons";
+import { CatalogueIcon } from "../../../components/catalogue-icons/catalogue-icons";
+import { FormLink } from "../../../components/form-buttons/form-buttons";
 import { useResellerVisibility } from "../hooks/use-reseller-visibility";
 import type { VisibilityNotice } from "../hooks/use-reseller-visibility";
 import { useResellersScreen } from "../hooks/use-resellers-screen";

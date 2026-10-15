@@ -7,7 +7,7 @@ import { Notice } from "../../../components/notice/notice";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
 import { useInstance } from "../../instance/hooks/use-instance";
-import styles from "../../resellers/components/position-map.module.css";
+import styles from "../../../map/position-map.module.css";
 import { loadAxisEditorMap } from "../map/axis-editor-map-adapter";
 import type { AxisEditorMapHandle } from "../map/axis-editor-map-adapter";
 import type { AxisDrawing } from "../rules/axis-editor-drawing";

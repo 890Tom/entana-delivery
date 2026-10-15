@@ -6,7 +6,7 @@ import { describeInstant, formatEventTime } from "../rules/format-detail";
 import { buildHistory } from "../rules/history";
 import type { HistoryActor } from "../rules/history";
 
-import card from "./card.module.css";
+import card from "../../../components/card/card.module.css";
 import styles from "./history-card.module.css";
 
 const t = texts.orderDetail.history;

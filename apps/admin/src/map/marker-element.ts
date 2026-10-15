@@ -1,4 +1,4 @@
-import { ICON_PATHS } from "../../../order-display/order-icons";
+import { ICON_PATHS } from "../order-display/order-icons";
 
 import styles from "./marker.module.css";
 

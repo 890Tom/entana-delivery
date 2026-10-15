@@ -6,10 +6,10 @@ import { texts } from "../../../i18n/texts";
 import { PHOTO_ACCEPT } from "../rules/photo-check";
 import type { PhotoProblem } from "../rules/photo-check";
 
-import { CatalogueIcon } from "./catalogue-icons";
-import { FormButton } from "./form-buttons";
+import { CatalogueIcon } from "../../../components/catalogue-icons/catalogue-icons";
+import { FormButton } from "../../../components/form-buttons/form-buttons";
 import styles from "./photo-card.module.css";
-import cardStyles from "../../order-detail/components/card.module.css";
+import cardStyles from "../../../components/card/card.module.css";
 
 const t = texts.catalogueForm;
 

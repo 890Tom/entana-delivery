@@ -6,7 +6,7 @@ import { useInstance } from "../../instance/hooks/use-instance";
 import { OrderIcon } from "../../../order-display/order-icons";
 import { formatPhone } from "../../../order-display/format-order";
 
-import card from "./card.module.css";
+import card from "../../../components/card/card.module.css";
 import styles from "./customer-card.module.css";
 
 const t = texts.orderDetail.customer;

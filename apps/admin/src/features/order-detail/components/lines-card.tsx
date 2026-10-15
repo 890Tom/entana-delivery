@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { texts } from "../../../i18n/texts";
 import { formatAmount } from "../../../order-display/format-order";
 
-import card from "./card.module.css";
+import card from "../../../components/card/card.module.css";
 import styles from "./lines-card.module.css";
 
 const t = texts.orderDetail.lines;

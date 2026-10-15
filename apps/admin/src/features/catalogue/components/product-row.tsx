@@ -12,7 +12,7 @@ import { formatAmount } from "../../../order-display/format-order";
 import { catalogueProductPath } from "../../../routes";
 import { daysUnavailable } from "../rules/unavailable-since";
 
-import { CatalogueIcon } from "./catalogue-icons";
+import { CatalogueIcon } from "../../../components/catalogue-icons/catalogue-icons";
 import { RetireDialog } from "./retire-dialog";
 import styles from "./product-row.module.css";
 

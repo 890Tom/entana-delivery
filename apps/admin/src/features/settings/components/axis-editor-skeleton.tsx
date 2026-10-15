@@ -2,8 +2,8 @@ import type { ReactElement } from "react";
 
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
-import cardStyles from "../../order-detail/components/card.module.css";
-import positionStyles from "../../resellers/components/position-map.module.css";
+import cardStyles from "../../../components/card/card.module.css";
+import positionStyles from "../../../map/position-map.module.css";
 
 import styles from "./axis-editor.module.css";
 import screenStyles from "./settings-screen.module.css";

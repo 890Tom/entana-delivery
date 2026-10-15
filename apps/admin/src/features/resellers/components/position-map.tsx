@@ -10,7 +10,7 @@ import { loadPositionMap } from "../map/position-map-adapter";
 import type { PositionMapHandle } from "../map/position-map-adapter";
 import type { MapPoint } from "../rules/reseller-form";
 
-import styles from "./position-map.module.css";
+import styles from "../../../map/position-map.module.css";
 
 interface PositionMapProps {
   readonly point: MapPoint | null;

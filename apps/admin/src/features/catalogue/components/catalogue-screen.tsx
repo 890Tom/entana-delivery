@@ -16,8 +16,8 @@ import type { CatalogueCounts } from "../rules/catalogue-view";
 
 import styles from "./catalogue-screen.module.css";
 import { CatalogueNoticeView } from "./catalogue-notice-view";
-import { FormLink } from "./form-buttons";
-import { CatalogueIcon } from "./catalogue-icons";
+import { FormLink } from "../../../components/form-buttons/form-buttons";
+import { CatalogueIcon } from "../../../components/catalogue-icons/catalogue-icons";
 import { ProductTable } from "./product-table";
 
 const t = texts.catalogue;

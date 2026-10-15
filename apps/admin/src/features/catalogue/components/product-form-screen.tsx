@@ -13,7 +13,7 @@ import type { NoticeState } from "../hooks/use-catalogue-notice";
 import { useProductActions } from "../hooks/use-product-actions";
 import { useProducts } from "../hooks/use-products";
 
-import { CatalogueIcon } from "./catalogue-icons";
+import { CatalogueIcon } from "../../../components/catalogue-icons/catalogue-icons";
 import { CatalogueNoticeView } from "./catalogue-notice-view";
 import { ProductForm } from "./product-form";
 import styles from "./product-form.module.css";

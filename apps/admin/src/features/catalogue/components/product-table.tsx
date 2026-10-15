@@ -15,7 +15,7 @@ import type { ReactElement } from "react";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
 
-import { DragHandle } from "./drag-handle";
+import { DragHandle } from "../../../components/drag-handle/drag-handle";
 import { ProductRowView } from "./product-row";
 import type { RowActions } from "./product-row";
 import styles from "./product-table.module.css";

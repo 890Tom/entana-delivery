@@ -8,7 +8,7 @@ import { texts } from "../../../i18n/texts";
 import { NotFound } from "../../../layout/not-found/not-found";
 import { OrderIcon } from "../../../order-display/order-icons";
 import { SETTINGS_PATH } from "../../../routes";
-import cardStyles from "../../order-detail/components/card.module.css";
+import cardStyles from "../../../components/card/card.module.css";
 import { useAxes } from "../hooks/use-axes";
 import { useAxisDelete } from "../hooks/use-axis-delete";
 import type { AxisDeleteModel, AxisDeleteNotice } from "../hooks/use-axis-delete";
