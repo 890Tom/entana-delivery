@@ -7,16 +7,20 @@ import { createQueryClient } from "./data-fetching/query-client";
 import { LoginRoute } from "./features/session/guard/login-route";
 import { ProtectedArea } from "./features/session/guard/protected-area";
 import { SESSION_NOTICE_CONTEXT } from "./features/session/notice/session-notice";
-import { useDocumentTitle } from "./layout/document-title/document-title";
+import { DocumentTitleProvider, TitledScreen } from "./layout/document-title/document-title";
+import { texts } from "./i18n/texts";
 import { LOGIN_PATH } from "./routes";
 
 function Routes(): ReactElement {
-  useDocumentTitle();
   return (
-    <Switch>
-      <Route path={LOGIN_PATH} component={LoginRoute} />
-      <Route component={ProtectedArea} />
-    </Switch>
+    <DocumentTitleProvider>
+      <Switch>
+        <Route path={LOGIN_PATH}>
+          <TitledScreen title={texts.login.title} component={LoginRoute} />
+        </Route>
+        <Route component={ProtectedArea} />
+      </Switch>
+    </DocumentTitleProvider>
   );
 }
 

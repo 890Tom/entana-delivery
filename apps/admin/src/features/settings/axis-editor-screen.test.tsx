@@ -85,7 +85,7 @@ describe("the way to the screen of an axis", () => {
   it("opens the creation from « Ajouter un axe »", async () => {
     await openAxesTab(() => axesList(north), { [ROUTES.places]: () => placesList(...PLACES) });
 
-    fireEvent.click(screen.getByRole("link", { name: texts.settings.axes.add }));
+    fireEvent.click(await screen.findByRole("link", { name: texts.settings.axes.add }));
 
     expect(await screen.findByRole("heading", { name: t.newTitle })).toBeDefined();
   });

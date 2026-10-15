@@ -6,34 +6,13 @@ import { texts } from "../../../i18n/texts";
 import { AdminShell } from "../../../layout/admin-shell";
 import { AuthSkeleton } from "../../../layout/auth-skeleton/auth-skeleton";
 import { NotFound } from "../../../layout/not-found/not-found";
-import {
-  CATALOGUE_NEW_PATH,
-  CATALOGUE_PATH,
-  CATALOGUE_PRODUCT_PATTERN,
-  HOME_PATH,
-  LOGIN_PATH,
-  ORDER_PATH_PATTERN,
-  ORDERS_PATH,
-  RESELLER_PATTERN,
-  RESELLERS_NEW_PATH,
-  RESELLERS_PATH,
-  SETTINGS_AXIS_NEW_PATH,
-  SETTINGS_AXIS_PATTERN,
-  SETTINGS_PATH,
-  SETTINGS_TEXTS_PATH,
-} from "../../../routes";
-import { CatalogueScreen } from "../../catalogue/catalogue-screen";
-import { EditProductScreen, NewProductScreen } from "../../catalogue/product-form-screen";
+import { TitledScreen } from "../../../layout/document-title/document-title";
+import { HOME_PATH, LOGIN_PATH, ORDERS_PATH } from "../../../routes";
 import { CatalogueFlashProvider } from "../../catalogue/notice/catalogue-flash";
-import { OrderDetailScreen } from "../../order-detail/order-detail-screen";
-import { OrdersScreen } from "../../orders/orders-screen";
-import { EditResellerScreen, NewResellerScreen } from "../../resellers/reseller-form-screen";
-import { ResellersScreen } from "../../resellers/resellers-screen";
-import { EditAxisScreen, NewAxisScreen } from "../../settings/axis-editor-screen";
-import { SettingsFeesScreen, SettingsTextsScreen } from "../../settings/settings-screen";
 import { useSession } from "../api/use-session";
 
 import styles from "./protected-area.module.css";
+import { SIGNED_IN_SCREENS } from "./signed-in-screens";
 
 /** The screens of a signed-in person; an unknown address is "not found". */
 function SignedInRoutes(): ReactElement {
@@ -42,19 +21,14 @@ function SignedInRoutes(): ReactElement {
       <Route path={HOME_PATH}>
         <Redirect to={ORDERS_PATH} replace />
       </Route>
-      <Route path={ORDERS_PATH} component={OrdersScreen} />
-      <Route path={ORDER_PATH_PATTERN} component={OrderDetailScreen} />
-      <Route path={CATALOGUE_PATH} component={CatalogueScreen} />
-      <Route path={CATALOGUE_NEW_PATH} component={NewProductScreen} />
-      <Route path={CATALOGUE_PRODUCT_PATTERN} component={EditProductScreen} />
-      <Route path={RESELLERS_PATH} component={ResellersScreen} />
-      <Route path={RESELLERS_NEW_PATH} component={NewResellerScreen} />
-      <Route path={RESELLER_PATTERN} component={EditResellerScreen} />
-      <Route path={SETTINGS_PATH} component={SettingsFeesScreen} />
-      <Route path={SETTINGS_TEXTS_PATH} component={SettingsTextsScreen} />
-      <Route path={SETTINGS_AXIS_NEW_PATH} component={NewAxisScreen} />
-      <Route path={SETTINGS_AXIS_PATTERN} component={EditAxisScreen} />
-      <Route component={NotFound} />
+      {SIGNED_IN_SCREENS.map(({ path, component, title }) => (
+        <Route key={path} path={path}>
+          <TitledScreen title={title} component={component} />
+        </Route>
+      ))}
+      <Route>
+        <TitledScreen title={texts.notFound.title} component={NotFound} />
+      </Route>
     </Switch>
   );
 }

@@ -9,6 +9,7 @@ import {
   NOW,
   openOrderDetail,
   openOrderPage,
+  ORDER_CODE,
   ORDER_ID,
 } from "../../test-support/order-detail/detail-harness";
 import {
@@ -45,6 +46,14 @@ const serve = (order = buildDetail()): Parameters<typeof openOrderDetail>[0] => 
 });
 
 describe("the sheet", () => {
+  it("titles the document with the code of the order and nothing about the customer", async () => {
+    await openOrderDetail(serve());
+
+    await waitFor(() => {
+      expect(document.title).toBe(`${t.title(ORDER_CODE)} — Administration — Maison Démo`);
+    });
+  });
+
   it("shows the articles, the totals, the customer, the landmark and the history", async () => {
     await openOrderDetail(serve());
 

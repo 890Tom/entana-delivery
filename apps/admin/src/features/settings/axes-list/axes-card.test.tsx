@@ -106,7 +106,7 @@ describe("the list of the axes", () => {
   it("shows a skeleton while the axes load", async () => {
     await openAxesTab(pendingUntilAborted);
 
-    const card = screen.getByRole("region", { name: t.title });
+    const card = await screen.findByRole("region", { name: t.title });
     expect(card.querySelector("[aria-busy='true']")).not.toBeNull();
     expect(within(card).getByText(texts.common.loading)).toBeDefined();
   });

@@ -5,6 +5,8 @@ import { DELIVERY_NAME_MAX_LENGTH, MAX_PLACES_PER_AXIS } from "@entana/contracts
 export const axisEditorTexts = {
   back: "Axes",
   newTitle: "Nouvel axe",
+  // To confirm: the title of the document of the screen of an existing axis.
+  editTitle: "Modifier l'axe",
   // To confirm.
   loadFailed: "L'axe n'a pas pu être chargé. Vérifiez la connexion.",
   name: "Nom de l'axe",

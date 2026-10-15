@@ -16,7 +16,6 @@ export const texts = {
   },
   document: {
     title: "Administration",
-    titleWithShop: (shopName: string): string => `Administration — ${shopName}`,
   },
   login: {
     title: "Connexion",
@@ -45,6 +44,8 @@ export const texts = {
   orderDetail: {
     back: "Commandes",
     title: (code: string): string => `Commande #${code}`,
+    // To confirm: the title of the document while the order loads.
+    loadingTitle: "Commande",
     notFound: "Commande introuvable.",
     loadFailed: "Impossible de charger la commande.",
     receivedToday: (time: string): string => `Reçue aujourd'hui à ${time}`,

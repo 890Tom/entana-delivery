@@ -4,6 +4,7 @@ import { useParams } from "wouter";
 
 import { Notice } from "../../components/notice/notice";
 import { texts } from "../../i18n/texts";
+import { useRefinedScreenTitle } from "../../layout/document-title/document-title";
 import { useNow } from "../../clock/use-now";
 import { useOrderDetail } from "./api/use-order-detail";
 import { useStatusChange } from "./decision/use-status-change";
@@ -51,6 +52,7 @@ function ReadySheet({
 }): ReactElement {
   const change = useStatusChange(orderId);
   const now = useNow();
+  useRefinedScreenTitle(t.title(order.publicCode));
   return (
     <div className={styles.screen}>
       <DetailHeader order={order} now={now} />
