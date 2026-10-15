@@ -3,6 +3,9 @@ import { resolve } from "node:path";
 
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Connect, type Plugin } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
+
+import { PWA_OPTIONS } from "./config/pwa-config";
 
 const THEME_FILE = "theme.local.css";
 
@@ -44,10 +47,10 @@ function themeFallback(): Plugin {
 }
 
 // The dev server keeps Vite's default host (localhost only). `server.proxy` is read by
-// `vite dev` only: `vite build` and `vite preview` ignore it, so no proxy reaches production.
-// /media serves the shop logo, which the API hosts.
+// `vite dev`, and by `vite preview` too (`preview.proxy` defaults to it); `vite build` ignores
+// it, so no proxy reaches production. /media serves the shop logo, which the API hosts.
 export default defineConfig({
-  plugins: [react(), themeFallback()],
+  plugins: [react(), themeFallback(), VitePWA(PWA_OPTIONS)],
   server: {
     proxy: { "/api": "http://127.0.0.1:3000", "/media": "http://127.0.0.1:3000" },
   },

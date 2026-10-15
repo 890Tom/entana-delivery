@@ -13,6 +13,8 @@ interface NoticeProps {
   readonly tone: "error" | "info" | "success";
   readonly children: ReactNode;
   readonly action?: NoticeAction;
+  /** A second choice after the first one, such as "Plus tard" after "Mettre à jour". */
+  readonly secondaryAction?: NoticeAction;
   /** False when another notice on the page already announces the same thing (no live role). */
   readonly isAnnounced?: boolean;
   /** Makes the notice a place that a script can move the focus to (not a stop of the Tab key). */
@@ -45,6 +47,7 @@ export function Notice({
   tone,
   children,
   action,
+  secondaryAction,
   isAnnounced = true,
   ref,
   tabIndex,
@@ -60,6 +63,7 @@ export function Notice({
       <NoticeIcon name={icon} />
       <p className={styles.text}>{children}</p>
       {action !== undefined && <NoticeActionControl action={action} />}
+      {secondaryAction !== undefined && <NoticeActionControl action={secondaryAction} />}
     </div>
   );
 }

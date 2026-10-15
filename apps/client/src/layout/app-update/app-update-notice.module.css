@@ -1,0 +1,6 @@
+/* Aligned with the step indicator below it. */
+.frame {
+  max-width: calc(var(--size-content-max) + 2 * var(--space-6));
+  padding: var(--space-4) var(--space-6) 0;
+  margin: 0 auto;
+}

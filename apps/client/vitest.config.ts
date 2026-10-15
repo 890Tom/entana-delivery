@@ -10,7 +10,7 @@ export default mergeConfig(
       // A style sheet read as text by a test (`?raw`) is the file itself; the others are not
       // processed, and their class names are proxied.
       css: { include: [/\.module\.css\?raw$/] },
-      include: ["src/**/*.test.{ts,tsx}"],
+      include: ["src/**/*.test.{ts,tsx}", "config/**/*.test.ts"],
       coverage: {
         provider: "v8",
         // Explicit, so that a source file without any test still counts as uncovered.
