@@ -1,4 +1,4 @@
-import type { DeliverySettings } from "../../delivery/delivery-settings.js";
+import type { DeliverySettings } from "../delivery-settings.js";
 import type { UpdateDeliverySettingsRequest } from "./delivery-settings-request.js";
 
 export type DeliverySettingsField = keyof DeliverySettings;

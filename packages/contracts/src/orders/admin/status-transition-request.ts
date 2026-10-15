@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PRODUCT_PRICE_MAX_AR } from "../../admin/catalogue/product-form.js";
+import { PRODUCT_PRICE_MAX_AR } from "../../catalog/admin/product-form.js";
 
 /** Longest reason the shop can give for a refusal. */
 export const MAX_STATUS_REASON_LENGTH = 300;
