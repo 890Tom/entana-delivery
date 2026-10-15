@@ -4,7 +4,6 @@ import type { ReactElement, RefObject } from "react";
 import { Link } from "wouter";
 
 import button from "../../../components/button/button.module.css";
-import { Notice } from "../../../components/notice/notice";
 import { texts } from "../../../i18n/texts";
 import { useCart } from "../cart-state/cart-context";
 
@@ -109,11 +108,6 @@ function Subtotal({
         <span className={styles.subtotalLabel}>{texts.cart.screen.subtotal}</span>
         <span className={styles.subtotalAmount}>{formatAmount(total)}</span>
       </p>
-      {variant === "panel" ? (
-        <p className={styles.hint}>{texts.cart.screen.deliveryHint}</p>
-      ) : (
-        <Notice tone="info">{texts.cart.screen.deliveryHint}</Notice>
-      )}
     </div>
   );
 }

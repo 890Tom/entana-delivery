@@ -18,6 +18,7 @@ import {
   renderDelivery,
   seedCart,
   stubApi,
+  waitForQuote,
 } from "../../test-support/harnesses/delivery-harness";
 import { continueButtons as contactContinueButtons } from "../../test-support/harnesses/contact-harness";
 import { expectNoAccessibilityViolations } from "../../test-support/assertions/expect-no-accessibility-violations";
@@ -26,6 +27,7 @@ import { restoreGeolocation, stubGeolocation } from "../../test-support/stubs/st
 
 import { MAP_LOADER_CONTEXT } from "./map/map-loader-context";
 
+const QUOTE_ADDRESS = "/api/v1/delivery/quote";
 const CONSOLE_METHODS = ["log", "info", "warn", "error", "debug"] as const;
 
 beforeEach(() => {
@@ -193,6 +195,7 @@ describe("the delivery screen", () => {
       expect(map.centrings).toHaveLength(1);
     });
     fireEvent.change(landmarkField(), { target: { value: "Portail secret du voisin" } });
+    await waitForQuote();
     fireEvent.click(continueButtons().card);
     await waitFor(() => {
       expect(window.location.pathname).toBe("/coordonnees");
@@ -217,19 +220,26 @@ describe("the delivery screen", () => {
     });
 
     // Not the page text: the review that follows shows these texts to their owner, by design
-    // (the review's own test checks that nothing else carries them).
+    // (the review's own test checks that nothing else carries them). The point goes in one place
+    // only, the body of the quote, which is left out here and checked below.
+    const calls = vi.mocked(fetch).mock.calls;
+    const isQuote = (call: (typeof calls)[number]): boolean => call[0] === QUOTE_ADDRESS;
     const everythingWritten = JSON.stringify([
       consoleCalls.map((spy) => spy.mock.calls),
       window.location.href,
-      vi.mocked(fetch).mock.calls,
+      calls.map((call) => (isQuote(call) ? [call[0], { ...call[1], body: undefined }] : call)),
     ]);
     expect(everythingWritten).not.toMatch(
       /18\.9|47\.5|Portail secret|Rakoto Secret|98 765 43|349876543|Chien méchant/,
     );
-    // The only requests are the instance configuration and the catalogue (the summary of the
-    // contact screen): the map is the one external call, made by the library, never by the app.
-    expect(new Set(vi.mocked(fetch).mock.calls.map((call) => call[0]))).toEqual(
-      new Set(["/api/v1/instance", "/api/v1/products"]),
+    // The point and the pieces, as numbers in the body of a POST: nothing else of the customer.
+    expect(calls.filter(isQuote).map((call) => [call[1]?.method, call[1]?.body])).toContainEqual([
+      "POST",
+      JSON.stringify({ latitude: TAPPED_ROUNDED.lat, longitude: TAPPED_ROUNDED.lng, pieces: 1 }),
+    ]);
+    // The requests of the app: the map is the one external call, made by the library.
+    expect(new Set(calls.map((call) => call[0]))).toEqual(
+      new Set(["/api/v1/instance", "/api/v1/products", "/api/v1/delivery/zones", QUOTE_ADDRESS]),
     );
   });
 

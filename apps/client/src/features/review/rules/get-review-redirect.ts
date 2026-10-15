@@ -6,6 +6,8 @@ import { isValidLandmark } from "../../delivery/rules/validate-landmark";
 interface ReviewGuardInput {
   readonly itemCount: number;
   readonly hasPoint: boolean;
+  /** A quote retained for this point and this cart. */
+  readonly hasDeliveryQuote: boolean;
   readonly landmark: string;
   readonly name: string;
   readonly phone: string;
@@ -22,7 +24,7 @@ export function getReviewRedirect(input: ReviewGuardInput): string | null {
   if (input.itemCount === 0) {
     return CART_PATH;
   }
-  if (!input.hasPoint || !isValidLandmark(input.landmark)) {
+  if (!input.hasPoint || !isValidLandmark(input.landmark) || !input.hasDeliveryQuote) {
     return DELIVERY_PATH;
   }
   const isContactValid =

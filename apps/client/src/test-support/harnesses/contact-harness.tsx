@@ -1,12 +1,17 @@
-import type { PublicInstance, PublicProduct } from "@entana/contracts";
+import type { DeliveryQuoteResponse, PublicInstance, PublicProduct } from "@entana/contracts";
 import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { vi } from "vitest";
 
 import { CART_STORAGE_KEY } from "../../features/cart/storage/cart-storage";
 import { CONTACT_DRAFT_STORAGE_KEY } from "../../features/contact/contact-draft/contact-draft-storage";
 import { DELIVERY_DRAFT_STORAGE_KEY } from "../../features/delivery/delivery-draft/delivery-draft-storage";
+import {
+  forgetDeliveryQuote,
+  retainDeliveryQuote,
+} from "../../features/delivery/quote/retained-quote";
 import { texts } from "../../i18n/texts";
 
+import { buildDeliveryQuote } from "../builders/build-delivery-quote";
 import { buildInstance } from "../builders/build-instance";
 import { buildProduct, buildProductId } from "../builders/build-product";
 import { renderAt } from "./delivery-harness";
@@ -48,6 +53,11 @@ interface OpenOptions {
   readonly api?: Partial<ApiControl>;
   /** The address the page is opened at: the contact screen by default. */
   readonly path?: string;
+  /**
+   * The quote retained on the delivery screen, for the point of the complete draft and the pieces
+   * of the cart; null when there is none (a reload). A free delivery by default.
+   */
+  readonly quote?: DeliveryQuoteResponse | null;
   /** What the network answers to the order request; it never answers when left out. */
   readonly order?: (init: RequestInit | undefined) => Promise<Response>;
 }
@@ -65,7 +75,10 @@ function answer(kind: Answer, body: unknown, init: RequestInit | undefined): Pro
   return Promise.resolve(kind === "ok" ? jsonResponse(body) : problemResponse(500));
 }
 
-/** The network boundary: the order, the tracking that follows it, the instance, the catalogue. */
+/**
+ * The network boundary: the order, the tracking that follows it, the delivery screen (when a test
+ * is sent back to it), the instance, the catalogue.
+ */
 function stubNetwork(control: ApiControl, order: OpenOptions["order"]): ReturnType<typeof vi.fn> {
   const fetchStub = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     if (input === "/api/v1/orders") {
@@ -75,12 +88,30 @@ function stubNetwork(control: ApiControl, order: OpenOptions["order"]): ReturnTy
     if (input === "/api/v1/tracking") {
       return pendingUntilAborted(init);
     }
+    if (input === "/api/v1/delivery/zones") {
+      return Promise.resolve(jsonResponse({ zones: [] }));
+    }
+    if (input === "/api/v1/delivery/quote") {
+      return Promise.resolve(jsonResponse(buildDeliveryQuote()));
+    }
     return input === "/api/v1/instance"
       ? answer(control.instance, control.instanceData, init)
       : answer(control.catalogue, { products: control.products }, init);
   });
   vi.stubGlobal("fetch", fetchStub);
   return fetchStub;
+}
+
+/** What the delivery screen would have retained before the contact screen opened. */
+function retainQuote(
+  quote: DeliveryQuoteResponse | null,
+  lines: readonly (readonly [string, number])[],
+): void {
+  forgetDeliveryQuote();
+  if (quote !== null) {
+    const pieces = lines.reduce((sum, [, quantity]) => sum + quantity, 0);
+    retainDeliveryQuote({ point: COMPLETE_DELIVERY.point, pieces, quote });
+  }
 }
 
 /** Stubs the network (the boundary), fills the storages and shows the contact screen. */
@@ -113,11 +144,15 @@ export function openContact(options: OpenOptions = {}): {
   if (options.contactDraft !== undefined) {
     sessionStorage.setItem(CONTACT_DRAFT_STORAGE_KEY, options.contactDraft);
   }
+  retainQuote(options.quote === undefined ? buildDeliveryQuote() : options.quote, lines);
   renderAt(options.path ?? "/coordonnees", createFakeMapLoader());
   return { control, fetchStub };
 }
 
-/** Shows the screen again with the storages as they are: a reload. */
+/**
+ * Shows the screen again with the storages as they are: a reload of what they hold. The quote
+ * retained in memory is kept; the forgetting of it by a reload is tested on its own.
+ */
 export function reopenContact(): void {
   cleanup();
   renderAt("/coordonnees", createFakeMapLoader());

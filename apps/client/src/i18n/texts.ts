@@ -75,8 +75,19 @@ export const texts: {
     /** Shown when the customer continues without having placed the point on the map. */
     readonly pointMissing: string;
     readonly continue: string;
-    /** The delivery fee line, shared with the next screens of the order. */
-    readonly fee: { readonly label: string; readonly free: string };
+    /**
+     * The delivery fee line, shared with the next screens of the order. The texts other than
+     * `label` and `free` are to confirm (6g-8b).
+     */
+    readonly fee: {
+      readonly label: string;
+      readonly free: string;
+      /** Inside an axis: the place the server found for the point. */
+      readonly zone: (placeName: string) => string;
+      /** Under a fee that the quantity can waive. */
+      readonly freeFrom: (pieces: number) => string;
+      readonly failed: string;
+    };
     readonly geo: {
       readonly denied: string;
       readonly unavailable: string;
@@ -141,7 +152,6 @@ export const texts: {
       readonly title: string;
       readonly heading: string;
       readonly subtotal: string;
-      readonly deliveryHint: string;
       readonly empty: { readonly text: string; readonly action: string };
       readonly continue: string;
     };
@@ -214,7 +224,13 @@ export const texts: {
     },
     pointMissing: "Placez le point de livraison sur la carte.",
     continue: "Continuer",
-    fee: { label: "Livraison", free: "Gratuite" },
+    fee: {
+      label: "Livraison",
+      free: "Gratuite",
+      zone: (placeName) => `Zone\u00a0: ${placeName}`,
+      freeFrom: (pieces) => `Livraison offerte dès ${String(pieces)}\u00a0pièces.`,
+      failed: "Impossible de calculer les frais de livraison.",
+    },
     geo: {
       denied: "Position refusée. Autorisez-la dans votre navigateur ou touchez la carte.",
       unavailable: "Position indisponible. Touchez la carte pour placer le point.",
@@ -274,7 +290,6 @@ export const texts: {
       title: "Panier",
       heading: "Votre panier",
       subtotal: "Sous-total",
-      deliveryHint: "Frais de livraison selon votre zone.",
       empty: { text: "Votre panier est vide.", action: "Voir les produits" },
       continue: "Choisir où livrer",
     },

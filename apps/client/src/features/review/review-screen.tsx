@@ -30,6 +30,6 @@ export function ReviewScreen(): ReactElement | null {
     case "redirect":
       return <Redirect href={gate.href} replace />;
     case "show":
-      return <ReviewContent submission={submission} />;
+      return <ReviewContent submission={submission} deliveryQuote={gate.deliveryQuote} />;
   }
 }

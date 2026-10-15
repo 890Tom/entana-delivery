@@ -3,7 +3,7 @@ import type { ReactElement, ReactNode } from "react";
 
 import { Button } from "../../../components/button/button";
 import { texts } from "../../../i18n/texts";
-import type { GeoPoint, MapAdapter } from "../map/map-adapter";
+import type { GeoPoint, MapAdapter, MapZone } from "../map/map-adapter";
 
 import { MapFrame } from "./map-frame";
 import styles from "./point-picker.module.css";
@@ -22,6 +22,8 @@ interface PointPickerProps {
   /** A point to bring into view: a new object each time the map must move there. */
   readonly centreOn: GeoPoint | null;
   readonly onPick: (point: GeoPoint) => void;
+  /** The circles of the delivery places: none while they are not known. */
+  readonly zones: readonly MapZone[];
   /**
    * A message about the map, shown once: the layout puts it under the map on a phone, and above
    * the side card from 1024 px. Nothing when there is none.
@@ -42,15 +44,20 @@ function resolveStatus(
   return isFailed ? { status: "failed" } : { status: "loading" };
 }
 
-/** Keeps the map in step with the draft: the marker where the point is, the view where asked. */
-function useMapSync(
-  adapter: MapAdapter | null,
-  point: GeoPoint | null,
-  centreOn: GeoPoint | null,
-): void {
+interface MapSync {
+  readonly point: GeoPoint | null;
+  readonly centreOn: GeoPoint | null;
+  readonly zones: readonly MapZone[];
+}
+
+/** Keeps the map in step with the screen: the marker, the circles, the view where asked. */
+function useMapSync(adapter: MapAdapter | null, { point, centreOn, zones }: MapSync): void {
   useEffect(() => {
     adapter?.setMarker(point);
   }, [adapter, point]);
+  useEffect(() => {
+    adapter?.setZones(zones);
+  }, [adapter, zones]);
   useEffect(() => {
     if (adapter !== null && centreOn !== null) {
       adapter.centreOn(centreOn, RECENTRE_ZOOM);
@@ -59,22 +66,14 @@ function useMapSync(
 }
 
 /** The map, its fallback while it loads or fails, and the keyboard way to place the point. */
-export function PointPicker({
-  config,
-  isConfigFailed,
-  onRetryConfig,
-  point,
-  centreOn,
-  onPick,
-  notice,
-  children,
-}: PointPickerProps): ReactElement {
+export function PointPicker(props: PointPickerProps): ReactElement {
+  const { config, isConfigFailed, onRetryConfig, onPick, notice, children } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, retry } = useMapAdapter(containerRef, config, onPick);
   const status = resolveStatus(state, config, isConfigFailed);
   const adapter = status.status === "ready" ? status.adapter : null;
 
-  useMapSync(adapter, point, centreOn);
+  useMapSync(adapter, props);
 
   return (
     <div className={styles.layout}>

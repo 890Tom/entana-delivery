@@ -1,5 +1,5 @@
 import { computeOrderTotal } from "@entana/contracts";
-import type { ProductListResponse } from "@entana/contracts";
+import type { DeliveryQuoteResponse, ProductListResponse } from "@entana/contracts";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { ReactElement, ReactNode } from "react";
 
@@ -14,11 +14,11 @@ import { useProducts } from "../catalogue/api/use-products";
 import { useCart } from "../cart/cart-state/cart-context";
 import type { CartLine } from "../cart/rules/cart-reducer";
 import { toDisplayLines } from "../cart/rules/to-display-lines";
-import { estimateDeliveryFee } from "../delivery/rules/estimate-delivery-fee";
 
 function toContent(
   query: UseQueryResult<ProductListResponse>,
   cartLines: readonly CartLine[],
+  deliveryQuote: DeliveryQuoteResponse,
 ): OrderSummaryContent {
   if (query.isPending) {
     return { status: "loading" };
@@ -38,7 +38,6 @@ function toContent(
   if (lines.length === 0) {
     return { status: "empty" };
   }
-  const deliveryFeeAr = estimateDeliveryFee();
   return {
     status: "ready",
     lines: lines.map((line) => ({
@@ -47,30 +46,33 @@ function toContent(
       quantity: line.quantity,
       amountAr: line.unitPriceAr * line.quantity,
     })),
-    deliveryFeeAr,
+    deliveryQuote,
     // A display only: the server recomputes the total when the order is placed.
     totalAr: computeOrderTotal(
       lines.map((line) => ({ unitPrice: line.unitPriceAr, quantity: line.quantity })),
-      deliveryFeeAr,
+      deliveryQuote.feeAr,
     ),
   };
 }
 
 /**
- * The summary of the customer's cart, priced by the catalogue. The screens of the order that show
- * it put their own notice and primary button in `children`.
+ * The summary of the customer's cart, priced by the catalogue, with the fee of the quote retained
+ * on the delivery screen (no new request). The screens of the order that show it put their own
+ * notice and primary button in `children`.
  */
 export function OrderSummaryCard({
+  deliveryQuote,
   title,
   children,
 }: {
+  deliveryQuote: DeliveryQuoteResponse;
   title?: OrderSummaryTitle;
   children?: ReactNode;
 }): ReactElement {
   const query = useProducts();
   const { lines } = useCart();
   return (
-    <OrderSummary content={toContent(query, lines)} title={title}>
+    <OrderSummary content={toContent(query, lines, deliveryQuote)} title={title}>
       {children}
     </OrderSummary>
   );

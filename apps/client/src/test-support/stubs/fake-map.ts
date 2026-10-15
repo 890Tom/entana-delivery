@@ -6,6 +6,7 @@ import type {
   MapAdapter,
   MapAdapterOptions,
   MapLoader,
+  MapZone,
 } from "../../features/delivery/map/map-adapter";
 
 /** A map that records what the screen asks of it. No WebGL: the real library is not run in tests. */
@@ -13,6 +14,8 @@ export interface FakeMap {
   readonly options: MapAdapterOptions;
   /** Every marker position set, in order; null is a removal. */
   readonly markers: (GeoPoint | null)[];
+  /** Every list of circles drawn, in order. */
+  readonly zoneDrawings: (readonly MapZone[])[];
   readonly centrings: { readonly point: GeoPoint; readonly zoom: number }[];
   center: GeoPoint;
   isDestroyed: boolean;
@@ -40,6 +43,7 @@ function buildFakeMap(options: MapAdapterOptions): { map: FakeMap; adapter: MapA
   const map: FakeMap = {
     options,
     markers: [],
+    zoneDrawings: [],
     centrings: [],
     center: options.center,
     isDestroyed: false,
@@ -50,6 +54,9 @@ function buildFakeMap(options: MapAdapterOptions): { map: FakeMap; adapter: MapA
   const adapter: MapAdapter = {
     setMarker: (point) => {
       map.markers.push(point);
+    },
+    setZones: (zones) => {
+      map.zoneDrawings.push(zones);
     },
     centreOn: (point, zoom) => {
       map.centrings.push({ point, zoom });

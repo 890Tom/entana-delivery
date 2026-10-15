@@ -1,3 +1,4 @@
+import { computeDistanceMeters } from "@entana/contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { texts } from "../../../i18n/texts";
@@ -21,6 +22,9 @@ const library = vi.hoisted(() => {
     markerMoves: [] as unknown[],
     markerHandlers: {} as Record<string, Handler[]>,
     markerRemovals: 0,
+    sources: {} as Record<string, unknown>,
+    layers: [] as Record<string, unknown>[],
+    zoneData: [] as unknown[],
   };
   class FakeMap {
     constructor(options: Record<string, unknown>) {
@@ -53,6 +57,21 @@ const library = vi.hoisted(() => {
     }
     remove(): void {
       state.isRemoved = true;
+    }
+    addSource(id: string, source: unknown): void {
+      state.sources[id] = source;
+    }
+    addLayer(layer: Record<string, unknown>): void {
+      state.layers.push(layer);
+    }
+    getSource(id: string): { setData: (data: unknown) => void } | undefined {
+      return id in state.sources
+        ? {
+            setData: (data) => {
+              state.zoneData.push(data);
+            },
+          }
+        : undefined;
     }
   }
   class FakeMarker {
@@ -140,6 +159,9 @@ beforeEach(() => {
   state.markerMoves = [];
   state.markerHandlers = {};
   state.markerRemovals = 0;
+  state.sources = {};
+  state.layers = [];
+  state.zoneData = [];
 });
 
 describe("the MapLibre adapter", () => {
@@ -252,5 +274,31 @@ describe("the MapLibre adapter", () => {
 
     expect(state.jumped).toEqual([{ center: [47.5, -18.9], zoom: 16 }]);
     expect(state.eased).toEqual([]);
+  });
+
+  it("draws each zone as a dashed outline of its radius in metres, in the colours of the tokens", async () => {
+    const container = document.createElement("div");
+    container.style.setProperty("--color-ink", "rgb(1, 2, 3)");
+    container.style.setProperty("--size-map-zone-stroke", "1.5px");
+    container.style.setProperty("--map-zone-dash", "6 6");
+    const adapter = await loadReady(buildOptions({ container }));
+
+    adapter.setZones([
+      { center: { lat: -18.9, lng: 47.5 }, radiusM: 800 },
+      { center: { lat: -18.95, lng: 47.55 }, radiusM: 500 },
+    ]);
+
+    expect(state.layers).toEqual([
+      expect.objectContaining({
+        type: "line",
+        paint: { "line-color": "rgb(1, 2, 3)", "line-width": 1.5, "line-dasharray": [4, 4] },
+      }),
+    ]);
+    const drawn = state.zoneData.at(-1) as {
+      features: { geometry: { coordinates: number[][] } }[];
+    };
+    expect(drawn.features).toHaveLength(2);
+    const [lng = 0, lat = 0] = drawn.features[0]?.geometry.coordinates[0] ?? [];
+    expect(computeDistanceMeters({ lat: -18.9, lng: 47.5 }, { lat, lng })).toBeCloseTo(800, 3);
   });
 });

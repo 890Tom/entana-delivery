@@ -17,6 +17,7 @@ import {
   typeInto,
 } from "../../test-support/harnesses/contact-harness";
 import { buildInstance } from "../../test-support/builders/build-instance";
+import { waitForQuote } from "../../test-support/harnesses/delivery-harness";
 import { expectNoAccessibilityViolations } from "../../test-support/assertions/expect-no-accessibility-violations";
 
 import { CONTACT_DRAFT_STORAGE_KEY } from "./contact-draft/contact-draft-storage";
@@ -70,6 +71,21 @@ describe("the contact screen guards", () => {
     openContact({ delivery });
 
     await screen.findByRole("heading", { level: 1, name: texts.delivery.heading });
+    expect(window.location.pathname).toBe("/livraison");
+  });
+
+  it("sends back to the delivery screen without a retained quote, which asks it again from the draft", async () => {
+    const { fetchStub } = openContact({ quote: null });
+
+    await screen.findByRole("heading", { level: 1, name: texts.delivery.heading });
+    // The draft is kept, and the fee of its point is asked without a new tap: no loop either.
+    expect(
+      screen.getByRole<HTMLInputElement>("textbox", { name: texts.delivery.landmark.label }).value,
+    ).toBe("Portail bleu");
+    await waitForQuote();
+    expect(fetchStub.mock.calls.map((call: unknown[]) => call[0])).toContain(
+      "/api/v1/delivery/quote",
+    );
     expect(window.location.pathname).toBe("/livraison");
   });
 });

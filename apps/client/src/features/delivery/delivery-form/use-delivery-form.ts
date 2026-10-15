@@ -22,9 +22,10 @@ export interface DeliveryFormState {
 /**
  * The checks of "Continuer": both errors are shown together, the focus goes to the first element
  * in error in visual order (the map's notice, then the field), and an error goes away as soon as
- * what it says is fixed. When all is valid the draft is saved and the next screen opens.
+ * what it says is fixed. When all is valid the draft is saved and the next screen opens. With a
+ * point whose fee is not known (being computed, or failed), the button does nothing.
  */
-export function useDeliveryForm(): DeliveryFormState {
+export function useDeliveryForm(isQuoteReady: boolean): DeliveryFormState {
   const { point, landmark, setLandmark, save } = useDeliveryDraft();
   const [, navigate] = useLocation();
   const [hasTried, setHasTried] = useState(false);
@@ -43,6 +44,9 @@ export function useDeliveryForm(): DeliveryFormState {
   }, [focusRequest]);
 
   const submit = (): void => {
+    if (point !== null && !isQuoteReady) {
+      return;
+    }
     setHasTried(true);
     if (point === null || !isLandmarkValid) {
       setFocusRequest({ target: point === null ? "point" : "landmark" });

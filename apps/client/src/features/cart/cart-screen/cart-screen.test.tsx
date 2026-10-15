@@ -154,7 +154,7 @@ describe("the cart screen", () => {
 
     // 2 x 4 500 + 1 x 3 000
     expect(subtotal.parentElement?.textContent).toContain("12 000 Ar");
-    expect(screen.getByText(texts.cart.screen.deliveryHint)).toBeTruthy();
+    expect(screen.queryByText(texts.delivery.fee.label)).toBeNull();
   });
 
   it("removes the line at quantity 1 and puts the focus on the next line", async () => {

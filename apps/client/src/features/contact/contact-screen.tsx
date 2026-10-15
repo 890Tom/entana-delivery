@@ -1,4 +1,5 @@
 import { useId } from "react";
+import type { DeliveryQuoteResponse } from "@entana/contracts";
 import type { ReactElement } from "react";
 import { Redirect } from "wouter";
 
@@ -12,6 +13,7 @@ import { useCart } from "../cart/cart-state/cart-context";
 import { useCartReconciliation } from "../cart/reconciliation/use-cart-reconciliation";
 import { useProducts } from "../catalogue/api/use-products";
 import { useDeliveryDraft } from "../delivery/delivery-draft/delivery-draft-context";
+import { useOrderQuote } from "../delivery/quote/use-order-quote";
 import { isValidLandmark } from "../delivery/rules/validate-landmark";
 import { OrderSummaryCard } from "../order-summary/order-summary-card";
 
@@ -21,8 +23,10 @@ import styles from "./contact-screen.module.css";
 
 function ContactContent({
   hasRemovedUnavailable,
+  deliveryQuote,
 }: {
   hasRemovedUnavailable: boolean;
+  deliveryQuote: DeliveryQuoteResponse;
 }): ReactElement {
   const form = useContactForm();
   const formId = useId();
@@ -39,7 +43,7 @@ function ContactContent({
           </div>
         </div>
         <div className={styles.side}>
-          <OrderSummaryCard>
+          <OrderSummaryCard deliveryQuote={deliveryQuote}>
             <Notice tone="info">{texts.contact.dateNotice}</Notice>
             <button type="submit" form={formId} className={bar.link}>
               {texts.contact.continue}
@@ -60,6 +64,7 @@ export function ContactScreen(): ReactElement {
   useDocumentTitle(texts.contact.title);
   const { itemCount, hasRemovedUnavailable } = useCart();
   const { point, landmark } = useDeliveryDraft();
+  const deliveryQuote = useOrderQuote();
   const products = useProducts();
   // The same drop of the products that are no longer on sale as on the cart screen.
   useCartReconciliation(products.data?.products);
@@ -67,8 +72,12 @@ export function ContactScreen(): ReactElement {
     // Nothing to deliver: back to the cart, without leaving this address in the history.
     return <Redirect href={CART_PATH} replace />;
   }
-  if (point === null || !isValidLandmark(landmark)) {
+  // No quote for this point and this cart (a reload, a changed cart): the delivery screen asks
+  // again, from the draft, which stays as it is.
+  if (point === null || !isValidLandmark(landmark) || deliveryQuote === null) {
     return <Redirect href={DELIVERY_PATH} replace />;
   }
-  return <ContactContent hasRemovedUnavailable={hasRemovedUnavailable} />;
+  return (
+    <ContactContent hasRemovedUnavailable={hasRemovedUnavailable} deliveryQuote={deliveryQuote} />
+  );
 }

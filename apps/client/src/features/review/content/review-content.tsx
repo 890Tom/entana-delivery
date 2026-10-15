@@ -1,3 +1,4 @@
+import type { DeliveryQuoteResponse } from "@entana/contracts";
 import { useId, useRef } from "react";
 import type { ReactElement } from "react";
 
@@ -51,12 +52,16 @@ function Recap(): ReactElement {
 
 /** The amounts, with the button of the web layout inside the card (`display: none` on a phone). */
 function Amounts(props: {
+  readonly deliveryQuote: DeliveryQuoteResponse;
   readonly formId: string;
   readonly isInactive: boolean;
   readonly isSending: boolean;
 }): ReactElement {
   return (
-    <OrderSummaryCard title={{ narrow: texts.review.itemsTitle, wide: texts.review.summaryTitle }}>
+    <OrderSummaryCard
+      deliveryQuote={props.deliveryQuote}
+      title={{ narrow: texts.review.itemsTitle, wide: texts.review.summaryTitle }}
+    >
       <button
         type="submit"
         form={props.formId}
@@ -70,11 +75,17 @@ function Amounts(props: {
   );
 }
 
+interface ReviewContentProps {
+  readonly submission: OrderSubmission;
+  /** The quote retained on the delivery screen, checked by the guards. */
+  readonly deliveryQuote: DeliveryQuoteResponse;
+}
+
 /**
  * The review, in the order of the keyboard: title, the card of the delivery (its links), the
  * payment, then the amounts with their button, then the error. The look is made by the grid.
  */
-export function ReviewContent({ submission }: { submission: OrderSubmission }): ReactElement {
+export function ReviewContent({ submission, deliveryQuote }: ReviewContentProps): ReactElement {
   const instance = useInstance();
   const products = useProducts();
   const formId = useId();
@@ -94,7 +105,12 @@ export function ReviewContent({ submission }: { submission: OrderSubmission }): 
           <Notice tone="info">{texts.review.payment}</Notice>
         </div>
         <div className={styles.summary}>
-          <Amounts formId={formId} isInactive={isInactive} isSending={isSending} />
+          <Amounts
+            deliveryQuote={deliveryQuote}
+            formId={formId}
+            isInactive={isInactive}
+            isSending={isSending}
+          />
         </div>
         {notice !== null && <div className={styles.error}>{notice}</div>}
       </div>
