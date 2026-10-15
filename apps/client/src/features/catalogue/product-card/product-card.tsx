@@ -47,7 +47,8 @@ export function ProductCard({ product }: { product: PublicProduct }): ReactEleme
             }}
           />
         ) : (
-          <div className={[styles.placeholder, dimmed].join(" ")}>
+          // Not dimmed: the text must keep its contrast; the disabled control tells it is sold out.
+          <div className={styles.placeholder}>
             <p className={styles.alt}>{alt}</p>
           </div>
         )}
