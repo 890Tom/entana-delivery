@@ -53,6 +53,8 @@ Generated at build time by vite-plugin-pwa from `config/pwa-config.ts`; off in d
 - **MapLibre excluded** from the precache (code and worker): it loads on demand on the two map screens.
 - **Updates by notice**: a new version waits until the customer chooses « Mettre à jour », which activates it and reloads the page (the cart and the drafts are kept in the browser's storage). Never a reload on its own.
 
+When the browser reports no network (`navigator.onLine` is false), a notice under the header says so. It offers no action and adds no offline mechanism: no order queue, no API cache.
+
 The service worker controls every page of the client's origin: the admin must be on another origin, otherwise its pages would be intercepted. At deployment, serve `/sw.js` and `index.html` with `Cache-Control: no-cache`, so that a new version is found.
 
 ## Points of attention

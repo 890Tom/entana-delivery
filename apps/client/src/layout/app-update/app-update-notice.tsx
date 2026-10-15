@@ -6,7 +6,7 @@ import { texts } from "../../i18n/texts";
 import { APP_UPDATE_CONTEXT } from "./app-update-context";
 import type { AppUpdate } from "./app-update-context";
 
-import styles from "./app-update-notice.module.css";
+import styles from "../shell-notice/shell-notice.module.css";
 
 const t = texts.appUpdate;
 
