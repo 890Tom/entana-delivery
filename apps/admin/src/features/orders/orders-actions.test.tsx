@@ -139,7 +139,8 @@ describe("the selection", () => {
         table: () => page([first, onTheRoad, delivered]),
       }),
     });
-    const rows = await screen.findAllByRole("checkbox");
+    await screen.findByRole("checkbox", { name: new RegExp(first.publicCode) });
+    const rows = screen.getAllByRole("checkbox");
     const header = screen.getByRole("checkbox", { name: texts.orders.columns.selectAll });
     const disabled = rows.slice(1).map((box) => box.hasAttribute("disabled"));
     expect([header.hasAttribute("disabled"), ...disabled]).toEqual([true, false, false, true]);

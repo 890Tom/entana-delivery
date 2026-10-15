@@ -57,6 +57,8 @@ export const resellersTexts = {
   form: {
     back: "Revendeurs",
     newTitle: "Nouveau revendeur",
+    // To confirm: the title of the document of the form of an existing reseller.
+    editTitle: "Modifier le revendeur",
     // Page shown for an id that the list does not hold: the shared "not found" page is used.
     status: { visible: "Visible", hidden: "Non visible" },
     information: {

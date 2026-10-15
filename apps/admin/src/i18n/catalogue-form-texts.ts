@@ -2,6 +2,8 @@
 export const catalogueFormTexts = {
   back: "Catalogue",
   newTitle: "Nouveau produit",
+  // To confirm: the title of the document of the form of an existing product.
+  editTitle: "Modifier le produit",
   notFound: "Produit introuvable.",
   status: { available: "Disponible", unavailable: "Indisponible", retired: "Retiré" },
   photo: {

@@ -185,7 +185,7 @@ describe("the sign-in", () => {
     openAt("/connexion", { [ROUTES.me]: signedOut, [ROUTES.instance]: networkFailure });
 
     await screen.findByText(texts.login.logoFallback);
-    expect(document.title).toBe(texts.document.title);
+    expect(document.title).toBe("Connexion — Administration");
   });
 
   it("does nothing with an answer that arrives after the screen is gone", async () => {
@@ -207,7 +207,7 @@ describe("the sign-in", () => {
     });
 
     await waitFor(() => {
-      expect(document.title).toBe("Administration — Maison Démo");
+      expect(document.title).toBe("Connexion — Administration — Maison Démo");
     });
   });
 
@@ -244,6 +244,19 @@ describe("the guard", () => {
 
     await screen.findByRole("heading", { name: texts.orders.title });
     expect(window.location.pathname).toBe("/commandes");
+  });
+
+  it("changes the title of the document with the screen", async () => {
+    openAt("/commandes", { [ROUTES.me]: signedIn });
+    await waitFor(() => {
+      expect(document.title).toBe("Commandes — Administration — Maison Démo");
+    });
+
+    fireEvent.click(screen.getByRole("link", { name: texts.catalogue.title }));
+
+    await waitFor(() => {
+      expect(document.title).toBe("Catalogue — Administration — Maison Démo");
+    });
   });
 
   it("shows not found, inside the page, to a signed-in person on an unknown address", async () => {
