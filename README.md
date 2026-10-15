@@ -16,30 +16,33 @@ Early development. Nothing is deployed yet.
   - contact details (name, and a phone number checked with the numbering rule of the instance's country), review, then an idempotent order creation;
   - tracking of an order through its link (the token stays in the URL fragment), with cancellation while the order is `NEW` or `CONFIRMED`;
   - finding an order again with the phone number and the 6-character order code;
-  - a map and a list of the shop's resellers.
+  - a map and a list of the shop's resellers;
+  - installable: a web app manifest and icons;
+  - a service worker: the interface precached (without MapLibre), product photos cached, neither the API nor the map tiles cached;
+  - a notice when a new version is available, which applies the update on a click, and a notice when the network is missing.
 - Administration (`apps/admin`):
   - sign-in with an e-mail and a password (session cookie);
   - orders: list with filters, search and counters, new orders shown every 30 seconds, an order's detail with its history, one-step status changes (confirm with a delivery day and an optional adjusted fee, refuse, cancel, out for delivery, delivered, failed);
   - catalogue: create, edit, photo upload, availability, retire and restore, display order;
   - resellers: create, edit, verify, delete, on a map;
-  - settings: delivery axes and their places on a map, the out-of-axis fee, the free-delivery threshold and the out-of-axis message.
+  - settings: delivery axes and their places on a map, the out-of-axis fee, the free-delivery threshold and the out-of-axis message;
+  - a page title for each screen.
 - API (`apps/api`): the routes behind both applications, listed in [`apps/api/README.md`](apps/api/README.md#routes), with health and readiness probes and an OpenAPI page.
 - Database schema, migrations and fake seed data (`packages/database`).
-
-**In progress**
-
-- Progressive web app: the customer application has no web app manifest and no service worker yet. Its PWA and accessibility audit is still to come.
 
 **Planned**
 
 - Editing the lines of an order from the administration (the `LINES_EDITED` event type exists in the schema, no route writes it).
-- Production deployment: a reverse proxy, backups, a one-command demo setup.
+- Production deployment: HTTPS, HTTP headers, a reverse proxy, backups, a one-command demo setup.
+- A test of the customer application on a real Android device.
+- Replacing the generic icons and theme with those of a real deployment.
 - A driver application with dispatch by axis (the `DRIVER` role and the `driver_id` and `tour_position` columns are reserved for it).
 
 ## Known limits and what comes next
 
 - No deployment before the production step: the repository runs locally only.
-- The PWA and accessibility audit is still to come.
+- Not yet tested on a real Android device.
+- Accessibility has only been checked with automated audits; no manual screen-reader testing yet.
 - Orders are paid in cash on delivery only: no online payment and no payment tracking.
 - No stock management: availability is set by hand.
 - One business per instance: no multi-tenant hosting.

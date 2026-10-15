@@ -29,6 +29,7 @@ pnpm --filter @entana/admin test:coverage
 - `src/features/<feature>/`: login, session (guard of the signed-in area), orders, order-detail, catalogue, resellers, settings, instance; each with its screens, its `api/` calls and its pure `rules/`.
 - `src/components/`, `src/layout/`, `src/map/`, `src/order-display/`: shared interface parts.
 - `src/i18n/`: the French texts. `src/routes.ts`: the addresses of the screens.
+- Each screen has its own page title, declared in the route table `src/features/session/guard/signed-in-screens.ts`.
 
 ## Points of attention
 

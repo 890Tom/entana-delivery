@@ -2,8 +2,12 @@ import { fileURLToPath } from "node:url";
 import { parseConfig } from "../../../src/config/app-config.js";
 import type { AppConfig } from "../../../src/config/app-config.js";
 
-/** No database listens here: the client connects on its first query, which the tests never make. */
-const TEST_DATABASE_URL = "postgresql://test:test@localhost:5432/test";
+/**
+ * No database listens here: the client connects on its first query, which the tests never make.
+ * Not 5432: the CI integration job runs a real PostgreSQL there, which would refuse the password
+ * (an error, 500) instead of the connection (unavailable, 503). Port 1 is privileged and unused.
+ */
+const TEST_DATABASE_URL = "postgresql://test:test@localhost:1/test";
 
 /** The origin of the administration in tests. */
 export const ADMIN_TEST_ORIGIN = "https://admin.example.mg";
