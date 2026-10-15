@@ -37,7 +37,12 @@ export default {
         "An import that cannot be resolved is a typo or a missing dependency, and hides the real target from the other rules.",
       severity: "error",
       from: {},
-      to: { couldNotResolve: true },
+      to: {
+        couldNotResolve: true,
+        // Exception: a virtual module that vite-plugin-pwa creates during the build, absent from
+        // the disk. Only this exact identifier is exempt.
+        pathNot: "^virtual:pwa-register$",
+      },
     },
     {
       name: "contracts-no-repo-imports",

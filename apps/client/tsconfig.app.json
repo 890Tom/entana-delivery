@@ -4,7 +4,7 @@
     // Browser code: DOM types, no Node globals (the configuration files have their own project).
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
-    "types": ["vite/client"],
+    "types": ["vite/client", "vite-plugin-pwa/vanillajs"],
     "composite": true,
     "tsBuildInfoFile": "node_modules/.tmp/tsconfig.app.tsbuildinfo"
   },

@@ -1,6 +1,6 @@
 # @entana/client
 
-The customer application: React, Vite, TanStack Query, wouter for routing and MapLibre GL for the maps. The interface is in French. It is installable (a web app manifest, see [Installable app](#installable-app)) but has no service worker yet, so it does not work offline.
+The customer application: React, Vite, TanStack Query, wouter for routing and MapLibre GL for the maps. The interface is in French. It is installable (a web app manifest, see [Installable app](#installable-app)) and has a service worker (see [Service worker](#service-worker)).
 
 ```sh
 pnpm --filter @entana/client dev       # http://localhost:5173
@@ -42,6 +42,18 @@ pnpm check:bundle                      # from the root, after a build: initial d
   ```
 
 - The icons, the name and the colours in the repository are generic. Before the build, a deployment replaces the icons with its own (same names, same sizes), and sets its `name` and `short_name` in the manifest and its `theme_color` and `background_color` in the manifest and in the `theme-color` meta tag of `index.html`. The maskable icon keeps its symbol in the central 80 % on a full background (the `background` of the command).
+
+## Service worker
+
+Generated at build time by vite-plugin-pwa from `config/pwa-config.ts`; off in development.
+
+- **Interface precached**: the HTML, JavaScript, CSS, fonts and icons of the build. A navigation offline gets `index.html`, except under `/api` and `/media`.
+- **Product photos cached first**: only `/media/products/<uuid>.webp` (a new name at every replacement), 60 files and 30 days at most, 200 answers only. Branding files are not cached.
+- **API and map tiles never cached**: they always go to the network, so an order, a quote or a tracking view is never stale.
+- **MapLibre excluded** from the precache (code and worker): it loads on demand on the two map screens.
+- **Updates by notice**: a new version waits until the customer chooses « Mettre à jour », which activates it and reloads the page (the cart and the drafts are kept in the browser's storage). Never a reload on its own.
+
+The service worker controls every page of the client's origin: the admin must be on another origin, otherwise its pages would be intercepted. At deployment, serve `/sw.js` and `index.html` with `Cache-Control: no-cache`, so that a new version is found.
 
 ## Points of attention
 

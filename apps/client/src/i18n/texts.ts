@@ -1,5 +1,7 @@
 import type { CatalogueErrorKind } from "../features/catalogue/api/fetch-products";
 
+import { appUpdateTexts } from "./app-update-texts";
+import type { AppUpdateTexts } from "./app-update-texts";
 import { findOrderTexts } from "./find-order-texts";
 import type { FindOrderTexts } from "./find-order-texts";
 import { resellersTexts } from "./resellers-texts";
@@ -137,6 +139,7 @@ export const texts: {
   /** The tracking of an order. */
   readonly tracking: TrackingTexts;
   readonly findOrder: FindOrderTexts;
+  readonly appUpdate: AppUpdateTexts;
   /** The screen "Où nous trouver": the resellers on a map and in a list. */
   readonly resellers: ResellersTexts;
   /** The summary of the order, shared by the screens that come after the cart. */
@@ -273,6 +276,7 @@ export const texts: {
   review: reviewTexts,
   tracking: trackingTexts,
   findOrder: findOrderTexts,
+  appUpdate: appUpdateTexts,
   resellers: resellersTexts,
   orderSummary: {
     title: "Votre commande",
