@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-import type { GeoPoint } from "../delivery/map/map-adapter";
+import type { GeoPoint } from "../../delivery/map/map-adapter";
 
-import type { MapShop } from "./map/resellers-map-adapter";
+import type { MapShop } from "../map/resellers-map-adapter";
 
 /** The reseller chosen, where it is, and whether the choice came from the map. */
 export interface Selection {

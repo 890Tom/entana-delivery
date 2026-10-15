@@ -1,13 +1,13 @@
 import type { ReactElement, RefObject } from "react";
 import { useEffect, useRef } from "react";
 
-import { ButtonLink } from "../../components/button/button";
-import { Icon } from "../../components/icon/icon";
-import { texts } from "../../i18n/texts";
+import { ButtonLink } from "../../../components/button/button";
+import { Icon } from "../../../components/icon/icon";
+import { texts } from "../../../i18n/texts";
 
-import { buildDirectionsUrl } from "./rules/build-directions-url";
-import { formatDistance } from "./rules/format-distance";
-import type { ShopEntry } from "./rules/sort-by-distance";
+import { buildDirectionsUrl } from "../rules/build-directions-url";
+import { formatDistance } from "../rules/format-distance";
+import type { ShopEntry } from "../rules/sort-by-distance";
 import styles from "./shop-card.module.css";
 
 interface ShopCardProps {

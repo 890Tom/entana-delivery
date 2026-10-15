@@ -20,12 +20,12 @@ import { DELIVERY_DRAFT_STORAGE_KEY } from "../delivery-draft/delivery-draft-sto
 // decide what is shown at which width are checked on the files.
 const BAR_CSS = "../../../components/bottom-bar/bottom-bar.module.css";
 const FORM_CSS = "./delivery-form.module.css";
-const CART_CSS = "../../cart/cart-screen/cart-screen.module.css";
+const CART_CSS = "../../cart/cart-screen.module.css";
 const styleSheets = import.meta.glob<string>(
   [
     "../../../components/bottom-bar/bottom-bar.module.css",
     "./delivery-form.module.css",
-    "../../cart/cart-screen/cart-screen.module.css",
+    "../../cart/cart-screen.module.css",
   ],
   { query: "?raw", import: "default", eager: true },
 );

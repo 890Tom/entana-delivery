@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-import type { GeoPoint } from "../delivery/map/map-adapter";
-import { locate } from "../delivery/position/locate";
-import type { LocateFailure } from "../delivery/position/locate";
+import type { GeoPoint } from "../../delivery/map/map-adapter";
+import { locate } from "../../delivery/position/locate";
+import type { LocateFailure } from "../../delivery/position/locate";
 
 type NearbyRequest =
   | { readonly status: "idle" }

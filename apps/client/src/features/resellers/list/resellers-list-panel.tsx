@@ -1,16 +1,16 @@
 import type { ReactElement } from "react";
 
-import { Button } from "../../components/button/button";
-import { Notice } from "../../components/notice/notice";
-import { TextField } from "../../components/text-field/text-field";
-import visuallyHidden from "../../components/visually-hidden/visually-hidden.module.css";
-import { texts } from "../../i18n/texts";
+import { Button } from "../../../components/button/button";
+import { Notice } from "../../../components/notice/notice";
+import { TextField } from "../../../components/text-field/text-field";
+import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
+import { texts } from "../../../i18n/texts";
 
-import { readResellersErrorKind } from "./api/fetch-resellers";
+import { readResellersErrorKind } from "../api/fetch-resellers";
 import styles from "./resellers-list-panel.module.css";
-import type { ShopEntry } from "./rules/sort-by-distance";
+import type { ShopEntry } from "../rules/sort-by-distance";
 import { ShopCard } from "./shop-card";
-import type { NearbyPosition } from "./use-nearby-position";
+import type { NearbyPosition } from "../position/use-nearby-position";
 
 /** What the list shows of the request of the resellers. */
 export type ListState =
