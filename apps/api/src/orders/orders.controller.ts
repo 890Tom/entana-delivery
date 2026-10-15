@@ -23,6 +23,7 @@ import {
 } from "@entana/contracts";
 import type { CreateOrderRequest, CreateOrderResponse } from "@entana/contracts";
 import type { Response } from "express";
+import { EXAMPLE_PHONE } from "../docs/example-phone.js";
 import { CREATE_ORDER_BODY_SCHEMA } from "./http/order-openapi.js";
 import { JsonContentTypeGuard } from "../errors/request-body/json-content-type.guard.js";
 import {
@@ -33,12 +34,6 @@ import {
 import { OrdersService } from "./orders.service.js";
 
 const REPLAY_HEADER = "Idempotent-Replayed";
-
-/**
- * The phone number of the OpenAPI example: valid for the numbering plan (an operator prefix and
- * seven digits), and obviously fake (the seven digits are zeros).
- */
-export const EXAMPLE_PHONE = "034 00 000 00";
 
 // Obviously fake: nothing here looks like a real person, place or token.
 const EXAMPLE_REQUEST = {
