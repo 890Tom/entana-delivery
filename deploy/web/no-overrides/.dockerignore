@@ -1,0 +1,3 @@
+# Default overrides context of docker-compose.prod.yml: "*" excludes every file, this one too,
+# so the context is empty and the image holds the demo application.
+*

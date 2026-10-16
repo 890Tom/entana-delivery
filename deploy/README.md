@@ -14,7 +14,7 @@ Images and configuration for running a shop. The images are built from the repos
 docker build -f deploy/web/Dockerfile -t entana-web .
 ```
 
-Without a build context named `overrides`, the image holds the demo application. A deployment's icons, manifest and themes are passed with `--build-context overrides=<folder>` (see the [customer app README](../apps/client/README.md#installable-app)).
+Without a build context named `overrides`, the image holds the demo application. A deployment's icons, manifest and themes are passed with `--build-context overrides=<folder>` (see the [customer app README](../apps/client/README.md#installable-app)). The production stack passes it from `OVERRIDES_DIR` (see [Branding](#branding-optional)).
 
 Caddy reads three variables when it starts:
 
@@ -47,6 +47,22 @@ chmod 600 deploy/.env                 # it holds the database password
 ```
 
 Copy `examples/demo/instance.config.yaml` to the path set in `INSTANCE_CONFIG_FILE` (for example `/opt/entana/instance.config.yaml`) and adapt it to the shop. That file never goes into the repository. It must exist before the first `up`: the stack refuses to start without it and never creates it.
+
+### Branding (optional)
+
+Without `OVERRIDES_DIR`, the web image holds the demo icons, manifest and themes. To give the shop its own, create a folder on the server, for example `/opt/entana/overrides`, and set its absolute path in `deploy/.env`:
+
+```text
+/opt/entana/overrides/
+├── client/public/icons/                  # icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png, favicon-32.png
+├── client/public/manifest.webmanifest    # name, short_name, theme_color (hex), background_color
+├── client/public/theme.local.css         # theme of the customer app
+└── admin/public/theme.local.css          # theme of the administration
+```
+
+Every file is optional; each one replaces the file of the same name in the image. Any file outside `client/public/` and `admin/public/` fails the build. The folder holds the shop's brand: it never goes into the repository. The files are built into the image, so after any change to the folder, run the `up -d --build --wait` command again: installed apps then receive the new files through their usual update notice.
+
+If `OVERRIDES_DIR` names a folder that does not exist, the build stops. When the path is outside the repository, the message reads `additional privileges requested: pass "--allow=fs.read=<parent folder>"`: create the folder or fix the path, never pass `--allow`.
 
 Start or update the stack from the repository root:
 

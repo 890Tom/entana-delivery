@@ -97,6 +97,9 @@ services:
     build:
       context: ..
       dockerfile: deploy/web/Dockerfile
+      additional_contexts:
+        # Icons, manifest and themes of the shop (ADR 0025). The default folder sends no file: demo.
+        overrides: ${OVERRIDES_DIR:-./web/no-overrides}
     restart: unless-stopped
     logging: *logging
     environment:
