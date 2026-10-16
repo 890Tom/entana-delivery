@@ -286,7 +286,7 @@ This test uses the `main` branch. Once the tag `v0.1.0` exists, switch to it (`g
 
 ## 7. Configuration
 
-Two files, both on the server only. Neither goes into the repository.
+Two files and an optional folder, all on the server only. None goes into the repository.
 
 ### The shop file
 
@@ -317,6 +317,29 @@ The `sed` line puts a generated password (`openssl rand -hex 24`) in place of th
 
 Leave the other lines as they are. `deploy/.env` holds the database password: never copy it anywhere else, and never commit it.
 
+### Branding (optional)
+
+Skip this step to start with the demo icons, colours and themes. You can add them later.
+
+The shop's icons, manifest and themes go in a folder on the server, `/opt/entana/overrides`, outside the repository. It holds the shop's brand: it never goes into the repository. Create it:
+
+```sh
+mkdir -p /opt/entana/overrides/client/public/icons /opt/entana/overrides/admin/public
+```
+
+Then put the shop's files there, each one optional (copy them from your own computer with `scp`, see [section 2](#connect-from-your-own-computer)):
+
+| File in `/opt/entana/overrides`      | What it holds                                                                                                             |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `client/public/icons/`               | `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`, `favicon-32.png`, same sizes as the demo |
+| `client/public/manifest.webmanifest` | The shop's `name`, `short_name`, `theme_color` (a hex colour such as `#1a2b3c`) and `background_color`                    |
+| `client/public/theme.local.css`      | Theme of the customer app                                                                                                 |
+| `admin/public/theme.local.css`       | Theme of the administration                                                                                               |
+
+Nothing else may be in the folder: any other file stops the build. Finally, in `deploy/.env`, remove the `#` in front of `OVERRIDES_DIR=/opt/entana/overrides`.
+
+The files are built into the image. **After any change to the folder**, run the start command of [section 8](#8-start-the-stack) again (`up -d --build --wait`); installed apps then show their usual update notice.
+
 ### Check before starting
 
 ```sh
@@ -328,6 +351,8 @@ docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml config -
 ```
 
 **Expected result:** `shop file: OK`; `deploy/.env` shows `-rw-------`; both names print the static IP; and `compose: OK`. If a required value is missing, `config` stops with its message instead, for example `Set POSTGRES_PASSWORD in deploy/.env`. Do not drop `--quiet`: without it, the command prints the configuration with the password. If `dig` is missing on the server, install it with `sudo apt install -y bind9-dnsutils`.
+
+If you set `OVERRIDES_DIR`, also check `test -d /opt/entana/overrides && echo "branding: OK"`. When that folder is missing, the build stops with `additional privileges requested: pass "--allow=fs.read=/opt/entana"`: create the folder or fix the path, never pass `--allow`.
 
 ## 8. Start the stack
 

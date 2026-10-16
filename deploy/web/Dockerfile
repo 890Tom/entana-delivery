@@ -35,8 +35,9 @@ COPY apps/admin apps/admin
 
 # Applied before the build, so that the service worker precaches the replaced files with their
 # own revisions. Only the public folders can be replaced: an override never reaches the code.
-COPY --from=overrides / /overrides/
-RUN set -eu; \
+# Mounted, not copied: a COPY of an empty context reused an old cache entry, with the files of an
+# earlier override (ADR 0025).
+RUN --mount=type=bind,from=overrides,target=/overrides set -eu; \
     unexpected=$(cd /overrides && find . ! -type d ! -path './client/public/*' ! -path './admin/public/*'); \
     if [ -n "$unexpected" ]; then \
         echo "Overrides may only contain client/public/ and admin/public/. Unexpected:" >&2; \
