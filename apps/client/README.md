@@ -42,6 +42,11 @@ pnpm check:bundle                      # from the root, after a build: initial d
   ```
 
 - The icons, the name and the colours in the repository are generic. Before the build, a deployment replaces the icons with its own (same names, same sizes), and sets its `name` and `short_name` in the manifest and its `theme_color` and `background_color` in the manifest and in the `theme-color` meta tag of `index.html`. The maskable icon keeps its symbol in the central 80 % on a full background (the `background` of the command).
+- **In the web image** (`deploy/web/Dockerfile`, ADR 0025), a deployment does not edit these files: it passes a folder of overrides as a named build context. The folder mirrors the applications and may hold only `client/public/` and `admin/public/`, for example `client/public/icons/`, `client/public/manifest.webmanifest`, `client/public/theme.local.css` and `admin/public/theme.local.css`. The files are applied before the build, so the service worker precaches them with new revisions. The `theme-color` meta tag takes the `theme_color` of the final manifest (a hex colour, or the build fails). Without the build context, the image holds the demo application.
+
+  ```sh
+  docker build --build-context overrides=../my-shop-overrides -f deploy/web/Dockerfile -t entana-web .
+  ```
 
 ## Service worker
 

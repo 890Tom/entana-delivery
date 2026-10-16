@@ -32,10 +32,15 @@
 # Logs
 **/*.log
 
+# Private theme of a deployment (git-ignored): a deployment passes it as a build override
+**/theme.local.css
+
 # Runtime data
 **/postgres-data
 **/uploads
 **/storage
+# The client source folders named storage are tracked code, not runtime data
+!apps/client/src/**/storage
 
 # Editors and OS
 **/.DS_Store
