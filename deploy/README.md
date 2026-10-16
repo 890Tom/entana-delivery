@@ -39,7 +39,7 @@ docker run --rm -e CLIENT_HOST=client.localhost -e ADMIN_HOST=admin.localhost \
 
 ## Production stack
 
-`docker-compose.prod.yml` runs one shop on one server (ADR 0027). Prepare the environment once:
+`docker-compose.prod.yml` runs one shop on one server (ADR 0027). For a step-by-step setup on a new server, see [Test deployment on AWS Lightsail](lightsail.md). Prepare the environment once:
 
 ```sh
 cp deploy/.env.example deploy/.env    # then fill in every value
@@ -51,7 +51,7 @@ Copy `examples/demo/instance.config.yaml` to the path set in `INSTANCE_CONFIG_FI
 Start or update the stack from the repository root:
 
 ```sh
-docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml up -d --build
+docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml up -d --build --wait
 ```
 
 | Service    | What it does                                                                                                           |
