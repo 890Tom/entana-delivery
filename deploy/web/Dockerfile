@@ -4,7 +4,7 @@
 #   docker build -f deploy/web/Dockerfile -t entana-web .
 # A deployment applies its own icons, manifest and themes with a named build context:
 #   docker build --build-context overrides=<folder> -f deploy/web/Dockerfile -t entana-web .
-# The Caddyfile is not part of this image yet.
+# Caddy reads CLIENT_HOST, ADMIN_HOST and API_UPSTREAM from the environment (ADR 0026).
 
 # Deployment overrides: empty unless replaced with --build-context overrides=<folder>. The folder
 # mirrors the applications: client/public/... and admin/public/... only.
@@ -78,3 +78,4 @@ RUN rm -rf apps/client/dist/icons-source
 FROM caddy:2.11.7-alpine AS runtime
 COPY --from=build --chown=root:root /repo/apps/client/dist /srv/client
 COPY --from=build --chown=root:root /repo/apps/admin/dist /srv/admin
+COPY --chown=root:root deploy/web/Caddyfile /etc/caddy/Caddyfile

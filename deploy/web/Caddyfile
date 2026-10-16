@@ -1,0 +1,69 @@
+# Public entry point of a deployment (ADR 0026). The customer app and the administration are two
+# origins, so the service worker of the customer app never controls the administration. HTTPS is
+# automatic; for names under .localhost Caddy uses its internal authority.
+
+(site) {
+	root * /srv/{args[0]}
+	header {
+		# Caddy is the public boundary: these two replace whatever the API sends (">" applies
+		# them after the proxy).
+		>Strict-Transport-Security "max-age=31536000"
+		>X-Robots-Tag "noindex, nofollow"
+	}
+	# Defaults only: the API keeps its own values when it sets them. One directive per field: in
+	# a block, the "?" fields share one condition, and one field sent by the API would skip all.
+	header ?Referrer-Policy "no-referrer"
+	header ?X-Content-Type-Options "nosniff"
+
+	# The API answers with its own Cache-Control; Caddy sets none here.
+	@api path /api/* /media/*
+	handle @api {
+		reverse_proxy {$API_UPSTREAM:api:3000}
+	}
+
+	# A stale build asking for a missing file must not get index.html: HTML in place of a script
+	# breaks the service worker.
+	@missingFile {
+		path /assets/* /fonts/* /icons/* *.js *.css *.map *.webmanifest
+		not file
+	}
+	handle @missingFile {
+		header Cache-Control "no-store"
+		respond 404
+	}
+
+	handle {
+		header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://tiles.openfreemap.org; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+		# no-cache unless a rule below applies: index.html, the SPA fallback, sw.js, theme.local.css.
+		header ?Cache-Control "no-cache"
+		header /assets/* Cache-Control "public, max-age=31536000, immutable"
+		header /workbox-*.js Cache-Control "public, max-age=31536000, immutable"
+		header /fonts/* Cache-Control "public, max-age=604800"
+		header /icons/* Cache-Control "public, max-age=86400"
+		header /manifest.webmanifest Cache-Control "public, max-age=3600"
+		encode zstd gzip
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+{$CLIENT_HOST} {
+	import site client
+	header ?Permissions-Policy "geolocation=(self)"
+	# The tracking page holds a tracking token in its address.
+	header /suivi* Cache-Control "no-store"
+}
+
+{$ADMIN_HOST} {
+	import site admin
+	header ?Permissions-Policy "geolocation=()"
+}
+
+# Any other name, or a forged Host header: the connection is closed, nothing is served.
+:80 {
+	abort
+}
+
+:443 {
+	abort
+}
