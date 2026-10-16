@@ -7,9 +7,17 @@
   border-radius: var(--radius-sm);
 }
 
-.canvas {
+/*
+ * The box the library draws in. Two classes on purpose: the library's own style sheet gives its
+ * container `position: relative` and `overflow: hidden` with one class, and it loads after this
+ * one. With the same weight it would win, the box would have no height and the map would be
+ * clipped to nothing (the tiles load, and nothing shows).
+ */
+.frame > .canvas {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .skeleton {
