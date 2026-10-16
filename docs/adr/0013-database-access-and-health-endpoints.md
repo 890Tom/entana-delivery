@@ -44,7 +44,7 @@ The API needs PostgreSQL. Prisma 7 requires a driver adapter (`@prisma/adapter-p
 Known limitations:
 
 - The rule "the API never imports `pg` or Prisma" is a convention: the `only-api-uses-database` rule in `dependency-cruiser.config.mjs` restricts who may use the database package, and does not apply to `apps/api`. A stricter rule is not in place yet.
-- TLS to the database is not configured; it has to be decided at deployment.
+- TLS to the database is not configured; it has to be decided at deployment. Decided in [ADR 0027](0027-production-stack-topology.md): no TLS while the database stays on the internal Docker network of the same machine.
 - The integration suite of `packages/database` does not refuse non-local hosts, unlike the API suite.
 - Readiness has no result caching and no rate limiting; the only protection is that concurrent checks share one in-flight query.
 

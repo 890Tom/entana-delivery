@@ -1,0 +1,129 @@
+# Production stack of one shop (ADR 0027). Run from the repository root:
+#   docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml up -d --build
+# Paths are relative to this folder. Only caddy publishes ports; postgres is reachable from the
+# API and migrate only.
+name: entana
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+services:
+  postgres:
+    # Same image as docker-compose.yml (development).
+    image: postgres:18-alpine
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-entana}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}
+      POSTGRES_DB: ${POSTGRES_DB:-entana}
+    volumes:
+      # PostgreSQL 18+ images keep a versioned data directory under /var/lib/postgresql.
+      - postgres_data:/var/lib/postgresql
+    networks: [internal]
+    healthcheck:
+      # Explicit TCP host: on an empty volume the image first runs a temporary server that listens
+      # only on the Unix socket, so a socket check could pass before the final server is up.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  # One-shot: applies pending migrations, then exits. The API starts only after it succeeded.
+  migrate:
+    build:
+      context: ..
+      dockerfile: packages/database/Dockerfile
+    restart: "no"
+    logging: *logging
+    environment:
+      DATABASE_URL: &databaseUrl postgresql://${POSTGRES_USER:-entana}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}@postgres:5432/${POSTGRES_DB:-entana}
+    networks: [internal]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      # Literal values: a variable of the shell or of the env file cannot change them.
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      # One proxy (caddy) in front: the client address comes from its X-Forwarded-For.
+      TRUST_PROXY: "1"
+      MEDIA_ROOT: /media
+      INSTANCE_CONFIG_PATH: /config/instance.config.yaml
+      CORS_ORIGINS: ""
+      DATABASE_URL: *databaseUrl
+      ADMIN_ALLOWED_ORIGINS: ${ADMIN_ALLOWED_ORIGINS:-https://${ADMIN_HOST:?Set ADMIN_HOST in deploy/.env}}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      # A named volume only: on creation it takes the owner of /media in the image (the node user).
+      - media:/media
+      # The file must exist: with create_host_path off, a wrong path stops the start instead of
+      # silently creating an empty folder in its place.
+      - type: bind
+        source: ${INSTANCE_CONFIG_FILE:?Set INSTANCE_CONFIG_FILE in deploy/.env}
+        target: /config/instance.config.yaml
+        read_only: true
+        bind:
+          create_host_path: false
+    networks: [edge, internal]
+    healthcheck:
+      # Readiness (one query to the database). The image has no curl: Node performs the request.
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/api/v1/health/ready',{signal:AbortSignal.timeout(2000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  caddy:
+    build:
+      context: ..
+      dockerfile: deploy/web/Dockerfile
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      CLIENT_HOST: ${CLIENT_HOST:?Set CLIENT_HOST in deploy/.env}
+      ADMIN_HOST: ${ADMIN_HOST:?Set ADMIN_HOST in deploy/.env}
+    # TCP only: no UDP port, so no HTTP/3.
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    volumes:
+      # Certificates and the account of the certificate authority: never delete caddy_data.
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [edge]
+    depends_on:
+      api:
+        condition: service_healthy
+
+networks:
+  edge:
+  internal:
+    internal: true
+
+volumes:
+  postgres_data:
+  media:
+  caddy_data:
+  caddy_config:
