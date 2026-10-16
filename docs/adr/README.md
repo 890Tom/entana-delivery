@@ -25,5 +25,6 @@
 | [0021](0021-delivery-axes-places-and-settings-in-the-database.md)        | Delivery axes, places and settings live in the database; free delivery in an axis, frozen fee   | accepted; axis colour and limit of ten axes replaced by 0022 |
 | [0022](0022-delivery-axis-colour-chosen-and-no-limit-of-axes.md)         | The administration chooses the colour of an axis; the number of axes is not limited             | accepted                                                     |
 | [0023](0023-service-worker-and-caching-strategy.md)                      | Service worker and caching strategy                                                             | accepted                                                     |
+| [0024](0024-migration-image.md)                                          | Migration image: a separate one-shot image applies the Prisma migrations                        | accepted                                                     |
 
 Planned records: PostGIS left out (setup in ADR 0006), delivery axes made of places, idempotent orders, simplified order statuses, VPS hosting with OpenFreeMap tiles, hashed tracking token. Use [`0000-template.md`](0000-template.md).
