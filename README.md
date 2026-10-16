@@ -8,6 +8,8 @@ It started from a family business in Madagascar that took orders through Faceboo
 
 Early development. Nothing is deployed yet.
 
+Deploying one shop to one server is documented step by step in [deploy/lightsail.md](deploy/lightsail.md) (AWS Lightsail, for a test). Automatic backups are not in place yet.
+
 **Done**
 
 - Customer application (`apps/client`), in the browser:
