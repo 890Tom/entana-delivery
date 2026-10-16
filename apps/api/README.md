@@ -272,6 +272,21 @@ more than 2 seconds. The image has no `curl`, so Node performs the request.
 other variable of the table above keeps its default. The process runs as the `node` user and
 starts with `node dist/main.js`.
 
+### Running migrations from the migrate image
+
+The API image does not apply the migrations. Before the first start, and before starting a new
+version, run the migrate image built by `packages/database/Dockerfile` (ADR 0024) on the network
+of the database. It exits with `0` when there is nothing to apply.
+
+```sh
+docker build -f packages/database/Dockerfile -t entana-migrate .
+docker run --rm --network entana-delivery_default \
+  -e DATABASE_URL=postgresql://user:password@postgres:5432/database \
+  entana-migrate
+```
+
+See the [database package](../../packages/database/README.md#running-migrations-from-the-migrate-image).
+
 ## Administration
 
 The people of the shop log in to the administration. Everything under `/api/v1/admin/*` is closed

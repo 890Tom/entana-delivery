@@ -52,6 +52,21 @@ A run interrupted by SIGINT or SIGTERM (Ctrl+C, or turbo stopping the task after
 
 A test checks that every CHECK constraint of the schema has a test case. When you add a constraint in a migration, add its case in `tests/integration/check-constraint-cases.ts` (or `admin-check-constraint-cases.ts`, `delivery-check-constraint-cases.ts`), or that test fails.
 
+## Running migrations from the migrate image
+
+A deployment applies the migrations with a one-shot image, without the sources or pnpm (ADR 0024). It holds the Prisma CLI, `prisma.config.ts`, the schema and the migrations, runs `prisma migrate deploy` against `DATABASE_URL` as the `node` user, and exits with its code. A second run on an up-to-date database applies nothing and exits with `0`. The API image holds neither the CLI nor the migrations.
+
+Build it from the repository root, then run it on the network of the database:
+
+```sh
+docker build -f packages/database/Dockerfile -t entana-migrate .
+docker run --rm --network entana-delivery_default \
+  -e DATABASE_URL=postgresql://user:password@postgres:5432/database \
+  entana-migrate
+```
+
+`entana-delivery_default` is the network of the Compose file of this repository; use the network or host of your database. Prisma prints the host, the port, the database and the user, never the password.
+
 ## Seed data
 
 The seed fills a migrated, empty database with obviously fake demo data: the settings (default values), six products, nineteen places in four delivery axes, five customers, eight orders (with items and events), six resellers, an admin and an inactive driver. It respects every CHECK constraint. Delivery dates are relative to today in the Indian/Antananarivo time zone. The tracking tokens and order codes of the demo orders are fixed, public, fake values (`demo-tracking-token-01`, code `DEMA22`, and so on).
