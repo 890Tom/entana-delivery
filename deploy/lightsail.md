@@ -73,7 +73,7 @@ Prices are not written in this guide, because they change. See the official [Lig
 3. Choose **Change AWS Region and Availability Zone**, then pick **Frankfurt** (`eu-central-1`). Keep the proposed Availability Zone.
 4. Under the platform, choose **Linux/Unix**. Under the blueprint, choose **OS Only**, then the most recent **Ubuntu** LTS on offer (at the time of writing, the documentation lists Ubuntu 24 and 22, so pick **Ubuntu 24.04 LTS**). **(verify in the console** which Ubuntu versions are offered.)
 5. Keep the default SSH key pair of the Region. You can download its private key later, see [Connect from your own computer](#connect-from-your-own-computer).
-6. Choose **Dual-stack** networking (IPv4 and IPv6), then the plan with **4 GB** of memory. **(verify in the console:** how the network type and the plans are labelled.) The images are built on the server, and smaller plans may run out of memory during the build.
+6. Choose **Dual-stack** networking (IPv4 and IPv6), then the plan with **4 GB** of memory. **(verify in the console:** how the network type and the plans are labelled.) The images are built on the server, and smaller plans run out of memory during the build: on a 512 MB plan, the first build stopped with `signal: killed`.
 7. Name the instance, for example `entana-test`.
 8. Choose **Create instance**.
 
@@ -211,6 +211,21 @@ sudo apt upgrade -y
 
 If `/var/run/reboot-required` exists, reboot with `sudo reboot`, wait a minute, then reconnect.
 
+### Swap
+
+A 2 GB swap file gives the build some room when memory runs short. It is kept across reboots by the line added to `/etc/fstab`:
+
+```sh
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+swapon --show
+```
+
+**Expected result:** `swapon --show` lists `/swapfile` with a size of `2G`.
+
 ### Docker Engine and the Compose plugin
 
 Install from Docker's official repository, not from Ubuntu's `docker.io` package:
@@ -295,7 +310,7 @@ cp examples/demo/instance.config.yaml /opt/entana/instance.config.yaml
 nano /opt/entana/instance.config.yaml
 ```
 
-Adapt it to the shop: at least `shop.name`, `phoneCountryCode`, and, if needed, the `map` centre and the `contact` phone. The comments in the file explain each field. Everything in it is public (it is served to every visitor), so put no secret in it. Keep its default permissions: the API container must be able to read it.
+Adapt it to the shop: at least `shop.name`, `phoneCountryCode`, and, if needed, the `map` centre (you can also set it later, see [Set the map centre](#set-the-map-centre)) and the `contact` phone. The comments in the file explain each field. Everything in it is public (it is served to every visitor), so put no secret in it. Keep its default permissions: the API container must be able to read it.
 
 ### The environment file
 
@@ -317,9 +332,11 @@ The `sed` line puts a generated password (`openssl rand -hex 24`) in place of th
 
 Leave the other lines as they are. `deploy/.env` holds the database password: never copy it anywhere else, and never commit it.
 
-### Branding (optional)
+### Icons, manifest and themes (optional)
 
 Skip this step to start with the demo icons, colours and themes. You can add them later.
+
+These files are built into the web image. The logo shown in the header of the customer app and of the administration is a different mechanism: it is a media file named in the shop file, added once the stack runs (see [Add the shop logo](#add-the-shop-logo)).
 
 The shop's icons, manifest and themes go in a folder on the server, `/opt/entana/overrides`, outside the repository. It holds the shop's brand: it never goes into the repository. Create it:
 
@@ -336,9 +353,16 @@ Then put the shop's files there, each one optional (copy them from your own comp
 | `client/public/theme.local.css`      | Theme of the customer app                                                                                                 |
 | `admin/public/theme.local.css`       | Theme of the administration                                                                                               |
 
-Nothing else may be in the folder: any other file stops the build. Finally, in `deploy/.env`, remove the `#` in front of `OVERRIDES_DIR=/opt/entana/overrides`.
+Nothing else may be in the folder: any other file stops the build. A Mac adds hidden `.DS_Store` files to the folders it opens, so delete them in your local copy before sending it (replace `~/overrides` with your folder), then check the server:
 
-The files are built into the image. **After any change to the folder**, run the start command of [section 8](#8-start-the-stack) again (`up -d --build --wait`); installed apps then show their usual update notice.
+```sh
+find ~/overrides -name .DS_Store -delete
+find /opt/entana/overrides -name .DS_Store -print -delete
+```
+
+The first command runs on your own computer, the second on the server; the second prints nothing when the folder is clean. Finally, in `deploy/.env`, remove the `#` in front of `OVERRIDES_DIR=/opt/entana/overrides`.
+
+The files are built into the image. **After any change to the folder**, rebuild the web image and restart (`build caddy`, then `up -d --wait`, see [section 8](#8-start-the-stack)); installed apps then show their usual update notice.
 
 ### Check before starting
 
@@ -356,11 +380,16 @@ If you set `OVERRIDES_DIR`, also check `test -d /opt/entana/overrides && echo "b
 
 ## 8. Start the stack
 
+Build the images one at a time, so that two builds never share the memory, then start the stack:
+
 ```sh
-docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml up -d --build --wait
+docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml build migrate
+docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml build api
+docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml build caddy
+docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml up -d --wait
 ```
 
-The first build takes several minutes. The command returns once every service is running, and healthy where it has a health check.
+The first build takes several minutes. The `up` command returns once every service is running, and healthy where it has a health check.
 
 ```sh
 docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml ps -a
@@ -395,6 +424,73 @@ docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml logs -f 
 
 Never run `down -v` to "start clean": it deletes the database and `caddy_data`, the volume that keeps the certificates.
 
+### Add the shop logo
+
+The logo in the header of the customer app (every screen, tracking included) and of the administration is a file of the `media` volume, named in the shop file. Without it, the header shows the shop name. It is not the icons of [section 7](#icons-manifest-and-themes-optional), which are built into the web image.
+
+- Formats: `.png`, `.webp` or `.jpg` (not `.jpeg`: rename it), **never `.svg`**. The name is letters, digits, `.`, `_` and `-` only, for example `logo.png`.
+- The logo never goes into the repository: it stays on your computer and on the server.
+- It lives in the `media` volume, with the product photos: back it up with the database.
+
+On your own computer, send the file to the home folder of the server (see [section 2](#connect-from-your-own-computer)):
+
+```sh
+scp -i ~/Keys/LightsailDefaultKey-eu-central-1.pem logo.png ubuntu@203.0.113.10:~/logo.png
+```
+
+Then, on the server, from `/opt/entana/entana-delivery`:
+
+```sh
+sudo mv ~/logo.png /opt/entana/logo.png
+sudo chmod 644 /opt/entana/logo.png
+docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml cp /opt/entana/logo.png api:/media/branding/logo.png
+nano /opt/entana/instance.config.yaml
+```
+
+In `nano`, uncomment the `branding` section and keep only the logo line:
+
+```yaml
+branding:
+  logoFile: logo.png
+```
+
+The API reads the shop file only when it starts, so restart it, then check the file:
+
+```sh
+docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml restart api
+curl -sI https://shop.example.com/media/branding/logo.png
+```
+
+**Expected result:** `HTTP/2 200` and `content-type: image/png` (`image/webp` or `image/jpeg` for the other formats). Reload the customer site: the logo replaces the shop name in the header. A `404` means that the file is not in the volume or that its name differs from `logoFile`.
+
+**Replacing the logo under the same name:** browsers keep it for up to one hour (`Cache-Control: max-age=3600`), so the old logo can stay visible that long. A new file name (for example `logo-2.png`, named in `logoFile`, then `restart api`) shows at once.
+
+### Set the map centre
+
+The delivery map of the customer app and the map of **Paramètres** open on the `map` section of the shop file. Without it, they open on Antananarivo at zoom 12. To centre them on the shop:
+
+```sh
+nano /opt/entana/instance.config.yaml
+```
+
+Uncomment the `map` section and set `center` (latitude and longitude, in decimal degrees) and `zoom` (from 1 to 18). Keep the default `styleUrl`:
+
+```yaml
+map:
+  styleUrl: https://tiles.openfreemap.org/styles/liberty
+  center: { lat: -18.91, lng: 47.52 }
+  zoom: 12
+```
+
+Restart the API, which reads the file only when it starts, then check:
+
+```sh
+docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml restart api
+curl -s https://shop.example.com/api/v1/instance
+```
+
+**Expected result:** the `map` object of the answer shows the new centre and zoom. The answer can be cached for up to one minute. If `restart` leaves the API unhealthy, read `docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml logs api`: an invalid value stops the API with the name of the key at fault.
+
 ## 9. First administrator and checks
 
 ### Create the first administrator
@@ -428,7 +524,7 @@ The Content-Security-Policy still has to be confirmed in a browser (see the [dep
 - Place test orders from a phone, then follow them through confirmation, delivery and cancellation in the administration.
 - **No real customer data.** Use made-up names and fake phone numbers in the test orders, and do not share the address with real customers. Test orders stay in the database.
 - Both sites send `X-Robots-Tag: noindex, nofollow`, so search engines do not list them. Anyone with the address can still open them.
-- The icons, name and colours are the generic ones of the repository. A shop's own branding is out of the scope of this guide (see the [customer app README](../apps/client/README.md#installable-app)).
+- Until you add them, the icons, colours and themes are the generic ones of the repository, and the header shows the shop name in place of a logo. Add the shop's own with [Icons, manifest and themes](#icons-manifest-and-themes-optional) and [Add the shop logo](#add-the-shop-logo).
 
 ## 11. Updating
 
@@ -441,11 +537,16 @@ The Content-Security-Policy still has to be confirmed in a browser (see the [dep
    ```
 
 3. Get the new version: `git pull` on `main`, or `git fetch --tags && git switch --detach <new tag>` once tags exist.
-4. Rebuild and restart. `migrate` runs again on its own, before the API restarts:
+4. Rebuild the images one at a time, as in section 8, then restart. `migrate` runs again on its own, before the API restarts:
 
    ```sh
-   docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml up -d --build --wait
+   docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml build migrate
+   docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml build api
+   docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml build caddy
+   docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml up -d --wait
    ```
+
+   Rebuild only the image that changed: for example, when the update touches only the customer app or the administration, run `build caddy` alone, then `up -d --wait`. `caddy` holds both front ends, `api` the API, `migrate` the database migrations; a change to `packages/contracts` reaches both `api` and `caddy`. When unsure, build all three.
 
 5. Check:
 
@@ -458,7 +559,7 @@ The Content-Security-Policy still has to be confirmed in a browser (see the [dep
 
 ### Going back
 
-Switch back to the version noted in step 2 (`git switch --detach <previous tag or commit>`), then run the `up` command of step 4 again.
+Switch back to the version noted in step 2 (`git switch --detach <previous tag or commit>`), then run the commands of step 4 again.
 
 **Database migrations are not undone.** Going back changes the code only. If the new version applied a migration that the old code cannot work with, the only way back is to restore the snapshot of step 1, and everything entered since that snapshot is lost.
 

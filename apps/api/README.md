@@ -213,8 +213,11 @@ A product whose key is not such a name makes the catalogue answer the generic `5
   the file on the host; the demo file is the default. The image holds no configuration and no
   media, and sets neither variable: a container started without them refuses to start.
 - **Put a branding file in** (by hand: the administration uploads product photos only):
-  `docker compose cp ./logo.png api:/media/branding/logo.png`, then name it in `branding.logoFile`
-  of the instance file. The files must be readable by the user of the image (`node`).
+  `docker compose cp ./logo.png api:/media/branding/logo.png` for the development stack, or
+  `docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml cp ./logo.png api:/media/branding/logo.png`
+  for the production stack (see `deploy/lightsail.md`, "Add the shop logo"). Then name it in
+  `branding.logoFile` of the instance file and restart the API, which reads that file only at
+  startup. The files must be readable by the user of the image (`node`).
 - **Backup**: the `media` volume is data, like the database: back both up together.
   `docker compose down -v` deletes the volume, so the media with it.
 - **Volume created earlier with root as owner**: give it back to the image user (`node`) with
