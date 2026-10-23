@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@entana/contracts": "workspace:*",
-    "@tanstack/react-query": "5.104.1",
+    "@tanstack/react-query": "5.104.5",
     "maplibre-gl": "6.14.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
