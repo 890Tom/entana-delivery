@@ -4,6 +4,8 @@ An open-source ordering and delivery app for small local businesses. Customers o
 
 It started from a family business in Madagascar that took orders through Facebook messages. The design follows local constraints: unstable mobile networks, no precise postal addresses, cash on delivery.
 
+https://github.com/user-attachments/assets/797f482e-ee02-4d51-80d7-f698c0abaae6
+
 ## Project status
 
 Early development. Nothing is deployed yet.
