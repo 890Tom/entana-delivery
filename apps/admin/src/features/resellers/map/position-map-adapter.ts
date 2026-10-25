@@ -3,6 +3,7 @@ import type * as Library from "maplibre-gl";
 import { texts } from "../../../i18n/texts";
 import { loadMapLibrary, whenMapLoaded } from "../../../map/load-maplibre";
 import { createMarkerElement } from "../../../map/marker-element";
+import { STREET_ZOOM } from "../../../map/street-zoom";
 import type { MapPoint } from "../rules/reseller-form";
 
 // The only file of the resellers that names the library. It is reached through dynamic imports
@@ -23,13 +24,12 @@ export interface PositionMapOptions {
 export interface PositionMapHandle {
   /** Moves the marker (and the view) to a point typed elsewhere; null removes the marker. */
   readonly setPoint: (point: MapPoint | null) => void;
+  /** Shows this point at this zoom at once (a found address). */
+  readonly centreOn: (point: MapPoint, zoom: number) => void;
   readonly destroy: () => void;
 }
 
 const t = texts.resellers.form.map;
-
-/** The street level of a point that was placed or typed. */
-const POINT_ZOOM = 16;
 
 const MAP_LOCALE = {
   "Map.Title": t.canvasLabel,
@@ -44,7 +44,7 @@ function createMap(library: typeof Library, options: PositionMapOptions): Librar
     container: options.container,
     style: options.styleUrl,
     center: [start.lng, start.lat],
-    zoom: options.point === null ? options.zoom : POINT_ZOOM,
+    zoom: options.point === null ? options.zoom : STREET_ZOOM,
     // The credits come with the style and stay open: they are the attribution of the tiles.
     attributionControl: { compact: false },
     locale: MAP_LOCALE,
@@ -107,6 +107,10 @@ function createController(
       }
       marker.place(point);
       map.easeTo({ center: [point.lng, point.lat] });
+    },
+    // A jump, not an animation: the move of the marker that follows must not cut a zoom short.
+    centreOn: (point, zoom) => {
+      map.jumpTo({ center: [point.lng, point.lat], zoom });
     },
     destroy: () => {
       map.remove();

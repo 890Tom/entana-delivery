@@ -8,6 +8,7 @@ import { texts } from "../../../i18n/texts";
 import { OrderIcon } from "../../../order-display/order-icons";
 import cardStyles from "../../../components/card/card.module.css";
 import positionStyles from "../../../map/position-map.module.css";
+import { AddressSearch } from "../../address-search/address-search";
 import { useAddressTest } from "./use-address-test";
 import type { AddressTestState } from "./use-address-test";
 import type { AxesModel } from "../api/use-axes";
@@ -56,12 +57,16 @@ export function AxesMapCard({ model }: { model: AxesModel }): ReactElement {
         {t.title}
       </h2>
       {isListLoading ? (
-        // The map waits for the list, so that its first view frames the axes.
-        <div className={positionStyles.frame} aria-busy="true">
-          <div className={positionStyles.skeleton}>
-            <span className={visuallyHidden.visuallyHidden}>{texts.common.loading}</span>
+        // The map waits for the list, so that its first view frames the axes. The search waits
+        // with it, inactive, so that the card keeps its layout.
+        <>
+          <AddressSearch isDisabled onChoose={() => undefined} />
+          <div className={positionStyles.frame} aria-busy="true">
+            <div className={positionStyles.skeleton}>
+              <span className={visuallyHidden.visuallyHidden}>{texts.common.loading}</span>
+            </div>
           </div>
-        </div>
+        </>
       ) : (
         <AxesMap axes={drawn} point={test.point} onPick={test.run} />
       )}

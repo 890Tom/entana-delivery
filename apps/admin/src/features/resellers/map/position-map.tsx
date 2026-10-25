@@ -5,6 +5,8 @@ import type { ReactElement, RefObject } from "react";
 import { Notice } from "../../../components/notice/notice";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
+import { STREET_ZOOM } from "../../../map/street-zoom";
+import { AddressSearch } from "../../address-search/address-search";
 import { useInstance } from "../../instance/use-instance";
 import { loadPositionMap } from "./position-map-adapter";
 import type { PositionMapHandle } from "./position-map-adapter";
@@ -133,6 +135,7 @@ function useMapLoad(
 
 function usePositionMap(props: PositionMapProps): {
   readonly containerRef: RefObject<HTMLDivElement | null>;
+  readonly handleRef: RefObject<PositionMapHandle | null>;
   readonly status: MapStatus;
   readonly retry: () => void;
 } {
@@ -148,32 +151,44 @@ function usePositionMap(props: PositionMapProps): {
   useEffect(() => {
     handleRef.current?.setPoint(lat === undefined || lng === undefined ? null : { lat, lng });
   }, [lat, lng]);
-  return { containerRef, ...loaded };
+  return { containerRef, handleRef, ...loaded };
 }
 
-/** The position of a reseller: click the map or drag the marker; the library loads on demand. */
+/**
+ * The position of a reseller: search an address, click the map or drag the marker; the library
+ * loads on demand. A found address goes through `onPick`, as a click does.
+ */
 export function PositionMap(props: PositionMapProps): ReactElement {
-  const { containerRef, status, retry } = usePositionMap(props);
+  const { containerRef, handleRef, status, retry } = usePositionMap(props);
   return (
-    <div
-      className={styles.frame}
-      role="group"
-      aria-label={texts.resellers.form.map.label}
-      aria-busy={status === "loading"}
-    >
-      <div ref={containerRef} className={styles.canvas} />
-      {status === "loading" && (
-        <div className={styles.skeleton}>
-          <span className={visuallyHidden.visuallyHidden}>{texts.common.loading}</span>
-        </div>
-      )}
-      {status === "failed" && (
-        <div className={styles.fallback}>
-          <Notice tone="error" action={{ label: texts.common.retry, onClick: retry }}>
-            {texts.resellers.form.map.failed}
-          </Notice>
-        </div>
-      )}
-    </div>
+    <>
+      <AddressSearch
+        isDisabled={status !== "ready"}
+        onChoose={({ lat, lng }) => {
+          props.onPick({ lat, lng });
+          handleRef.current?.centreOn({ lat, lng }, STREET_ZOOM);
+        }}
+      />
+      <div
+        className={styles.frame}
+        role="group"
+        aria-label={texts.resellers.form.map.label}
+        aria-busy={status === "loading"}
+      >
+        <div ref={containerRef} className={styles.canvas} />
+        {status === "loading" && (
+          <div className={styles.skeleton}>
+            <span className={visuallyHidden.visuallyHidden}>{texts.common.loading}</span>
+          </div>
+        )}
+        {status === "failed" && (
+          <div className={styles.fallback}>
+            <Notice tone="error" action={{ label: texts.common.retry, onClick: retry }}>
+              {texts.resellers.form.map.failed}
+            </Notice>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

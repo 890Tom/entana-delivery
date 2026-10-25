@@ -21,6 +21,7 @@ export const ROUTES = {
   createAxis: "POST /api/v1/admin/delivery/axes",
   places: "GET /api/v1/admin/delivery/places",
   resolve: "GET /api/v1/admin/delivery/resolve",
+  placesSearch: "GET /api/v1/places/search",
 } as const;
 
 /** The change, the verification and the deletion of one reseller. */

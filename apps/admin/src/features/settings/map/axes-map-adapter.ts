@@ -28,6 +28,8 @@ export interface AxesMapHandle {
   readonly setAxes: (axes: readonly DrawnAxis[]) => void;
   /** Moves the marker of the tested address; null removes it. */
   readonly setTestPoint: (point: GeoPoint | null) => void;
+  /** Shows this point at this zoom at once (a found address). */
+  readonly centreOn: (point: GeoPoint, zoom: number) => void;
   readonly destroy: () => void;
 }
 
@@ -140,6 +142,10 @@ function createController(library: MapLibrary, map: Library.Map): AxesMapHandle 
       void map.getSource<Library.GeoJSONSource>(SOURCE_ID)?.setData(toShapes(axes));
     },
     setTestPoint,
+    // A jump, not an animation, as on the map of a reseller.
+    centreOn: (point, zoom) => {
+      map.jumpTo({ center: [point.lng, point.lat], zoom });
+    },
     destroy: () => {
       map.remove();
     },

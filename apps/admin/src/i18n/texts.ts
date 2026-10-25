@@ -7,6 +7,9 @@ import { ordersTexts } from "./orders-texts";
 import { resellersTexts } from "./resellers-texts";
 import { settingsTexts } from "./settings-texts";
 
+// One wording wherever a search is emptied: the catalogue and the address search.
+const CLEAR_SEARCH = "Effacer la recherche";
+
 // Fixed French texts. No text ever comes from the server: every message depends on the kind of
 // answer only, so that a response cannot put words in the interface.
 export const texts = {
@@ -200,7 +203,7 @@ export const texts = {
       noProduct: "Aucun produit pour le moment.",
       emptyList: "Aucun produit dans cette liste.",
       noMatch: (term: string): string => `Aucun produit ne correspond à « ${term} ».`,
-      clearSearch: "Effacer la recherche",
+      clearSearch: CLEAR_SEARCH,
     },
     drag: {
       instructions:
@@ -217,6 +220,13 @@ export const texts = {
   catalogueForm: catalogueFormTexts,
   resellers: resellersTexts,
   settings: settingsTexts,
+  /** The address search above the maps where a point is placed: one set for every map. */
+  addressSearch: {
+    label: "Rechercher une adresse",
+    clear: CLEAR_SEARCH,
+    noResult: "Aucun lieu trouvé. Cliquez directement sur la carte.",
+    failed: "La recherche est indisponible. Cliquez directement sur la carte.",
+  },
   notFound: {
     title: "Page introuvable",
     message: "Cette page n'existe pas.",

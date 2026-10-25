@@ -6,6 +6,8 @@ import type { ReactElement, ReactNode, RefObject } from "react";
 import { Notice } from "../../../components/notice/notice";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
+import { STREET_ZOOM } from "../../../map/street-zoom";
+import { AddressSearch } from "../../address-search/address-search";
 import { useInstance } from "../../instance/use-instance";
 import styles from "../../../map/position-map.module.css";
 import { loadAxisEditorMap } from "../map/axis-editor-map-adapter";
@@ -55,15 +57,15 @@ function startLoad(container: HTMLElement, map: PublicInstance["map"], sinks: Si
   };
 }
 
-/** The map is created once for a style; the axis then goes through the handle. */
-function useAxisEditorMap(
-  drawing: AxisDrawing,
-  onPick: (point: GeoPoint) => void,
-): {
+interface EditorMap {
   readonly containerRef: RefObject<HTMLDivElement | null>;
+  readonly handleRef: RefObject<AxisEditorMapHandle | null>;
   readonly status: MapStatus;
   readonly retry: () => void;
-} {
+}
+
+/** The map is created once for a style; the axis then goes through the handle. */
+function useAxisEditorMap(drawing: AxisDrawing, onPick: (point: GeoPoint) => void): EditorMap {
   const instance = useInstance();
   const map = instance.data?.map;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -88,6 +90,7 @@ function useAxisEditorMap(
   }, [map, attempt]);
   return {
     containerRef,
+    handleRef,
     status: instance.isError ? "failed" : status,
     retry: () => {
       setStatus("loading");
@@ -99,34 +102,48 @@ function useAxisEditorMap(
 interface AxisEditorMapProps {
   readonly drawing: AxisDrawing;
   readonly onPick: (point: GeoPoint) => void;
+  /** Only while a click creates a place: a found address then does what a click does. */
+  readonly isAddressSearchShown: boolean;
   /** The tools and the window shown over the map. */
   readonly children?: ReactNode;
 }
 
 /** The axis being edited on the shop's map, drawn again as it changes. Loaded on demand. */
-export function AxisEditorMap({ drawing, onPick, children }: AxisEditorMapProps): ReactElement {
-  const { containerRef, status, retry } = useAxisEditorMap(drawing, onPick);
+export function AxisEditorMap(props: AxisEditorMapProps): ReactElement {
+  const { drawing, onPick, isAddressSearchShown, children } = props;
+  const { containerRef, handleRef, status, retry } = useAxisEditorMap(drawing, onPick);
   return (
-    <div
-      className={styles.frame}
-      role="group"
-      aria-label={t.label}
-      aria-busy={status === "loading"}
-    >
-      <div ref={containerRef} className={styles.canvas} />
-      {status === "ready" && children}
-      {status === "loading" && (
-        <div className={styles.skeleton}>
-          <span className={visuallyHidden.visuallyHidden}>{texts.common.loading}</span>
-        </div>
+    <>
+      {isAddressSearchShown && (
+        <AddressSearch
+          isDisabled={status !== "ready"}
+          onChoose={({ lat, lng }) => {
+            onPick({ lat, lng });
+            handleRef.current?.centreOn({ lat, lng }, STREET_ZOOM);
+          }}
+        />
       )}
-      {status === "failed" && (
-        <div className={styles.fallback}>
-          <Notice tone="error" action={{ label: texts.common.retry, onClick: retry }}>
-            {texts.settings.map.failed}
-          </Notice>
-        </div>
-      )}
-    </div>
+      <div
+        className={styles.frame}
+        role="group"
+        aria-label={t.label}
+        aria-busy={status === "loading"}
+      >
+        <div ref={containerRef} className={styles.canvas} />
+        {status === "ready" && children}
+        {status === "loading" && (
+          <div className={styles.skeleton}>
+            <span className={visuallyHidden.visuallyHidden}>{texts.common.loading}</span>
+          </div>
+        )}
+        {status === "failed" && (
+          <div className={styles.fallback}>
+            <Notice tone="error" action={{ label: texts.common.retry, onClick: retry }}>
+              {texts.settings.map.failed}
+            </Notice>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

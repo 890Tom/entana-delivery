@@ -57,6 +57,8 @@ export type AdminFailure = Exclude<AdminResult<never>, { kind: "ok" }>;
 interface AdminRequest {
   /** A fixed address of the API, never built from an input. */
   readonly path: string;
+  /** What an input adds to the address: encoded here, so that it never changes the path. */
+  readonly params?: URLSearchParams;
   readonly method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   /** Serialised as JSON, a `FormData` as it is. Never log it: it may hold a password. */
   readonly body?: unknown;
@@ -119,6 +121,12 @@ interface Exchange {
   readonly problem: AdminProblem | undefined;
 }
 
+function addressOf(request: AdminRequest): string {
+  return request.params === undefined
+    ? request.path
+    : `${request.path}?${request.params.toString()}`;
+}
+
 /** The options of the request: a form is sent as it is, anything else as JSON. */
 function initOf(request: AdminRequest, signal: AbortSignal): RequestInit {
   const base: RequestInit = {
@@ -171,7 +179,7 @@ async function exchange(request: AdminRequest, isBodyNeeded: boolean): Promise<E
       ? timeout.signal
       : AbortSignal.any([request.signal, timeout.signal]);
   try {
-    const response = await fetch(request.path, initOf(request, signal));
+    const response = await fetch(addressOf(request), initOf(request, signal));
     return await readExchange(response, isBodyNeeded);
   } catch (error: unknown) {
     if (request.signal?.aborted === true) {

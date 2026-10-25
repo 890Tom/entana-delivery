@@ -102,7 +102,11 @@ function MapCard({ model, loaded, drawing }: MapCardProps): ReactElement {
         }
       }}
     >
-      <AxisEditorMap drawing={axisDrawing} onPick={drawing.pick}>
+      <AxisEditorMap
+        drawing={axisDrawing}
+        onPick={drawing.pick}
+        isAddressSearchShown={drawing.mode !== "idle"}
+      >
         <MapTools drawing={drawing} />
         {draft !== null && (
           <NewPlaceDialog

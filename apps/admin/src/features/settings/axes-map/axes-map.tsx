@@ -5,6 +5,8 @@ import type { ReactElement, RefObject } from "react";
 import { Notice } from "../../../components/notice/notice";
 import visuallyHidden from "../../../components/visually-hidden/visually-hidden.module.css";
 import { texts } from "../../../i18n/texts";
+import { STREET_ZOOM } from "../../../map/street-zoom";
+import { AddressSearch } from "../../address-search/address-search";
 import { useInstance } from "../../instance/use-instance";
 import styles from "../../../map/position-map.module.css";
 import { loadAxesMap } from "../map/axes-map-adapter";
@@ -96,6 +98,7 @@ function useMapLoad(
 
 function useAxesMap(props: AxesMapProps): {
   readonly containerRef: RefObject<HTMLDivElement | null>;
+  readonly handleRef: RefObject<AxesMapHandle | null>;
   readonly status: MapStatus;
   readonly retry: () => void;
 } {
@@ -112,32 +115,44 @@ function useAxesMap(props: AxesMapProps): {
   useEffect(() => {
     handleRef.current?.setTestPoint(props.point);
   }, [props.point]);
-  return { containerRef, ...loaded };
+  return { containerRef, handleRef, ...loaded };
 }
 
-/** The active axes on the shop's map; a click tests an address. The library loads on demand. */
+/**
+ * The active axes on the shop's map; a click, or a found address, tests an address. The library
+ * loads on demand.
+ */
 export function AxesMap(props: AxesMapProps): ReactElement {
-  const { containerRef, status, retry } = useAxesMap(props);
+  const { containerRef, handleRef, status, retry } = useAxesMap(props);
   return (
-    <div
-      className={styles.frame}
-      role="group"
-      aria-label={t.label}
-      aria-busy={status === "loading"}
-    >
-      <div ref={containerRef} className={styles.canvas} />
-      {status === "loading" && (
-        <div className={styles.skeleton}>
-          <span className={visuallyHidden.visuallyHidden}>{texts.common.loading}</span>
-        </div>
-      )}
-      {status === "failed" && (
-        <div className={styles.fallback}>
-          <Notice tone="error" action={{ label: texts.common.retry, onClick: retry }}>
-            {t.failed}
-          </Notice>
-        </div>
-      )}
-    </div>
+    <>
+      <AddressSearch
+        isDisabled={status !== "ready"}
+        onChoose={({ lat, lng }) => {
+          props.onPick({ lat, lng });
+          handleRef.current?.centreOn({ lat, lng }, STREET_ZOOM);
+        }}
+      />
+      <div
+        className={styles.frame}
+        role="group"
+        aria-label={t.label}
+        aria-busy={status === "loading"}
+      >
+        <div ref={containerRef} className={styles.canvas} />
+        {status === "loading" && (
+          <div className={styles.skeleton}>
+            <span className={visuallyHidden.visuallyHidden}>{texts.common.loading}</span>
+          </div>
+        )}
+        {status === "failed" && (
+          <div className={styles.fallback}>
+            <Notice tone="error" action={{ label: texts.common.retry, onClick: retry }}>
+              {t.failed}
+            </Notice>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
