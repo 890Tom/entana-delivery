@@ -8,6 +8,7 @@ import { Notice } from "../../../components/notice/notice";
 import { TextField } from "../../../components/text-field/text-field";
 import { texts } from "../../../i18n/texts";
 import { PhoneField } from "../../contact/contact-form/phone-field";
+import { DeviceOrders } from "../device-orders/device-orders";
 
 import styles from "../find-order-screen.module.css";
 import { useLookupForm } from "./use-lookup-form";
@@ -98,19 +99,22 @@ export function FindOrderForm({ isReturning, onFound }: FindOrderFormProps): Rea
   };
   return (
     <div className={styles.page}>
-      <form id={formId} noValidate className={styles.form} onSubmit={handleSubmit}>
+      <div className={styles.form}>
         <h1 ref={titleRef} tabIndex={-1} className={styles.title}>
           {findOrder.title}
         </h1>
-        <p className={styles.intro}>{findOrder.intro}</p>
-        <PhoneField
-          form={form.phoneState}
-          error={form.isPhoneRefused ? texts.contact.phone.errors.invalid : undefined}
-        />
-        <CodeField form={form} />
-        <ProblemNotice form={form} />
-        <WideSubmit isSending={form.isSending} />
-      </form>
+        <DeviceOrders />
+        <form id={formId} noValidate className={styles.form} onSubmit={handleSubmit}>
+          <p className={styles.intro}>{findOrder.intro}</p>
+          <PhoneField
+            form={form.phoneState}
+            error={form.isPhoneRefused ? texts.contact.phone.errors.invalid : undefined}
+          />
+          <CodeField form={form} />
+          <ProblemNotice form={form} />
+          <WideSubmit isSending={form.isSending} />
+        </form>
+      </div>
       <BottomBar
         formId={formId}
         label={findOrder.submit}

@@ -76,20 +76,30 @@ function writeOrders(orders: readonly ConfirmedOrder[]): void {
 const isFresh = (order: ConfirmedOrder, nowMs: number): boolean =>
   nowMs - Date.parse(order.createdAt) <= CONFIRMED_ORDER_RETENTION_DAYS * DAY_MS;
 
+const byNewestFirst = (first: ConfirmedOrder, second: ConfirmedOrder): number =>
+  Date.parse(second.createdAt) - Date.parse(first.createdAt);
+
 /**
- * Puts the order first, and keeps the ten most recent that are not expired. An order that is
- * already there (a tracking link opened again) is moved, not repeated.
+ * Keeps the ten most recent orders by their date that are not expired, the newest first. An order
+ * that is already there (a tracking link opened again) is not repeated, and the link of an old
+ * order never pushes out a more recent one.
  */
 export function addConfirmedOrder(order: ConfirmedOrder, nowMs: number): void {
   const isSameOrder = (entry: ConfirmedOrder): boolean =>
     entry.token === order.token && entry.code === order.code;
   const kept = readOrders().filter((entry) => isFresh(entry, nowMs) && !isSameOrder(entry));
-  writeOrders([order, ...kept].slice(0, MAX_ORDERS));
+  // A stable sort: orders of the same instant keep the latest one confirmed first.
+  writeOrders([order, ...kept].sort(byNewestFirst).slice(0, MAX_ORDERS));
 }
 
-/** The orders this device remembers that are not expired, the most recent first. */
+/**
+ * The orders this device remembers that are not expired, the most recent first. Sorted here too:
+ * a list written before the order date decided the sort is in the order it was confirmed.
+ */
 export function readConfirmedOrders(nowMs: number): readonly ConfirmedOrder[] {
-  return readOrders().filter((entry) => isFresh(entry, nowMs));
+  return readOrders()
+    .filter((entry) => isFresh(entry, nowMs))
+    .sort(byNewestFirst);
 }
 
 /** Forgets one order: the customer asked for it, or the server no longer knows it. */

@@ -2,12 +2,15 @@ import type { PublicInstance } from "@entana/contracts";
 import { fireEvent, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
+import { addConfirmedOrder } from "../../features/order-submission/storage/confirmed-orders-storage";
+import type { ConfirmedOrder } from "../../features/order-submission/storage/confirmed-orders-storage";
 import { texts } from "../../i18n/texts";
 
 import { buildInstance } from "../builders/build-instance";
 import { renderAt } from "./delivery-harness";
 import { createFakeMapLoader } from "../stubs/fake-map";
 import { jsonResponse } from "../stubs/stub-fetch";
+import { TRACKING_ADDRESS, viewAnswer } from "./tracking-harness";
 import type { Answer } from "./tracking-harness";
 
 const LOOKUP_ADDRESS = "/api/v1/tracking/lookup";
@@ -20,10 +23,14 @@ export const SENT_BODY = { phone: "+261341234567", orderCode: "K7M2QX" };
 interface OpenOptions {
   readonly lookup: Answer;
   readonly instance?: Partial<PublicInstance>;
+  /** The orders confirmed on the device, in the order they were confirmed. */
+  readonly confirmed?: readonly ConfirmedOrder[];
+  readonly tracking?: Answer;
 }
 
 export interface FindOrderApp {
   readonly lookupCalls: () => readonly (readonly [string, RequestInit | undefined])[];
+  readonly trackingCalls: () => readonly (readonly [string, RequestInit | undefined])[];
 }
 
 /** Shows the screen with the network stubbed: the boundary, and nothing else. */
@@ -35,6 +42,8 @@ export function openFindOrder(options: OpenOptions): FindOrderApp {
         return Promise.resolve(jsonResponse(instance));
       case LOOKUP_ADDRESS:
         return options.lookup();
+      case TRACKING_ADDRESS:
+        return (options.tracking ?? viewAnswer())();
       default:
         return Promise.resolve(jsonResponse({ products: [] }));
     }
@@ -42,12 +51,17 @@ export function openFindOrder(options: OpenOptions): FindOrderApp {
   vi.stubGlobal("fetch", fetchStub);
   sessionStorage.clear();
   localStorage.clear();
+  for (const order of options.confirmed ?? []) {
+    addConfirmedOrder(order, Date.now());
+  }
   renderAt("/retrouver", createFakeMapLoader());
+  const callsTo = (address: string): readonly (readonly [string, RequestInit | undefined])[] =>
+    fetchStub.mock.calls.filter(
+      (call): call is [string, RequestInit | undefined] => call[0] === address,
+    );
   return {
-    lookupCalls: () =>
-      fetchStub.mock.calls.filter(
-        (call): call is [string, RequestInit | undefined] => call[0] === LOOKUP_ADDRESS,
-      ),
+    lookupCalls: () => callsTo(LOOKUP_ADDRESS),
+    trackingCalls: () => callsTo(TRACKING_ADDRESS),
   };
 }
 

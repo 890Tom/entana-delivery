@@ -24,6 +24,12 @@ export interface FindOrderTexts {
   readonly another: string;
   /** The link to this screen, from the tracking screen. */
   readonly entry: string;
+  /** The orders this device remembers, above the form. */
+  readonly deviceOrders: {
+    readonly title: string;
+    /** The button that opens the tracking of one order: its code and the day it was placed. */
+    readonly order: (code: string, day: string) => string;
+  };
 }
 
 export const findOrderTexts: FindOrderTexts = {
@@ -41,4 +47,8 @@ export const findOrderTexts: FindOrderTexts = {
   refresh: "Actualiser",
   another: "Chercher une autre commande",
   entry: "Retrouver ma commande",
+  deviceOrders: {
+    title: "Commandes passées sur cet appareil",
+    order: (code, day) => `Commande ${code} du ${day}`,
+  },
 };
