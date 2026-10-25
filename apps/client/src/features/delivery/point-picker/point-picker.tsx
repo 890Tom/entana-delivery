@@ -1,9 +1,11 @@
+import type { PlaceSuggestion } from "@entana/contracts";
 import { useEffect, useRef } from "react";
 import type { ReactElement, ReactNode } from "react";
 
 import { Button } from "../../../components/button/button";
 import { texts } from "../../../i18n/texts";
 import type { GeoPoint, MapAdapter, MapZone } from "../map/map-adapter";
+import { PlaceSearch } from "../place-search/place-search";
 
 import { MapFrame } from "./map-frame";
 import styles from "./point-picker.module.css";
@@ -65,7 +67,25 @@ function useMapSync(adapter: MapAdapter | null, { point, centreOn, zones }: MapS
   }, [adapter, centreOn]);
 }
 
-/** The map, its fallback while it loads or fails, and the keyboard way to place the point. */
+/**
+ * A chosen suggestion places the point through the same handler as a tap, then brings the map to
+ * it at street level. Only offered once the map is ready.
+ */
+function chooseSuggestion(
+  adapter: MapAdapter,
+  onPick: (point: GeoPoint) => void,
+): (suggestion: PlaceSuggestion) => void {
+  return ({ lat, lng }) => {
+    const point = { lat, lng };
+    onPick(point);
+    adapter.centreOn(point, RECENTRE_ZOOM);
+  };
+}
+
+/**
+ * The place search and the map, its fallback while it loads or fails, and the keyboard way to
+ * place the point.
+ */
 export function PointPicker(props: PointPickerProps): ReactElement {
   const { config, isConfigFailed, onRetryConfig, onPick, notice, children } = props;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,11 +97,17 @@ export function PointPicker(props: PointPickerProps): ReactElement {
 
   return (
     <div className={styles.layout}>
-      <MapFrame
-        containerRef={containerRef}
-        status={status.status}
-        onRetry={config === undefined ? onRetryConfig : retry}
-      />
+      <div className={styles.mapColumn}>
+        <PlaceSearch
+          isDisabled={adapter === null}
+          onChoose={adapter === null ? () => undefined : chooseSuggestion(adapter, onPick)}
+        />
+        <MapFrame
+          containerRef={containerRef}
+          status={status.status}
+          onRetry={config === undefined ? onRetryConfig : retry}
+        />
+      </div>
       {notice !== undefined && notice !== null && <div className={styles.notice}>{notice}</div>}
       <div className={styles.side}>
         <Button

@@ -122,7 +122,7 @@ describe("the delivery screen", () => {
     });
 
     expect(map.markers.at(-1)).toEqual(TAPPED_ROUNDED);
-    expect(screen.getByRole("status").textContent).toBe(texts.delivery.placed);
+    expect(screen.getByRole("status", { name: "" }).textContent).toBe(texts.delivery.placed);
   });
 
   it("refuses a point outside the bounds of the contract", async () => {
@@ -135,7 +135,7 @@ describe("the delivery screen", () => {
     });
 
     expect(map.markers.filter((marker) => marker !== null)).toHaveLength(0);
-    expect(screen.getByRole("status").textContent).toBe("");
+    expect(screen.getByRole("status", { name: "" }).textContent).toBe("");
   });
 
   it("places the point at the centre of the map with the button, which the keyboard can reach", async () => {
@@ -149,7 +149,7 @@ describe("the delivery screen", () => {
     fireEvent.click(placeButton());
 
     expect(map.markers.at(-1)).toEqual(TAPPED_ROUNDED);
-    expect(screen.getByRole("status").textContent).toBe(texts.delivery.placed);
+    expect(screen.getByRole("status", { name: "" }).textContent).toBe(texts.delivery.placed);
   });
 
   it("does not place a point with the button while the map is loading", async () => {

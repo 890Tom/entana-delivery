@@ -23,7 +23,8 @@ export type IconName =
   | "search"
   | "store"
   | "navigation"
-  | "chevron-right";
+  | "chevron-right"
+  | "x";
 
 // Inline line icons (no request, no package). Decorative: the control that holds one is named.
 // Exported for the map marker, which is drawn outside React by the map library.
@@ -81,6 +82,8 @@ export const ICON_PATHS: Readonly<Record<IconName, readonly string[]>> = {
   ],
   // The magnifying glass of the same line set: the way to find an order again.
   search: ["M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z", "m21 21-4.35-4.35"],
+  // The cross of the same line set: the way to empty a field.
+  x: ["M18 6 6 18", "m6 6 12 12"],
   // The shop: awning, then the body with its door. The marker of a reseller and its tile.
   store: [
     "m2 7 4.4-4.4A2 2 0 0 1 7.8 2h8.4a2 2 0 0 1 1.4.6L22 7",

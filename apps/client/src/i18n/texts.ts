@@ -6,6 +6,8 @@ import { connectionTexts } from "./connection-texts";
 import type { ConnectionTexts } from "./connection-texts";
 import { findOrderTexts } from "./find-order-texts";
 import type { FindOrderTexts } from "./find-order-texts";
+import { placeSearchTexts } from "./place-search-texts";
+import type { PlaceSearchTexts } from "./place-search-texts";
 import { resellersTexts } from "./resellers-texts";
 import type { ResellersTexts } from "./resellers-texts";
 import { reviewTexts } from "./review-texts";
@@ -107,6 +109,7 @@ export const texts: {
       readonly toggleAttribution: string;
       readonly failed: string;
     };
+    readonly search: PlaceSearchTexts;
   };
   readonly contact: {
     /** The title of the document; the page heading is `heading`. */
@@ -251,6 +254,7 @@ export const texts: {
       toggleAttribution: "Afficher les crédits de la carte",
       failed: "La carte n'a pas pu se charger. Réessayez ou utilisez votre position.",
     },
+    search: placeSearchTexts,
   },
   contact: {
     title: "Coordonnées",
