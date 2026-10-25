@@ -55,6 +55,19 @@ describe("the confirmed orders", () => {
     );
   });
 
+  it("keep the ten most recent by order date when the link of an older order is opened again", () => {
+    const codes = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K"].map(
+      (letter) => `AAAAA${letter}`,
+    );
+    codes.forEach((code, index) => {
+      addConfirmedOrder(order(code, new Date(NOW - index * DAY).toISOString()), NOW);
+    });
+
+    addConfirmedOrder(order("OLDEST", new Date(NOW - 20 * DAY).toISOString()), NOW);
+
+    expect(readConfirmedOrders(NOW).map((entry) => entry.code)).toEqual(codes);
+  });
+
   it("drop an order older than the retention", () => {
     const old = new Date(NOW - (CONFIRMED_ORDER_RETENTION_DAYS + 1) * DAY).toISOString();
     addConfirmedOrder(order("ALDANE", old), NOW - DAY);
