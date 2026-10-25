@@ -40,6 +40,15 @@ describe("placeSearchResponseSchema", () => {
     expect(placeSearchResponseSchema.safeParse({ suggestions }).success).toBe(false);
   });
 
+  it("accepts a label of 200 characters and refuses 201", () => {
+    const withLabel = (length: number): unknown => ({
+      suggestions: [{ ...SUGGESTION, label: "a".repeat(length) }],
+    });
+
+    expect(placeSearchResponseSchema.safeParse(withLabel(200)).success).toBe(true);
+    expect(placeSearchResponseSchema.safeParse(withLabel(201)).success).toBe(false);
+  });
+
   it("refuses an empty label", () => {
     const suggestions = [{ ...SUGGESTION, label: "" }];
 

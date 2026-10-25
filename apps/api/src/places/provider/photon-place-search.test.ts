@@ -101,6 +101,18 @@ describe("PhotonPlaceSearch", () => {
     });
   });
 
+  it("refuses to follow a redirect, so that no other host is reached", async () => {
+    let redirect: RequestInit["redirect"];
+    stubFetch((_url, init) => {
+      redirect = init.redirect;
+      return Promise.resolve(respondWith(buildPhotonCollection([])));
+    });
+
+    await search();
+
+    expect(redirect).toBe("error");
+  });
+
   it.each([
     ["a network error", (): Promise<Response> => Promise.reject(new TypeError("fetch failed"))],
     ["a status other than 2xx", (): Promise<Response> => Promise.resolve(respondWith({}, 502))],

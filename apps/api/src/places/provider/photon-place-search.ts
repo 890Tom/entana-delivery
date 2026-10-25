@@ -69,6 +69,7 @@ function toCandidate(feature: unknown): PlaceCandidate[] {
 }
 
 // The timer covers the body too: a server that sends its headers and then stalls is cut as well.
+// A redirect is refused: only the fixed host of Photon is ever reached.
 async function fetchJson(url: URL): Promise<unknown> {
   const controller = new AbortController();
   const timer = setTimeout(() => {
@@ -77,6 +78,7 @@ async function fetchJson(url: URL): Promise<unknown> {
   try {
     const response = await fetch(url, {
       signal: controller.signal,
+      redirect: "error",
       headers: { Accept: "application/json" },
     });
     if (!response.ok) {
