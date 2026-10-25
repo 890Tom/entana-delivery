@@ -44,6 +44,9 @@ function useSettledAnswer(settled: string): SettledAnswer | null {
     );
     return () => {
       controller.abort();
+      // Forgotten with its request: the same text typed again is asked again, never answered
+      // from an earlier result.
+      setLatest(null);
     };
   }, [settled]);
   return latest;

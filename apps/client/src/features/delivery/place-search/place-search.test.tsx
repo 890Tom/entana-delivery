@@ -185,6 +185,27 @@ describe("the place search of the point picker", () => {
     expect(options().map((option) => option.textContent)).toEqual([buildPlaceSuggestion(1).label]);
   });
 
+  it("searches a text typed again after a failure anew, instead of showing the old answer", async () => {
+    let requestCount = 0;
+    stubSearch(() => {
+      requestCount += 1;
+      return requestCount === 1
+        ? Promise.resolve(problemResponse(503))
+        : new Promise<Response>(() => undefined);
+    });
+    await readyPicker();
+
+    await searchFor("analakely");
+    expect(screen.getByRole("status", { name: texts.delivery.search.label }).textContent).toBe(
+      texts.delivery.search.failed,
+    );
+    await searchFor("");
+    await searchFor("analakely");
+
+    expect(searchField().getAttribute("aria-busy")).toBe("true");
+    expect(screen.getByRole("status", { name: texts.delivery.search.label }).textContent).toBe("");
+  });
+
   it("says that no place was found", async () => {
     stubSearch(answerWith([]));
     await readyPicker();
