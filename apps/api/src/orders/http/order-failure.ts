@@ -3,6 +3,7 @@ import {
   DELIVERY_PROBLEM_TYPES,
   GENERIC_PROBLEM_TYPE,
   ORDER_PROBLEM_TYPES,
+  PLACE_PROBLEM_TYPES,
   PRODUCT_PHOTO_MAX_BYTES,
   PRODUCT_PHOTO_MIN_SHORT_SIDE_PX,
   PRODUCT_PROBLEM_TYPES,
@@ -57,6 +58,7 @@ import {
   OrderNotCancellableError,
   TrackingNotFoundError,
 } from "../../tracking/errors/tracking-errors.js";
+import { PlaceSearchUnavailableError } from "../../places/errors/place-search-errors.js";
 import { RATE_LIMIT_RETRY_AFTER_SECONDS } from "../rate-limit/order-http-limits.js";
 
 /** What the HTTP layer answers for a typed error of the order creation. */
@@ -240,6 +242,15 @@ const FIXED_FAILURES: readonly (readonly [new () => Error, OrderFailure])[] = [
       status: 422,
       detail: "A place of the list is unknown or inactive.",
       problemType: DELIVERY_PROBLEM_TYPES.placeUnavailable,
+    },
+  ],
+  // The place search: one text whatever went wrong with the provider, which it never names.
+  [
+    PlaceSearchUnavailableError,
+    {
+      status: 503,
+      detail: "The place search is not available. Try again later.",
+      problemType: PLACE_PROBLEM_TYPES.searchUnavailable,
     },
   ],
   [

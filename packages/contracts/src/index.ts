@@ -58,6 +58,7 @@ export {
   RESELLER_PROBLEM_TYPES,
   DELIVERY_PROBLEM_TYPES,
   ORDER_PROBLEM_TYPES,
+  PLACE_PROBLEM_TYPES,
   VALIDATION_PROBLEM_TYPE,
   fieldErrorSchema,
   problemDetailsSchema,
@@ -282,3 +283,14 @@ export type {
   DeliveryResolveQuery,
   DeliveryResolveResponse,
 } from "./delivery/admin/delivery-resolve.js";
+export {
+  MAX_PLACE_SUGGESTIONS,
+  placeSearchQuerySchema,
+  placeSearchResponseSchema,
+  placeSuggestionSchema,
+} from "./places/place-search.js";
+export type {
+  PlaceSearchQuery,
+  PlaceSearchResponse,
+  PlaceSuggestion,
+} from "./places/place-search.js";
