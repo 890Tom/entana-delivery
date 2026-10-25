@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
+import { ScheduleModule } from "@nestjs/schedule";
 import type { DestinationStream } from "pino";
 import type { AppConfig } from "./config/app-config.js";
 import { AdminAuthModule } from "./admin-auth/admin-auth.module.js";
@@ -13,6 +14,7 @@ import { NotFoundFallback } from "./errors/problem-details/not-found-fallback.js
 import { HealthModule } from "./health/health.module.js";
 import { InstanceModule } from "./instance/instance.module.js";
 import { MediaModule } from "./media/media.module.js";
+import { OrderAutoDeliveryModule } from "./order-auto-delivery/order-auto-delivery.module.js";
 import { OrdersModule } from "./orders/orders.module.js";
 import { ResellersModule } from "./resellers/resellers.module.js";
 import { TrackingModule } from "./tracking/tracking.module.js";
@@ -39,6 +41,8 @@ export class AppModule {
         AdminCatalogueModule.register(config),
         AdminResellersModule.register(config),
         AdminDeliveryModule.register(config),
+        ScheduleModule.forRoot(),
+        OrderAutoDeliveryModule.register(config),
       ],
       providers: [NotFoundFallback],
     };
