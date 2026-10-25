@@ -18,7 +18,7 @@ import styles from "./axis-editor.module.css";
 import { AxisPlaceList } from "./axis-place-list";
 import type { PlaceRow } from "./axis-place-list";
 import { TraceTools } from "../place-drawing/drawing-tools";
-import { PlaceSearch } from "./place-search";
+import { PlaceSearch } from "../../../components/place-search/place-search";
 
 const t = texts.settings.axisEditor;
 
@@ -77,6 +77,7 @@ function PlacesSection(props: Omit<AxisFormProps, "onAskDelete">): ReactElement 
       <PlaceSearch
         search={search}
         results={searchPlaces(places, search, model.values)}
+        optionOf={(place) => ({ key: place.id, label: place.name })}
         isDisabled={!canAddPlace(model.values)}
         onSearch={setSearch}
         onPick={(place) => {

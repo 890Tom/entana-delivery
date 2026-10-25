@@ -32,6 +32,24 @@ describe("fetchAdmin", () => {
     expect(result).toEqual({ kind: "ok", data: PROFILE });
   });
 
+  it("adds its parameters, encoded, to the fixed address", async () => {
+    const addresses: unknown[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        addresses.push(input);
+        return Promise.resolve(jsonResponse(PROFILE));
+      }),
+    );
+
+    await fetchAdmin(
+      { path: "/api/v1/x", params: new URLSearchParams({ q: "a&b c" }) },
+      adminProfileSchema,
+    );
+
+    expect(addresses).toEqual(["/api/v1/x?q=a%26b+c"]);
+  });
+
   it.each(["PUT", "PATCH"] as const)("sends a %s with its JSON body", async (method) => {
     let sent: RequestInit | undefined;
     stubFetch((init) => {

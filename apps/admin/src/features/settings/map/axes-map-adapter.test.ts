@@ -15,6 +15,7 @@ const library = vi.hoisted(() => {
     markerCount: 0,
     isMarkerRemoved: false,
     isMapRemoved: false,
+    jumpedTo: undefined as unknown,
   };
   class FakeMap {
     constructor(options: Record<string, unknown>) {
@@ -42,6 +43,9 @@ const library = vi.hoisted(() => {
           state.sourceData.push(data);
         },
       };
+    }
+    jumpTo(options: unknown): void {
+      state.jumpedTo = options;
     }
     remove(): void {
       state.isMapRemoved = true;
@@ -167,6 +171,14 @@ describe("the map of the axes", () => {
     fire("click", { lngLat: { lat: -18.95, lng: 47.55 } });
 
     expect(onPick).toHaveBeenCalledWith({ lat: -18.95, lng: 47.55 });
+  });
+
+  it("jumps to a found address at the zoom it is given", async () => {
+    const handle = await loaded(optionsWith());
+
+    handle.centreOn({ lat: -18.5, lng: 47.1 }, 16);
+
+    expect(state.jumpedTo).toEqual({ center: [47.1, -18.5], zoom: 16 });
   });
 
   it("places one marker on the tested point, moves it, and removes it", async () => {

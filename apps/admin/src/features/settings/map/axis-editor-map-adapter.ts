@@ -27,6 +27,8 @@ export interface AxisEditorMapOptions {
 export interface AxisEditorMapHandle {
   /** Draws the axis again: a new colour, a place added, removed or moved. */
   readonly setDrawing: (drawing: AxisDrawing) => void;
+  /** Shows this point at this zoom at once (a found address). */
+  readonly centreOn: (point: GeoPoint, zoom: number) => void;
   readonly destroy: () => void;
 }
 
@@ -214,6 +216,10 @@ export async function loadAxisEditorMap(
       setData(map, OTHERS_SOURCE, toOtherZones(drawing.others));
       setData(map, PENDING_SOURCE, pendingZone(drawing));
       placeMarkers(drawing);
+    },
+    // A jump, not an animation, as on the map of a reseller.
+    centreOn: (point, zoom) => {
+      map.jumpTo({ center: [point.lng, point.lat], zoom });
     },
     destroy: () => {
       map.remove();

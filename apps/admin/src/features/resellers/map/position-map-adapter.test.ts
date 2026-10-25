@@ -16,6 +16,7 @@ const library = vi.hoisted(() => {
     isMarkerRemoved: false,
     isMapRemoved: false,
     easedTo: undefined as unknown,
+    jumpedTo: undefined as unknown,
     markerLngLat: { lat: 0, lng: 0 },
   };
   class FakeMap {
@@ -34,6 +35,9 @@ const library = vi.hoisted(() => {
     }
     easeTo(options: unknown): void {
       state.easedTo = options;
+    }
+    jumpTo(options: unknown): void {
+      state.jumpedTo = options;
     }
     remove(): void {
       state.isMapRemoved = true;
@@ -165,6 +169,14 @@ describe("loadPositionMap", () => {
 
     handle.destroy();
     expect(library.state.isMapRemoved).toBe(true);
+  });
+
+  it("jumps to a found address at the zoom it is given", async () => {
+    const handle = await open(null);
+
+    handle.centreOn({ lat: -18.5, lng: 47.1 }, 16);
+
+    expect(library.state.jumpedTo).toEqual({ center: [47.1, -18.5], zoom: 16 });
   });
 
   it("rejects, and removes the map, when the style fails before the first load", async () => {

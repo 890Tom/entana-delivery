@@ -15,6 +15,7 @@ const library = vi.hoisted(() => {
     markerElements: [] as HTMLElement[],
     removedMarkers: 0,
     isMapRemoved: false,
+    jumpedTo: undefined as unknown,
   };
   class FakeMap {
     constructor(options: Record<string, unknown>) {
@@ -42,6 +43,9 @@ const library = vi.hoisted(() => {
           state.sourceData.push(data);
         },
       };
+    }
+    jumpTo(options: unknown): void {
+      state.jumpedTo = options;
     }
     remove(): void {
       state.isMapRemoved = true;
@@ -212,6 +216,14 @@ describe("the map of the axis editor", () => {
     }
 
     expect(onPick).toHaveBeenCalledWith({ lat: -18.95, lng: 47.45 });
+  });
+
+  it("jumps to a found address at the zoom it is given", async () => {
+    const handle = await loaded(optionsWith());
+
+    handle.centreOn({ lat: -18.5, lng: 47.1 }, 16);
+
+    expect(state.jumpedTo).toEqual({ center: [47.1, -18.5], zoom: 16 });
   });
 
   it("removes the map when it is destroyed", async () => {
