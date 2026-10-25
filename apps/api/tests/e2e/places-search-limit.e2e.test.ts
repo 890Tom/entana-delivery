@@ -24,12 +24,10 @@ describe("GET /api/v1/places/search: the limit per address", () => {
     vi.unstubAllGlobals();
   });
 
-  it("answers 429 with Retry-After to the 61st request of an address in the window", async () => {
+  it("answers 429 with Retry-After to the 61st request of an address, before Photon", async () => {
     // No request ever leaves the machine.
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(() => Promise.resolve(respondWith(buildPhotonCollection([])))),
-    );
+    const photon = vi.fn(() => Promise.resolve(respondWith(buildPhotonCollection([]))));
+    vi.stubGlobal("fetch", photon);
     const search = (): request.Test =>
       request(app.getHttpServer()).get(SEARCH_PATH).query({ q: SEARCHED_TEXT });
     for (let attempt = 0; attempt < 60; attempt += 1) {
@@ -39,6 +37,7 @@ describe("GET /api/v1/places/search: the limit per address", () => {
     const response = await search();
 
     expect(response.status).toBe(429);
+    expect(photon).toHaveBeenCalledTimes(60);
     expect(response.headers["retry-after"]).toBe("600");
     expect(response.body).toMatchObject({ status: 429, instance: SEARCH_PATH });
     expect(logs.text()).toContain("places_search_address_limited");

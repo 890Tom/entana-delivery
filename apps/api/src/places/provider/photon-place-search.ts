@@ -8,7 +8,7 @@ import type { PlaceCandidate } from "../rules/select-suggestions.js";
 // file that knows the provider.
 const PHOTON_BASE_URL = "https://photon.komoot.io/api/";
 /** How long the whole call (answer and body) may take before the search counts as unavailable. */
-export const PHOTON_TIMEOUT_MS = 3_000;
+const PHOTON_TIMEOUT_MS = 3_000;
 const PHOTON_RESULT_LIMIT = 10;
 const PHOTON_LANGUAGE = "fr";
 

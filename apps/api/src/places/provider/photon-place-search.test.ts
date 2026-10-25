@@ -6,7 +6,7 @@ import {
   respondWith,
 } from "../../../tests/support/photon-response.js";
 import { PlaceSearchUnavailableError } from "../errors/place-search-errors.js";
-import { PHOTON_TIMEOUT_MS, PhotonPlaceSearch } from "./photon-place-search.js";
+import { PhotonPlaceSearch } from "./photon-place-search.js";
 
 const NEAR = { lat: -18.91, lng: 47.52 };
 const TEXT = "gare routiere";
@@ -115,7 +115,11 @@ describe("PhotonPlaceSearch", () => {
 
   it.each([
     ["a network error", (): Promise<Response> => Promise.reject(new TypeError("fetch failed"))],
-    ["a status other than 2xx", (): Promise<Response> => Promise.resolve(respondWith({}, 502))],
+    [
+      "a status other than 2xx, even with a readable collection",
+      (): Promise<Response> =>
+        Promise.resolve(respondWith(buildPhotonCollection(GARE_ROUTIERE_FEATURES), 502)),
+    ],
     [
       "a body that is not JSON",
       (): Promise<Response> => Promise.resolve(new Response("<html>", { status: 200 })),
@@ -130,15 +134,19 @@ describe("PhotonPlaceSearch", () => {
     await expect(search()).rejects.toThrow(PlaceSearchUnavailableError);
   });
 
-  it("fails as unavailable when Photon has not answered after 3 seconds", async () => {
+  it("waits for Photon for 3 seconds, then fails as unavailable", async () => {
     vi.useFakeTimers();
     stubFetch(hangUntilAborted);
+    let failure: unknown;
+    const outcome = search().catch((error: unknown) => {
+      failure = error;
+    });
 
-    const pending = search();
-    const outcome = expect(pending).rejects.toThrow(PlaceSearchUnavailableError);
-    await vi.advanceTimersByTimeAsync(PHOTON_TIMEOUT_MS);
-
+    await vi.advanceTimersByTimeAsync(2_999);
+    expect(failure).toBeUndefined();
+    await vi.advanceTimersByTimeAsync(1);
     await outcome;
-    expect(PHOTON_TIMEOUT_MS).toBe(3_000);
+
+    expect(failure).toBeInstanceOf(PlaceSearchUnavailableError);
   });
 });
