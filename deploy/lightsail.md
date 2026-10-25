@@ -548,6 +548,8 @@ The Content-Security-Policy still has to be confirmed in a browser (see the [dep
 
    Rebuild only the image that changed: for example, when the update touches only the customer app or the administration, run `build caddy` alone, then `up -d --wait`. `caddy` holds both front ends, `api` the API, `migrate` the database migrations; a change to `packages/contracts` reaches both `api` and `caddy`. When unsure, build all three.
 
+   `deploy/update.sh` runs this step and the checks of step 5 in one command: `bash deploy/update.sh` builds the three images, `bash deploy/update.sh caddy` only the one named. It stops before building when `deploy/.env` is missing, the compose configuration is invalid or a tracked file was changed on the server.
+
 5. Check:
 
    ```sh
