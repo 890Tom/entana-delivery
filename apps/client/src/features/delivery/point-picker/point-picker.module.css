@@ -12,6 +12,14 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+/* The place search above the map: one column item, so that the side card keeps its top. */
+.mapColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  grid-area: map;
+}
+
 .notice {
   grid-area: notice;
   margin-block-end: var(--space-4);
@@ -27,7 +35,6 @@
 /* The map box: sized by the delivery screen's layout, clipped to its rounded corners. */
 .frame {
   position: relative;
-  grid-area: map;
   height: var(--size-map-height);
   margin-block-end: var(--space-4);
   overflow: hidden;
