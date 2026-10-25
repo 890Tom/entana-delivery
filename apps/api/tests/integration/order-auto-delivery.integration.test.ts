@@ -45,7 +45,11 @@ describe("the automatic delivery of overdue orders on a real PostgreSQL", () => 
     );
     const { id } = await client.customerOrder.update({
       where: { publicCode: response.orderCode },
-      data: { status, deliveryDate: new Date(deliveryDate) },
+      data: {
+        status,
+        deliveryDate: new Date(deliveryDate),
+        ...(status === "CANCELLED" ? { statusReason: "Fake cancellation reason." } : {}),
+      },
       select: { id: true },
     });
     return id;
