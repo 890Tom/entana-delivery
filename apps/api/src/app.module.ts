@@ -16,6 +16,7 @@ import { InstanceModule } from "./instance/instance.module.js";
 import { MediaModule } from "./media/media.module.js";
 import { OrderAutoDeliveryModule } from "./order-auto-delivery/order-auto-delivery.module.js";
 import { OrdersModule } from "./orders/orders.module.js";
+import { PlacesModule } from "./places/places.module.js";
 import { ResellersModule } from "./resellers/resellers.module.js";
 import { TrackingModule } from "./tracking/tracking.module.js";
 import { createLoggingModule } from "./logging/create-logging-module.js";
@@ -32,6 +33,7 @@ export class AppModule {
         CatalogModule.register(config),
         ResellersModule.register(config),
         DeliveryQuoteModule.register(config),
+        PlacesModule.register(config),
         InstanceModule.register(config),
         MediaModule.register(config),
         OrdersModule.register(config),

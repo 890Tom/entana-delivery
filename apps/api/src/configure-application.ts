@@ -10,6 +10,8 @@ import { sessionCookieSettings } from "./admin-auth/http/session-cookie.js";
 import { rejectBody } from "./errors/request-body/body-rejected-error.js";
 import { AddressRateLimiter } from "./orders/rate-limit/address-rate-limiter.js";
 import { ORDER_CREATION_PATH } from "./orders/rate-limit/order-http-limits.js";
+import { PLACES_SEARCH_PATH } from "./places/rate-limit/places-http-limits.js";
+import { PlacesSearchAddressRateLimiter } from "./places/rate-limit/places-search-address-rate-limiter.js";
 import { TrackingAddressRateLimiter } from "./tracking/rate-limit/tracking-address-rate-limiter.js";
 import { TrackingLookupAddressRateLimiter } from "./tracking/rate-limit/tracking-lookup-address-rate-limiter.js";
 import { TRACKING_LOOKUP_PATH, TRACKING_PATH } from "./tracking/rate-limit/tracking-http-limits.js";
@@ -57,6 +59,8 @@ export function configureApplication(app: NestExpressApplication, config: AppCon
   app.enableCors({ origin: [...config.corsOrigins], maxAge: CORS_PREFLIGHT_MAX_AGE_SECONDS });
   // Before the body parser: an address over its limit is answered without reading its body.
   app.use(ORDER_CREATION_PATH, app.get(AddressRateLimiter).middleware);
+  // The place search: each request costs a call to the provider, so it has its own limit.
+  app.use(PLACES_SEARCH_PATH, app.get(PlacesSearchAddressRateLimiter).middleware);
   // The tracking routes: their headers first (every answer carries them, errors included), then
   // their own limit, then the body is set aside, all before the parser. The lookup by phone number
   // and code is the one tracking route with a body and has its own limit: the two steps above do

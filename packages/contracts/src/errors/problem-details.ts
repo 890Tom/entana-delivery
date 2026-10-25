@@ -40,6 +40,11 @@ export const ORDER_PROBLEM_TYPES = {
   totalTooLarge: "urn:entana:problem:order_total_too_large",
 } as const;
 
+/** `type` of the problem of the place search: the provider could not answer (503 is shared). */
+export const PLACE_PROBLEM_TYPES = {
+  searchUnavailable: "urn:entana:problem:place_search_unavailable",
+} as const;
+
 /** One invalid field of a request. `pointer` is a JSON Pointer (RFC 6901) into the request data. */
 export const fieldErrorSchema = z.object({
   pointer: z.string(),
