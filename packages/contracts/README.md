@@ -17,7 +17,7 @@ One folder per domain under `src/`, all exported from `src/index.ts`:
 - `delivery/`: the quote and zones schemas, `resolveDeliveryAxis`, `computeDeliveryFee`, the settings and the administration of axes.
 - `orders/`: order creation, order code, phone numbering, totals, tracking, administration list and detail, status transitions (`canTransition`) and the fee adjustment at confirmation.
 - `admin-auth/`: login, password policy and session rules.
-- `instance/`: the instance configuration file and its public part.
+- `instance/`: the instance configuration file and its public part, including the theme derived from the two brand colours (`instance/theme/`: WCAG contrast, colour mixing).
 - `errors/`, `health/`, `money/`: problem details, probe answers, amount formatting.
 
 ## Points of attention

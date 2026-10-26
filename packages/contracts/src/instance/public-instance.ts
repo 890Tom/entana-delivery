@@ -9,6 +9,7 @@ import {
   zoomSchema,
 } from "./instance-config.js";
 import type { InstanceConfig } from "./instance-config.js";
+import { deriveInstanceTheme, instanceThemeSchema } from "./theme/derive-instance-theme.js";
 
 const BRANDING_URL_PREFIX = "/media/branding/";
 
@@ -32,6 +33,8 @@ export const publicInstanceSchema = z.strictObject({
   appIconUrl: brandingUrlSchema,
   /** The shop's own number, canonical ("+261..."), published on purpose; null when not set. */
   contactPhone: z.string().nullable(),
+  /** The brand colours and the colours derived from them; null when the file sets none. */
+  theme: instanceThemeSchema.nullable(),
   map: z.strictObject({
     styleUrl: mapStyleUrlSchema,
     center: z.strictObject({ lat: latitudeSchema, lng: longitudeSchema }),
@@ -55,6 +58,8 @@ export function toPublicInstance(config: InstanceConfig): PublicInstance {
     logoUrl: toBrandingUrl(config.branding?.logoFile),
     appIconUrl: toBrandingUrl(config.branding?.appIconFile),
     contactPhone: config.contact?.phone ?? null,
+    theme:
+      config.branding?.colors === undefined ? null : deriveInstanceTheme(config.branding.colors),
     map: {
       styleUrl: config.map.styleUrl,
       center: { lat: config.map.center.lat, lng: config.map.center.lng },

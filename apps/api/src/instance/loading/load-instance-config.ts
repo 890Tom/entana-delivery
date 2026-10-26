@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { instanceConfigSchema, parsePhoneNumber } from "@entana/contracts";
+import { checkThemeContrast, instanceConfigSchema, parsePhoneNumber } from "@entana/contracts";
 import type { InstanceConfig } from "@entana/contracts";
 import type { z } from "zod";
 import { InvalidInstanceConfigurationError } from "../errors/invalid-instance-configuration-error.js";
@@ -73,6 +73,30 @@ function canonicalizeContact(config: InstanceConfig): InstanceConfig {
   return { ...config, contact: { phone: parsed.e164 } };
 }
 
+// Only the key and the contrast reached are named: the colour itself never reaches a message.
+function assertBrandColorsReadable(config: InstanceConfig): void {
+  const colors = config.branding?.colors;
+  if (colors === undefined) {
+    return;
+  }
+  const failures = checkThemeContrast(colors);
+  if (failures.length > 0) {
+    throw new InvalidInstanceConfigurationError(
+      [
+        "Couleurs de l'instance trop claires sur fond blanc. Clés à corriger :",
+        ...failures.map(
+          (failure) =>
+            `  - branding.colors.${failure.key} : contraste de ${formatRatio(failure.ratio)}:1, ${String(failure.minimum)}:1 minimum`,
+        ),
+      ].join("\n"),
+    );
+  }
+}
+
+function formatRatio(ratio: number): string {
+  return ratio.toFixed(2).replace(".", ",");
+}
+
 /** Loads and validates the instance configuration. Throws a French error that names keys only. */
 export function loadInstanceConfig(source: InstanceConfigSource): InstanceConfig {
   const document = parseInstanceYaml(readInstanceFile(resolvePath(source)));
@@ -80,5 +104,6 @@ export function loadInstanceConfig(source: InstanceConfigSource): InstanceConfig
   if (!result.success) {
     throw invalidKeysError(invalidKeys(result.error.issues));
   }
+  assertBrandColorsReadable(result.data);
   return canonicalizeContact(result.data);
 }

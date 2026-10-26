@@ -124,6 +124,31 @@ describe("instanceConfigSchema", () => {
     expect(invalidPaths({ ...validConfig, map })).toEqual([path]);
   });
 
+  it("accepts brand colours and keeps them in lower case", () => {
+    const result = instanceConfigSchema.parse({
+      ...validConfig,
+      branding: { colors: { accent: "#2D6CDF", action: "#2b2B2b" } },
+    });
+
+    expect(result.branding?.colors).toEqual({ accent: "#2d6cdf", action: "#2b2b2b" });
+  });
+
+  it.each([
+    ["a short hex", { accent: "#26d", action: "#2b2b2b" }, "branding.colors.accent"],
+    ["a colour name", { accent: "#2d6cdf", action: "blue" }, "branding.colors.action"],
+    ["rgb()", { accent: "rgb(1, 2, 3)", action: "#2b2b2b" }, "branding.colors.accent"],
+    ["hsl()", { accent: "#2d6cdf", action: "hsl(1, 2%, 3%)" }, "branding.colors.action"],
+    ["a hex without #", { accent: "2d6cdf", action: "#2b2b2b" }, "branding.colors.accent"],
+    [
+      "an unknown key",
+      { accent: "#2d6cdf", action: "#2b2b2b", text: "#000000" },
+      "branding.colors",
+    ],
+    ["only one colour", { accent: "#2d6cdf" }, "branding.colors.action"],
+  ])("refuses brand colours with %s", (_label, colors, path) => {
+    expect(invalidPaths({ ...validConfig, branding: { colors } })).toEqual([path]);
+  });
+
   it("refuses an unknown key", () => {
     const result = instanceConfigSchema.safeParse({ ...validConfig, secret: "x" });
     expect(result.success).toBe(false);

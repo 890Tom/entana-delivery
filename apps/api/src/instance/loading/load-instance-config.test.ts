@@ -50,6 +50,36 @@ afterAll(() => {
   rmSync(directory, { recursive: true, force: true });
 });
 
+const COLORS_YAML = `${VALID_YAML}branding:
+  colors:
+    accent: "#2D6CDF"
+    action: "#2b2b2b"
+`;
+
+describe("loadInstanceConfig brand colours", () => {
+  it("loads brand colours, in lower case", () => {
+    expect(loadFrom(COLORS_YAML).branding?.colors).toEqual({
+      accent: "#2d6cdf",
+      action: "#2b2b2b",
+    });
+  });
+
+  it("stops on an accent too light on white, naming the key and the contrast only", () => {
+    const message = failureOf(() => loadFrom(COLORS_YAML.replace("#2D6CDF", "#F5E663")));
+
+    expect(message).toContain("branding.colors.accent");
+    expect(message).toMatch(/\d,\d{2}:1/);
+    expect(message).not.toMatch(/f5e663/i);
+  });
+
+  it("stops on an action too light on white, naming its key", () => {
+    const message = failureOf(() => loadFrom(COLORS_YAML.replace("#2b2b2b", "#f5e663")));
+
+    expect(message).toContain("branding.colors.action");
+    expect(message).not.toContain("branding.colors.accent");
+  });
+});
+
 describe("loadInstanceConfig", () => {
   it("loads a valid configuration", () => {
     expect(loadFrom(VALID_YAML)).toMatchObject({
