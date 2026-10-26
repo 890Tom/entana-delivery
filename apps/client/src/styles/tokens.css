@@ -5,13 +5,14 @@
  *
  * Customisable colour roles (the single list; a settings screen and a contrast check read it):
  *   surface, surface-muted, surface-inverse
- *   text, text-muted, text-inverse, text-disabled, text-on-accent, text-on-error
+ *   text, text-muted, text-inverse, text-disabled, text-on-accent, text-on-error, text-on-success
  *   border, border-strong, border-input
  *   accent, accent-soft, accent-strong
+ *   success
  *   error, skeleton, focus-ring, ink-hover
  *
  * An "on" token is the text colour used on top of its fill: text-on-accent on accent,
- * text-on-error on error, text-inverse on surface-inverse.
+ * text-on-error on error, text-on-success on success, text-inverse on surface-inverse.
  */
 :root {
   /* Colours: palette */
@@ -27,6 +28,7 @@
   --color-accent-800: #1e40af;
   --color-ink-hover: #333;
   --color-error: #c62828;
+  --color-success-500: #60a5fa;
 
   /* Colours: roles */
   --color-surface: var(--color-white);
@@ -38,12 +40,14 @@
   --color-text-disabled: var(--color-neutral-400);
   --color-text-on-accent: var(--color-ink);
   --color-text-on-error: var(--color-white);
+  --color-text-on-success: var(--color-ink);
   --color-border: var(--color-neutral-200);
   --color-border-strong: var(--color-ink);
   --color-border-input: var(--color-neutral-500);
   --color-accent: var(--color-accent-500);
   --color-accent-soft: var(--color-accent-100);
   --color-accent-strong: var(--color-accent-800);
+  --color-success: var(--color-success-500);
   --color-skeleton: var(--color-neutral-200);
   --color-focus-ring: var(--color-ink);
 
