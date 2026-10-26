@@ -28,6 +28,7 @@ describe("toPublicInstance", () => {
       logoUrl: "/media/branding/logo.png",
       appIconUrl: null,
       contactPhone: null,
+      theme: null,
       map: {
         styleUrl: "https://tiles.openfreemap.org/styles/liberty",
         center: { lat: -18.91, lng: 47.52 },
@@ -35,6 +36,25 @@ describe("toPublicInstance", () => {
       },
     });
     expect(JSON.stringify(publicInstance)).not.toContain("Antananarivo");
+  });
+});
+
+describe("toPublicInstance theme", () => {
+  it("derives the theme from the brand colours of the file", () => {
+    const withColors = {
+      ...config,
+      branding: { colors: { accent: "#2d6cdf", action: "#2b2b2b" } },
+    };
+
+    expect(publicInstanceSchema.parse(toPublicInstance(withColors)).theme).toEqual({
+      accent: "#2d6cdf",
+      accentSoft: "#e0e9fa",
+      accentStrong: "#2961c9",
+      textOnAccent: "#ffffff",
+      action: "#2b2b2b",
+      actionHover: "#555555",
+      textOnAction: "#ffffff",
+    });
   });
 });
 
@@ -63,6 +83,15 @@ describe("publicInstanceSchema", () => {
     expect(
       publicInstanceSchema.safeParse({ ...valid, map: { ...valid.map, apiKey: "x" } }).success,
     ).toBe(false);
+  });
+
+  it("refuses a response without theme, or with a theme that is not a hex colour set", () => {
+    const valid = toPublicInstance(config);
+
+    expect(publicInstanceSchema.safeParse({ ...valid, theme: undefined }).success).toBe(false);
+    expect(publicInstanceSchema.safeParse({ ...valid, theme: { accent: "red" } }).success).toBe(
+      false,
+    );
   });
 
   it("refuses a response without contactPhone", () => {

@@ -70,6 +70,8 @@ export { instanceConfigSchema, mediaFileNameSchema } from "./instance/instance-c
 export type { InstanceConfig } from "./instance/instance-config.js";
 export { publicInstanceSchema, toPublicInstance } from "./instance/public-instance.js";
 export type { PublicInstance } from "./instance/public-instance.js";
+export { checkThemeContrast } from "./instance/theme/check-theme-contrast.js";
+export type { ThemeContrastFailure } from "./instance/theme/check-theme-contrast.js";
 export {
   TRACKING_TOKEN_HEADER,
   trackingResponseSchema,

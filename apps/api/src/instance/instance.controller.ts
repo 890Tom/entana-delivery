@@ -18,7 +18,7 @@ export class InstanceController {
   @ApiOperation({
     summary: "Describe the shop",
     description:
-      "Public. The shop name, languages, currency, phone country code and branding media URLs. Nothing internal.",
+      "Public. The shop name, languages, currency, phone country code, branding media URLs and the theme (the two brand colours and the colours derived from them, or null when the file sets none). Nothing internal.",
     operationId: "getInstance",
   })
   @ApiOkResponse({

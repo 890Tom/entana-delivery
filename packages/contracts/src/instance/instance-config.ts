@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { configHexColorSchema } from "./theme/hex-color.js";
 
 // A bare file name: no separator, no ".." and a raster extension (never svg, which can carry
 // script). The pattern is the whole defence, so a name that passes it is safe to place in a URL.
@@ -107,6 +108,10 @@ export const instanceConfigSchema = z.strictObject({
     .strictObject({
       logoFile: mediaFileNameSchema.optional(),
       appIconFile: mediaFileNameSchema.optional(),
+      // Both colours or none: the whole theme is derived from these two.
+      colors: z
+        .strictObject({ accent: configHexColorSchema, action: configHexColorSchema })
+        .optional(),
     })
     .optional(),
   // Only the shape is checked here: the loader checks the number against the numbering rule of

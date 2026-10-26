@@ -1,0 +1,13 @@
+# Fictitious test configuration: neutral colours, no real shop value.
+shop:
+  name: Boutique de démonstration
+locale:
+  default: fr
+  available: [fr]
+currency: MGA
+timezone: Indian/Antananarivo
+phoneCountryCode: "261"
+branding:
+  colors:
+    accent: "#2d6cdf"
+    action: "#2b2b2b"
