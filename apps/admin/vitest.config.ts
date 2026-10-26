@@ -7,9 +7,9 @@ export default mergeConfig(
   defineConfig({
     test: {
       environment: "jsdom",
-      // A style sheet read as text by a test (`?raw`) is the file itself; the others are not
-      // processed, and their class names are proxied.
-      css: { include: [/\.module\.css\?raw$/] },
+      // A style sheet read as text by a test (`?raw`), tokens.css included, is the file itself;
+      // the others are not processed, and their class names are proxied.
+      css: { include: [/\.css\?raw$/] },
       include: ["src/**/*.test.{ts,tsx}"],
       coverage: {
         provider: "v8",
