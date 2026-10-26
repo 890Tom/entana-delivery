@@ -553,6 +553,38 @@ To go back to the generic colours, remove the `colors` lines (or the whole `bran
 3. In the private theme of the **customer app** only, define `--color-success-500` with the value the accent had: the success notice used to follow the accent and now has its own colour. Without this line it shows the generic colour of the repository.
 4. These files are built into the image, so build and restart again, as in [Icons, manifest and themes](#icons-manifest-and-themes-optional).
 
+### Add the map archive
+
+The map tiles can be served by the server itself, from one archive file, `madagascar.pmtiles`. Caddy serves the folder `/opt/entana/maps` under `/maps/`, on the customer site and on the administration, read-only.
+
+- The archive never goes into the repository: it stays on your computer and on the server.
+- It is not in a volume: back it up with your own copy, or extract it again.
+
+On your own computer, extract the area of the shop from a build of the OpenStreetMap tiles with the `pmtiles` command-line tool of Protomaps. Replace `<build-url>` with the address of the build and the four bounds with the west, south, east and north limits of the area, in decimal degrees:
+
+```sh
+pmtiles extract <build-url> madagascar.pmtiles --bbox=<west>,<south>,<east>,<north> --maxzoom=15
+```
+
+Send it to the home folder of the server (see [section 2](#connect-from-your-own-computer)):
+
+```sh
+scp -i ~/Keys/LightsailDefaultKey-eu-central-1.pem madagascar.pmtiles ubuntu@203.0.113.10:~/madagascar.pmtiles
+```
+
+Then, on the server, from `/opt/entana/entana-delivery`, put it in its folder, set `MAPS_DIR=/opt/entana/maps` in `deploy/.env` (remove the `#` in front of the line), and start the stack again so that caddy mounts the folder:
+
+```sh
+sudo mkdir -p /opt/entana/maps
+sudo mv ~/madagascar.pmtiles /opt/entana/maps/madagascar.pmtiles
+sudo chmod 644 /opt/entana/maps/madagascar.pmtiles
+nano deploy/.env
+docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml up -d --wait
+curl -s -o /dev/null -D - -r 0-16383 https://shop.example.com/maps/madagascar.pmtiles
+```
+
+**Expected result:** `HTTP/2 206`, `content-range: bytes 0-16383/<size of the file>` and `content-length: 16384`. A `404` means that the file is not in `/opt/entana/maps` or that its name differs. If `up` stops with an error about the source of a mount, the folder named in `MAPS_DIR` does not exist.
+
 ## 9. First administrator and checks
 
 ### Create the first administrator

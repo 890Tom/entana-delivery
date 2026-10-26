@@ -115,6 +115,14 @@ services:
       # Certificates and the account of the certificate authority: never delete caddy_data.
       - caddy_data:/data
       - caddy_config:/config
+      # Map files of the shop, served under /maps/ (deploy/lightsail.md). The default folder is
+      # empty: no map file. The folder must exist: a wrong path stops the start.
+      - type: bind
+        source: ${MAPS_DIR:-./web/no-maps}
+        target: /srv/maps
+        read_only: true
+        bind:
+          create_host_path: false
     networks: [edge]
     depends_on:
       api:
