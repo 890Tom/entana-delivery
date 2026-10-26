@@ -1,14 +1,16 @@
 import type * as Library from "maplibre-gl";
 
 import { texts } from "../../../i18n/texts";
+import { loadMapLibrary } from "../../../map/load-maplibre";
+import type { MapLibrary } from "../../../map/load-maplibre";
 
 import type { MapAdapter, MapAdapterOptions, MapLoader, MapZone } from "./map-adapter";
 import { createMarkerElement } from "./marker-element";
 import { readZoneLineStyle, toZoneFeatures } from "./zone-layer";
 
-// The only file that names the library. It is reached through dynamic imports only, so that the
-// library, its style sheet and its worker are one separate chunk that the first page never loads.
-type LibraryModule = typeof Library;
+// The only file of the delivery screen that uses the library, which src/map/load-maplibre.ts loads
+// on demand.
+type LibraryModule = MapLibrary;
 
 const MAP_LOCALE = {
   "Map.Title": texts.delivery.map.canvasLabel,
@@ -121,13 +123,7 @@ function createMap(library: LibraryModule, options: MapAdapterOptions): Library.
 
 /** Loads the library, creates the map, and resolves when its style has loaded. */
 export const loadMapLibreAdapter: MapLoader = async (options) => {
-  const [library, worker] = await Promise.all([
-    import("maplibre-gl"),
-    import("maplibre-gl/dist/maplibre-gl-worker.mjs?url"),
-    import("maplibre-gl/dist/maplibre-gl.css"),
-  ]);
-  // The worker is a file of the application (same origin), not a blob: a strict policy allows it.
-  library.setWorkerUrl(worker.default);
+  const library = await loadMapLibrary();
   const map = createMap(library, options);
   return new Promise<MapAdapter>((resolve, reject) => {
     let isLoaded = false;
