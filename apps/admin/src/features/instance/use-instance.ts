@@ -6,7 +6,13 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import { fetchAdmin } from "../../data-fetching/fetch-admin";
 import { AdminRequestError } from "../../data-fetching/admin-request-error";
 
-/** The name and the logo of the shop: public, and unchanged while the page is open. */
+import { applyInstanceTheme } from "./theme/apply-instance-theme";
+
+/**
+ * The name, the logo and the theme of the shop: public, and unchanged while the page is open. The
+ * theme is applied inside the request, before the answer reaches any component: the maps read the
+ * colours once, when they are created.
+ */
 export function useInstance(): UseQueryResult<PublicInstance> {
   return useQuery({
     queryKey: ["instance"],
@@ -15,6 +21,7 @@ export function useInstance(): UseQueryResult<PublicInstance> {
       if (result.kind !== "ok") {
         throw new AdminRequestError(result.kind);
       }
+      applyInstanceTheme(result.data.theme);
       return result.data;
     },
     staleTime: Infinity,
