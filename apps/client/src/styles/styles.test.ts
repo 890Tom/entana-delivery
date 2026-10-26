@@ -11,6 +11,15 @@ const noticeStylesheets = import.meta.glob<string>("../components/notice/notice.
   import: "default",
   eager: true,
 });
+const accentTextStylesheets = import.meta.glob<string>(
+  [
+    "../layout/header/cart-badge.module.css",
+    "../layout/step-indicator/step-indicator.module.css",
+    "../features/resellers/map/shop-marker.module.css",
+    "../components/button/button.module.css",
+  ],
+  { query: "?raw", import: "default", eager: true },
+);
 // Git-ignored and absent on a fresh clone: the glob is then empty.
 const privateThemes = import.meta.glob<string>("../../public/theme.local.css", {
   query: "?raw",
@@ -59,6 +68,24 @@ describe("the success notice", () => {
       "--color-success",
       "--color-text-on-success",
     ]);
+  });
+});
+
+// The text colour of a rule: `color`, and not `background-color` or `border-color`.
+function textColourOf(css: string, selector: string): string | undefined {
+  return /(?<![-\w])color:\s*var\((--[\w-]+)\)/.exec(ruleBody(css, selector))?.[1];
+}
+
+describe("the text set on the accent", () => {
+  it.each([
+    ["../layout/header/cart-badge.module.css", ".count"],
+    ["../layout/step-indicator/step-indicator.module.css", ".current .step"],
+    ["../features/resellers/map/shop-marker.module.css", ".selected"],
+    ["../components/button/button.module.css", '.accent:hover:not([aria-disabled="true"])'],
+  ])("reads --color-text-on-accent in %s, rule %s", (file, selector) => {
+    const css = withoutComments(accentTextStylesheets[file] ?? "");
+
+    expect(textColourOf(css, selector)).toBe("--color-text-on-accent");
   });
 });
 

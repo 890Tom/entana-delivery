@@ -29,6 +29,7 @@
   z-index: 1;
   width: var(--size-map-marker-selected);
   height: var(--size-map-marker-selected);
+  color: var(--color-text-on-accent);
   background: var(--color-accent);
 }
 

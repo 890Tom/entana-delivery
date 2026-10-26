@@ -16,7 +16,7 @@
   }
 }
 
-/* The round count: accent fill, ink text, at the top right of the bag. */
+/* The round count: accent fill, the text made for it, at the top right of the bag. */
 .count {
   position: absolute;
   top: 0;
@@ -30,7 +30,7 @@
   font: var(--font-body-strong);
   font-size: var(--font-size-badge-count);
   font-variant-numeric: tabular-nums;
-  color: var(--color-text);
+  color: var(--color-text-on-accent);
   background: var(--color-accent);
   border-radius: var(--radius-full);
 }
