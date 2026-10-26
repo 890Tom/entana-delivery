@@ -21,6 +21,7 @@ phoneCountryCode: "261"
 #   # minuscules), rien d'autre. Les autres teintes (fond doux, survol, texte) en sont déduites.
 #   # Au démarrage, chacune doit atteindre un contraste d'au moins 3:1 sur fond blanc, sinon
 #   # l'API refuse de démarrer en nommant la clé. Valeurs neutres ci-dessous, à remplacer.
+#   # Le fichier n'est lu qu'au démarrage : redémarrez l'API après un changement.
 #   colors:
 #     accent: "#2d6cdf"   # bleu : sélection et états
 #     action: "#2b2b2b"   # gris foncé : boutons principaux

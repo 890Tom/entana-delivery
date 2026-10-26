@@ -3,13 +3,14 @@
  * theme.local.css (git-ignored, served next to the app, loaded after this file). Components
  * reference the semantic names only; the palette is the layer a theme changes.
  *
- * Customisable colour roles (the single list; a settings screen and a contrast check read it):
- *   surface, surface-muted, surface-inverse
- *   text, text-muted, text-inverse, text-disabled, text-on-accent, text-on-error, text-on-success
- *   border, border-strong, border-input
- *   accent, accent-soft, accent-strong
- *   success
- *   error, skeleton, focus-ring, ink-hover
+ * Two colours are set per instance, in branding.colors of the instance file (ADR 0029): the
+ * accent and the action. The API derives seven values from them, and the app writes them at run
+ * time as inline variables on the document, which win over this file and over theme.local.css:
+ *   accent -> --color-accent, accentSoft -> --color-accent-soft,
+ *   accentStrong -> --color-accent-strong, textOnAccent -> --color-text-on-accent,
+ *   action -> --color-surface-inverse, actionHover -> --color-ink-hover,
+ *   textOnAction -> --color-text-inverse.
+ * Every other role below is changed in theme.local.css only.
  *
  * An "on" token is the text colour used on top of its fill: text-on-accent on accent,
  * text-on-error on error, text-on-success on success, text-inverse on surface-inverse.

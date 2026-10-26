@@ -30,5 +30,6 @@
 | [0026](0026-reverse-proxy-security-headers-and-caching.md)               | Reverse proxy, security headers and caching (Caddy, two origins)                                | accepted                                                     |
 | [0027](0027-production-stack-topology.md)                                | Production stack topology: networks, ports, one-shot migrations, no TLS to the database         | accepted                                                     |
 | [0028](0028-place-search-through-public-photon.md)                       | Place search through the public Photon instance, called by the API                              | accepted                                                     |
+| [0029](0029-instance-theme-colors.md)                                    | Instance theme colours: two colours in the instance file, derived by a pure function            | accepted                                                     |
 
 Planned records: PostGIS left out (setup in ADR 0006), delivery axes made of places, idempotent orders, simplified order statuses, VPS hosting with OpenFreeMap tiles, hashed tracking token. Use [`0000-template.md`](0000-template.md).

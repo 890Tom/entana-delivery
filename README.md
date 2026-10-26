@@ -39,7 +39,7 @@ Deploying one shop to one server is documented step by step in [deploy/lightsail
 - Editing the lines of an order from the administration (the `LINES_EDITED` event type exists in the schema, no route writes it).
 - Production deployment: HTTPS, HTTP headers, a reverse proxy, backups, a one-command demo setup.
 - A test of the customer application on a real Android device.
-- Replacing the generic icons and theme with those of a real deployment.
+- Replacing the generic icons with those of a real deployment (the two brand colours are set in the instance file).
 - A driver application with dispatch by axis (the `DRIVER` role and the `driver_id` and `tour_position` columns are reserved for it).
 
 ## Known limits and what comes next
