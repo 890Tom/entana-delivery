@@ -104,8 +104,9 @@
   border-radius: var(--radius-full);
 }
 
+/* White, whatever the text of the action: the badge is on a colour chosen by the shop. */
 .light {
-  color: var(--color-text-inverse);
+  color: var(--color-white);
 }
 
 .dark {

@@ -6,6 +6,14 @@ const stylesheets = import.meta.glob<string>("./*.css", {
   import: "default",
   eager: true,
 });
+const accentTextStylesheets = import.meta.glob<string>(
+  [
+    "../features/settings/place-drawing/place-drawing.module.css",
+    "../features/settings/map/axis-marker.module.css",
+    "../features/settings/axis-editor/axis-editor.module.css",
+  ],
+  { query: "?raw", import: "default", eager: true },
+);
 // Git-ignored and absent on a fresh clone: the glob is then empty.
 const privateThemes = import.meta.glob<string>("../../public/theme.local.css", {
   query: "?raw",
@@ -37,6 +45,37 @@ function definedVariables(css: string): Set<string> {
 function usedVariables(css: string): Set<string> {
   return new Set([...css.matchAll(/var\(\s*(--[\w-]+)/g)].map((match) => match[1] ?? ""));
 }
+
+function ruleBody(css: string, selector: string): string {
+  const start = css.indexOf(`${selector} {`);
+  return start === -1 ? "" : css.slice(start, css.indexOf("}", start));
+}
+
+// The text colour of a rule: `color`, and not `background-color` or `border-color`.
+function textColourOf(css: string, selector: string): string | undefined {
+  return /(?<![-\w])color:\s*var\((--[\w-]+)\)/.exec(ruleBody(css, selector))?.[1];
+}
+
+describe("the text set on a colour of the theme", () => {
+  it("reads the text role of the accent on the accent, and not the text role of the action on a badge of an axis", () => {
+    const textColourIn = (file: string, selector: string): string | undefined =>
+      textColourOf(withoutComments(accentTextStylesheets[file] ?? ""), selector);
+
+    expect([
+      textColourIn("../features/settings/place-drawing/place-drawing.module.css", ".draftBadge"),
+      textColourIn("../features/settings/map/axis-marker.module.css", ".draft"),
+      textColourIn("../features/settings/map/axis-marker.module.css", ".light"),
+      textColourIn("../features/settings/axis-editor/axis-editor.module.css", ".light"),
+    ]).toEqual([
+      "--color-text-on-accent",
+      "--color-text-on-accent",
+      // The badge of an axis is on a colour chosen by the shop, whose light text is white: it
+      // must not follow the text of the action.
+      "--color-white",
+      "--color-white",
+    ]);
+  });
+});
 
 describe("the stylesheets", () => {
   it("only use variables that tokens.css defines", () => {
