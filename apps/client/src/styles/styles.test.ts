@@ -6,6 +6,11 @@ const stylesheets = import.meta.glob<string>("./*.css", {
   import: "default",
   eager: true,
 });
+const noticeStylesheets = import.meta.glob<string>("../components/notice/notice.module.css", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
 // Git-ignored and absent on a fresh clone: the glob is then empty.
 const privateThemes = import.meta.glob<string>("../../public/theme.local.css", {
   query: "?raw",
@@ -37,6 +42,25 @@ function definedVariables(css: string): Set<string> {
 function usedVariables(css: string): Set<string> {
   return new Set([...css.matchAll(/var\(\s*(--[\w-]+)/g)].map((match) => match[1] ?? ""));
 }
+
+function ruleBody(css: string, selector: string): string {
+  const start = css.indexOf(`${selector} {`);
+  return start === -1 ? "" : css.slice(start, css.indexOf("}", start));
+}
+
+describe("the success notice", () => {
+  const success = ruleBody(
+    withoutComments(noticeStylesheets["../components/notice/notice.module.css"] ?? ""),
+    ".success",
+  );
+
+  it("is painted with the success roles only", () => {
+    expect([...usedVariables(success)].sort()).toEqual([
+      "--color-success",
+      "--color-text-on-success",
+    ]);
+  });
+});
 
 describe("the stylesheets", () => {
   it("only use variables that tokens.css defines", () => {
