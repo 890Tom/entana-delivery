@@ -60,6 +60,8 @@ Without `OVERRIDES_DIR`, the web image holds the demo icons, manifest and themes
 └── admin/public/theme.local.css          # theme of the administration
 ```
 
+The two brand colours (accent and action) are not set in these files: they go in `branding.colors` of the shop file and need no build, see [Set the shop colours](lightsail.md#set-the-shop-colours). The `theme_color` of the manifest and the icons stay here, built into the image.
+
 Every file is optional; each one replaces the file of the same name in the image. Any file outside `client/public/` and `admin/public/` fails the build. The folder holds the shop's brand: it never goes into the repository. The files are built into the image, so after any change to the folder, run the `up -d --build --wait` command again: installed apps then receive the new files through their usual update notice.
 
 If `OVERRIDES_DIR` names a folder that does not exist, the build stops. When the path is outside the repository, the message reads `additional privileges requested: pass "--allow=fs.read=<parent folder>"`: create the folder or fix the path, never pass `--allow`.

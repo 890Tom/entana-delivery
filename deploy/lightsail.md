@@ -310,7 +310,7 @@ cp examples/demo/instance.config.yaml /opt/entana/instance.config.yaml
 nano /opt/entana/instance.config.yaml
 ```
 
-Adapt it to the shop: at least `shop.name`, `phoneCountryCode`, and, if needed, the `map` centre (you can also set it later, see [Set the map centre](#set-the-map-centre)) and the `contact` phone. The comments in the file explain each field. Everything in it is public (it is served to every visitor), so put no secret in it. Keep its default permissions: the API container must be able to read it.
+Adapt it to the shop: at least `shop.name`, `phoneCountryCode`, and, if needed, the `map` centre (you can also set it later, see [Set the map centre](#set-the-map-centre)) and the `contact` phone. The comments in the file explain each field. Everything in it is public (it is served to every visitor), so put no secret in it. Keep its default permissions: the API container must be able to read it. The shop's two colours go in the same file: see [Set the shop colours](#set-the-shop-colours).
 
 ### The environment file
 
@@ -336,7 +336,7 @@ Leave the other lines as they are. `deploy/.env` holds the database password: ne
 
 Skip this step to start with the demo icons, colours and themes. You can add them later.
 
-These files are built into the web image. The logo shown in the header of the customer app and of the administration is a different mechanism: it is a media file named in the shop file, added once the stack runs (see [Add the shop logo](#add-the-shop-logo)).
+These files are built into the web image. The logo shown in the header of the customer app and of the administration is a different mechanism: it is a media file named in the shop file, added once the stack runs (see [Add the shop logo](#add-the-shop-logo)). So are the two brand colours: they are set in the shop file, with no build (see [Set the shop colours](#set-the-shop-colours)). The `theme_color` of the manifest and the icons stay in this folder.
 
 The shop's icons, manifest and themes go in a folder on the server, `/opt/entana/overrides`, outside the repository. It holds the shop's brand: it never goes into the repository. Create it:
 
@@ -491,6 +491,68 @@ curl -s https://shop.example.com/api/v1/instance
 
 **Expected result:** the `map` object of the answer shows the new centre and zoom. The answer can be cached for up to one minute. If `restart` leaves the API unhealthy, read `docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml logs api`: an invalid value stops the API with the name of the key at fault.
 
+### Set the shop colours
+
+The shop sets two colours in the shop file: an **accent** (selection and state: the cart count, the current step, the selected options) and an **action** (the main buttons and the other dark marks). The API derives the other shades and the text colours from them, checks them when it starts, and the customer app and the administration paint themselves with the result. There is no image to build.
+
+Both keys are required, written as `#rrggbb` (no short form, no colour name). Neutral colours as an example, to replace with the shop's own:
+
+```yaml
+branding:
+  colors:
+    accent: "#2d6cdf"
+    action: "#2b2b2b"
+```
+
+If the shop also has a logo, keep `logoFile` in the same `branding` section.
+
+**A refused colour stops the API from starting**, so work in this order.
+
+1. Keep a copy of the working file, outside the repository:
+
+   ```sh
+   cp /opt/entana/instance.config.yaml /opt/entana/instance.config.yaml.bak
+   ```
+
+2. Test the new file before it replaces the working one. On your own computer, in a copy of the repository where you ran `pnpm install` and `pnpm build`, with the `.env` of the development setup (copied from `.env.example`), start the API with the new file:
+
+   ```sh
+   INSTANCE_CONFIG_PATH=/path/to/new-instance.config.yaml pnpm --filter @entana/api start
+   ```
+
+   **Expected result:** the API starts (stop it with Ctrl+C). A refused colour prints a message and the command ends at once with a failure.
+
+3. On the server, edit the shop file, restart the API, then check the answer:
+
+   ```sh
+   nano /opt/entana/instance.config.yaml
+   docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml restart api
+   curl -s https://shop.example.com/api/v1/instance
+   ```
+
+   **Expected result:** the answer holds a `theme` object with seven colours (`null` when the file sets none). The answer can be cached for up to one minute, so a reload can show the old colours for that long. The customer app keeps the last theme it received on each device and replaces it when the new answer arrives; the administration applies it at every load.
+
+4. If the API does not start again, read why, restore the copy and restart:
+
+   ```sh
+   docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml logs api
+   cp /opt/entana/instance.config.yaml.bak /opt/entana/instance.config.yaml
+   docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml restart api
+   ```
+
+   A colour that is too pale (contrast under 3:1 on white) is refused, and the message says which one and the contrast obtained, for example `branding.colors.accent : contraste de 1,28:1, 3:1 minimum`. Choose a darker colour. Any other mistake (a missing key, a three-digit short form, a colour name, an unknown key) is reported as `Clés à corriger :` followed by the key, for example `branding.colors.action`.
+
+To go back to the generic colours, remove the `colors` lines (or the whole `branding` section if it holds nothing else) and restart the API.
+
+**What the colours do not change.** The `theme_color` of the manifest, the `theme-color` meta tag and the icons are built into the web image: they stay in the overrides folder (see [Icons, manifest and themes](#icons-manifest-and-themes-optional)). The error and success colours, the shadows, the ink of the text and the colours of the delivery axes are not customisable. The action colour also fills the step dots, the map pins and markers, the dark status pills and the veil of the modal windows of the administration.
+
+**Moving from `theme.local.css`.** If the shop's private themes already set these colours:
+
+1. Put the accent and the action in `branding.colors`, as above.
+2. In the private `theme.local.css` of the customer app and of the administration, remove `--color-accent-100`, `--color-accent-500`, `--color-accent-800` and `--color-ink-hover`: the instance now supplies these shades, and the colours it writes win over this file. Keep `--color-ink`, which still sets the text, the strong borders and the focus ring; it no longer sets the action colour.
+3. In the private theme of the **customer app** only, define `--color-success-500` with the value the accent had: the success notice used to follow the accent and now has its own colour. Without this line it shows the generic colour of the repository.
+4. These files are built into the image, so build and restart again, as in [Icons, manifest and themes](#icons-manifest-and-themes-optional).
+
 ## 9. First administrator and checks
 
 ### Create the first administrator
@@ -524,7 +586,7 @@ The Content-Security-Policy still has to be confirmed in a browser (see the [dep
 - Place test orders from a phone, then follow them through confirmation, delivery and cancellation in the administration.
 - **No real customer data.** Use made-up names and fake phone numbers in the test orders, and do not share the address with real customers. Test orders stay in the database.
 - Both sites send `X-Robots-Tag: noindex, nofollow`, so search engines do not list them. Anyone with the address can still open them.
-- Until you add them, the icons, colours and themes are the generic ones of the repository, and the header shows the shop name in place of a logo. Add the shop's own with [Icons, manifest and themes](#icons-manifest-and-themes-optional) and [Add the shop logo](#add-the-shop-logo).
+- Until you add them, the icons, colours and themes are the generic ones of the repository, and the header shows the shop name in place of a logo. Add the shop's own with [Icons, manifest and themes](#icons-manifest-and-themes-optional), [Set the shop colours](#set-the-shop-colours) and [Add the shop logo](#add-the-shop-logo).
 
 ## 11. Updating
 

@@ -152,7 +152,7 @@ After editing `packages/contracts`, run `pnpm --filter @entana/contracts build` 
 
 ## Instance configuration
 
-The shop itself (name, language, currency, time zone, phone country code, logo file names) is
+The shop itself (name, language, currency, time zone, phone country code, logo file names, brand colours) is
 described by a YAML file, validated at startup by the schema in `packages/contracts`. Start from
 `examples/demo/instance.config.yaml`; the real file is `instance.config.yaml` at the repository
 root, ignored by git. **It holds no secret**: its public part is served to everybody.
@@ -168,12 +168,18 @@ root, ignored by git. **It holds no secret**: its public part is served to every
   (never `.svg`), served later under `/media/branding/`.
 - **`GET /api/v1/instance`**: public, `Cache-Control: public, max-age=60`. Answers
   `publicInstanceSchema`: `name`, `locale`, `currency`, `phoneCountryCode`, `logoUrl`,
-  `appIconUrl`, `contactPhone`, `map`. The time zone and the file names stay on the server. The only error cases are
+  `appIconUrl`, `contactPhone`, `theme`, `map`. The time zone and the file names stay on the server. The only error cases are
   those of any route: an invalid file never reaches the route, because the API did not start.
 - **`map`** (optional): `styleUrl`, `center { lat, lng }` and `zoom` of the delivery map; every
   field has a default (the OpenFreeMap "liberty" style, Antananarivo, zoom 12), so a file without
   the section still starts. `styleUrl` is an absolute `https` URL or a path of the same origin,
   which lets a shop serve its own tile style; the section is public, so it holds no secret key.
+- **`branding.colors`** (optional): the shop's `accent` and `action`, both required, as `#rrggbb` (either
+  case; any other form is refused). `deriveInstanceTheme` in `packages/contracts` derives the other
+  shades and the text colours, served as `theme` (seven hex values, `null` without the section). At
+  startup each colour must reach 3:1 on white: a paler one stops the API with a message that names the
+  key and the contrast reached (`branding.colors.accent : contraste de 1,28:1, 3:1 minimum`), never the
+  value. See [ADR 0029](../../docs/adr/0029-instance-theme-colors.md).
 - **`contact`** (optional): `contact.phone` is the shop's own number, published on purpose as
   `contactPhone`. At startup it is checked with the same rule as customers' numbers, using the
   file's `phoneCountryCode`; a refused number stops the API and the message names `contact.phone`,

@@ -24,6 +24,7 @@ The customer app has a service worker (ADR 0023) that precaches the HTML, script
 - Changing an icon, the manifest or a theme means building the image again; there is no file to edit on the server.
 - The image is small (about 95 MB on disk, mostly the Caddy base) and holds no secret: the front ends are public files.
 - The Node and pnpm versions now appear in three Dockerfiles, which must stay equal.
+- The two brand colours of an instance are not an override: they come from the instance file at run time and win over `theme.local.css` (ADR 0029).
 
 ## Alternatives considered
 
