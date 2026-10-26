@@ -54,4 +54,15 @@ export default defineConfig({
   server: {
     proxy: { "/api": "http://127.0.0.1:3000", "/media": "http://127.0.0.1:3000" },
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        // A fixed name, so that the service worker can leave the tile reader (and its inflate
+        // library) out of the precache, like the map library (config/pwa-config.ts).
+        codeSplitting: {
+          groups: [{ name: "pmtiles", test: /[\\/]node_modules[\\/](?:pmtiles|fflate)[\\/]/ }],
+        },
+      },
+    },
+  },
 });
