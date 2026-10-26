@@ -288,7 +288,7 @@ describe("the route and the cart badge", () => {
     const badge = screen.getByRole("link", { name: "Voir le panier, 3 articles" });
 
     expect(badge.getAttribute("href")).toBe("/panier");
-    await screen.findByRole("heading", { name: "Sakafo" });
+    await screen.findByRole("heading", { level: 2, name: "Sakafo" });
   });
 
   it("names the badge without a number when the cart is empty", async () => {
@@ -303,7 +303,7 @@ describe("the route and the cart badge", () => {
     stubApi(catalogueOf(SAKAFO));
     seedCart([SAKAFO.id, 1]);
     renderAt("/");
-    await screen.findByRole("heading", { name: "Sakafo" });
+    await screen.findByRole("heading", { level: 2, name: "Sakafo" });
 
     fireEvent.click(screen.getByRole("link", { name: "Voir le panier, 1 article" }));
 

@@ -50,6 +50,7 @@
   height: var(--size-cart-pill-height);
   padding-inline: var(--space-3) var(--space-4);
   font: var(--font-body-strong);
+  color: var(--color-text-on-accent);
   background: var(--color-accent);
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);

@@ -29,6 +29,7 @@
   }
 
   .accent:hover:not([aria-disabled="true"]) {
+    color: var(--color-text-on-accent);
     background: var(--color-accent);
   }
 }
