@@ -454,7 +454,7 @@ branding:
   logoFile: logo.png
 ```
 
-The API reads the shop file only when it starts, so restart it, then check the file:
+The API reads the shop file only when it starts, so restart it (`bash deploy/reload-instance-config.sh` does the same and waits until the API is healthy), then check the file:
 
 ```sh
 docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml restart api
