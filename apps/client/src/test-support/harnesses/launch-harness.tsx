@@ -15,13 +15,22 @@ import type { Answer } from "./tracking-harness";
 export const PRODUCT = buildProduct({ id: buildProductId(1) });
 export const OLDER_TOKEN = "C".repeat(43);
 
+interface StoredOrder {
+  readonly code: string;
+  readonly token: string;
+  /** By default, one minute older than the order listed before it. */
+  readonly createdAt?: string;
+}
+
+const MINUTE_MS = 60_000;
+
 interface OpenOptions {
   /** The path the application is opened on. */
   readonly path?: string;
   /** What the tracking answers; an order that goes on by default. */
   readonly tracking?: Answer;
   /** The orders of the device, the most recent first. */
-  readonly stored?: readonly { readonly code: string; readonly token: string }[];
+  readonly stored?: readonly StoredOrder[];
   readonly hasCart?: boolean;
   /** The session already handled its opening (a reload in the same tab). */
   readonly isHandled?: boolean;
@@ -47,9 +56,13 @@ export function openApplication(options: OpenOptions = {}): LaunchApp {
   vi.stubGlobal("fetch", fetchStub);
   sessionStorage.clear();
   localStorage.clear();
-  const orders = (options.stored ?? [{ code: "K7M2QX", token: TOKEN }]).map((order) => ({
+  // Distinct dates in the order of the list, so that sorting by date keeps it. Relative to one
+  // reading of the clock: the application drops an order older than the retention by the real clock.
+  const nowMs = Date.now();
+  const stored: readonly StoredOrder[] = options.stored ?? [{ code: "K7M2QX", token: TOKEN }];
+  const orders = stored.map((order, index) => ({
     ...order,
-    createdAt: new Date().toISOString(),
+    createdAt: order.createdAt ?? new Date(nowMs - index * MINUTE_MS).toISOString(),
   }));
   if (orders.length > 0) {
     localStorage.setItem(CONFIRMED_ORDERS_STORAGE_KEY, JSON.stringify({ version: 1, orders }));

@@ -58,7 +58,11 @@ export function inSequence(...answers: readonly Answer[]): Answer {
 interface StoredOrder {
   readonly code: string;
   readonly token: string;
+  /** By default, one minute older than the order listed before it. */
+  readonly createdAt?: string;
 }
+
+const MINUTE_MS = 60_000;
 
 interface OpenOptions {
   /** The address after the path: "#token". */
@@ -97,9 +101,12 @@ export function openTracking(options: OpenOptions = {}): TrackingApp {
   if (options.keepStorage !== true) {
     sessionStorage.clear();
     localStorage.clear();
-    const orders = (options.stored ?? []).map((order) => ({
+    // Distinct dates in the order of the list, so that sorting by date keeps it. Relative to one
+    // reading of the clock: the screen drops an order older than the retention by the real clock.
+    const nowMs = Date.now();
+    const orders = (options.stored ?? []).map((order, index) => ({
       ...order,
-      createdAt: new Date().toISOString(),
+      createdAt: order.createdAt ?? new Date(nowMs - index * MINUTE_MS).toISOString(),
     }));
     if (orders.length > 0) {
       localStorage.setItem(CONFIRMED_ORDERS_STORAGE_KEY, JSON.stringify({ version: 1, orders }));
