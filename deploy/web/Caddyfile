@@ -21,6 +21,29 @@
 		reverse_proxy {$API_UPSTREAM:api:3000}
 	}
 
+	# Map files of the deployment, mounted read-only on /srv/maps (deploy/lightsail.md). handle_path
+	# strips /maps, so a path cannot leave the folder. No encode: the archive is already compressed
+	# and read by byte ranges. No fallback: a missing file is a 404, never index.html.
+	handle_path /maps/* {
+		root * /srv/maps
+		# A folder or the placeholder of the empty default folder is not a file to serve.
+		@servedMap {
+			file
+			not path */ */.gitkeep
+		}
+		handle @servedMap {
+			header Cache-Control "public, max-age=3600"
+			file_server {
+				hide .gitkeep
+			}
+		}
+		# Like @missingFile below: a missing file must not be cached as missing.
+		handle {
+			header Cache-Control "no-store"
+			respond 404
+		}
+	}
+
 	# A stale build asking for a missing file must not get index.html: HTML in place of a script
 	# breaks the service worker.
 	@missingFile {
