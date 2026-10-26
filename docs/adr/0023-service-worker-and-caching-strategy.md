@@ -47,6 +47,8 @@ library is large and is used by two screens only. The administration is a separa
 - A deployment must replace the icons and the manifest values before building, serve the client
   and the administration from different origins, and serve `/sw.js` and `index.html` with
   `Cache-Control: no-cache` so that a new version is found.
+- The PMTiles reader is a chunk named `pmtiles`, left out of the precache like the map library
+  (ADR 0030).
 
 ## Alternatives considered
 

@@ -36,6 +36,7 @@ A shop runs on one server with Docker. The images exist: the API (ADR 0012), the
 - A failed migration leaves the API stopped rather than running on a schema it does not expect.
 - Readiness as the health check means a database outage marks the API unhealthy. Docker Compose does not restart an unhealthy container, so the process keeps running. A database that is down at the first start keeps Caddy from starting.
 - The database password must use only URL-safe characters, because Compose cannot percent-encode it.
+- The `caddy` service also mounts a folder of the host (`MAPS_DIR`) read-only on `/srv/maps`, served under `/maps/` on both sites (ADR 0030).
 
 ## Alternatives considered
 
