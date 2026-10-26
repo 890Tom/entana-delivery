@@ -2,6 +2,8 @@
 // Workspaces, scripts, Vitest and test files are detected automatically.
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  // Copied to and run from a temporary folder outside the repository (deploy/maps/README.md).
+  "ignoreFiles": ["deploy/maps/generate-style.mjs"],
   "workspaces": {
     "apps/api": {
       // Started by `node dist/main.js` (the compiled output), so it is not found through a script.
