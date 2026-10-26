@@ -12,14 +12,17 @@ Early development. Nothing is deployed yet.
 
 Deploying one shop to one server is documented step by step in [deploy/lightsail.md](deploy/lightsail.md) (AWS Lightsail, for a test). Automatic backups are not in place yet.
 
+By default the map uses the public OpenFreeMap style (`map.styleUrl`). A shop can serve its own tiles instead: one PMTiles archive, a generated style and its fonts under `/maps/`, then `map.styleUrl: /maps/style.json`. See [deploy/maps/README.md](deploy/maps/README.md), [Add the map archive](deploy/lightsail.md#add-the-map-archive) and [ADR 0030](docs/adr/0030-self-hosted-map-tiles.md).
+
 **Done**
 
 - Customer application (`apps/client`), in the browser:
   - catalogue with manual availability, and a cart kept on the device;
-  - delivery step: a point chosen on a map (MapLibre GL), the delivery zones drawn on it, a written landmark, and the delivery fee announced by the server;
+  - delivery step: a point chosen on a map (MapLibre GL), with address suggestions (ADR 0028), the delivery zones drawn on it, a written landmark, and the delivery fee announced by the server;
   - contact details (name, and a phone number checked with the numbering rule of the instance's country), review, then an idempotent order creation;
   - tracking of an order through its link (the token stays in the URL fragment), with cancellation while the order is `NEW` or `CONFIRMED`;
-  - finding an order again with the phone number and the 6-character order code;
+  - finding an order again with the phone number and the 6-character order code, or from the list of the orders remembered on the device;
+  - at the first opening of a session, on the catalogue with an empty cart, a way back to the tracking of the most recent order remembered on the device;
   - a map and a list of the shop's resellers;
   - installable: a web app manifest and icons;
   - a service worker: the interface precached (without MapLibre), product photos cached, neither the API nor the map tiles cached;
@@ -28,16 +31,19 @@ Deploying one shop to one server is documented step by step in [deploy/lightsail
   - sign-in with an e-mail and a password (session cookie);
   - orders: list with filters, search and counters, new orders shown every 30 seconds, an order's detail with its history, one-step status changes (confirm with a delivery day and an optional adjusted fee, refuse, cancel, out for delivery, delivered, failed);
   - catalogue: create, edit, photo upload, availability, retire and restore, display order;
-  - resellers: create, edit, verify, delete, on a map;
-  - settings: delivery axes and their places on a map, the out-of-axis fee, the free-delivery threshold and the out-of-axis message;
+  - resellers: create, edit, verify, delete, on a map with an address search;
+  - settings: delivery axes and their places on a map with an address search, the out-of-axis fee, the free-delivery threshold and the out-of-axis message;
   - a page title for each screen.
-- API (`apps/api`): the routes behind both applications, listed in [`apps/api/README.md`](apps/api/README.md#routes), with health and readiness probes and an OpenAPI page.
+- Instance theme colours: two colours set in the instance file, applied by the customer application and the administration (ADR 0029).
+- API (`apps/api`): the routes behind both applications, listed in [`apps/api/README.md`](apps/api/README.md#routes), with health and readiness probes and an OpenAPI page; a task run every morning delivers the orders whose delivery day is over and that the shop left open.
 - Database schema, migrations and fake seed data (`packages/database`).
+- Deployment files (`deploy/`): a Docker Compose stack, Caddy as reverse proxy with automatic HTTPS and security headers, and a step-by-step guide (ADR 0025 to 0027). Running a shop in production is up to each deployment.
+- Self-hosted map tiles, optional (ADR 0030): the PMTiles reader in the map loaders of both applications, the `/maps/` route of Caddy and the style generator (`deploy/maps/`). Setting them up on a server is up to each deployment.
 
 **Planned**
 
 - Editing the lines of an order from the administration (the `LINES_EDITED` event type exists in the schema, no route writes it).
-- Production deployment: HTTPS, HTTP headers, a reverse proxy, backups, a one-command demo setup.
+- Production deployment: backups, a one-command demo setup.
 - A test of the customer application on a real Android device.
 - Replacing the generic icons with those of a real deployment (the two brand colours are set in the instance file).
 - A driver application with dispatch by axis (the `DRIVER` role and the `driver_id` and `tour_position` columns are reserved for it).

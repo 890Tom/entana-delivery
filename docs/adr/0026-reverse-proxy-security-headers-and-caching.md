@@ -1,6 +1,6 @@
 # 0026. Reverse proxy, security headers and caching
 
-- Status: accepted
+- Status: accepted; run-time mount and the `/maps/*` route added by [0030](0030-self-hosted-map-tiles.md)
 - Date: 2026-10-16
 
 ## Context
@@ -58,6 +58,8 @@ Each "only if the API sets none" header is its own `header ?Name` directive. In 
 - The cache and header rules are tested with a local container, not by an automated test. A change to the Caddyfile is checked with `caddy validate` and requests against a local container.
 - The CSP still has to be confirmed in a browser, which is the next deployment step. `style-src 'self'` without `'unsafe-inline'` may block inline styles set by the interface or by MapLibre. If it does, the policy changes in a new decision.
 - The API must run with `TRUST_PROXY=1` behind Caddy. Otherwise every customer shares the address of the proxy for rate limiting.
+- The maps folder is mounted at run time, read-only, and `/maps/*` has its own rule: served without compression, and a missing file answers `404` with `no-store`, never `index.html` (ADR 0030).
+- `/maps/*` serves the map files on the same origin as the pages, so the CSP does not change (ADR 0030).
 
 ## Alternatives considered
 

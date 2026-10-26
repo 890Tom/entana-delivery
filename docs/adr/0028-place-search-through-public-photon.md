@@ -28,6 +28,7 @@ The customer app (MAP-1b) and the admin (MAP-2) need address suggestions on the 
 - **The API needs outbound HTTPS access** to `photon.komoot.io`. In production it has it through the `edge` network (ADR 0027), not the `internal` one. Moving the API to the internal network only would make every search answer 503.
 - The public instance has no availability guarantee and limits heavy use. There is no global limit across addresses and no cache, so a busy shop could be throttled; the suggestions would then answer 503 until the provider accepts requests again.
 - The limit is counted per API process, like the other limits.
+- Self-hosted map tiles do not change place search: it stays an external service called by the API (ADR 0030).
 
 ## Alternatives considered
 

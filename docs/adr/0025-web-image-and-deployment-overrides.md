@@ -25,6 +25,7 @@ The customer app has a service worker (ADR 0023) that precaches the HTML, script
 - The image is small (about 95 MB on disk, mostly the Caddy base) and holds no secret: the front ends are public files.
 - The Node and pnpm versions now appear in three Dockerfiles, which must stay equal.
 - The two brand colours of an instance are not an override: they come from the instance file at run time and win over `theme.local.css` (ADR 0029).
+- The map files are not an override: the archive is too large for the image, so its folder is mounted read-only at run time instead of passing through the build context (ADR 0030).
 
 ## Alternatives considered
 

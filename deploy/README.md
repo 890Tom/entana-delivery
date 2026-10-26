@@ -66,6 +66,8 @@ Every file is optional; each one replaces the file of the same name in the image
 
 If `OVERRIDES_DIR` names a folder that does not exist, the build stops. When the path is outside the repository, the message reads `additional privileges requested: pass "--allow=fs.read=<parent folder>"`: create the folder or fix the path, never pass `--allow`.
 
+**Map files (optional).** `MAPS_DIR` names a folder of the server served read-only under `/maps/`; see [maps/README.md](maps/README.md).
+
 Start or update the stack from the repository root:
 
 ```sh

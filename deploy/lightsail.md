@@ -482,6 +482,8 @@ map:
   zoom: 12
 ```
 
+The default `styleUrl` is the public OpenFreeMap style. Once the archive, the style and the fonts are in place on the server, set it to `/maps/style.json` instead: see [Add the map archive](#add-the-map-archive) and [deploy/maps/README.md](maps/README.md).
+
 Restart the API, which reads the file only when it starts, then check:
 
 ```sh
