@@ -61,6 +61,7 @@ vi.mock("maplibre-gl", () => ({
   setWorkerUrl: (url: string) => {
     library.state.workerUrl = url;
   },
+  addProtocol: (): void => undefined,
 }));
 vi.mock("maplibre-gl/dist/maplibre-gl-worker.mjs?url", () => ({ default: "/worker.mjs" }));
 vi.mock("maplibre-gl/dist/maplibre-gl.css", () => ({}));

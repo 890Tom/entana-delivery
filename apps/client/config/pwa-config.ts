@@ -34,9 +34,10 @@ export const PWA_OPTIONS: Partial<VitePWAOptions> = {
   devOptions: { enabled: false },
   workbox: {
     globPatterns: ["**/*.{html,js,css,ttf,png,svg,webmanifest}"],
-    // The map library is loaded on demand by two screens only, and is larger than the rest of
-    // the interface: never precached. The icon source is not served to the customer.
-    globIgnores: ["**/maplibre-gl*", "**/*.map", "icons-source/**"],
+    // The map library and its tile reader (the "pmtiles" chunk named in vite.config.ts) are
+    // loaded on demand by two screens only, and are larger than the rest of the interface: never
+    // precached. The icon source is not served to the customer.
+    globIgnores: ["**/maplibre-gl*", "**/pmtiles*", "**/*.map", "icons-source/**"],
     navigateFallback: "index.html",
     navigateFallbackDenylist: [/^\/api\//, /^\/media\//],
     cleanupOutdatedCaches: true,

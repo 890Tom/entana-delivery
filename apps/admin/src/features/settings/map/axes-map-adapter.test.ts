@@ -79,6 +79,7 @@ vi.mock("maplibre-gl", () => ({
   Marker: library.FakeMarker,
   NavigationControl: library.FakeNavigation,
   setWorkerUrl: (): void => undefined,
+  addProtocol: (): void => undefined,
 }));
 vi.mock("maplibre-gl/dist/maplibre-gl-worker.mjs?url", () => ({ default: "/worker.mjs" }));
 vi.mock("maplibre-gl/dist/maplibre-gl.css", () => ({}));
